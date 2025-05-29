@@ -1,13 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using PMSWPF.Data.Entities;
 using PMSWPF.Message;
+using System.Collections.ObjectModel;
 
 namespace PMSWPF.ViewModels
 {
     partial class MainViewModel : ObservableRecipient, IRecipient<MyMessage>
     {
+       
         public MainViewModel()
-        {
+        { 
             IsActive = true;
         }
 
