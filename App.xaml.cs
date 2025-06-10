@@ -14,29 +14,55 @@ namespace PMSWPF
     /// </summary>
     public partial class App : Application
     {
-        [STAThread]
-        static void Main(string[] args)
-        {
-            using IHost host = CreateHostBuilder(args).Build();
-            host.Start();
-            App app = new App();
-            app.InitializeComponent();
-            app.MainWindow = host.Services.GetRequiredService<MainView>();
-            app.MainWindow.Visibility = Visibility.Visible;
-            app.Run();
+        public new static App Current => (App)Application.Current;
+        public IServiceProvider Services { get; }
 
+        public App()
+        {
+            var container = new ServiceCollection();
+            container.AddSingleton<NavgatorServices>();
+            container.AddSingleton<MainViewModel>();
+            container.AddSingleton<HomeViewModel>();
+            container.AddSingleton<DevicesViewModel>();
+            container.AddSingleton<DataTransformViewModel>();
+            container.AddSingleton<MainView>(dp => new MainView()
+                { DataContext = dp.GetRequiredService<MainViewModel>() });
+            container.AddSingleton<HomeView>();
+            container.AddSingleton<DevicesView>();
+            container.AddSingleton<DataTransformViewModel>();
+
+            Services = container.BuildServiceProvider();
         }
 
-        private static IHostBuilder CreateHostBuilder(string[] args)
+        protected override void OnStartup(StartupEventArgs e)
         {
-            return Host.CreateDefaultBuilder(args).ConfigureServices(services =>
-            {
-
-                services.AddHostedService<DemoBackgroundService>();
-                services.AddSingleton<MainView>();
-                services.AddSingleton<MainViewModel>();
-            });
+            base.OnStartup(e);
+            MainWindow = Services.GetRequiredService<MainView>();
+            MainWindow.Show();
         }
+
+        // [STAThread]
+        // static void Main(string[] args)
+        // {
+        //     using IHost host = CreateHostBuilder(args).Build();
+        //     host.Start();
+        //     App app = new App();
+        //     app.InitializeComponent();
+        //     app.MainWindow = host.Services.GetRequiredService<MainView>();
+        //     app.MainWindow.Visibility = Visibility.Visible;
+        //     app.Run();
+        //
+        // }
+        //
+        // private static IHostBuilder CreateHostBuilder(string[] args)
+        // {
+        //     return Host.CreateDefaultBuilder(args).ConfigureServices(services =>
+        //     {
+        //
+        //         services.AddHostedService<DemoBackgroundService>();
+        //         services.AddSingleton<MainView>();
+        //         services.AddSingleton<MainViewModel>();
+        //     });
+        // }
     }
-
 }

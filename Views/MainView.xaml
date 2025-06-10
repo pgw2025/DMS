@@ -3,29 +3,123 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:PMSWPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:PMSWPF.ViewModels"
     Title="MainView"
     Width="800"
-    Height="450"
+    Height="600"
+    ui:WindowHelper.UseModernWindowStyle="True"
+    ui:WindowHelper.SystemBackdropType="Mica"
     d:DataContext="{d:DesignInstance vm:MainViewModel}"
     mc:Ignorable="d">
-    <StackPanel>
-        <TextBlock
-            HorizontalAlignment="Center"
-            FontSize="36"
-            Text="{Binding Message}" />
+    <Grid>
+        <ui:NavigationView 
+                           ExpandedModeThresholdWidth="500"
+                           IsTabStop="False"
+                           PaneDisplayMode="Left"
+                           PaneTitle="设备管理系统"
+                           IsSettingsVisible="False"
+                           AlwaysShowHeader="True"
+                           IsBackButtonVisible="Collapsed"
+                           IsBackEnabled="False"
+                           SelectionFollowsFocus="Disabled"
+                           SelectionChanged="NavigationView_SelectionChanged">
 
-        <Border
-            Width="100"
-            Height="100"
-            Background="Orange">
-            <i:Interaction.Behaviors>
-                <i:MouseDragElementBehavior />
-            </i:Interaction.Behaviors>
-        </Border>
-    </StackPanel>
+            <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem
+                    Content="主页"
+                    Tag="Home">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem
+                    Content="设备"
+                    Tag="Devices">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem
+                    Content="数据转换"
+                    Tag="DataTransform">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItemHeader Content="Actions" />
+                <ui:NavigationViewItem
+                    x:Name="SamplePage2Item"
+                    Content="Menu Item2"
+                    SelectsOnInvoked="True"
+                    Tag="SamplePage2">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem
+                    x:Name="SamplePage3Item"
+                    Content="Menu Item3"
+                    Tag="SamplePage3">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+            </ui:NavigationView.MenuItems>
+
+            <ui:NavigationView.PaneCustomContent>
+                <ui:HyperlinkButton
+                    x:Name="PaneHyperlink"
+                    Margin="12,0"
+                    Content="More info"
+                    Visibility="Collapsed" />
+            </ui:NavigationView.PaneCustomContent>
+
+
+            <ui:NavigationView.AutoSuggestBox>
+                <ui:AutoSuggestBox AutomationProperties.Name="Search">
+                    <ui:AutoSuggestBox.QueryIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" />
+                    </ui:AutoSuggestBox.QueryIcon>
+                </ui:AutoSuggestBox>
+            </ui:NavigationView.AutoSuggestBox>
+
+
+            <ui:NavigationView.PaneFooter>
+                <StackPanel
+                    x:Name="FooterStackPanel"
+                    Orientation="Vertical"
+                    Visibility="Visible">
+                    <ui:NavigationViewItem Content="设置">
+                        <ui:NavigationViewItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                        </ui:NavigationViewItem.Icon>
+                    </ui:NavigationViewItem>
+                    <ui:NavigationViewItem Content="关于">
+                        <ui:NavigationViewItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
+                        </ui:NavigationViewItem.Icon>
+                    </ui:NavigationViewItem>
+                </StackPanel>
+            </ui:NavigationView.PaneFooter>
+
+            <ContentControl Content="{Binding CurrentViewModel}">
+               <ContentControl.Resources>
+                   <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                       <local:HomeView/>
+                   </DataTemplate>
+                   <DataTemplate DataType="{x:Type vm:DevicesViewModel}">
+                       <local:DevicesView/>
+                   </DataTemplate>
+                   <DataTemplate DataType="{x:Type vm:DataTransformViewModel}">
+                       <local:DataTransformView/>
+                   </DataTemplate>
+               </ContentControl.Resources>
+            </ContentControl>
+        </ui:NavigationView>
+    </Grid>
 </Window>
