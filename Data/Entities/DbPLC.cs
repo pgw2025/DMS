@@ -4,7 +4,7 @@ using SqlSugar.DbConvert;
 
 namespace PMSWPF.Data.Entities
 {
-    public class PLC
+    public class DbPLC
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]//数据库是自增才配自增
         public int id { get; set; }
@@ -47,11 +47,11 @@ namespace PMSWPF.Data.Entities
         /// </summary>
         public bool IsEnable { get; set; }
 
-        public PLC()
+        public DbPLC()
         {
 
         }
-        public PLC(string name = "", string nodeID = "", string ip = "", string status = "", string connType = "")
+        public DbPLC(string name = "", string nodeID = "", string ip = "", string status = "", string connType = "")
         {
             this.Name = name;
             this.NodeID = nodeID;

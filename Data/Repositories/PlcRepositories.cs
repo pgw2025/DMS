@@ -11,10 +11,10 @@ namespace PMSWPF.Data.Repositories
         {
 
             _db = DbContext.GetInstance();
-            var tabExist = _db.DbMaintenance.IsAnyTable(nameof(PLC), false);
+            var tabExist = _db.DbMaintenance.IsAnyTable(nameof(DbPLC), false);
             if (tabExist)
             {
-                _db.CodeFirst.InitTables<PLC>();
+                _db.CodeFirst.InitTables<DbPLC>();
             }
         }
     }

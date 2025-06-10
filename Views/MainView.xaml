@@ -51,33 +51,33 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItemHeader Content="Actions" />
-                <ui:NavigationViewItem
-                    x:Name="SamplePage2Item"
-                    Content="Menu Item2"
-                    SelectsOnInvoked="True"
-                    Tag="SamplePage2">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <ui:NavigationViewItem
-                    x:Name="SamplePage3Item"
-                    Content="Menu Item3"
-                    Tag="SamplePage3">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
+                <!-- <ui:NavigationViewItemHeader Content="Actions" /> -->
+                <!-- <ui:NavigationViewItem -->
+                <!--     x:Name="SamplePage2Item" -->
+                <!--     Content="Menu Item2" -->
+                <!--     SelectsOnInvoked="True" -->
+                <!--     Tag="SamplePage2"> -->
+                <!--     <ui:NavigationViewItem.Icon> -->
+                <!--         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" /> -->
+                <!--     </ui:NavigationViewItem.Icon> -->
+                <!-- </ui:NavigationViewItem> -->
+                <!-- <ui:NavigationViewItem -->
+                <!--     x:Name="SamplePage3Item" -->
+                <!--     Content="Menu Item3" -->
+                <!--     Tag="SamplePage3"> -->
+                <!--     <ui:NavigationViewItem.Icon> -->
+                <!--         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" /> -->
+                <!--     </ui:NavigationViewItem.Icon> -->
+                <!-- </ui:NavigationViewItem> -->
             </ui:NavigationView.MenuItems>
 
-            <ui:NavigationView.PaneCustomContent>
-                <ui:HyperlinkButton
-                    x:Name="PaneHyperlink"
-                    Margin="12,0"
-                    Content="More info"
-                    Visibility="Collapsed" />
-            </ui:NavigationView.PaneCustomContent>
+            <!-- <ui:NavigationView.PaneCustomContent> -->
+            <!--     <ui:HyperlinkButton -->
+            <!--         x:Name="PaneHyperlink" -->
+            <!--         Margin="12,0" -->
+            <!--         Content="More info" -->
+            <!--         Visibility="Collapsed" /> -->
+            <!-- </ui:NavigationView.PaneCustomContent> -->
 
 
             <ui:NavigationView.AutoSuggestBox>
@@ -90,8 +90,11 @@
 
 
             <ui:NavigationView.PaneFooter>
+
                 <StackPanel
                     x:Name="FooterStackPanel"
+                    Margin="0"
+                
                     Orientation="Vertical"
                     Visibility="Visible">
                     <ui:NavigationViewItem Content="设置">

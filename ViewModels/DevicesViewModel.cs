@@ -2,5 +2,11 @@
 
 public class DevicesViewModel:ViewModelBase
 {
+    public DevicesViewModel()
+    {
+        
+    }
+    
+    
     
 }
