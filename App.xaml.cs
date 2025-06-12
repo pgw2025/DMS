@@ -21,6 +21,7 @@ namespace PMSWPF
         {
             var container = new ServiceCollection();
             container.AddSingleton<NavgatorServices>();
+            container.AddSingleton<IDeviceDialogService, DeviceDialogService>();
             container.AddSingleton<MainViewModel>();
             container.AddSingleton<HomeViewModel>();
             container.AddSingleton<DevicesViewModel>();

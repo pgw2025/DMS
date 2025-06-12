@@ -1,6 +1,11 @@
-﻿namespace PMSWPF.ViewModels;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-public class ViewModelBase
+namespace PMSWPF.ViewModels;
+
+public partial class ViewModelBase:ObservableObject
 {
-    
+    public ViewModelBase()
+    {
+        
+    }
 }

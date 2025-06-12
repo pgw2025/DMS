@@ -9,21 +9,21 @@ public class DevicesRepositories:BaseRepositories
         
     }
     
-    public async Task<int> Add(DbPLC dbPLC)
+    public async Task<int> Add(DbDevice dbDevice)
     {
-      return await _db.Insertable<DbPLC>(dbPLC).ExecuteCommandAsync();
+      return await _db.Insertable<DbDevice>(dbDevice).ExecuteCommandAsync();
     }
     
-    public async Task<List<DbPLC>> GetAll()
+    public async Task<List<DbDevice>> GetAll()
     {
-        return await _db.Queryable<DbPLC>().ToListAsync();
+        return await _db.Queryable<DbDevice>().ToListAsync();
     }
-    public async Task<DbPLC> GetById(int id)
+    public async Task<DbDevice> GetById(int id)
     {
-        return await _db.Queryable<DbPLC>().FirstAsync(p=>p.id == id);
+        return await _db.Queryable<DbDevice>().FirstAsync(p=>p.Id == id);
     }
     public async Task<int> DeleteById(int id)
     {
-        return await _db.Deleteable<DbPLC>(new DbPLC() { id = id }).ExecuteCommandAsync();
+        return await _db.Deleteable<DbDevice>(new DbDevice() { Id = id }).ExecuteCommandAsync();
     }
 }

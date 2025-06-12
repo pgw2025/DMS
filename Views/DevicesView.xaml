@@ -4,12 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:PMSWPF.Views"
+             xmlns:dl="clr-namespace:PMSWPF.Views.Dialogs"
+             xmlns:vm="clr-namespace:PMSWPF.ViewModels"
+             d:DataContext="{d:DesignInstance vm:DevicesViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Button Content="添加"/>
+        <StackPanel Margin="10 5" Orientation="Horizontal">
+            <Button Margin="5" Command="{Binding AddDeviceCommand}" Content="添加"/>
         </StackPanel>
         <TextBlock Text="DevicesView" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
     </StackPanel>
+    
 </UserControl>
