@@ -29,11 +29,15 @@ public partial class DevicesViewModel : ViewModelBase
     {
         try
         {
-            Device device = new Device();
-            await _deviceDialogService.ShowAddDeviceDialog(device);
-            DbDevice dbDevice = new DbDevice();
-            device.CopyTo<DbDevice>(dbDevice);
-            await _devicesRepositories.Add(dbDevice);
+            
+          Device device=  await _deviceDialogService.ShowAddDeviceDialog();
+          if (device != null)
+          {
+              DbDevice dbDevice = new DbDevice();
+              device.CopyTo<DbDevice>(dbDevice);
+              await _devicesRepositories.Add(dbDevice);
+          }
+            
         }
         catch (DbExistException e)
         {
