@@ -3,6 +3,7 @@ using System.Data;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PMSWPF.Data.Repositories;
 using PMSWPF.Services;
 using PMSWPF.ViewModels;
 using PMSWPF.Views;
@@ -21,6 +22,7 @@ namespace PMSWPF
         {
             var container = new ServiceCollection();
             container.AddSingleton<NavgatorServices>();
+            container.AddSingleton<DevicesRepositories>();
             container.AddSingleton<IDeviceDialogService, DeviceDialogService>();
             container.AddSingleton<MainViewModel>();
             container.AddSingleton<HomeViewModel>();

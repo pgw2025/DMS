@@ -8,7 +8,7 @@ public class DeviceDialogService : IDeviceDialogService
 {
     public async Task<Device> ShowAddDeviceDialog(Device device)
     {
-        DeviceDialogViewModel ddvm = new DeviceDialogViewModel()
+        DeviceDialogViewModel ddvm = new DeviceDialogViewModel(device)
         {
             Title = "添加设备"
         };

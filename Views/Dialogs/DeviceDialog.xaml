@@ -11,40 +11,46 @@
     Title="{Binding Title}"
     d:DesignHeight="756"
     d:DesignWidth="700"
-    CloseButtonClick="OnCloseButtonClick"
     CloseButtonText="取消"
     Closed="OnClosed"
     DefaultButton="Primary"
-    PrimaryButtonClick="OnPrimaryButtonClick"
+    PrimaryButtonCommand="{Binding AddDeviceCommand}"
     PrimaryButtonText="添加"
     FullSizeDesired="False"
     IsShadowEnabled="True"
     d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
     mc:Ignorable="d">
     <ikw:SimpleStackPanel  Spacing="12">
+        <TextBox ui:ControlHelper.Header="设备名称"
+                 Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBox ui:ControlHelper.Header="设备描述"
+                 Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
+       
         <TextBox
             ui:ControlHelper.Header="设备IP地址:"
             AcceptsReturn="True"
-            Text="{Binding ElementName=dialog, Path=Title, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBox ui:ControlHelper.Header="PrimaryButtonText"
-                 Text="{Binding ElementName=dialog, Path=PrimaryButtonText, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBox ui:ControlHelper.Header="SecondaryButtonText"
-                 Text="{Binding ElementName=dialog, Path=SecondaryButtonText, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBox ui:ControlHelper.Header="CloseButtonText"
-                 Text="{Binding ElementName=dialog, Path=CloseButtonText, UpdateSourceTrigger=PropertyChanged}" />
-        <ComboBox
-            ui:ControlHelper.Header="DefaultButton"
-            ItemsSource="{Binding Source={x:Type ui:ContentDialogButton}}"
-            SelectedItem="{Binding ElementName=dialog, Path=DefaultButton}" />
-        <CheckBox Content="FullSizeDesired" IsChecked="{Binding ElementName=dialog, Path=FullSizeDesired}" />
-        <CheckBox Content="IsShadowEnabled" IsChecked="{Binding ElementName=dialog, Path=IsShadowEnabled}" />
-        <StackPanel>
-            <Button Click="TryOpenAnother" Content="Try to open another ContentDialog" />
-            <TextBlock
-                x:Name="ErrorText"
-                Margin="0,8,0,0"
-                Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
-                Visibility="Collapsed" />
-        </StackPanel>
+            Text="{Binding Device.Ip, UpdateSourceTrigger=PropertyChanged}" />
+        
+        <CheckBox Content="是否启用" IsChecked="{Binding Device.IsActive}" />
+        <!-- <TextBox ui:ControlHelper.Header="PrimaryButtonText" -->
+        <!--          Text="{Binding ElementName=dialog, Path=PrimaryButtonText, UpdateSourceTrigger=PropertyChanged}" /> -->
+        <!-- <TextBox ui:ControlHelper.Header="SecondaryButtonText" -->
+        <!--          Text="{Binding ElementName=dialog, Path=SecondaryButtonText, UpdateSourceTrigger=PropertyChanged}" /> -->
+        <!-- <TextBox ui:ControlHelper.Header="CloseButtonText" -->
+        <!--          Text="{Binding ElementName=dialog, Path=CloseButtonText, UpdateSourceTrigger=PropertyChanged}" /> -->
+        <!-- <ComboBox -->
+        <!--     ui:ControlHelper.Header="DefaultButton" -->
+        <!--     ItemsSource="{Binding Source={x:Type ui:ContentDialogButton}}" -->
+        <!--     SelectedItem="{Binding ElementName=dialog, Path=DefaultButton}" /> -->
+        <!-- -->
+        <!-- <CheckBox Content="IsShadowEnabled" IsChecked="{Binding ElementName=dialog, Path=IsShadowEnabled}" /> -->
+        <!-- <StackPanel> -->
+        <!--     <Button Click="TryOpenAnother" Content="Try to open another ContentDialog" /> -->
+        <!--     <TextBlock -->
+        <!--         x:Name="ErrorText" -->
+        <!--         Margin="0,8,0,0" -->
+        <!--         Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}" -->
+        <!--         Visibility="Collapsed" /> -->
+        <!-- </StackPanel> -->
     </ikw:SimpleStackPanel>
 </ui:ContentDialog>

@@ -41,8 +41,8 @@ public partial class DeviceDialog
 
     private void OnClosed(ContentDialog sender, ContentDialogClosedEventArgs args)
     {
-        ErrorText.Text = string.Empty;
-        ErrorText.Visibility = Visibility.Collapsed;
+        // ErrorText.Text = string.Empty;
+        // ErrorText.Visibility = Visibility.Collapsed;
     }
 }
 
