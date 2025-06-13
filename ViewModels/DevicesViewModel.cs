@@ -24,19 +24,25 @@ public partial class DevicesViewModel : ViewModelBase
     {
         _deviceDialogService = deviceDialogService;
         _devicesRepositories = devicesRepositories;
+        _devices = new ObservableCollection<Device>();
     }
 
     public async Task OnLoadedAsync()
     {
         var ds = await _devicesRepositories.GetAll();
-        _devices = new ObservableCollection<Device>();
-        
+  
         foreach (var dbDevice in ds)
         {
-            Device device = new Device();
-            dbDevice.CopyTo(device);
-            _devices.Add(device);
+           var deviceExist= _devices.FirstOrDefault(d => d.Id == dbDevice.Id);
+           if (deviceExist == null)
+           {
+               Device device = new Device();
+               dbDevice.CopyTo(device);
+               _devices.Add(device);
+           }
+            
         }
+        
     }
 
 
@@ -54,7 +60,8 @@ public partial class DevicesViewModel : ViewModelBase
              var rowCount= await _devicesRepositories.Add(dbDevice);
              if (rowCount>0)
              {
-                 MessageBox.Show("Device added successfully");
+                 // MessageBox.Show("Device added successfully");
+                 await OnLoadedAsync();
              }
           }
             
