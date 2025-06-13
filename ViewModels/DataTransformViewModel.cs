@@ -2,5 +2,8 @@
 
 public class DataTransformViewModel:ViewModelBase
 {
-    
+    public override void OnLoaded()
+    {
+        
+    }
 }

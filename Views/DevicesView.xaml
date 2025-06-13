@@ -3,8 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:local="clr-namespace:PMSWPF.Views"
              xmlns:dl="clr-namespace:PMSWPF.Views.Dialogs"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:vm="clr-namespace:PMSWPF.ViewModels"
              d:DataContext="{d:DesignInstance vm:DevicesViewModel}"
              mc:Ignorable="d"
@@ -13,7 +16,14 @@
         <StackPanel Margin="10 5" Orientation="Horizontal">
             <Button Margin="5" Command="{Binding AddDeviceCommand}" Content="添加"/>
         </StackPanel>
-        <TextBlock Text="DevicesView" FontSize="40" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+        <ui:GridView x:Name="BasicGridView"
+                     Margin="10"
+                     IsItemClickEnabled="True"
+                     ItemClick="BasicGridView_ItemClick"
+                     ItemsSource="{Binding Devices}"
+                     ItemTemplate="{StaticResource DeviceItemTemplate}"
+                     SelectionMode="Single" />
+        
     </StackPanel>
     
 </UserControl>

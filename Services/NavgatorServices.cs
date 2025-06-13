@@ -16,6 +16,7 @@ public class NavgatorServices
         {
             currentViewModel = value; 
             OnViewModelChanged?.Invoke();
+            currentViewModel.OnLoaded();
         }
     }
 

@@ -17,8 +17,5 @@
 		<PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178" />
 		<PackageReference Include="SqlSugarCoreNoDrive" Version="5.1.4.193" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Resources\" />
-	</ItemGroup>
 
 </Project>

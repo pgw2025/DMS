@@ -27,4 +27,9 @@ public class DeviceDialogService : IDeviceDialogService
         }
 
     }
+
+    public void ShowMessageDialog(string title, string message)
+    {
+        MessageBox.Show(message);
+    }
 }

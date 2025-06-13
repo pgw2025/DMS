@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
@@ -16,11 +18,25 @@ public partial class DevicesViewModel : ViewModelBase
 {
     private readonly IDeviceDialogService _deviceDialogService;
     private readonly DevicesRepositories _devicesRepositories;
-
+    [ObservableProperty]
+    private ObservableCollection<Device> _devices;
     public DevicesViewModel(IDeviceDialogService deviceDialogService,DevicesRepositories devicesRepositories)
     {
         _deviceDialogService = deviceDialogService;
         _devicesRepositories = devicesRepositories;
+    }
+
+    public async Task OnLoadedAsync()
+    {
+        var ds = await _devicesRepositories.GetAll();
+        _devices = new ObservableCollection<Device>();
+        
+        foreach (var dbDevice in ds)
+        {
+            Device device = new Device();
+            dbDevice.CopyTo(device);
+            _devices.Add(device);
+        }
     }
 
 
@@ -35,7 +51,11 @@ public partial class DevicesViewModel : ViewModelBase
           {
               DbDevice dbDevice = new DbDevice();
               device.CopyTo<DbDevice>(dbDevice);
-              await _devicesRepositories.Add(dbDevice);
+             var rowCount= await _devicesRepositories.Add(dbDevice);
+             if (rowCount>0)
+             {
+                 MessageBox.Show("Device added successfully");
+             }
           }
             
         }
@@ -50,5 +70,16 @@ public partial class DevicesViewModel : ViewModelBase
             Console.WriteLine(e);
             MessageBox.Show(e.Message);
         }
+    }
+
+    public override void OnLoaded()
+    {
+        OnLoadedAsync().Await((e) =>
+        {
+            _deviceDialogService.ShowMessageDialog("",e.Message);
+        }, () =>
+        {
+
+        });
     }
 }

@@ -2,10 +2,12 @@
 
 namespace PMSWPF.ViewModels;
 
-public partial class ViewModelBase:ObservableObject
+public abstract partial class ViewModelBase:ObservableObject
 {
     public ViewModelBase()
     {
         
     }
+    
+    public abstract void OnLoaded();
 }
