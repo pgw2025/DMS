@@ -10,6 +10,7 @@ public partial class DevicesView : UserControl
     public DevicesView()
     {
         InitializeComponent();
+        
     }
 
     private void BasicGridView_ItemClick(object sender, ItemClickEventArgs e)

@@ -9,6 +9,7 @@
     xmlns:local="clr-namespace:PMSWPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:PMSWPF.ViewModels"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
     Title="MainView"
     Width="800"
     Height="600"
@@ -51,34 +52,8 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-                <!-- <ui:NavigationViewItemHeader Content="Actions" /> -->
-                <!-- <ui:NavigationViewItem -->
-                <!--     x:Name="SamplePage2Item" -->
-                <!--     Content="Menu Item2" -->
-                <!--     SelectsOnInvoked="True" -->
-                <!--     Tag="SamplePage2"> -->
-                <!--     <ui:NavigationViewItem.Icon> -->
-                <!--         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" /> -->
-                <!--     </ui:NavigationViewItem.Icon> -->
-                <!-- </ui:NavigationViewItem> -->
-                <!-- <ui:NavigationViewItem -->
-                <!--     x:Name="SamplePage3Item" -->
-                <!--     Content="Menu Item3" -->
-                <!--     Tag="SamplePage3"> -->
-                <!--     <ui:NavigationViewItem.Icon> -->
-                <!--         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" /> -->
-                <!--     </ui:NavigationViewItem.Icon> -->
-                <!-- </ui:NavigationViewItem> -->
+               
             </ui:NavigationView.MenuItems>
-
-            <!-- <ui:NavigationView.PaneCustomContent> -->
-            <!--     <ui:HyperlinkButton -->
-            <!--         x:Name="PaneHyperlink" -->
-            <!--         Margin="12,0" -->
-            <!--         Content="More info" -->
-            <!--         Visibility="Collapsed" /> -->
-            <!-- </ui:NavigationView.PaneCustomContent> -->
-
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox AutomationProperties.Name="Search">
@@ -94,7 +69,6 @@
                 <StackPanel
                     x:Name="FooterStackPanel"
                     Margin="0"
-                
                     Orientation="Vertical"
                     Visibility="Visible">
                     <ui:NavigationViewItem Content="设置">
@@ -109,20 +83,27 @@
                     </ui:NavigationViewItem>
                 </StackPanel>
             </ui:NavigationView.PaneFooter>
-
-            <ContentControl Content="{Binding CurrentViewModel}">
-               <ContentControl.Resources>
-                   <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-                       <local:HomeView/>
-                   </DataTemplate>
-                   <DataTemplate DataType="{x:Type vm:DevicesViewModel}">
-                       <local:DevicesView/>
-                   </DataTemplate>
-                   <DataTemplate DataType="{x:Type vm:DataTransformViewModel}">
-                       <local:DataTransformView/>
-                   </DataTemplate>
-               </ContentControl.Resources>
-            </ContentControl>
+            <Grid>
+                
+                <ContentControl Content="{Binding CurrentViewModel}">
+                    <ContentControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+                            <local:HomeView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:DevicesViewModel}">
+                            <local:DevicesView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:DataTransformViewModel}">
+                            <local:DataTransformView/>
+                        </DataTemplate>
+                    </ContentControl.Resources>
+                </ContentControl>
+                
+                <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right">
+                    <StackPanel hc:Growl.GrowlParent="True" VerticalAlignment="Top" Margin="0,10,10,10"/>
+                </ScrollViewer>
+            </Grid>
+            
         </ui:NavigationView>
     </Grid>
 </Window>

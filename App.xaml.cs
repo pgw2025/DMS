@@ -24,6 +24,7 @@ namespace PMSWPF
             container.AddSingleton<NavgatorServices>();
             container.AddSingleton<DevicesRepositories>();
             container.AddSingleton<IDeviceDialogService, DeviceDialogService>();
+            container.AddSingleton<INotificationService, GrowlNotificationService>();
             container.AddSingleton<MainViewModel>();
             container.AddSingleton<HomeViewModel>();
             container.AddSingleton<DevicesViewModel>();

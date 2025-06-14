@@ -9,13 +9,18 @@
              xmlns:dl="clr-namespace:PMSWPF.Views.Dialogs"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:vm="clr-namespace:PMSWPF.ViewModels"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              d:DataContext="{d:DesignInstance vm:DevicesViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
-    <StackPanel>
-        <StackPanel Margin="10 5" Orientation="Horizontal">
+    
+    <StackPanel ZIndex="1" >
+        <StackPanel  Margin="10 5" Orientation="Horizontal">
             <Button Margin="5" Command="{Binding AddDeviceCommand}" Content="添加"/>
+            <Button Margin="5" Command="{Binding TestCommand}" Content="测试通知"/>
         </StackPanel>
+        
+        
         <ui:GridView x:Name="BasicGridView"
                      Margin="10"
                      IsItemClickEnabled="True"
