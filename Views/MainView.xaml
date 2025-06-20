@@ -10,7 +10,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:PMSWPF.ViewModels"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    Title="MainView"
+    Title="设备管理系统"
     Width="800"
     Height="600"
     ui:WindowHelper.UseModernWindowStyle="True"
@@ -19,6 +19,7 @@
     mc:Ignorable="d">
     <Grid>
         <ui:NavigationView 
+            
                            ExpandedModeThresholdWidth="500"
                            IsTabStop="False"
                            PaneDisplayMode="Left"

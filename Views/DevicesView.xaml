@@ -17,12 +17,11 @@
     <StackPanel ZIndex="1" >
         <StackPanel  Margin="10 5" Orientation="Horizontal">
             <Button Margin="5" Command="{Binding AddDeviceCommand}" Content="添加"/>
-            <Button Margin="5" Command="{Binding TestCommand}" Content="测试通知"/>
         </StackPanel>
         
         
         <ui:GridView x:Name="BasicGridView"
-                     Margin="10"
+                     Margin="20"
                      IsItemClickEnabled="True"
                      ItemClick="BasicGridView_ItemClick"
                      ItemsSource="{Binding Devices}"

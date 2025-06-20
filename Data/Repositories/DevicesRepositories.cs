@@ -1,5 +1,8 @@
 using PMSWPF.Data.Entities;
+using PMSWPF.Enums;
 using PMSWPF.Excptions;
+using PMSWPF.Extensions;
+using PMSWPF.Models;
 
 namespace PMSWPF.Data.Repositories;
 
@@ -7,23 +10,26 @@ public class DevicesRepositories:BaseRepositories
 {
     public DevicesRepositories():base()
     {
-       var tableExist= _db.DbMaintenance.IsAnyTable<DbDevice>();
-       if (!tableExist)
-       {
-           _db.CodeFirst.InitTables<DbDevice>();
-       }
+     
     }
     
-    public async Task<int> Add(DbDevice dbDevice)
+    public async Task<bool> Add(Device device)
     {
-       var exist=await _db.Queryable<DbDevice>().Where(d=>d.Name==dbDevice.Name).FirstAsync();
+       var exist=await _db.Queryable<DbDevice>().Where(d=>d.Name==device.Name).FirstAsync();
        if (exist != null)
        {
            throw new DbExistException("设备名称已经存在。");
        }
-      var res= await _db.Insertable<DbDevice>(dbDevice).ExecuteCommandAsync();
-      
-      return res;
+       DbDevice dbDevice=new DbDevice();
+       device.CopyTo<DbDevice>(dbDevice);
+       dbDevice.VariableTables=new List<DbVariableTable>();
+       DbVariableTable dbVariableTable=new DbVariableTable();
+       dbVariableTable.Name = "默认变量表";
+       dbVariableTable.Description = "默认变量表";
+       dbVariableTable.ProtocolType = ProtocolType.S7;
+       dbDevice.VariableTables.Add(dbVariableTable);
+      return await _db.InsertNav(dbDevice).Include(d=>d.VariableTables).ExecuteCommandAsync();
+
     }
     
     public async Task<List<DbDevice>> GetAll()

@@ -25,4 +25,27 @@ public static class ObjectExtensions
            }
        }
     }
+    
+    /// <summary>
+    /// 创建一个泛型对象，将source对象上的所有属性的值，都转换到新创建对象上
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="target"></param>
+    /// <typeparam name="T"></typeparam>
+    public static void NewTo<T>(this Object source ) where T : new()
+    {
+        T target = new T();
+        var sourceType = source.GetType();
+        var targetType = target.GetType();
+        var sourceProperties = sourceType.GetProperties();
+        foreach (PropertyInfo sourceProperty in sourceProperties)
+        {
+            PropertyInfo targetProperty = targetType.GetProperty(sourceProperty.Name);
+            if (targetProperty!= null && targetProperty.CanWrite && sourceProperty.CanRead && targetProperty.PropertyType == sourceProperty.PropertyType)
+            {
+                object value = sourceProperty.GetValue(source, null);
+                targetProperty.SetValue(target, value, null);
+            }
+        }
+    }
 }

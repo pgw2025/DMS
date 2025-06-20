@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PMSWPF.Enums;
 using PMSWPF.Extensions;
 using PMSWPF.Models;
 
@@ -13,6 +14,7 @@ public partial class DeviceDialogViewModel:ObservableObject
     private string title="添加设备";
     [ObservableProperty]
     private Device device;
+
     public DeviceDialogViewModel(Device saveDevice)
     {
         _saveDevice = saveDevice;

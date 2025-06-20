@@ -23,9 +23,10 @@ public partial class DevicesViewModel : ViewModelBase
     private readonly IDeviceDialogService _deviceDialogService;
     private readonly DevicesRepositories _devicesRepositories;
     private readonly INotificationService _notificationService;
-    [ObservableProperty] private ObservableCollection<Device> _devices = new ();
+    [ObservableProperty] private ObservableCollection<Device> _devices = new();
 
-    public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,INotificationService notificationService)
+    public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,
+        INotificationService notificationService)
     {
         _deviceDialogService = deviceDialogService;
         _devicesRepositories = devicesRepositories;
@@ -45,56 +46,30 @@ public partial class DevicesViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public void Test()
+    public async  void AddDevice()
     {
-        // GrowlInfo info = new GrowlInfo();
-        // info.Message = "Hello";
-        // info.Type = InfoType.Error;
-        // info.ShowCloseButton = true;
-        _notificationService.Show( "Hello",NotificationType.Info,true);
-        // Growl.Error("Hello");
-        // Growl.Info("Hello");
-        // Growl.Success("Hello");
-        // Growl.WarningGlobal("Hello");
-        // Growl.SuccessGlobal("Hello");
-        // Growl.FatalGlobal("Hello");
-        // Growl.Ask("Hello", isConfirmed =>
-        // {
-        //     Growl.Info(isConfirmed.ToString());
-        //     return true;
-        // });
-        
-        
-    }
-
-    [RelayCommand]
-    public async void AddDevice()
-    {
+        Device device = null;
         try
         {
-            Device device = await _deviceDialogService.ShowAddDeviceDialog();
+            device= await _deviceDialogService.ShowAddDeviceDialog();
             if (device != null)
             {
-                DbDevice dbDevice = new DbDevice();
-                device.CopyTo<DbDevice>(dbDevice);
-                var rowCount = await _devicesRepositories.Add(dbDevice);
-                if (rowCount > 0)
+                var isOk = await _devicesRepositories.Add(device);
+                if (isOk)
                 {
                     // MessageBox.Show("Device added successfully");
                     await OnLoadedAsync();
-                    _notificationService.Show(new Notification(){Message = "Hello World!",Type = NotificationType.Success,IsGlobal = true});
+                    _notificationService.Show($"设备添加成功：{device.Name}", NotificationType.Success);
                 }
             }
         }
         catch (DbExistException e)
         {
-            Console.WriteLine(e);
-            MessageBox.Show(e.Message);
+            _notificationService.Show($"设备添加失败：名称为{device?.Name}的设备已经存在。请更换是被名称", NotificationType.Error);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            MessageBox.Show(e.Message);
+            _notificationService.Show($"添加设备的过程中发生错误：{e.Message}", NotificationType.Error);
         }
     }
 

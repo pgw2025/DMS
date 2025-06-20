@@ -7,30 +7,57 @@
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:vmd="clr-namespace:PMSWPF.ViewModels.Dialogs"
-    x:Name="dialog"
+    xmlns:vc="clr-namespace:PMSWPF.ValueConverts"
+    xmlns:ex="clr-namespace:PMSWPF.Extensions"
+    xmlns:en="clr-namespace:PMSWPF.Enums"
     Title="{Binding Title}"
-    d:DesignHeight="756"
-    d:DesignWidth="700"
     CloseButtonText="取消"
-    Closed="OnClosed"
     DefaultButton="Primary"
     PrimaryButtonCommand="{Binding AddDeviceCommand}"
     PrimaryButtonText="添加"
-    FullSizeDesired="False"
-    IsShadowEnabled="True"
+
     d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
     mc:Ignorable="d">
-    <ikw:SimpleStackPanel  Spacing="12">
-        <TextBox ui:ControlHelper.Header="设备名称"
-                 Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
-        <TextBox ui:ControlHelper.Header="设备描述"
-                 Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
-       
+    <ui:ContentDialog.Resources>
+        <ex:EnumBindingSource x:Key="deviceType" EnumType="{x:Type en:DeviceType}"/>
+        <ex:EnumBindingSource x:Key="protocolType" EnumType="{x:Type en:ProtocolType}"/>
+        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
+    </ui:ContentDialog.Resources>
+    <ikw:SimpleStackPanel Width="260" Spacing="12">
+        <!-- 设备名称 -->
+        <TextBlock Text="设备名称" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
         <TextBox
-            ui:ControlHelper.Header="设备IP地址:"
+            Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
+        <!-- 设备描述 -->
+        <TextBlock Text="设备描述" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
+        <TextBox 
+                 Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
+        <!-- 设备IP地址 -->
+        <TextBlock Text="设备IP地址" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
+        <TextBox
             AcceptsReturn="True"
             Text="{Binding Device.Ip, UpdateSourceTrigger=PropertyChanged}" />
         
+        <!-- 设备类型 -->
+        <TextBlock Text="设备类型" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
+        <ComboBox SelectedItem="{Binding Device.DeviceType}" ItemsSource="{Binding Source={StaticResource deviceType} }" >
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"></TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox> 
+        
+        <!-- 通讯协议-->
+        <TextBlock Text="设备通信协议" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
+        <ComboBox SelectedItem="{Binding Device.ProtocolType}" ItemsSource="{Binding Source={StaticResource protocolType} }" >
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"></TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <!-- 通讯协议-->
         <CheckBox Content="是否启用" IsChecked="{Binding Device.IsActive}" />
         <!-- <TextBox ui:ControlHelper.Header="PrimaryButtonText" -->
         <!--          Text="{Binding ElementName=dialog, Path=PrimaryButtonText, UpdateSourceTrigger=PropertyChanged}" /> -->

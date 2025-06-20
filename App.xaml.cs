@@ -41,8 +41,15 @@ namespace PMSWPF
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            CheckDb();
+            
             MainWindow = Services.GetRequiredService<MainView>();
             MainWindow.Show();
+        }
+
+        private void CheckDb()
+        {
+            
         }
 
         // [STAThread]
