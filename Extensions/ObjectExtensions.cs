@@ -32,7 +32,7 @@ public static class ObjectExtensions
     /// <param name="source"></param>
     /// <param name="target"></param>
     /// <typeparam name="T"></typeparam>
-    public static void NewTo<T>(this Object source ) where T : new()
+    public static T NewTo<T>(this Object source ) where T : new()
     {
         T target = new T();
         var sourceType = source.GetType();
@@ -47,5 +47,6 @@ public static class ObjectExtensions
                 targetProperty.SetValue(target, value, null);
             }
         }
+        return target;
     }
 }

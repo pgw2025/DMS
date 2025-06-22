@@ -41,6 +41,18 @@ public partial class DevicesViewModel : ViewModelBase
         {
             Device device = new Device();
             dbDevice.CopyTo(device);
+            foreach (var dbVariableTable in dbDevice.VariableTables)
+            {
+
+                if (device.VariableTables == null)
+                {
+                    device.VariableTables=new List<VariableTable>();
+                }
+
+                var table = dbVariableTable.NewTo<VariableTable>();
+                device.VariableTables.Add(table);
+            }
+            
             _devices.Add(device);
         }
     }

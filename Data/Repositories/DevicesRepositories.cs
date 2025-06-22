@@ -22,11 +22,12 @@ public class DevicesRepositories:BaseRepositories
        }
        DbDevice dbDevice=new DbDevice();
        device.CopyTo<DbDevice>(dbDevice);
-       dbDevice.VariableTables=new List<DbVariableTable>();
+       dbDevice.VariableTables=new ();
+       // 添加默认变量表
        DbVariableTable dbVariableTable=new DbVariableTable();
        dbVariableTable.Name = "默认变量表";
        dbVariableTable.Description = "默认变量表";
-       dbVariableTable.ProtocolType = ProtocolType.S7;
+       dbVariableTable.ProtocolType = dbDevice.ProtocolType;
        dbDevice.VariableTables.Add(dbVariableTable);
       return await _db.InsertNav(dbDevice).Include(d=>d.VariableTables).ExecuteCommandAsync();
 
@@ -34,7 +35,7 @@ public class DevicesRepositories:BaseRepositories
     
     public async Task<List<DbDevice>> GetAll()
     {
-        return await _db.Queryable<DbDevice>().ToListAsync();
+        return await _db.Queryable<DbDevice>().Includes(d=>d.VariableTables).ToListAsync();
     }
     public async Task<DbDevice> GetById(int id)
     {

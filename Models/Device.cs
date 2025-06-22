@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PMSWPF.Enums;
 using SqlSugar;
@@ -22,7 +23,7 @@ public partial class Device:ObservableObject
     [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
     public DeviceType DeviceType { get; set; }
 
-    public List<DataVariable>? DataVariables { get; set; } 
+    public List<VariableTable>? VariableTables { get; set; } 
     public ProtocolType ProtocolType { get; set; }
     
 }

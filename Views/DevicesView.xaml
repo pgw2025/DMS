@@ -13,11 +13,60 @@
              d:DataContext="{d:DesignInstance vm:DevicesViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <DataTemplate x:Key="DeviceItemTemplate">
+            <Border Background="#eee" CornerRadius="10" Margin="3" Padding="10" >
+                <ikw:SimpleStackPanel Spacing="10"   Width="300" Height="200">
+                    <DockPanel >
+                        <ui:ToggleSwitch 
+                                         DockPanel.Dock="Right"
+                                         Margin="20 0 0 0 "
+                                         IsOn="{Binding IsActive}"
+                                         OffContent="停止" OnContent="启动"/>
+                        <TextBlock FontSize="24" FontWeight="Bold" Text="{Binding Name }" />
+                    </DockPanel>
+                    
+                    <TextBlock Text="{Binding Description }" />
+                    <TextBlock Text="{Binding Ip }" />
+                    <ListBox ItemsSource="{Binding }">
+                        
+                    </ListBox>
+                </ikw:SimpleStackPanel>
+            </Border>
+       
+        </DataTemplate>
+    </UserControl.Resources>
     
-    <StackPanel ZIndex="1" >
-        <StackPanel  Margin="10 5" Orientation="Horizontal">
-            <Button Margin="5" Command="{Binding AddDeviceCommand}" Content="添加"/>
-        </StackPanel>
+    <StackPanel >
+
+        <ui:CommandBar x:Name="PrimaryCommandBar"
+                       DefaultLabelPosition="Right" IsOpen="False">
+            <ui:AppBarButton x:Name="AddButton"
+                             Command="{Binding AddDeviceCommand}"
+                              Label="Add">
+                <ui:AppBarButton.Icon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}"/>
+                </ui:AppBarButton.Icon>
+            </ui:AppBarButton>
+            <ui:AppBarButton x:Name="EditButton"
+                              Label="Edit">
+                <ui:AppBarButton.Icon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                </ui:AppBarButton.Icon>
+
+            </ui:AppBarButton>
+            <ui:AppBarButton x:Name="ShareButton"
+                              Label="Share">
+                <ui:AppBarButton.Icon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Share}"/>
+                </ui:AppBarButton.Icon>
+            </ui:AppBarButton>
+            <ui:CommandBar.SecondaryCommands>
+                <ui:AppBarButton x:Name="SettingsButton"
+                                 Icon="Setting" Label="Settings"
+                                 />
+            </ui:CommandBar.SecondaryCommands>
+        </ui:CommandBar>
         
         
         <ui:GridView x:Name="BasicGridView"
