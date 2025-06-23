@@ -1,18 +1,15 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
-using PMSWPF.Models;
 using PMSWPF.ViewModels.Dialogs;
 
 namespace PMSWPF.Views.Dialogs;
 
 public partial class DeviceDialog
 {
-
     public DeviceDialog(DeviceDialogViewModel viewModel)
     {
         InitializeComponent();
-        this.DataContext = viewModel;
+        DataContext = viewModel;
     }
 
     private void OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -45,4 +42,3 @@ public partial class DeviceDialog
         // ErrorText.Visibility = Visibility.Collapsed;
     }
 }
-

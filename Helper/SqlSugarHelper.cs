@@ -1,26 +1,17 @@
 ﻿using PMSWPF.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PMSWPF.Helper
+namespace PMSWPF.Helper;
+
+public class SqlSugarHelper
 {
-    public class SqlSugarHelper
+    private DbContext _db;
+
+    public SqlSugarHelper()
     {
-        private DbContext _db;
+        _db = new DbContext();
+    }
 
-        public SqlSugarHelper() { 
-            _db=new DbContext();
-            
-        }
-
-        public void InitTables()
-        {
-            
-        }
-
-       
+    public void InitTables()
+    {
     }
 }

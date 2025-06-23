@@ -19,41 +19,43 @@
     d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
     mc:Ignorable="d">
     <ui:ContentDialog.Resources>
-        <ex:EnumBindingSource x:Key="deviceType" EnumType="{x:Type en:DeviceType}"/>
-        <ex:EnumBindingSource x:Key="protocolType" EnumType="{x:Type en:ProtocolType}"/>
-        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
+        <ex:EnumBindingSource x:Key="deviceType" EnumType="{x:Type en:DeviceType}" />
+        <ex:EnumBindingSource x:Key="protocolType" EnumType="{x:Type en:ProtocolType}" />
+        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
     </ui:ContentDialog.Resources>
     <ikw:SimpleStackPanel Width="260" Spacing="12">
         <!-- 设备名称 -->
-        <TextBlock Text="设备名称" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
+        <TextBlock Text="设备名称" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}" />
         <TextBox
             Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
         <!-- 设备描述 -->
-        <TextBlock Text="设备描述" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
-        <TextBox 
-                 Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Text="设备描述" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}" />
+        <TextBox
+            Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
         <!-- 设备IP地址 -->
-        <TextBlock Text="设备IP地址" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
+        <TextBlock Text="设备IP地址" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}" />
         <TextBox
             AcceptsReturn="True"
             Text="{Binding Device.Ip, UpdateSourceTrigger=PropertyChanged}" />
-        
+
         <!-- 设备类型 -->
-        <TextBlock Text="设备类型" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
-        <ComboBox SelectedItem="{Binding Device.DeviceType}" ItemsSource="{Binding Source={StaticResource deviceType} }" >
+        <TextBlock Text="设备类型" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}" />
+        <ComboBox SelectedItem="{Binding Device.DeviceType}"
+                  ItemsSource="{Binding Source={StaticResource deviceType} }">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"></TextBlock>
+                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
                 </DataTemplate>
             </ComboBox.ItemTemplate>
-        </ComboBox> 
-        
+        </ComboBox>
+
         <!-- 通讯协议-->
-        <TextBlock Text="设备通信协议" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}"></TextBlock>
-        <ComboBox SelectedItem="{Binding Device.ProtocolType}" ItemsSource="{Binding Source={StaticResource protocolType} }" >
+        <TextBlock Text="设备通信协议" HorizontalAlignment="Left" Style="{StaticResource TextBlockSubTitle}" />
+        <ComboBox SelectedItem="{Binding Device.ProtocolType}"
+                  ItemsSource="{Binding Source={StaticResource protocolType} }">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"></TextBlock>
+                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>

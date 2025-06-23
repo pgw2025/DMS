@@ -1,5 +1,4 @@
-﻿using System.Windows.Interop;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using HandyControl.Controls;
 using PMSWPF.Enums;
@@ -8,21 +7,23 @@ using Notification = PMSWPF.Models.Notification;
 
 namespace PMSWPF.Services;
 
-public class GrowlNotificationService :ObservableRecipient,IRecipient<NotificationMessage>
+public class GrowlNotificationService : ObservableRecipient, IRecipient<NotificationMessage>
 {
     public GrowlNotificationService()
     {
         IsActive = true;
     }
+
+    public void Receive(NotificationMessage message)
+    {
+        Show(message.Value, message.Type, message.IsGlobal);
+    }
+
     public void Show(Notification notification)
     {
-        if (notification == null )
-        {
-            return;
-        }
+        if (notification == null) return;
 
         if (notification.IsGlobal)
-        {
             switch (notification.Type)
             {
                 case NotificationType.Info:
@@ -47,10 +48,7 @@ public class GrowlNotificationService :ObservableRecipient,IRecipient<Notificati
                     Growl.InfoGlobal(notification.Message);
                     break;
             }
-
-        }
         else
-        {
             switch (notification.Type)
             {
                 case NotificationType.Info:
@@ -75,16 +73,10 @@ public class GrowlNotificationService :ObservableRecipient,IRecipient<Notificati
                     Growl.Info(notification.Message);
                     break;
             }
-        }
     }
 
-    public void Show(string message, NotificationType type=NotificationType.Info,bool IsGlobal=true)
+    public void Show(string message, NotificationType type = NotificationType.Info, bool IsGlobal = true)
     {
-        Show(new Notification(){Message = message,Type = type,IsGlobal = IsGlobal});
-    }
-
-    public void Receive(NotificationMessage message)
-    {
-        Show(message.Value,message.Type,message.IsGlobal);
+        Show(new Notification { Message = message, Type = type, IsGlobal = IsGlobal });
     }
 }

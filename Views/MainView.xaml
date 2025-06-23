@@ -4,8 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:local="clr-namespace:PMSWPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:PMSWPF.ViewModels"
@@ -13,24 +11,24 @@
     Title="设备管理系统"
     Width="1080"
     Height="800"
-    
+
     ui:WindowHelper.UseModernWindowStyle="True"
     ui:WindowHelper.SystemBackdropType="Mica"
     d:DataContext="{d:DesignInstance vm:MainViewModel}"
     mc:Ignorable="d">
     <Grid>
-        <ui:NavigationView 
-            
-                           ExpandedModeThresholdWidth="500"
-                           IsTabStop="False"
-                           PaneDisplayMode="Left"
-                           PaneTitle="设备管理系统"
-                           IsSettingsVisible="False"
-                           AlwaysShowHeader="True"
-                           IsBackButtonVisible="Collapsed"
-                           IsBackEnabled="False"
-                           SelectionFollowsFocus="Disabled"
-                           SelectionChanged="NavigationView_SelectionChanged">
+        <ui:NavigationView
+
+            ExpandedModeThresholdWidth="500"
+            IsTabStop="False"
+            PaneDisplayMode="Left"
+            PaneTitle="设备管理系统"
+            IsSettingsVisible="False"
+            AlwaysShowHeader="True"
+            IsBackButtonVisible="Collapsed"
+            IsBackEnabled="False"
+            SelectionFollowsFocus="Disabled"
+            SelectionChanged="NavigationView_SelectionChanged">
 
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem
@@ -64,7 +62,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-               
+
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.AutoSuggestBox>
@@ -76,31 +74,30 @@
             </ui:NavigationView.AutoSuggestBox>
 
 
-
             <Grid>
-                
+
                 <ContentControl Content="{Binding CurrentViewModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
-                            <local:HomeView/>
+                            <local:HomeView />
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type vm:DevicesViewModel}">
-                            <local:DevicesView/>
+                            <local:DevicesView />
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type vm:DataTransformViewModel}">
-                            <local:DataTransformView/>
+                            <local:DataTransformView />
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type vm:SettingViewModel}">
-                            <local:SettingView/>
+                            <local:SettingView />
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
-                
+
                 <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Right">
-                    <StackPanel hc:Growl.GrowlParent="True" VerticalAlignment="Top" Margin="0,10,10,10"/>
+                    <StackPanel hc:Growl.GrowlParent="True" VerticalAlignment="Top" Margin="0,10,10,10" />
                 </ScrollViewer>
             </Grid>
-            
+
         </ui:NavigationView>
     </Grid>
 </Window>

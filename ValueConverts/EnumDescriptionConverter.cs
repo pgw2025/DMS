@@ -24,12 +24,11 @@ public class EnumDescriptionConverter : IValueConverter
     {
         var fi = enumObj.GetType().GetField(enumObj.ToString());
 
-        DescriptionAttribute[] attributes =
+        var attributes =
             (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
         if (attributes != null && attributes.Length > 0)
             return attributes[0].Description;
-        else
-            return enumObj.ToString();
+        return enumObj.ToString();
     }
 }

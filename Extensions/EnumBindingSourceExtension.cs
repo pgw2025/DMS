@@ -2,9 +2,18 @@
 
 namespace PMSWPF.Extensions;
 
-class EnumBindingSourceExtension : MarkupExtension
+internal class EnumBindingSourceExtension : MarkupExtension
 {
     private Type? _enumType;
+
+    public EnumBindingSourceExtension()
+    {
+    }
+
+    public EnumBindingSourceExtension(Type enumType)
+    {
+        EnumType = enumType;
+    }
 
     public Type? EnumType
     {
@@ -15,7 +24,7 @@ class EnumBindingSourceExtension : MarkupExtension
             {
                 if (value != null)
                 {
-                    Type enumType = Nullable.GetUnderlyingType(value) ?? value;
+                    var enumType = Nullable.GetUnderlyingType(value) ?? value;
                     if (!enumType.IsEnum)
                         throw new ArgumentException("Type must be for an Enum.");
                 }
@@ -23,13 +32,6 @@ class EnumBindingSourceExtension : MarkupExtension
                 _enumType = value;
             }
         }
-    }
-
-    public EnumBindingSourceExtension() { }
-
-    public EnumBindingSourceExtension(Type enumType)
-    {
-        EnumType = enumType;
     }
 
     public override object ProvideValue(IServiceProvider serviceProvider)

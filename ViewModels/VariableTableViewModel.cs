@@ -1,6 +1,6 @@
 namespace PMSWPF.ViewModels;
 
-public class SettingViewModel : ViewModelBase
+public class VariableTableViewModel : ViewModelBase
 {
     public override void OnLoaded()
     {

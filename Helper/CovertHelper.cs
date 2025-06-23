@@ -6,28 +6,31 @@ public class CovertHelper
 {
     public static List<TTarget> ConvertList<TSource, TTarget>(List<TSource> sourceList)
     {
-        List<TTarget> targetList = new List<TTarget>();
-        Type sourceType = typeof(TSource);
-        Type targetType = typeof(TTarget);
+        var targetList = new List<TTarget>();
+        var sourceType = typeof(TSource);
+        var targetType = typeof(TTarget);
 
         // 获取源类型和目标类型的公共属性
-        PropertyInfo[] sourceProperties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        PropertyInfo[] targetProperties = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var sourceProperties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var targetProperties = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-        foreach (TSource sourceObject in sourceList)
+        foreach (var sourceObject in sourceList)
         {
-            TTarget targetObject = Activator.CreateInstance<TTarget>();
-            foreach (PropertyInfo targetProperty in targetProperties)
+            var targetObject = Activator.CreateInstance<TTarget>();
+            foreach (var targetProperty in targetProperties)
             {
-                PropertyInfo sourceProperty = sourceProperties.FirstOrDefault(p => p.Name == targetProperty.Name && p.PropertyType == targetProperty.PropertyType);
-                if (sourceProperty!= null)
+                var sourceProperty = sourceProperties.FirstOrDefault(p =>
+                    p.Name == targetProperty.Name && p.PropertyType == targetProperty.PropertyType);
+                if (sourceProperty != null)
                 {
-                    object value = sourceProperty.GetValue(sourceObject);
+                    var value = sourceProperty.GetValue(sourceObject);
                     targetProperty.SetValue(targetObject, value);
                 }
             }
+
             targetList.Add(targetObject);
         }
+
         return targetList;
     }
 }

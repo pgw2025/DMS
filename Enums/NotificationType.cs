@@ -9,5 +9,4 @@ public enum NotificationType
     Success,
     Clear,
     Ask
-    
 }

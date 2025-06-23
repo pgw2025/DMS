@@ -9,23 +9,17 @@ public class DeviceDialogService : IDeviceDialogService
 {
     public async Task<Device> ShowAddDeviceDialog()
     {
-        Device device = new Device();
-        DeviceDialogViewModel ddvm = new DeviceDialogViewModel(device)
+        var device = new Device();
+        var ddvm = new DeviceDialogViewModel(device)
         {
             Title = "添加设备"
         };
 
-        DeviceDialog dialog = new DeviceDialog(ddvm);
-        var res=await dialog.ShowAsync();
-        if (res == ContentDialogResult.Primary)
-        {
-            return device;
-        }
-        else
-        {
-            return null;
-        }
+        var dialog = new DeviceDialog(ddvm);
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary) return device;
 
+        return null;
     }
 
     public void ShowMessageDialog(string title, string message)

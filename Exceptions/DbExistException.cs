@@ -1,10 +1,16 @@
 ﻿namespace PMSWPF.Excptions;
 
-public class DbExistException: Exception
+public class DbExistException : Exception
 {
-    public DbExistException() : base() { }
+    public DbExistException()
+    {
+    }
 
-    public DbExistException(string message) : base(message) { }
+    public DbExistException(string message) : base(message)
+    {
+    }
 
-    public DbExistException(string message, System.Exception innerException) : base(message, innerException) { }
+    public DbExistException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 }

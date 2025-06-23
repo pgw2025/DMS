@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.Messaging.Messages;
+﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 
-namespace PMSWPF.Message
+namespace PMSWPF.Message;
+
+public class MyMessage : ValueChangedMessage<int>
 {
-    public class MyMessage : ValueChangedMessage<int>
+    public MyMessage(int value) : base(value)
     {
-        private int count;
-
-        public MyMessage(int value) : base(value)
-        {
-        }
-
-        public int Count { get => count; set => count = value; }
     }
+
+    public int Count { get; set; }
 }

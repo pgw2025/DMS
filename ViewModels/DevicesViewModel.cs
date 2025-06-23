@@ -1,23 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using HandyControl.Controls;
-using HandyControl.Data;
 using Microsoft.Extensions.Logging;
-using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Excptions;
-using PMSWPF.Extensions;
 using PMSWPF.Helper;
-using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.Services;
-using PMSWPF.ViewModels.Dialogs;
-using PMSWPF.Views.Dialogs;
-using MessageBox = System.Windows.MessageBox;
-using Notification = PMSWPF.Models.Notification;
 
 namespace PMSWPF.ViewModels;
 
@@ -26,11 +16,12 @@ public partial class DevicesViewModel : ViewModelBase
     private readonly IDeviceDialogService _deviceDialogService;
     private readonly DevicesRepositories _devicesRepositories;
     private readonly ILogger<DevicesViewModel> _logger;
-    [ObservableProperty] 
-    private ObservableCollection<Device> _devices ;
 
-    public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,ILogger<DevicesViewModel> logger
-       )
+    [ObservableProperty] private ObservableCollection<Device> _devices;
+
+    public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,
+        ILogger<DevicesViewModel> logger
+    )
     {
         _deviceDialogService = deviceDialogService;
         _devicesRepositories = devicesRepositories;
@@ -40,17 +31,16 @@ public partial class DevicesViewModel : ViewModelBase
     public async Task OnLoadedAsync()
     {
         var ds = await _devicesRepositories.GetAll();
-        Devices=new ObservableCollection<Device>(ds);
-        
+        Devices = new ObservableCollection<Device>(ds);
     }
 
     [RelayCommand]
-    public async  void AddDevice()
+    public async void AddDevice()
     {
         Device device = null;
         try
         {
-            device= await _deviceDialogService.ShowAddDeviceDialog();
+            device = await _deviceDialogService.ShowAddDeviceDialog();
             if (device != null)
             {
                 var isOk = await _devicesRepositories.Add(device);
@@ -78,9 +68,14 @@ public partial class DevicesViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    public void NavigateVt()
+    {
+    }
+
+
     public override async void OnLoaded()
     {
-        // OnLoadedAsync().Await((e) => { _deviceDialogService.ShowMessageDialog("", e.Message); }, () => { });
         await OnLoadedAsync();
     }
 }

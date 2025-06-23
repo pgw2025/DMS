@@ -1,26 +1,37 @@
-﻿using System.ComponentModel;
-using System.Windows;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
+using PMSWPF.Message;
 using PMSWPF.ViewModels;
 
 namespace PMSWPF.Services;
 
-public class NavgatorServices
+public class NavgatorServices : ObservableRecipient, IRecipient<NavgatorMessage>
 {
     private ViewModelBase currentViewModel;
 
+    public NavgatorServices()
+    {
+        IsActive = true;
+    }
+
     public ViewModelBase CurrentViewModel
     {
-        get { return currentViewModel; }
+        get => currentViewModel;
         set
         {
-            currentViewModel = value; 
+            currentViewModel = value;
             OnViewModelChanged?.Invoke();
             currentViewModel.OnLoaded();
         }
     }
 
-    public event Action OnViewModelChanged ;
+    public void Receive(NavgatorMessage message)
+    {
+        CurrentViewModel = message.Value;
+    }
+
+    public event Action OnViewModelChanged;
 
     public void NavigateTo<T>() where T : ViewModelBase
     {
