@@ -53,6 +53,16 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
+                <ui:NavigationViewItem Tag="Setting" Content="设置">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="关于">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                
             </ui:NavigationView.MenuItems>
 
@@ -65,25 +75,7 @@
             </ui:NavigationView.AutoSuggestBox>
 
 
-            <ui:NavigationView.PaneFooter>
 
-                <StackPanel
-                    x:Name="FooterStackPanel"
-                    Margin="0"
-                    Orientation="Vertical"
-                    Visibility="Visible">
-                    <ui:NavigationViewItem Content="设置">
-                        <ui:NavigationViewItem.Icon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                        </ui:NavigationViewItem.Icon>
-                    </ui:NavigationViewItem>
-                    <ui:NavigationViewItem Content="关于">
-                        <ui:NavigationViewItem.Icon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
-                        </ui:NavigationViewItem.Icon>
-                    </ui:NavigationViewItem>
-                </StackPanel>
-            </ui:NavigationView.PaneFooter>
             <Grid>
                 
                 <ContentControl Content="{Binding CurrentViewModel}">
@@ -96,6 +88,9 @@
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type vm:DataTransformViewModel}">
                             <local:DataTransformView/>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type vm:SettingViewModel}">
+                            <local:SettingView/>
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>

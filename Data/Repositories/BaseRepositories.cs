@@ -9,13 +9,23 @@ public class BaseRepositories
 
     public BaseRepositories()
     {
-        _db = DbContext.GetInstance();
-        _db.DbMaintenance.CreateDatabase();
-        CheckDbTables();
+        try
+        {
+            _db = DbContext.GetInstance();
+            // _db.DbMaintenance.CreateDatabase();
+            // CheckDbTables();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     private void CheckDbTables()
     {
+        if(!_db.DbMaintenance.IsAnyTable<DbNlog>())
+            _db.CodeFirst.InitTables<DbNlog>();
        if(!_db.DbMaintenance.IsAnyTable<DbDevice>())
            _db.CodeFirst.InitTables<DbDevice>();
        if(!_db.DbMaintenance.IsAnyTable<DbVariableTable>())

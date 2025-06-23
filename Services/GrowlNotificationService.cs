@@ -1,11 +1,19 @@
-﻿using HandyControl.Controls;
+﻿using System.Windows.Interop;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using HandyControl.Controls;
 using PMSWPF.Enums;
+using PMSWPF.Message;
 using Notification = PMSWPF.Models.Notification;
 
 namespace PMSWPF.Services;
 
-public class GrowlNotificationService : INotificationService
+public class GrowlNotificationService :ObservableRecipient,IRecipient<NotificationMessage>
 {
+    public GrowlNotificationService()
+    {
+        IsActive = true;
+    }
     public void Show(Notification notification)
     {
         if (notification == null )
@@ -73,5 +81,10 @@ public class GrowlNotificationService : INotificationService
     public void Show(string message, NotificationType type=NotificationType.Info,bool IsGlobal=true)
     {
         Show(new Notification(){Message = message,Type = type,IsGlobal = IsGlobal});
+    }
+
+    public void Receive(NotificationMessage message)
+    {
+        Show(message.Value,message.Type,message.IsGlobal);
     }
 }

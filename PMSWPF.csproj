@@ -14,8 +14,16 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+		<PackageReference Include="MySql.Data" Version="9.3.0" />
+		<PackageReference Include="NLog" Version="6.0.0" />
+		<PackageReference Include="NLog.Database" Version="6.0.0" />
 		<PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178" />
 		<PackageReference Include="SqlSugarCoreNoDrive" Version="5.1.4.193" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="Config\nlog.config">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

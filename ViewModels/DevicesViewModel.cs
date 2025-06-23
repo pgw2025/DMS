@@ -1,14 +1,17 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using HandyControl.Controls;
 using HandyControl.Data;
+using Microsoft.Extensions.Logging;
 using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Excptions;
 using PMSWPF.Extensions;
 using PMSWPF.Helper;
+using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.Services;
 using PMSWPF.ViewModels.Dialogs;
@@ -22,15 +25,16 @@ public partial class DevicesViewModel : ViewModelBase
 {
     private readonly IDeviceDialogService _deviceDialogService;
     private readonly DevicesRepositories _devicesRepositories;
-    private readonly INotificationService _notificationService;
-    [ObservableProperty] private ObservableCollection<Device> _devices = new();
+    private readonly ILogger<DevicesViewModel> _logger;
+    [ObservableProperty] 
+    private ObservableCollection<Device> _devices = new();
 
-    public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,
-        INotificationService notificationService)
+    public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,ILogger<DevicesViewModel> logger
+       )
     {
         _deviceDialogService = deviceDialogService;
         _devicesRepositories = devicesRepositories;
-        _notificationService = notificationService;
+        _logger = logger;
     }
 
     public async Task OnLoadedAsync()
@@ -71,22 +75,29 @@ public partial class DevicesViewModel : ViewModelBase
                 {
                     // MessageBox.Show("Device added successfully");
                     await OnLoadedAsync();
-                    _notificationService.Show($"设备添加成功：{device.Name}", NotificationType.Success);
+                    var msg = $"设备添加成功：{device.Name}";
+                    _logger.LogInformation(msg);
+                    NotificationHelper.ShowMessage(msg, NotificationType.Success);
                 }
             }
         }
         catch (DbExistException e)
         {
-            _notificationService.Show($"设备添加失败：名称为{device?.Name}的设备已经存在。请更换是被名称", NotificationType.Error);
+            var msg = $"设备添加失败：名称为{device?.Name}的设备已经存在。请更换是被名称";
+            _logger.LogError(msg);
+            NotificationHelper.ShowMessage(msg, NotificationType.Error);
         }
         catch (Exception e)
         {
-            _notificationService.Show($"添加设备的过程中发生错误：{e.Message}", NotificationType.Error);
+            var msg = $"添加设备的过程中发生错误：{e.Message}";
+            _logger.LogError(msg);
+            NotificationHelper.ShowMessage(msg, NotificationType.Success);
         }
     }
 
-    public override void OnLoaded()
+    public override async void OnLoaded()
     {
-        OnLoadedAsync().Await((e) => { _deviceDialogService.ShowMessageDialog("", e.Message); }, () => { });
+        // OnLoadedAsync().Await((e) => { _deviceDialogService.ShowMessageDialog("", e.Message); }, () => { });
+        await OnLoadedAsync();
     }
 }

@@ -7,7 +7,7 @@ using PMSWPF.Services;
 
 namespace PMSWPF.ViewModels
 {
-    partial class MainViewModel : ObservableRecipient, IRecipient<MyMessage>
+   public partial class MainViewModel : ObservableRecipient, IRecipient<MyMessage>
     {
         private readonly NavgatorServices _navgatorServices;
 

@@ -3,6 +3,11 @@ using System.Data;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Extensions.Logging;
+using PMSWPF.Data;
+using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Services;
 using PMSWPF.ViewModels;
@@ -21,59 +26,58 @@ namespace PMSWPF
         public App()
         {
             var container = new ServiceCollection();
+
+            var nlog = LogManager.Setup().LoadConfigurationFromFile("Config/nlog.config").GetCurrentClassLogger();
+
+            container.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                loggingBuilder.AddNLog();
+            });
+
+
             container.AddSingleton<NavgatorServices>();
             container.AddSingleton<DevicesRepositories>();
             container.AddSingleton<IDeviceDialogService, DeviceDialogService>();
-            container.AddSingleton<INotificationService, GrowlNotificationService>();
+            container.AddSingleton<GrowlNotificationService>();
             container.AddSingleton<MainViewModel>();
             container.AddSingleton<HomeViewModel>();
             container.AddSingleton<DevicesViewModel>();
             container.AddSingleton<DataTransformViewModel>();
-            container.AddSingleton<MainView>(dp => new MainView()
-                { DataContext = dp.GetRequiredService<MainViewModel>() });
+            container.AddSingleton<SettingViewModel>();
+            container.AddSingleton<SettingView>();
+            container.AddSingleton<MainView>();
             container.AddSingleton<HomeView>();
             container.AddSingleton<DevicesView>();
             container.AddSingleton<DataTransformViewModel>();
 
             Services = container.BuildServiceProvider();
+            // 启动服务
+            Services.GetRequiredService<GrowlNotificationService>();
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            CheckDb();
-            
+            InitDB();
+
             MainWindow = Services.GetRequiredService<MainView>();
             MainWindow.Show();
         }
 
-        private void CheckDb()
+        private void InitDB()
         {
-            
+            var _db = DbContext.GetInstance();
+            _db.DbMaintenance.CreateDatabase();
+            _db.CodeFirst.InitTables<DbNlog>();
+            _db.CodeFirst.InitTables<DbNlog>();
+            _db.CodeFirst.InitTables<DbDevice>();
+            _db.CodeFirst.InitTables<DbVariableTable>();
+            _db.CodeFirst.InitTables<DbDataVariable>();
+            _db.CodeFirst.InitTables<DbS7DataVariable>();
+            _db.CodeFirst.InitTables<DbUser>();
+            _db.CodeFirst.InitTables<DbMqtt>();
         }
-
-        // [STAThread]
-        // static void Main(string[] args)
-        // {
-        //     using IHost host = CreateHostBuilder(args).Build();
-        //     host.Start();
-        //     App app = new App();
-        //     app.InitializeComponent();
-        //     app.MainWindow = host.Services.GetRequiredService<MainView>();
-        //     app.MainWindow.Visibility = Visibility.Visible;
-        //     app.Run();
-        //
-        // }
-        //
-        // private static IHostBuilder CreateHostBuilder(string[] args)
-        // {
-        //     return Host.CreateDefaultBuilder(args).ConfigureServices(services =>
-        //     {
-        //
-        //         services.AddHostedService<DemoBackgroundService>();
-        //         services.AddSingleton<MainView>();
-        //         services.AddSingleton<MainViewModel>();
-        //     });
-        // }
     }
 }
