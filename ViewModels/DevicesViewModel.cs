@@ -27,7 +27,7 @@ public partial class DevicesViewModel : ViewModelBase
     private readonly DevicesRepositories _devicesRepositories;
     private readonly ILogger<DevicesViewModel> _logger;
     [ObservableProperty] 
-    private ObservableCollection<Device> _devices = new();
+    private ObservableCollection<Device> _devices ;
 
     public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,ILogger<DevicesViewModel> logger
        )
@@ -40,25 +40,8 @@ public partial class DevicesViewModel : ViewModelBase
     public async Task OnLoadedAsync()
     {
         var ds = await _devicesRepositories.GetAll();
-        _devices.Clear();
-        foreach (var dbDevice in ds)
-        {
-            Device device = new Device();
-            dbDevice.CopyTo(device);
-            foreach (var dbVariableTable in dbDevice.VariableTables)
-            {
-
-                if (device.VariableTables == null)
-                {
-                    device.VariableTables=new List<VariableTable>();
-                }
-
-                var table = dbVariableTable.NewTo<VariableTable>();
-                device.VariableTables.Add(table);
-            }
-            
-            _devices.Add(device);
-        }
+        Devices=new ObservableCollection<Device>(ds);
+        
     }
 
     [RelayCommand]

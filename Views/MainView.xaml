@@ -11,8 +11,9 @@
     xmlns:vm="clr-namespace:PMSWPF.ViewModels"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     Title="设备管理系统"
-    Width="800"
-    Height="600"
+    Width="1080"
+    Height="800"
+    
     ui:WindowHelper.UseModernWindowStyle="True"
     ui:WindowHelper.SystemBackdropType="Mica"
     d:DataContext="{d:DesignInstance vm:MainViewModel}"

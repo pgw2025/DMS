@@ -2,6 +2,7 @@ using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
 using PMSWPF.Excptions;
 using PMSWPF.Extensions;
+using PMSWPF.Helper;
 using PMSWPF.Models;
 
 namespace PMSWPF.Data.Repositories;
@@ -33,9 +34,18 @@ public class DevicesRepositories:BaseRepositories
 
     }
     
-    public async Task<List<DbDevice>> GetAll()
+    public async Task<List<Device>> GetAll()
     {
-        return await _db.Queryable<DbDevice>().Includes(d=>d.VariableTables).ToListAsync();
+       var dlist= await _db.Queryable<DbDevice>().Includes(d=>d.VariableTables).ToListAsync();
+       List<Device> devices=new List<Device>();
+       foreach (DbDevice dbDevice in dlist)
+       {
+           Device device = dbDevice.NewTo<Device>();
+           device.VariableTables=CovertHelper.ConvertList<DbVariableTable,VariableTable>(dbDevice.VariableTables);
+           devices.Add(device);
+       }
+
+       return devices;
     }
     public async Task<DbDevice> GetById(int id)
     {
