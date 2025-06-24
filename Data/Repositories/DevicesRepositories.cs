@@ -3,11 +3,17 @@ using PMSWPF.Excptions;
 using PMSWPF.Extensions;
 using PMSWPF.Helper;
 using PMSWPF.Models;
+using SqlSugar;
 
 namespace PMSWPF.Data.Repositories;
 
-public class DevicesRepositories : BaseRepositories
+public class DevicesRepositories 
 {
+    private SqlSugarClient _db;
+    public DevicesRepositories()
+    {
+        _db = DbContext.GetInstance();
+    }
     public async Task<bool> Add(Device device)
     {
         var exist = await _db.Queryable<DbDevice>().Where(d => d.Name == device.Name).FirstAsync();
@@ -30,8 +36,7 @@ public class DevicesRepositories : BaseRepositories
         var devices = new List<Device>();
         foreach (var dbDevice in dlist)
         {
-            var device = dbDevice.NewTo<Device>();
-            device.VariableTables = CovertHelper.ConvertList<DbVariableTable, VariableTable>(dbDevice.VariableTables);
+            var device = dbDevice.CopyTo<Device>();
             devices.Add(device);
         }
 

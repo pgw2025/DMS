@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
@@ -60,9 +62,27 @@ public partial class App : Application
     {
         base.OnStartup(e);
         InitDB();
+        // InitMenu();
 
         MainWindow = Services.GetRequiredService<MainView>();
         MainWindow.Show();
+    }
+
+    private void InitMenu()
+    {
+        using (var db = DbContext.GetInstance())
+        {
+            List<DbMenu> items = new List<DbMenu>();
+            items.Add(new DbMenu() { Id = 1, Name = "主页", Icon = SegoeFluentIcons.Home.Glyph, ParentId = 0});
+            items.Add(new DbMenu() { Id = 1, Name = "设备", Icon = SegoeFluentIcons.Devices.Glyph, ParentId = 0});
+            items.Add(new DbMenu() { Id = 1, Name = "数据转换", Icon = SegoeFluentIcons.Move.Glyph, ParentId = 0});
+            items.Add(new DbMenu() { Id = 1, Name = "设置", Icon = SegoeFluentIcons.Settings.Glyph, ParentId = 0});
+            items.Add(new DbMenu() { Id = 1, Name = "关于", Icon = SegoeFluentIcons.Info.Glyph, ParentId = 0});
+            db.Insertable<DbMenu>(items).ExecuteCommand();
+        }
+
+        
+        
     }
 
     private void InitDB()
@@ -77,5 +97,6 @@ public partial class App : Application
         _db.CodeFirst.InitTables<DbS7DataVariable>();
         _db.CodeFirst.InitTables<DbUser>();
         _db.CodeFirst.InitTables<DbMqtt>();
+        _db.CodeFirst.InitTables<DbMenu>();
     }
 }

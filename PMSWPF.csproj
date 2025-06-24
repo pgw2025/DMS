@@ -25,5 +25,8 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="Data\Repositories\BaseRepositories.cs" />
+    </ItemGroup>
 
 </Project>

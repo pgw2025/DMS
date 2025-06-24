@@ -23,6 +23,6 @@ public partial class DeviceDialogViewModel : ObservableObject
     [RelayCommand]
     public void AddDevice()
     {
-        device.CopyTo<Device>(_saveDevice);
+        device.CopyTo(_saveDevice);
     }
 }
