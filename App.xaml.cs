@@ -36,7 +36,7 @@ public partial class App : Application
 
         container.AddSingleton<NavgatorServices>();
         container.AddSingleton<DevicesRepositories>();
-        container.AddSingleton<IDeviceDialogService, DeviceDialogService>();
+        container.AddSingleton<DialogService>();
         container.AddSingleton<GrowlNotificationService>();
         container.AddSingleton<MainViewModel>();
         container.AddSingleton<HomeViewModel>();
@@ -53,6 +53,7 @@ public partial class App : Application
         Services = container.BuildServiceProvider();
         // 启动服务
         Services.GetRequiredService<GrowlNotificationService>();
+        Services.GetRequiredService<DialogService>();
     }
 
     public new static App Current => (App)Application.Current;

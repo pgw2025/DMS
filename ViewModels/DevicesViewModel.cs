@@ -1,11 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Excptions;
 using PMSWPF.Helper;
+using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.Services;
 
@@ -13,17 +16,16 @@ namespace PMSWPF.ViewModels;
 
 public partial class DevicesViewModel : ViewModelBase
 {
-    private readonly IDeviceDialogService _deviceDialogService;
     private readonly DevicesRepositories _devicesRepositories;
     private readonly ILogger<DevicesViewModel> _logger;
 
     [ObservableProperty] private ObservableCollection<Device> _devices;
 
-    public DevicesViewModel(IDeviceDialogService deviceDialogService, DevicesRepositories devicesRepositories,
+    public DevicesViewModel(DevicesRepositories devicesRepositories,
         ILogger<DevicesViewModel> logger
     )
     {
-        _deviceDialogService = deviceDialogService;
+
         _devicesRepositories = devicesRepositories;
         _logger = logger;
     }
@@ -40,19 +42,31 @@ public partial class DevicesViewModel : ViewModelBase
         Device device = null;
         try
         {
-            device = await _deviceDialogService.ShowAddDeviceDialog();
-            if (device != null)
-            {
-                var isOk = await _devicesRepositories.Add(device);
-                if (isOk)
-                {
-                    // MessageBox.Show("Device added successfully");
-                    await OnLoadedAsync();
-                    var msg = $"设备添加成功：{device.Name}";
-                    _logger.LogInformation(msg);
-                    NotificationHelper.ShowMessage(msg, NotificationType.Success);
-                }
-            }
+            OpenDialogMessage dialog = new OpenDialogMessage();
+            
+            var res=WeakReferenceMessenger.Default.Send<OpenDialogMessage>(dialog);
+
+            Console.WriteLine("");
+
+            // device = await _deviceDialogService.ShowAddDeviceDialog();
+            // if (device != null)
+            // {
+            //     var isOk = await _devicesRepositories.Add(device);
+            //     if (isOk)
+            //     {
+            //         // 添加菜单项
+            //         MenuBean deviceMenu = new MenuBean()
+            //             { Name = device.Name, Icon = SegoeFluentIcons.Devices4.Glyph, ParentId = 2 };
+            //         MenuRepositories mre = new MenuRepositories();
+            //         mre.AddMenu(deviceMenu);
+            //         
+            //         // MessageBox.Show("Device added successfully");
+            //         await OnLoadedAsync();
+            //         var msg = $"设备添加成功：{device.Name}";
+            //         _logger.LogInformation(msg);
+            //         NotificationHelper.ShowMessage(msg, NotificationType.Success);
+            //     }
+            // }
         }
         catch (DbExistException e)
         {

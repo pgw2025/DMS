@@ -1,12 +1,22 @@
-﻿using iNKORE.UI.WPF.Modern.Controls;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using HandyControl.Tools.Extension;
+using iNKORE.UI.WPF.Modern.Controls;
+using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.ViewModels.Dialogs;
 using PMSWPF.Views.Dialogs;
 
 namespace PMSWPF.Services;
 
-public class DeviceDialogService : IDeviceDialogService
+public class DialogService:ObservableRecipient,IRecipient<OpenDialogMessage> 
 {
+    public DialogService()
+    {
+        IsActive = true;
+        
+    }
+
     public async Task<Device> ShowAddDeviceDialog()
     {
         var device = new Device();
@@ -25,5 +35,12 @@ public class DeviceDialogService : IDeviceDialogService
     public void ShowMessageDialog(string title, string message)
     {
         MessageBox.Show(message);
+    }
+
+
+    public void Receive(OpenDialogMessage message)
+    {
+        
+        message.Reply(new DialogMessage(){IsConfirm = true, IsCancel = false});
     }
 }

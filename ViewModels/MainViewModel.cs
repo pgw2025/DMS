@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
+using PMSWPF.Models;
 using PMSWPF.Services;
 
 namespace PMSWPF.ViewModels;
@@ -12,7 +14,7 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty] private ViewModelBase currentViewModel;
     [ObservableProperty]
-    private ObservableCollection<DbMenu> _menus;
+    private ObservableCollection<MenuBean> _menus;
 
     public MainViewModel(NavgatorServices navgatorServices)
     {
@@ -23,10 +25,11 @@ public partial class MainViewModel : ViewModelBase
     }
 
 
+
     public override async void OnLoaded()
-    {
+    { 
         MenuRepositories mr = new MenuRepositories();
        var menuList= await mr.GetMenu();
-       Menus=new ObservableCollection<DbMenu>(menuList);
+       Menus=new ObservableCollection<MenuBean>(menuList);
     }
 }

@@ -7,15 +7,25 @@
     xmlns:local="clr-namespace:PMSWPF.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:PMSWPF.ViewModels"
+    xmlns:mo="clr-namespace:PMSWPF.Models"
     xmlns:hc="https://handyorg.github.io/handycontrol"
     Title="设备管理系统"
     Width="1080"
     Height="800"
-   
+   Loaded="MainView_OnLoaded"
     ui:WindowHelper.UseModernWindowStyle="True"
     ui:WindowHelper.SystemBackdropType="Mica"
     d:DataContext="{d:DesignInstance vm:MainViewModel}"
     mc:Ignorable="d">
+    <Window.Resources>
+        <DataTemplate x:Key="NavigationViewMenuItem" DataType="{x:Type mo:MenuBean}">
+            <ui:NavigationViewItem   Content="{Binding Name}" MenuItemsSource="{Binding Items }">
+                <ui:NavigationViewItem.Icon>
+                    <ui:FontIcon Glyph="{Binding Icon}" />
+                </ui:NavigationViewItem.Icon>
+            </ui:NavigationViewItem>
+        </DataTemplate>
+    </Window.Resources>
     <Grid>
         <ui:NavigationView
 
@@ -28,42 +38,45 @@
             IsBackButtonVisible="Collapsed"
             IsBackEnabled="False"
             SelectionFollowsFocus="Disabled"
-            SelectionChanged="NavigationView_SelectionChanged">
+            MenuItemsSource="{Binding Menus}"
+            MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
+            ItemInvoked="NavigationView_OnItemInvoked"
+            >
 
-            <ui:NavigationView.MenuItems>
-                <ui:NavigationViewItem
-                    Content="主页"
-                    Tag="Home">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <ui:NavigationViewItem
-                    Content="设备"
-                    Tag="Devices">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <ui:NavigationViewItem
-                    Content="数据转换"
-                    Tag="DataTransform">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <ui:NavigationViewItem Tag="Setting" Content="设置">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <ui:NavigationViewItem Content="关于">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-
-            </ui:NavigationView.MenuItems>
+            <!-- <ui:NavigationView.MenuItems> -->
+            <!--     <ui:NavigationViewItem -->
+            <!--         Content="主页" -->
+            <!--         Tag="Home"> -->
+            <!--         <ui:NavigationViewItem.Icon> -->
+            <!--             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}" /> -->
+            <!--         </ui:NavigationViewItem.Icon> -->
+            <!--     </ui:NavigationViewItem> -->
+            <!--     <ui:NavigationViewItem -->
+            <!--         Content="设备" -->
+            <!--         Tag="Devices"> -->
+            <!--         <ui:NavigationViewItem.Icon> -->
+            <!--             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}" /> -->
+            <!--         </ui:NavigationViewItem.Icon> -->
+            <!--     </ui:NavigationViewItem> -->
+            <!--     <ui:NavigationViewItem -->
+            <!--         Content="数据转换" -->
+            <!--         Tag="DataTransform"> -->
+            <!--         <ui:NavigationViewItem.Icon> -->
+            <!--             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" /> -->
+            <!--         </ui:NavigationViewItem.Icon> -->
+            <!--     </ui:NavigationViewItem> -->
+            <!--     <ui:NavigationViewItem Tag="Setting" Content="设置"> -->
+            <!--         <ui:NavigationViewItem.Icon> -->
+            <!--             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" /> -->
+            <!--         </ui:NavigationViewItem.Icon> -->
+            <!--     </ui:NavigationViewItem> -->
+            <!--     <ui:NavigationViewItem Content="关于"> -->
+            <!--         <ui:NavigationViewItem.Icon> -->
+            <!--             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" /> -->
+            <!--         </ui:NavigationViewItem.Icon> -->
+            <!--     </ui:NavigationViewItem> -->
+            <!-- -->
+            <!-- </ui:NavigationView.MenuItems> -->
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox AutomationProperties.Name="Search">
