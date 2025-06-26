@@ -9,26 +9,22 @@ using PMSWPF.Views.Dialogs;
 
 namespace PMSWPF.Services;
 
-public class DialogService:ObservableRecipient,IRecipient<OpenDialogMessage> 
+public class DialogService :IDialogService
 {
     public DialogService()
     {
-        IsActive = true;
-        
+
     }
 
     public async Task<Device> ShowAddDeviceDialog()
     {
         var device = new Device();
-        var ddvm = new DeviceDialogViewModel(device)
-        {
-            Title = "添加设备"
-        };
-
-        var dialog = new DeviceDialog(ddvm);
+        var dialog = new DeviceDialog(device);
         var res = await dialog.ShowAsync();
-        if (res == ContentDialogResult.Primary) return device;
-
+        if (res == ContentDialogResult.Primary)
+        {
+            return device;
+        }
         return null;
     }
 
@@ -40,7 +36,30 @@ public class DialogService:ObservableRecipient,IRecipient<OpenDialogMessage>
 
     public void Receive(OpenDialogMessage message)
     {
-        
-        message.Reply(new DialogMessage(){IsConfirm = true, IsCancel = false});
+        // DialogMessage response = new DialogMessage();
+        // Device device = new Device();
+        // if (message.Message! != null && message.Message.Request != null && message.Message.Request is Device)
+        // {
+        //     device = message.Message.Request as Device;
+        // }
+        // else
+        // {
+        //     var ddvm = new DeviceDialogViewModel(device)
+        //     {
+        //         Title = "添加设备"
+        //     };
+        //     var dialog = new DeviceDialog(ddvm);
+        //     var res = dialog.ShowAsync().GetAwaiter().GetResult();
+        //     if (res == ContentDialogResult.Primary)
+        //     {
+        //         response.IsConfirm = true;
+        //         response.Response = device;
+        //     }
+        //     else
+        //     {
+        //         response.IsCancel = true;
+        //     }
+        // }
+        // message.Reply(response);
     }
 }

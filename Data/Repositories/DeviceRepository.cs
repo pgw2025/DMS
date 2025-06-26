@@ -7,10 +7,10 @@ using SqlSugar;
 
 namespace PMSWPF.Data.Repositories;
 
-public class DevicesRepositories 
+public class DeviceRepository 
 {
     private SqlSugarClient _db;
-    public DevicesRepositories()
+    public DeviceRepository()
     {
         _db = DbContext.GetInstance();
     }

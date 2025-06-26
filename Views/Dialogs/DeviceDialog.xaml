@@ -13,7 +13,6 @@
     Title="{Binding Title}"
     CloseButtonText="取消"
     DefaultButton="Primary"
-    PrimaryButtonCommand="{Binding AddDeviceCommand}"
     PrimaryButtonText="添加"
 
     d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"

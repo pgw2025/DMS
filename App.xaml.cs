@@ -35,8 +35,7 @@ public partial class App : Application
 
 
         container.AddSingleton<NavgatorServices>();
-        container.AddSingleton<DevicesRepositories>();
-        container.AddSingleton<DialogService>();
+        container.AddSingleton<IDialogService,DialogService>();
         container.AddSingleton<GrowlNotificationService>();
         container.AddSingleton<MainViewModel>();
         container.AddSingleton<HomeViewModel>();
@@ -53,7 +52,6 @@ public partial class App : Application
         Services = container.BuildServiceProvider();
         // 启动服务
         Services.GetRequiredService<GrowlNotificationService>();
-        Services.GetRequiredService<DialogService>();
     }
 
     public new static App Current => (App)Application.Current;
@@ -74,11 +72,11 @@ public partial class App : Application
         using (var db = DbContext.GetInstance())
         {
             List<DbMenu> items = new List<DbMenu>();
-            items.Add(new DbMenu() { Id = 1, Name = "主页", Icon = SegoeFluentIcons.Home.Glyph, ParentId = 0});
-            items.Add(new DbMenu() { Id = 1, Name = "设备", Icon = SegoeFluentIcons.Devices.Glyph, ParentId = 0});
-            items.Add(new DbMenu() { Id = 1, Name = "数据转换", Icon = SegoeFluentIcons.Move.Glyph, ParentId = 0});
-            items.Add(new DbMenu() { Id = 1, Name = "设置", Icon = SegoeFluentIcons.Settings.Glyph, ParentId = 0});
-            items.Add(new DbMenu() { Id = 1, Name = "关于", Icon = SegoeFluentIcons.Info.Glyph, ParentId = 0});
+            items.Add(new DbMenu() {  Name = "主页", Icon = SegoeFluentIcons.Home.Glyph, ParentId = 0});
+            items.Add(new DbMenu() {  Name = "设备", Icon = SegoeFluentIcons.Devices.Glyph, ParentId = 0});
+            items.Add(new DbMenu() {  Name = "数据转换", Icon = SegoeFluentIcons.Move.Glyph, ParentId = 0});
+            items.Add(new DbMenu() {  Name = "设置", Icon = SegoeFluentIcons.Settings.Glyph, ParentId = 0});
+            items.Add(new DbMenu() {  Name = "关于", Icon = SegoeFluentIcons.Info.Glyph, ParentId = 0});
             db.Insertable<DbMenu>(items).ExecuteCommand();
         }
 

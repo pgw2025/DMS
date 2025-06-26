@@ -7,22 +7,21 @@ namespace PMSWPF.ViewModels.Dialogs;
 
 public partial class DeviceDialogViewModel : ObservableObject
 {
-    private readonly Device _saveDevice;
+    [ObservableProperty]
+    private Device _device;
 
-    [ObservableProperty] private Device device;
 
     [ObservableProperty] private string title = "添加设备";
 
-    public DeviceDialogViewModel(Device saveDevice)
+    public DeviceDialogViewModel(Device device)
     {
-        _saveDevice = saveDevice;
-        device = new Device();
+        _device = device;
     }
 
 
     [RelayCommand]
     public void AddDevice()
     {
-        device.CopyTo(_saveDevice);
+
     }
 }

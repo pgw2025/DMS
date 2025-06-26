@@ -2,7 +2,7 @@
 
 namespace PMSWPF.Services;
 
-public interface IDeviceDialogService
+public interface IDialogService
 {
     Task<Device> ShowAddDeviceDialog();
 
