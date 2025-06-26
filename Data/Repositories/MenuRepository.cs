@@ -1,6 +1,11 @@
 using System.Windows.Controls;
+using CommunityToolkit.Mvvm.Messaging;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using PMSWPF.Data.Entities;
+using PMSWPF.Enums;
 using PMSWPF.Extensions;
+using PMSWPF.Helper;
+using PMSWPF.Message;
 using PMSWPF.Models;
 using SqlSugar;
 
@@ -34,11 +39,48 @@ public class MenuRepository
         return await _db.Insertable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
     }
 
-    public async Task<int> AddDeviceMenu(MenuBean menu)
+
+    public async Task<bool> AddDeviceMenu(MenuBean menu)
     {
-        var deviceMenu = await _db.Queryable<DbMenu>().FirstAsync(m => m.Name == "设备");
-        if (deviceMenu == null) return 0;
-        menu.ParentId = deviceMenu.Id;
-        return await _db.Insertable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
+        bool result = false;
+        var deviceMainMenu = await _db.Queryable<DbMenu>().FirstAsync(m => m.Name == "设备");
+        if (deviceMainMenu == null)
+            throw new InvalidOperationException("没有找到设备菜单！！");
+
+        menu.ParentId=deviceMainMenu.Id;
+        var addDeviceMenuRes = await _db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
+            .ExecuteCommandAsync();
+        if (addDeviceMenuRes == 0)
+            throw new InvalidOperationException($"{menu.Name},设备菜单添加失败！！");
+
+        var addDM = await _db.Queryable<DbMenu>().OrderBy(m => m.Id, OrderByType.Desc)
+            .FirstAsync(m => m.Name == menu.Name);
+        if (addDM == null)
+            throw new InvalidOperationException($"添加默认变量表菜单时，没有找到名字为：{menu.Name}的菜单项！");
+
+
+        var defVarTable=new MenuBean()
+        {
+            Name = "默认变量表",
+            Icon = SegoeFluentIcons.Tablet.Glyph,
+            ParentId = addDM.Id,
+        };
+        var addVarTable=new MenuBean()
+        {
+            Name = "添加变量表",
+            Icon = SegoeFluentIcons.Add.Glyph,
+            ParentId = addDM.Id,
+        };
+        var defTableRes = await _db.Insertable<DbMenu>(defVarTable).ExecuteCommandAsync();
+        var addTableRes = await _db.Insertable<DbMenu>(addVarTable).ExecuteCommandAsync();
+        if ((addTableRes+defTableRes) != 2)
+        {
+            // 如果出错删除原来添加的设备菜单
+            await _db.Deleteable<DbMenu>().Where(m=>m.Id==addDM.Id).ExecuteCommandAsync();
+            throw new InvalidOperationException("添加默认变量表时发生了错误！！");
+        }
+            
+
+        return true;
     }
 }

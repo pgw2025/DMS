@@ -33,33 +33,4 @@ public class DialogService :IDialogService
         MessageBox.Show(message);
     }
 
-
-    public void Receive(OpenDialogMessage message)
-    {
-        // DialogMessage response = new DialogMessage();
-        // Device device = new Device();
-        // if (message.Message! != null && message.Message.Request != null && message.Message.Request is Device)
-        // {
-        //     device = message.Message.Request as Device;
-        // }
-        // else
-        // {
-        //     var ddvm = new DeviceDialogViewModel(device)
-        //     {
-        //         Title = "添加设备"
-        //     };
-        //     var dialog = new DeviceDialog(ddvm);
-        //     var res = dialog.ShowAsync().GetAwaiter().GetResult();
-        //     if (res == ContentDialogResult.Primary)
-        //     {
-        //         response.IsConfirm = true;
-        //         response.Response = device;
-        //     }
-        //     else
-        //     {
-        //         response.IsCancel = true;
-        //     }
-        // }
-        // message.Reply(response);
-    }
 }

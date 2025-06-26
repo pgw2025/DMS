@@ -17,7 +17,8 @@ public class DeviceRepository
     public async Task<bool> Add(Device device)
     {
         var exist = await _db.Queryable<DbDevice>().Where(d => d.Name == device.Name).FirstAsync();
-        if (exist != null) throw new DbExistException("设备名称已经存在。");
+        if (exist != null) 
+            throw new InvalidOperationException("设备名称已经存在。");
         var dbDevice = new DbDevice();
         device.CopyTo(dbDevice);
         dbDevice.VariableTables = new List<DbVariableTable>();

@@ -58,54 +58,31 @@ public partial class DevicesViewModel : ViewModelBase
                         Name = device.Name,
                         Icon = SegoeFluentIcons.Devices4.Glyph,
                     };
-                    var rows = await _menuRepository.AddDeviceMenu(deviceMenu);
-                    if (rows > 0)
+                    bool addMenuRes = await _menuRepository.AddDeviceMenu(deviceMenu);
+                    if (addMenuRes)
                     {
-                        WeakReferenceMessenger.Default.Send<UpdateMenuMessage>(new UpdateMenuMessage(2));
+                        // 通知更新菜单
+                        WeakReferenceMessenger.Default.Send<UpdateMenuMessage>(new UpdateMenuMessage(0));
+                        NotificationHelper.ShowMessage(msg, NotificationType.Success);
+                    }
+                    else
+                    {
+                        var msgerr = $"给设备添加菜单失败：{device.Name}";
+                        _logger.LogInformation(msgerr);
+                        NotificationHelper.ShowMessage(msgerr, NotificationType.Error);
                     }
                 }
                 else
                 {
                     var msg = $"添加设备失败：{device.Name}";
                     _logger.LogInformation(msg);
+                    NotificationHelper.ShowMessage(msg, NotificationType.Error);
                 }
             }
-
-            // OpenDialogMessage dialog = new OpenDialogMessage();
-            //
-            // var res=WeakReferenceMessenger.Default.Send<OpenDialogMessage>(dialog);
-
-            Console.WriteLine("");
-
-            // device = await _deviceDialogService.ShowAddDeviceDialog();
-            // if (device != null)
-            // {
-            //     var isOk = await _deviceRepository.Add(device);
-            //     if (isOk)
-            //     {
-            //         // 添加菜单项
-            //         MenuBean deviceMenu = new MenuBean()
-            //             { Name = device.Name, Icon = SegoeFluentIcons.Devices4.Glyph, ParentId = 2 };
-            //         MenuRepository mre = new MenuRepository();
-            //         mre.AddMenu(deviceMenu);
-            //         
-            //         // MessageBox.Show("Device added successfully");
-            //         await OnLoadedAsync();
-            //         var msg = $"设备添加成功：{device.Name}";
-            //         _logger.LogInformation(msg);
-            //         NotificationHelper.ShowMessage(msg, NotificationType.Success);
-            //     }
-            // }
-        }
-        catch (DbExistException e)
-        {
-            var msg = $"设备添加失败：名称为{device?.Name}的设备已经存在。请更换是被名称";
-            _logger.LogError(msg);
-            NotificationHelper.ShowMessage(msg, NotificationType.Error);
         }
         catch (Exception e)
         {
-            var msg = $"添加设备的过程中发生错误：{e.Message}";
+            var msg = $"添加设备失败：{e.Message}";
             _logger.LogError(msg);
             NotificationHelper.ShowMessage(msg, NotificationType.Success);
         }
