@@ -1,3 +1,5 @@
+using PMSWPF.Enums;
+
 namespace PMSWPF.Models;
 
 public class MenuBean
@@ -7,5 +9,7 @@ public class MenuBean
     public string Icon { get; set; }
     public string Name { get; set; }
     public int ParentId { get; set; }
+    
+    public MenuType Type { get; set; }
     public List<MenuBean> Items { get; set; }
 }

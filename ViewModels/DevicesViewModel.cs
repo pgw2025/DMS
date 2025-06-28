@@ -19,24 +19,27 @@ public partial class DevicesViewModel : ViewModelBase
     private readonly DeviceRepository _deviceRepository;
     private readonly ILogger<DevicesViewModel> _logger;
     private readonly IDialogService _dialogService;
+    private readonly DataServices _dataServices;
 
     [ObservableProperty] private ObservableCollection<Device> _devices;
     private readonly MenuRepository _menuRepository;
 
     public DevicesViewModel(
-        ILogger<DevicesViewModel> logger, IDialogService dialogService
+        ILogger<DevicesViewModel> logger, IDialogService dialogService, DataServices dataServices
     )
     {
         _deviceRepository = new DeviceRepository();
         _menuRepository = new MenuRepository();
         _logger = logger;
         _dialogService = dialogService;
+        _dataServices = dataServices;
+
+        WeakReferenceMessenger.Default.Send<LoadMessage>(new LoadMessage(LoadTypes.Devices));
+        _dataServices.OnDeviceListChanged += (devices) => { Devices = new ObservableCollection<Device>(devices); };
     }
 
     public async Task OnLoadedAsync()
     {
-        var ds = await _deviceRepository.GetAll();
-        Devices = new ObservableCollection<Device>(ds);
     }
 
     [RelayCommand]
@@ -56,6 +59,7 @@ public partial class DevicesViewModel : ViewModelBase
                     MenuBean deviceMenu = new MenuBean()
                     {
                         Name = device.Name,
+                        Type = MenuType.DeviceMenu,
                         Icon = SegoeFluentIcons.Devices4.Glyph,
                     };
                     bool addMenuRes = await _menuRepository.AddDeviceMenu(deviceMenu);

@@ -8,6 +8,7 @@ using NLog.Extensions.Logging;
 using PMSWPF.Data;
 using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
+using PMSWPF.Enums;
 using PMSWPF.Services;
 using PMSWPF.ViewModels;
 using PMSWPF.Views;
@@ -34,8 +35,9 @@ public partial class App : Application
         });
 
 
+        container.AddSingleton<DataServices>();
         container.AddSingleton<NavgatorServices>();
-        container.AddSingleton<IDialogService,DialogService>();
+        container.AddSingleton<IDialogService, DialogService>();
         container.AddSingleton<GrowlNotificationService>();
         container.AddSingleton<MainViewModel>();
         container.AddSingleton<HomeViewModel>();
@@ -72,16 +74,18 @@ public partial class App : Application
         using (var db = DbContext.GetInstance())
         {
             List<DbMenu> items = new List<DbMenu>();
-            items.Add(new DbMenu() {  Name = "主页", Icon = SegoeFluentIcons.Home.Glyph, ParentId = 0});
-            items.Add(new DbMenu() {  Name = "设备", Icon = SegoeFluentIcons.Devices.Glyph, ParentId = 0});
-            items.Add(new DbMenu() {  Name = "数据转换", Icon = SegoeFluentIcons.Move.Glyph, ParentId = 0});
-            items.Add(new DbMenu() {  Name = "设置", Icon = SegoeFluentIcons.Settings.Glyph, ParentId = 0});
-            items.Add(new DbMenu() {  Name = "关于", Icon = SegoeFluentIcons.Info.Glyph, ParentId = 0});
+            items.Add(new DbMenu()
+                { Name = "主页", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Home.Glyph, ParentId = 0 });
+            items.Add(new DbMenu()
+                { Name = "设备", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Devices3.Glyph, ParentId = 0 });
+            items.Add(new DbMenu()
+                { Name = "数据转换", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.ChromeSwitch.Glyph, ParentId = 0 });
+            items.Add(new DbMenu()
+                { Name = "设置", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Settings.Glyph, ParentId = 0 });
+            items.Add(new DbMenu()
+                { Name = "关于", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Info.Glyph, ParentId = 0 });
             db.Insertable<DbMenu>(items).ExecuteCommand();
         }
-
-        
-        
     }
 
     private void InitDB()

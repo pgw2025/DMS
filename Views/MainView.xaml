@@ -41,6 +41,7 @@
             MenuItemsSource="{Binding Menus}"
             MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
             ItemInvoked="NavigationView_OnItemInvoked"
+            SelectionChanged="NavigationView_OnSelectionChanged"
             >
 
             <!-- <ui:NavigationView.MenuItems> -->

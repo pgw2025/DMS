@@ -14,4 +14,16 @@ public static class TaskExtensions
             onError?.Invoke(e);
         }
     }
+    public static async Task Await<T>(this Task<T> task, Action<Exception> onError = null, Action<T> onComplete = null)
+    {
+        try
+        {
+            T res= await task;
+            onComplete?.Invoke(res);
+        }
+        catch (Exception e)
+        {
+            onError?.Invoke(e);
+        }
+    }
 }

@@ -63,12 +63,14 @@ public class MenuRepository
         {
             Name = "默认变量表",
             Icon = SegoeFluentIcons.Tablet.Glyph,
+            Type = MenuType.VariableTableMenu,
             ParentId = addDM.Id,
         };
         var addVarTable=new MenuBean()
         {
             Name = "添加变量表",
             Icon = SegoeFluentIcons.Add.Glyph,
+            Type = MenuType.AddVariableTableMenu,
             ParentId = addDM.Id,
         };
         var defTableRes = await _db.Insertable<DbMenu>(defVarTable).ExecuteCommandAsync();

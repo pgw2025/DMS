@@ -17,6 +17,9 @@
         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="所属设备:" /> <TextBlock Text="默认变量表" />
         </ikw:SimpleStackPanel>
+        <DataGrid>
+            
+        </DataGrid>
     </ikw:SimpleStackPanel>
 
 

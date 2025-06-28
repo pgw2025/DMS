@@ -1,9 +1,11 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Message;
+using PMSWPF.Models;
 using PMSWPF.ViewModels;
 
 namespace PMSWPF.Views;
@@ -69,6 +71,7 @@ public partial class MainView : Window
     private void NavigationView_OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         ViewModelBase navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
+        Object parameter =null;
         switch (args.InvokedItem)
         {
             case "主页":
@@ -93,7 +96,13 @@ public partial class MainView : Window
                 break;
         }
 
-        var nm = new NavgatorMessage(navgateVM);
+        var nm = new NavgatorMessage(navgateVM,parameter);
         WeakReferenceMessenger.Default.Send(nm);
+    }
+
+    private void NavigationView_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+      var selectMenu=  args.SelectedItem as MenuBean;
+
     }
 }

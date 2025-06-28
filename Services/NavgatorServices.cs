@@ -29,6 +29,7 @@ public class NavgatorServices : ObservableRecipient, IRecipient<NavgatorMessage>
     public void Receive(NavgatorMessage message)
     {
         CurrentViewModel = message.Value;
+        CurrentViewModel.NavgateParameters = message.Parameters;
     }
 
     public event Action OnViewModelChanged;

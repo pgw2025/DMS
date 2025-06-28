@@ -5,7 +5,9 @@ namespace PMSWPF.Message;
 
 public class NavgatorMessage : ValueChangedMessage<ViewModelBase>
 {
-    public NavgatorMessage(ViewModelBase value) : base(value)
+    public Object Parameters;
+    public NavgatorMessage(ViewModelBase value,Object parameters=null) : base(value)
     {
+        Parameters=parameters;
     }
 }
