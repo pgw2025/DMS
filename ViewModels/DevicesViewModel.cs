@@ -55,14 +55,8 @@ public partial class DevicesViewModel : ViewModelBase
                 {
                     var msg = $"添加设备成功：{device.Name}";
                     _logger.LogInformation(msg);
-                    // 添加菜单项
-                    MenuBean deviceMenu = new MenuBean()
-                    {
-                        Name = device.Name,
-                        Type = MenuType.DeviceMenu,
-                        Icon = SegoeFluentIcons.Devices4.Glyph,
-                    };
-                    bool addMenuRes = await _menuRepository.AddDeviceMenu(deviceMenu);
+                    
+                    bool addMenuRes = await _menuRepository.AddDeviceMenu(device);
                     if (addMenuRes)
                     {
                         // 通知更新菜单

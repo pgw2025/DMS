@@ -15,6 +15,10 @@ public class DbMenu
     [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
     public MenuType Type { get; set; }
     
+    public int DataId { get; set; }
+    [SugarColumn(IsIgnore = true)]
+    public Object? Data { get; set; }
+    
     [SugarColumn(IsIgnore = true)]
     public List<DbMenu> Items { get; set; }
 }

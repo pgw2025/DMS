@@ -40,45 +40,52 @@ public class MenuRepository
     }
 
 
-    public async Task<bool> AddDeviceMenu(MenuBean menu)
+    public async Task<bool> AddDeviceMenu(Device device)
     {
         bool result = false;
         var deviceMainMenu = await _db.Queryable<DbMenu>().FirstAsync(m => m.Name == "设备");
         if (deviceMainMenu == null)
             throw new InvalidOperationException("没有找到设备菜单！！");
+        
+        // 添加菜单项
+        MenuBean menu = new MenuBean()
+        {
+            Name = device.Name,
+            Type = MenuType.DeviceMenu,
+            DataId = device.Id,
+            Icon = SegoeFluentIcons.Devices4.Glyph,
+        };
 
         menu.ParentId=deviceMainMenu.Id;
-        var addDeviceMenuRes = await _db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
-            .ExecuteCommandAsync();
-        if (addDeviceMenuRes == 0)
+        var addDeviceMenuId = await _db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
+            .ExecuteReturnIdentityAsync();
+        if (addDeviceMenuId == 0)
             throw new InvalidOperationException($"{menu.Name},设备菜单添加失败！！");
-
-        var addDM = await _db.Queryable<DbMenu>().OrderBy(m => m.Id, OrderByType.Desc)
-            .FirstAsync(m => m.Name == menu.Name);
-        if (addDM == null)
-            throw new InvalidOperationException($"添加默认变量表菜单时，没有找到名字为：{menu.Name}的菜单项！");
-
-
-        var defVarTable=new MenuBean()
+        
+       var defVarTable= await _db.Queryable<DbVariableTable>().FirstAsync(v=>v.DeviceId==device.Id && v.Name=="默认变量表");
+       if (defVarTable == null)
+           throw new InvalidOperationException($"没有找到{device.Name}的默认变量表。");
+        var defVarTableMenu=new MenuBean()
         {
             Name = "默认变量表",
             Icon = SegoeFluentIcons.Tablet.Glyph,
             Type = MenuType.VariableTableMenu,
-            ParentId = addDM.Id,
+            ParentId = addDeviceMenuId,
+            DataId = defVarTable.Id
         };
         var addVarTable=new MenuBean()
         {
             Name = "添加变量表",
             Icon = SegoeFluentIcons.Add.Glyph,
             Type = MenuType.AddVariableTableMenu,
-            ParentId = addDM.Id,
+            ParentId = addDeviceMenuId,
         };
-        var defTableRes = await _db.Insertable<DbMenu>(defVarTable).ExecuteCommandAsync();
+        var defTableRes = await _db.Insertable<DbMenu>(defVarTableMenu).ExecuteCommandAsync();
         var addTableRes = await _db.Insertable<DbMenu>(addVarTable).ExecuteCommandAsync();
         if ((addTableRes+defTableRes) != 2)
         {
             // 如果出错删除原来添加的设备菜单
-            await _db.Deleteable<DbMenu>().Where(m=>m.Id==addDM.Id).ExecuteCommandAsync();
+            await _db.Deleteable<DbMenu>().Where(m=>m.Id==addDeviceMenuId).ExecuteCommandAsync();
             throw new InvalidOperationException("添加默认变量表时发生了错误！！");
         }
             
