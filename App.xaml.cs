@@ -69,7 +69,10 @@ public partial class App : Application
         InitMenu().Await((e) =>
         {
             NotificationHelper.ShowMessage($"初始化主菜单失败：{e.Message}");
-        }, () => { });
+        }, () =>
+        {
+            MessageHelper.SendLoadMessage(LoadTypes.Menu);
+        });
 
         MainWindow = Services.GetRequiredService<MainView>();
         MainWindow.Show();

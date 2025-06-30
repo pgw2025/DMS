@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PMSWPF.Helper;
 using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.ViewModels;
@@ -58,9 +59,8 @@ public partial class MainView : Window
                 _logger.LogInformation("导航到到设备页面");
                 break;
         }
-
-        var nm = new NavgatorMessage(navgateVM);
-        WeakReferenceMessenger.Default.Send(nm);
+        
+        MessageHelper.SendNavgatorMessage(navgateVM);
     }
 
     private async void MainView_OnLoaded(object sender, RoutedEventArgs e)
@@ -95,9 +95,8 @@ public partial class MainView : Window
                 _logger.LogInformation("导航到到设备页面");
                 break;
         }
-
-        var nm = new NavgatorMessage(navgateVM,parameter);
-        WeakReferenceMessenger.Default.Send(nm);
+        
+        MessageHelper.SendNavgatorMessage(navgateVM,parameter);
     }
 
     private void NavigationView_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

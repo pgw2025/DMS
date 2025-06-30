@@ -9,4 +9,5 @@ public class VariableTable
     public string Description { get; set; }
     public ProtocolType ProtocolType { get; set; }
     public List<DataVariable> DataVariables { get; set; }
+    public Device? Device { get; set; }
 }

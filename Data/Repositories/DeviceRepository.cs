@@ -14,7 +14,7 @@ public class DeviceRepository
     {
         _db = DbContext.GetInstance();
     }
-    public async Task<bool> Add(Device device)
+    public async Task<Device> Add(Device device)
     {
         var exist = await _db.Queryable<DbDevice>().Where(d => d.Name == device.Name).FirstAsync();
         if (exist != null) 
@@ -28,7 +28,8 @@ public class DeviceRepository
         dbVariableTable.Description = "默认变量表";
         dbVariableTable.ProtocolType = dbDevice.ProtocolType;
         dbDevice.VariableTables.Add(dbVariableTable);
-        return await _db.InsertNav(dbDevice).Include(d => d.VariableTables).ExecuteCommandAsync();
+       var addDbDevice= await _db.InsertNav(dbDevice).Include(d => d.VariableTables).ExecuteReturnEntityAsync();
+       return addDbDevice.CopyTo<Device>();
     }
 
     public async Task<List<Device>> GetAll()

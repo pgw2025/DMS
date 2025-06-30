@@ -33,8 +33,8 @@ public partial class DevicesViewModel : ViewModelBase
         _logger = logger;
         _dialogService = dialogService;
         _dataServices = dataServices;
-
-        WeakReferenceMessenger.Default.Send<LoadMessage>(new LoadMessage(LoadTypes.Devices));
+        
+        MessageHelper.SendLoadMessage(LoadTypes.Devices);
         _dataServices.OnDeviceListChanged += (devices) => { Devices = new ObservableCollection<Device>(devices); };
     }
 
@@ -51,7 +51,8 @@ public partial class DevicesViewModel : ViewModelBase
             device = await _dialogService.ShowAddDeviceDialog();
             if (device != null)
             {
-                if (await _deviceRepository.Add(device))
+               device= await _deviceRepository.Add(device);
+                if (device!=null)
                 {
                     var msg = $"添加设备成功：{device.Name}";
                     _logger.LogInformation(msg);
@@ -60,7 +61,7 @@ public partial class DevicesViewModel : ViewModelBase
                     if (addMenuRes)
                     {
                         // 通知更新菜单
-                        WeakReferenceMessenger.Default.Send<UpdateMenuMessage>(new UpdateMenuMessage(0));
+                        MessageHelper.SendLoadMessage(LoadTypes.Menu);
                         NotificationHelper.ShowMessage(msg, NotificationType.Success);
                     }
                     else
@@ -82,7 +83,7 @@ public partial class DevicesViewModel : ViewModelBase
         {
             var msg = $"添加设备失败：{e.Message}";
             _logger.LogError(msg);
-            NotificationHelper.ShowMessage(msg, NotificationType.Success);
+            NotificationHelper.ShowMessage(msg, NotificationType.Error);
         }
     }
 

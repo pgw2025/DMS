@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
+using PMSWPF.Helper;
 using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.Services;
@@ -28,10 +29,12 @@ public partial class MainViewModel : ViewModelBase
         _dataServices = dataServices;
 
         _navgatorServices.OnViewModelChanged += () => { CurrentViewModel = _navgatorServices.CurrentViewModel; };
+        
         CurrentViewModel = new HomeViewModel();
         CurrentViewModel.OnLoaded();
-        
-        WeakReferenceMessenger.Default.Send<LoadMessage>(new LoadMessage(LoadTypes.Menu));
+        // 发送消息加载数据
+        MessageHelper.SendLoadMessage(LoadTypes.All);
+        // 当菜单加载成功后，在前台显示菜单
         dataServices.OnMenuListChanged += (menus) =>
         {
             Menus = new ObservableCollection<MenuBean>(menus);
