@@ -68,34 +68,34 @@ public partial class MainView : Window
         _viewModel.OnLoaded();
     }
 
-    private void NavigationView_OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
-    {
-        ViewModelBase navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
-
-        switch (args.InvokedItem)
-        {
-            case "主页":
-                // mainViewModel.NavgateTo<HomeViewModel>();
-                navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
-                _logger.LogInformation("导航到到主页面");
-                break;
-            case "设备":
-                navgateVM = App.Current.Services.GetRequiredService<DevicesViewModel>();
-                // mainViewModel.NavgateTo<DevicesViewModel>();
-                _logger.LogInformation("导航到到设备页面");
-                break;
-            case "数据转换":
-                navgateVM = App.Current.Services.GetRequiredService<DataTransformViewModel>();
-                // mainViewModel.NavgateTo<DataTransformViewModel>();
-                _logger.LogInformation("导航到到数据转换页面");
-                break;
-            case "设置":
-                // mainViewModel.NavgateTo<SettingViewModel>();
-                navgateVM = App.Current.Services.GetRequiredService<SettingViewModel>();
-                _logger.LogInformation("导航到到设备页面");
-                break;
-        }
-
-        MessageHelper.SendNavgatorMessage(navgateVM);
-    }
+    // private void NavigationView_OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+    // {
+    //     ViewModelBase navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
+    //
+    //     switch (args.InvokedItem)
+    //     {
+    //         case "主页":
+    //             // mainViewModel.NavgateTo<HomeViewModel>();
+    //             navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
+    //             _logger.LogInformation("导航到到主页面");
+    //             break;
+    //         case "设备":
+    //             navgateVM = App.Current.Services.GetRequiredService<DevicesViewModel>();
+    //             // mainViewModel.NavgateTo<DevicesViewModel>();
+    //             _logger.LogInformation("导航到到设备页面");
+    //             break;
+    //         case "数据转换":
+    //             navgateVM = App.Current.Services.GetRequiredService<DataTransformViewModel>();
+    //             // mainViewModel.NavgateTo<DataTransformViewModel>();
+    //             _logger.LogInformation("导航到到数据转换页面");
+    //             break;
+    //         case "设置":
+    //             // mainViewModel.NavgateTo<SettingViewModel>();
+    //             navgateVM = App.Current.Services.GetRequiredService<SettingViewModel>();
+    //             _logger.LogInformation("导航到到设备页面");
+    //             break;
+    //     }
+    //
+    //     MessageHelper.SendNavgatorMessage(navgateVM);
+    // }
 }

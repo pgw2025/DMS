@@ -82,7 +82,10 @@ public static class ObjectExtensions
                 }
                 else
                 {
-                    
+                    var sObj = sourceProperty.GetValue(tsource);
+                    var tObj = targetProperty.GetValue(ttarget);
+                    // if (sObj == null && tObj == null)
+                    //     CopyTo(sObj,tObj);
                 }
             }
         }

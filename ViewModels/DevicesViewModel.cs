@@ -62,6 +62,7 @@ public partial class DevicesViewModel : ViewModelBase
                     {
                         // 通知更新菜单
                         MessageHelper.SendLoadMessage(LoadTypes.Menu);
+                        MessageHelper.SendLoadMessage(LoadTypes.Devices);
                         NotificationHelper.ShowMessage(msg, NotificationType.Success);
                     }
                     else
