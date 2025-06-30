@@ -24,5 +24,5 @@ public class DbVariableTable
     [SugarColumn(IsNullable = true)] public int? DeviceId { get; set; }
 
     [Navigate(NavigateType.ManyToOne, nameof(DeviceId))]
-    public Device? Device { get; set; }
+    public DbDevice? Device { get; set; }
 }

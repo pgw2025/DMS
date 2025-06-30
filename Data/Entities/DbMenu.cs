@@ -21,4 +21,6 @@ public class DbMenu
     
     [SugarColumn(IsIgnore = true)]
     public List<DbMenu> Items { get; set; }
+    
+    public DbMenu? Parent { get; set; }
 }

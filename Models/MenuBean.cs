@@ -16,4 +16,6 @@ public class MenuBean
     public ViewModelBase ViewModel { get; set; }
     public Object? Data { get; set; }
     public List<MenuBean> Items { get; set; }
+    
+    public MenuBean Parent { get; set; }
 }

@@ -34,7 +34,7 @@ public class DeviceRepository
 
     public async Task<List<Device>> GetAll()
     {
-        var dlist = await _db.Queryable<DbDevice>().Includes(d => d.VariableTables).ToListAsync();
+        var dlist = await _db.Queryable<DbDevice>().Includes(d => d.VariableTables,dv=>dv.Device).ToListAsync();
         var devices = new List<Device>();
         foreach (var dbDevice in dlist)
         {

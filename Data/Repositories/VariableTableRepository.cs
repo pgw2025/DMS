@@ -32,7 +32,7 @@ public class VariableTableRepository
 
     public async Task<List<VariableTable>> GetAll()
     {
-        var dbVariableTables = await _db.Queryable<DbVariableTable>().ToListAsync();
+        var dbVariableTables = await _db.Queryable<DbVariableTable>().Includes(dv=>dv.Device).ToListAsync();
         var variableTables = new List<VariableTable>();
         
         foreach (var dbVariableTable in dbVariableTables)
