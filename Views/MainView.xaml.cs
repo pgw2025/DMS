@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PMSWPF.Enums;
 using PMSWPF.Helper;
 using PMSWPF.Message;
 using PMSWPF.Models;
@@ -18,6 +19,7 @@ public partial class MainView : Window
 {
     private readonly ILogger<MainView> _logger;
     private MainViewModel _viewModel;
+
     public MainView(MainViewModel viewModel, ILogger<MainView> logger)
     {
         InitializeComponent();
@@ -34,33 +36,31 @@ public partial class MainView : Window
     /// <param name="args"></param>
     private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var item = args.SelectedItem as NavigationViewItem;
-        ViewModelBase navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
-        switch (item.Tag)
+        try
         {
-            case "Home":
-                // mainViewModel.NavgateTo<HomeViewModel>();
-                navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
-                _logger.LogInformation("导航到到主页面");
-                break;
-            case "Devices":
-                navgateVM = App.Current.Services.GetRequiredService<DevicesViewModel>();
-                // mainViewModel.NavgateTo<DevicesViewModel>();
-                _logger.LogInformation("导航到到设备页面");
-                break;
-            case "DataTransform":
-                navgateVM = App.Current.Services.GetRequiredService<DataTransformViewModel>();
-                // mainViewModel.NavgateTo<DataTransformViewModel>();
-                _logger.LogInformation("导航到到数据转换页面");
-                break;
-            case "Setting":
-                // mainViewModel.NavgateTo<SettingViewModel>();
-                navgateVM = App.Current.Services.GetRequiredService<SettingViewModel>();
-                _logger.LogInformation("导航到到设备页面");
-                break;
+            var menu = args.SelectedItem as MenuBean;
+            if (menu == null)
+                throw new ArgumentException("选择的菜单项为空！");
+
+            switch (menu.Type)
+            {
+                case MenuType.MainMenu:
+                case MenuType.DeviceMenu:
+                case MenuType.VariableTableMenu:
+                    if (menu.ViewModel == null)
+                        throw new ArgumentException($"菜单项：{menu.Name}，没有绑定对象的ViewModel");
+                    MessageHelper.SendNavgatorMessage(menu.ViewModel);
+                    _logger.LogInformation($"导航到：{menu.Name}");
+                    break;
+                case MenuType.AddVariableTableMenu:
+                    break;
+            }
         }
-        
-        MessageHelper.SendNavgatorMessage(navgateVM);
+        catch (Exception e)
+        {
+            NotificationHelper.ShowMessage(e.Message, NotificationType.Error);
+            _logger.LogError(e.Message);
+        }
     }
 
     private async void MainView_OnLoaded(object sender, RoutedEventArgs e)
@@ -71,7 +71,7 @@ public partial class MainView : Window
     private void NavigationView_OnItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         ViewModelBase navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
-        Object parameter =null;
+
         switch (args.InvokedItem)
         {
             case "主页":
@@ -95,13 +95,7 @@ public partial class MainView : Window
                 _logger.LogInformation("导航到到设备页面");
                 break;
         }
-        
-        MessageHelper.SendNavgatorMessage(navgateVM,parameter);
-    }
 
-    private void NavigationView_OnSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-    {
-      var selectMenu=  args.SelectedItem as MenuBean;
-
+        MessageHelper.SendNavgatorMessage(navgateVM);
     }
 }

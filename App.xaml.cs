@@ -54,6 +54,8 @@ public partial class App : Application
         container.AddSingleton<DataTransformViewModel>();
         container.AddSingleton<VariableTableViewModel>();
         container.AddSingleton<VariableTableView>();
+        container.AddScoped<DeviceDetailViewModel>();
+        container.AddScoped<DeviceDetailView>();
         Services = container.BuildServiceProvider();
         // 启动服务
         Services.GetRequiredService<GrowlNotificationService>();

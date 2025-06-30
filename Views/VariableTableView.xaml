@@ -4,15 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:vm="clr-namespace:PMSWPF.ViewModels"
              mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:VariableTableViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
     <ikw:SimpleStackPanel Spacing="5">
 
         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="变量表名称:" /> <TextBlock Text="默认变量表" />
+            <TextBlock Text="变量表名称:" /> <TextBlock Text="{Binding VariableTable.Name}" />
         </ikw:SimpleStackPanel>
         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="变量表描述:" /> <TextBlock Text="默认变量表" />
+            <TextBlock Text="变量表描述:" /> <TextBlock Text="{Binding VariableTable.Description}" />
         </ikw:SimpleStackPanel>
         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
             <TextBlock Text="所属设备:" /> <TextBlock Text="默认变量表" />

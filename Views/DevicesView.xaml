@@ -76,7 +76,6 @@
                      ItemsSource="{Binding Devices}"
                      ItemTemplate="{StaticResource DeviceItemTemplate}"
                      SelectionMode="Single" />
-
     </StackPanel>
 
 </UserControl>

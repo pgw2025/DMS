@@ -15,9 +15,4 @@ public partial class DevicesView : UserControl
     {
     }
 
-    private async void DevicesView_OnLoaded(object sender, RoutedEventArgs e)
-    {
-        //  var devicesViewModel = (DevicesViewModel)this.DataContext;
-        // await  devicesViewModel.OnLoadedAsync();
-    }
 }

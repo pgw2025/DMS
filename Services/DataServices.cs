@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
@@ -7,6 +8,7 @@ using PMSWPF.Extensions;
 using PMSWPF.Helper;
 using PMSWPF.Message;
 using PMSWPF.Models;
+using PMSWPF.ViewModels;
 
 namespace PMSWPF.Services;
 
@@ -61,13 +63,16 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             switch (menuBean.Type)
             {   
                 case MenuType.MainMenu:
+                    menuBean.ViewModel= GetMainViewModel(menuBean.Name);
                     break;
                 case MenuType.DeviceMenu:
+                    menuBean.ViewModel = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
                     menuBean.Data= Devices.FirstOrDefault(d => d.Id == menuBean.DataId);
                     break;
                 case MenuType.VariableTableMenu:
-                    menuBean.Data= FindVarTableForDevice(menuBean.DataId);
-                    // menuBean.Data= Devices.FirstOrDefault(d => d.Id == menuBean.DataId);
+                    var varTableVM = App.Current.Services.GetRequiredService<VariableTableViewModel>();
+                    varTableVM.VariableTable = FindVarTableForDevice(menuBean.DataId);
+                    menuBean.ViewModel = varTableVM;
                     break;
                 case MenuType.AddVariableTableMenu:
                     break;
@@ -77,6 +82,28 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 FillMenuData(menuBean.Items);
             }
         }
+    }
+
+    private ViewModelBase GetMainViewModel(string name)
+    {
+        ViewModelBase navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
+        switch (name)
+        {
+            case "主页":
+                navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
+                break;
+            case "设备":
+                navgateVM = App.Current.Services.GetRequiredService<DevicesViewModel>();
+                break;
+            case "数据转换":
+                navgateVM = App.Current.Services.GetRequiredService<DataTransformViewModel>();
+                break;
+            case "设置":
+                navgateVM = App.Current.Services.GetRequiredService<SettingViewModel>();
+                break;
+        }
+        return navgateVM;
+
     }
 
     private VariableTable FindVarTableForDevice(int vtableId)
