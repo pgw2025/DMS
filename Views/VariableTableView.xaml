@@ -4,25 +4,75 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:vm="clr-namespace:PMSWPF.ViewModels"
+             xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:VariableTableViewModel}"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <ikw:SimpleStackPanel Spacing="5">
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!-- 标签字体的样式 -->
+        <Style TargetType="TextBlock" x:Key="VarTableLabelStyle">
+            <Setter Property="Foreground" Value="#555" />
+            <Setter Property="FontSize" Value="20" />
+        </Style>
+        <!-- 值字体的样式 -->
+        <Style TargetType="TextBlock" x:Key="VarTableValueStyle">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="MinWidth" Value="120" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+        
+       <DockPanel>
 
-        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="变量表名称:" /> <TextBlock Text="{Binding VariableTable.Name}" />
+        <ikw:SimpleStackPanel Margin="10" DockPanel.Dock="Top">
+            <!-- 操作菜单 -->
+            <controls:CommandBar x:Name="PrimaryCommandBar"
+                                 DefaultLabelPosition="Right" IsOpen="False">
+                <ui:AppBarButton x:Name="AddButton"
+                                 Command="{Binding AddDeviceCommand}"
+                                 Label="Add">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:AppBarButton x:Name="EditButton"
+                                 Label="Edit">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                    </ui:AppBarButton.Icon>
+
+                </ui:AppBarButton>
+                <ui:AppBarButton x:Name="ShareButton"
+                                 Label="Share">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Share}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:CommandBar.SecondaryCommands>
+                    <ui:AppBarButton x:Name="SettingsButton"
+
+                                     Icon="Setting" Label="Settings" />
+                </ui:CommandBar.SecondaryCommands>
+            </controls:CommandBar>
+            <!-- 变量表的名称描述等信息 -->
+            <ikw:SimpleStackPanel Margin="10" Orientation="Horizontal" Spacing="10">
+                <TextBlock Style="{StaticResource VarTableLabelStyle}" Text="变量表名称:" />
+                <TextBlock Style="{StaticResource VarTableValueStyle}" Text="{Binding VariableTable.Name}" />
+                <TextBlock Style="{StaticResource VarTableLabelStyle}" Text="变量表描述:" />
+                <TextBlock Style="{StaticResource VarTableValueStyle}" Text="{Binding VariableTable.Description}" />
+                <TextBlock Style="{StaticResource VarTableLabelStyle}" Text="所属设备:" />
+                <TextBlock Style="{StaticResource VarTableValueStyle}" Text="默认变量表" />
+            </ikw:SimpleStackPanel>
+
+
         </ikw:SimpleStackPanel>
-        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="变量表描述:" /> <TextBlock Text="{Binding VariableTable.Description}" />
-        </ikw:SimpleStackPanel>
-        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-            <TextBlock Text="所属设备:" /> <TextBlock Text="默认变量表" />
-        </ikw:SimpleStackPanel>
-        <DataGrid>
-            
+
+        <DataGrid Margin="10" >
+
         </DataGrid>
-    </ikw:SimpleStackPanel>
-
+       </DockPanel>
 
 </UserControl>

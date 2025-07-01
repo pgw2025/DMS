@@ -28,21 +28,19 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     partial void OnDevicesChanged(List<Device> devices)
     {
         OnDeviceListChanged?.Invoke(devices);
-        if (menuBeans!=null && Devices!=null)
+        if (menuBeans != null && Devices != null)
         {
-            FillMenuData(MenuBeans,Devices);
+            FillMenuData(MenuBeans, Devices);
         }
-
     }
 
     partial void OnMenuBeansChanged(List<MenuBean> menuBeans)
     {
         OnMenuListChanged?.Invoke(menuBeans);
-        if (MenuBeans!=null && Devices!=null)
+        if (MenuBeans != null && Devices != null)
         {
-            FillMenuData(MenuBeans,Devices);
+            FillMenuData(MenuBeans, Devices);
         }
-        
     }
 
 
@@ -59,7 +57,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// 给Menu菜单的Data填充数据
     /// </summary>
     /// <param name="menuBeans"></param>
-    private void FillMenuData(List<MenuBean> menuBeans,List<Device> devices)
+    private void FillMenuData(List<MenuBean> menuBeans, List<Device> devices)
     {
         if (menuBeans == null || menuBeans.Count == 0)
             return;
@@ -87,7 +85,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
             if (menuBean.Items != null && menuBean.Items.Count > 0)
             {
-                FillMenuData(menuBean.Items,devices);
+                FillMenuData(menuBean.Items, devices);
             }
         }
     }
@@ -114,20 +112,29 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         return navgateVM;
     }
 
+    /// <summary>
+    /// 从设备列表中找到变量表VarTable对象
+    /// </summary>
+    /// <param name="vtableId">VarTable的ID</param>
+    /// <returns>如果找到择返回对象，否则返回null</returns>
     private VariableTable FindVarTableForDevice(int vtableId)
     {
         VariableTable varTable = null;
         foreach (var device in _devices)
         {
             varTable = device.VariableTables.FirstOrDefault(v => v.Id == vtableId);
-            if (varTable!=null)
+            if (varTable != null)
                 return varTable;
         }
 
         return varTable;
     }
 
-
+    /// <summary>
+    /// 接受加载消息，收到消息后从数据库加载对应的数据
+    /// </summary>
+    /// <param name="message">消息的类型，如加载菜单LoadMessage.Menu</param>
+    /// <exception cref="ArgumentException"></exception>
     public async void Receive(LoadMessage message)
     {
         if (!(message.Value is LoadTypes))
