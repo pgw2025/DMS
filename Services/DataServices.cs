@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
-using PMSWPF.Extensions;
 using PMSWPF.Helper;
 using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.ViewModels;
+using SqlSugar;
 
 namespace PMSWPF.Services;
 
@@ -17,29 +17,29 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     private readonly ILogger<DataServices> _logger;
     [ObservableProperty] private List<Device> _devices;
     [ObservableProperty] private List<VariableTable> _variableTables;
-    [ObservableProperty] private List<MenuBean> menuBeans;
+    [ObservableProperty] private List<MenuBean> menuTrees;
     private readonly DeviceRepository _deviceRepository;
     private readonly MenuRepository _menuRepository;
 
     public event Action<List<Device>> OnDeviceListChanged;
-    public event Action<List<MenuBean>> OnMenuListChanged;
+    public event Action<List<MenuBean>> OnMenuTreeListChanged;
 
 
     partial void OnDevicesChanged(List<Device> devices)
     {
         OnDeviceListChanged?.Invoke(devices);
-        if (menuBeans != null && Devices != null)
+        if (menuTrees != null && Devices != null)
         {
-            FillMenuData(MenuBeans, Devices);
+            FillMenuData(MenuTrees, Devices);
         }
     }
 
-    partial void OnMenuBeansChanged(List<MenuBean> menuBeans)
+    partial void OnMenuTreesChanged(List<MenuBean> MenuTrees)
     {
-        OnMenuListChanged?.Invoke(menuBeans);
-        if (MenuBeans != null && Devices != null)
+        OnMenuTreeListChanged?.Invoke(MenuTrees);
+        if (MenuTrees != null && Devices != null)
         {
-            FillMenuData(MenuBeans, Devices);
+            FillMenuData(MenuTrees, Devices);
         }
     }
 
@@ -56,18 +56,18 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <summary>
     /// 给Menu菜单的Data填充数据
     /// </summary>
-    /// <param name="menuBeans"></param>
-    private void FillMenuData(List<MenuBean> menuBeans, List<Device> devices)
+    /// <param name="MenuTrees"></param>
+    private void FillMenuData(List<MenuBean> MenuTrees, List<Device> devices)
     {
-        if (menuBeans == null || menuBeans.Count == 0)
+        if (MenuTrees == null || MenuTrees.Count == 0)
             return;
 
-        foreach (MenuBean menuBean in menuBeans)
+        foreach (MenuBean menuBean in MenuTrees)
         {
             switch (menuBean.Type)
             {
                 case MenuType.MainMenu:
-                    menuBean.ViewModel = GetMainViewModel(menuBean.Name);
+                    menuBean.ViewModel =DataServicesHelper.GetMainViewModel(menuBean.Name);
                     break;
                 case MenuType.DeviceMenu:
                     menuBean.ViewModel = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
@@ -90,26 +90,20 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         }
     }
 
-    private ViewModelBase GetMainViewModel(string name)
-    {
-        ViewModelBase navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
-        switch (name)
-        {
-            case "主页":
-                navgateVM = App.Current.Services.GetRequiredService<HomeViewModel>();
-                break;
-            case "设备":
-                navgateVM = App.Current.Services.GetRequiredService<DevicesViewModel>();
-                break;
-            case "数据转换":
-                navgateVM = App.Current.Services.GetRequiredService<DataTransformViewModel>();
-                break;
-            case "设置":
-                navgateVM = App.Current.Services.GetRequiredService<SettingViewModel>();
-                break;
-        }
+    
 
-        return navgateVM;
+    /// <summary>
+    /// 查找设备所对应的菜单对象
+    /// </summary>
+    /// <param name="device"></param>
+    /// <returns></returns>
+    public async Task<int> UpdateMenuForDevice(Device device)
+    {
+       var menu= DataServicesHelper.FindMenusForDevice(device, MenuTrees);
+       if (menu != null)
+          return await _menuRepository.Edit(menu);
+
+        return 0;
     }
 
     /// <summary>
@@ -164,10 +158,22 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
     private async Task LoadMenus()
     {
-        MenuBeans = await _menuRepository.GetMenu();
-        foreach (MenuBean menu in MenuBeans)
+        MenuTrees = await _menuRepository.GetMenuTrees();
+        foreach (MenuBean menu in MenuTrees)
         {
             MenuHelper.MenuAddParent(menu);
         }
+    }
+
+    public async Task<int> DeleteMenuForDevice(Device device)
+    {
+        var menu= DataServicesHelper.FindMenusForDevice(device, MenuTrees);
+        if (menu != null)
+        {
+           return await _menuRepository.DeleteMenu(menu);
+        }
+
+        return 0;
+
     }
 }

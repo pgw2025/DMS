@@ -1,8 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Messaging;
-using HandyControl.Tools.Extension;
-using iNKORE.UI.WPF.Modern.Controls;
-using PMSWPF.Message;
+﻿using iNKORE.UI.WPF.Modern.Controls;
 using PMSWPF.Models;
 using PMSWPF.ViewModels.Dialogs;
 using PMSWPF.Views.Dialogs;
@@ -19,7 +15,15 @@ public class DialogService :IDialogService
     public async Task<Device> ShowAddDeviceDialog()
     {
         var device = new Device();
-        var dialog = new DeviceDialog(device);
+        DeviceDialogViewModel vm = new DeviceDialogViewModel(device);
+        vm.Title = "添加设备";
+        vm.PrimaryButContent = "添加设备";
+        return await ShowConentDialog(vm,device);
+    }
+
+    private static async Task<Device> ShowConentDialog(DeviceDialogViewModel viewModel,Device device)
+    {
+        var dialog = new DeviceDialog(viewModel);
         var res = await dialog.ShowAsync();
         if (res == ContentDialogResult.Primary)
         {
@@ -27,6 +31,31 @@ public class DialogService :IDialogService
         }
         return null;
     }
+
+    public async Task<Device> ShowEditDeviceDialog(Device device)
+    {
+        DeviceDialogViewModel vm = new DeviceDialogViewModel(device);
+        vm.Title = "编辑设备";
+        vm.PrimaryButContent = "编辑设备";
+        return await ShowConentDialog(vm,device);
+        
+    }
+
+    public async Task<bool> ShowConfrimeDialog(string title, string message,string buttonText="确认")
+    {
+        ConfrimDialogViewModel vm = new ConfrimDialogViewModel();
+        vm.Title = title;
+        vm.Message = message;
+        vm.PrimaryButtonText = buttonText;
+        var dialog = new ConfirmDialog(vm);
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary)
+        {
+            return true;
+        }
+        return false;
+    }
+
 
     public void ShowMessageDialog(string title, string message)
     {

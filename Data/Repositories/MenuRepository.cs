@@ -1,13 +1,8 @@
-using System.Windows.Controls;
-using CommunityToolkit.Mvvm.Messaging;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
-using PMSWPF.Helper;
-using PMSWPF.Message;
 using PMSWPF.Models;
-using SqlSugar;
 
 namespace PMSWPF.Data.Repositories;
 
@@ -17,7 +12,16 @@ public class MenuRepository
     {
     }
 
-    public async Task<List<MenuBean>> GetMenu()
+    public async Task<int> DeleteMenu(MenuBean menu)
+    {
+        using (var db = DbContext.GetInstance())
+        {
+            var childList = await db.Queryable<DbMenu>().ToChildListAsync(it => it.ParentId, menu.Id);
+            return await db.Deleteable<DbMenu>(childList).ExecuteCommandAsync();
+        }
+    }
+
+    public async Task<List<MenuBean>> GetMenuTrees()
     {
         // //无主键用法新:5.1.4.110
         // db.Queryable<Tree>().ToTree(it=>it.Child,it=>it.ParentId,0,it=>it.Id)//+4重载
@@ -27,10 +31,9 @@ public class MenuRepository
         {
             List<MenuBean> menuTree = new();
             var dbMenuTree = await db.Queryable<DbMenu>().ToTreeAsync(dm => dm.Items, dm => dm.ParentId, 0);
+
             foreach (var dbMenu in dbMenuTree)
-            {
                 menuTree.Add(dbMenu.CopyTo<MenuBean>());
-            }
 
             return menuTree;
         }
@@ -100,6 +103,14 @@ public class MenuRepository
 
 
             return true;
+        }
+    }
+
+    public async Task<int> Edit(MenuBean menu)
+    {
+        using (var db = DbContext.GetInstance())
+        {
+            return await db.Updateable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
         }
     }
 }

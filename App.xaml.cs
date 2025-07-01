@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -7,7 +6,6 @@ using NLog;
 using NLog.Extensions.Logging;
 using PMSWPF.Data;
 using PMSWPF.Data.Entities;
-using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
 using PMSWPF.Helper;

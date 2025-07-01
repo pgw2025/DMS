@@ -7,10 +7,10 @@ namespace PMSWPF.Views.Dialogs;
 
 public partial class DeviceDialog
 {
-    public DeviceDialog(Device device)
+    public DeviceDialog(DeviceDialogViewModel viewModel)
     {
         InitializeComponent();
-        DataContext = new DeviceDialogViewModel(device);
+        DataContext = viewModel;
     }
 
     private void OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)

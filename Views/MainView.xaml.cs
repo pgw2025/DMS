@@ -1,12 +1,8 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
-using CommunityToolkit.Mvvm.Messaging;
 using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Enums;
 using PMSWPF.Helper;
-using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.ViewModels;
 

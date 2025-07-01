@@ -70,9 +70,7 @@
 
         </ikw:SimpleStackPanel>
 
-        <DataGrid Margin="10" >
-
-        </DataGrid>
+        <DataGrid Margin="10" />
        </DockPanel>
 
 </UserControl>

@@ -1,12 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using PMSWPF.Data.Entities;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Helper;
-using PMSWPF.Message;
 using PMSWPF.Models;
 using PMSWPF.Services;
 
@@ -35,7 +31,7 @@ public partial class MainViewModel : ViewModelBase
         // 发送消息加载数据
         MessageHelper.SendLoadMessage(LoadTypes.All);
         // 当菜单加载成功后，在前台显示菜单
-        dataServices.OnMenuListChanged += (menus) =>
+        dataServices.OnMenuTreeListChanged += (menus) =>
         {
             Menus = new ObservableCollection<MenuBean>(menus);
         };

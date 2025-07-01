@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using PMSWPF.Enums;
 using PMSWPF.ViewModels;
 
@@ -8,6 +9,7 @@ public class MenuBean
     
     public  int Id { get; set; }
     public string Icon { get; set; }
+  
     public string Name { get; set; }
     public int ParentId { get; set; }
     public int DataId { get; set; }
