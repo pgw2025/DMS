@@ -10,12 +10,12 @@ partial class VariableTableViewModel : ViewModelBase
     private VariableTable variableTable;
     [ObservableProperty]
     private ObservableCollection<DataVariable> _dataVariables;
-
+    
     public override void OnLoaded()
     {
         if (VariableTable.DataVariables!=null )
         {
-            _dataVariables = new ObservableCollection<DataVariable>(VariableTable.DataVariables);
+            DataVariables = new ObservableCollection<DataVariable>(VariableTable.DataVariables);
         }
     }
 }

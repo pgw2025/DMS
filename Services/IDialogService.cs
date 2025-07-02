@@ -8,6 +8,8 @@ public interface IDialogService
     Task<Device> ShowEditDeviceDialog(Device device);
     
     Task<bool> ShowConfrimeDialog(string title, string message,string buttonText="确认");
+    
+    Task<VariableTable> ShowAddVarTableDialog(Device device);
 
     void ShowMessageDialog(string title, string message);
 }

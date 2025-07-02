@@ -56,6 +56,21 @@ public class DialogService :IDialogService
         return false;
     }
 
+    public async Task<VariableTable> ShowAddVarTableDialog(Device device)
+    {
+        VarTableDialogViewModel vm = new();
+        vm.Title = "添加变量表";
+        vm.PrimaryButtonText =  "添加变量表";
+        vm.VariableTable = new VariableTable();
+        var dialog = new VarTableDialog(vm);
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary)
+        {
+            return vm.VariableTable;
+        }
+        return null;
+    }
+
 
     public void ShowMessageDialog(string title, string message)
     {

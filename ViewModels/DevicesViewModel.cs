@@ -102,9 +102,12 @@ public partial class DevicesViewModel : ViewModelBase
 
             var editDievce = await _dialogService.ShowEditDeviceDialog(SelectedDevice);
             if (editDievce != null)
-            {
+            { 
+                // 更新菜单
                 var res = await _deviceRepository.Edit(editDievce);
-                await _dataServices.UpdateMenuForDevice(editDievce);
+                var menu = DataServicesHelper.FindMenusForDevice(editDievce, _dataServices.MenuTrees);
+                if (menu != null)
+                     await _menuRepository.Edit(menu);
 
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);
@@ -132,8 +135,13 @@ public partial class DevicesViewModel : ViewModelBase
             var isDel = await _dialogService.ShowConfrimeDialog("删除设备", msg, "删除设备");
             if (isDel)
             {
-                var defDeviceRes = await _deviceRepository.DeleteById(SelectedDevice.Id);
-                var defMenuRes = await _dataServices.DeleteMenuForDevice(SelectedDevice);
+                // 删除设备
+                await _deviceRepository.DeleteById(SelectedDevice.Id);
+                // 删除菜单
+                var menu = DataServicesHelper.FindMenusForDevice(SelectedDevice, _dataServices.MenuTrees);
+                if (menu != null)
+                    await _menuRepository.DeleteMenu(menu);
+                
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);
                 NotificationHelper.ShowMessage($"删除设备成功,设备名：{SelectedDevice.Name}", NotificationType.Success);
@@ -141,8 +149,8 @@ public partial class DevicesViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowMessage($"编辑设备的过程中发生错误：{e.Message}", NotificationType.Error);
-            _logger.LogError($"编辑设备的过程中发生错误：{e}");
+            NotificationHelper.ShowMessage($"删除设备的过程中发生错误：{e.Message}", NotificationType.Error);
+            _logger.LogError($"删除设备的过程中发生错误：{e}");
         }
     }
     

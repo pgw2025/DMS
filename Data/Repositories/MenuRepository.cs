@@ -40,7 +40,7 @@ public class MenuRepository
     }
 
 
-    public async Task<int> AddMenu(MenuBean menu)
+    public async Task<int> Add(MenuBean menu)
     {
         using (var db = DbContext.GetInstance())
         {

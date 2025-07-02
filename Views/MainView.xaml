@@ -19,9 +19,17 @@
         d:DataContext="{d:DesignInstance vm:MainViewModel}"
         mc:Ignorable="d">
     <Window.Resources>
+
+        <ContextMenu x:Key="MyMenuItemContextMenu">
+            <MenuItem Header="添加" />
+            <MenuItem Header="编辑" />
+            <Separator />
+            <MenuItem Header="删除" />
+        </ContextMenu>
         <DataTemplate x:Key="NavigationViewMenuItem"
                       DataType="{x:Type mo:MenuBean}">
-            <ui:NavigationViewItem Content="{Binding Name}"
+            <ui:NavigationViewItem 
+                                   Content="{Binding Name}"
                                    MenuItemsSource="{Binding Items }">
                 <ui:NavigationViewItem.Icon>
                     <ui:FontIcon Glyph="{Binding Icon}" />

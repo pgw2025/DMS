@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <ApplicationIcon>AppIcon2.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
@@ -27,6 +28,10 @@
     </ItemGroup>
     <ItemGroup>
       <Compile Remove="Data\Repositories\BaseRepositories.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Assets\AppIcon.png" />
+      <Resource Include="Assets\AppIcon.png" />
     </ItemGroup>
 
 </Project>

@@ -1,9 +1,11 @@
 ﻿using System.Windows;
 using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Enums;
 using PMSWPF.Helper;
 using PMSWPF.Models;
+using PMSWPF.Services;
 using PMSWPF.ViewModels;
 
 namespace PMSWPF.Views;
@@ -13,15 +15,17 @@ namespace PMSWPF.Views;
 /// </summary>
 public partial class MainView : Window
 {
+    private readonly DataServices _dataServices;
     private readonly ILogger<MainView> _logger;
     private MainViewModel _viewModel;
 
-    public MainView(MainViewModel viewModel, ILogger<MainView> logger)
+    public MainView(DataServices dataServices, ILogger<MainView> logger)
     {
         InitializeComponent();
-        _viewModel = viewModel;
+        _viewModel = App.Current.Services.GetRequiredService<MainViewModel>();
+        _dataServices = dataServices;
         _logger = logger;
-        DataContext = viewModel;
+        DataContext = _viewModel;
         _logger.LogInformation("主界面加载成功");
     }
 
@@ -30,32 +34,16 @@ public partial class MainView : Window
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="args"></param>
-    private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        try
+        var menu = args.SelectedItem as MenuBean;
+        if (menu != null)
         {
-            var menu = args.SelectedItem as MenuBean;
-            if (menu == null)
-                throw new ArgumentException("选择的菜单项为空！");
-
-            switch (menu.Type)
-            {
-                case MenuType.MainMenu:
-                case MenuType.DeviceMenu:
-                case MenuType.VariableTableMenu:
-                    if (menu.ViewModel == null)
-                        throw new ArgumentException($"菜单项：{menu.Name}，没有绑定对象的ViewModel");
-                    MessageHelper.SendNavgatorMessage(menu.ViewModel);
-                    _logger.LogInformation($"导航到：{menu.Name}");
-                    break;
-                case MenuType.AddVariableTableMenu:
-                    break;
-            }
+           await _viewModel.MenuSelectionChanged(menu);
         }
-        catch (Exception e)
+        else
         {
-            NotificationHelper.ShowMessage(e.Message, NotificationType.Error);
-            _logger.LogError(e.Message);
+            NotificationHelper.ShowMessage("选择的菜单项为空！", NotificationType.Error);
         }
     }
 
@@ -63,5 +51,4 @@ public partial class MainView : Window
     {
         _viewModel.OnLoaded();
     }
-
 }

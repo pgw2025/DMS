@@ -1,13 +1,17 @@
-﻿using PMSWPF.Enums;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using PMSWPF.Enums;
 
 namespace PMSWPF.Models;
 
-public class VariableTable
+public partial class VariableTable:ObservableObject
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
+    [ObservableProperty] private string name;
+    [ObservableProperty] private string description;
+    
     public ProtocolType ProtocolType { get; set; }
     public List<DataVariable> DataVariables { get; set; }
+    
+    public int? DeviceId { get; set; }
     public Device? Device { get; set; }
 }
