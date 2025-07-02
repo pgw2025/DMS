@@ -3,6 +3,7 @@ using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
 using PMSWPF.Models;
+using SqlSugar;
 
 namespace PMSWPF.Data.Repositories;
 
@@ -47,63 +48,104 @@ public class MenuRepository
             return await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
         }
     }
-
-
-    public async Task<bool> AddDeviceMenu(Device device)
+    
+    /// <summary>
+    /// 添加默认变量表的菜单
+    /// </summary>
+    /// <param name="device"></param>
+    /// <param name="addDeviceMenuId"></param>
+    /// <param name="db"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task<int> AddDeviceDefTableMenu(Device device, int parentMenuId,int varTableId, SqlSugarClient db)
     {
-        using (var db = DbContext.GetInstance())
+        var defVarTableMenu = new MenuBean()
         {
-            bool result = false;
-            var deviceMainMenu = await db.Queryable<DbMenu>().FirstAsync(m => m.Name == "设备");
-            if (deviceMainMenu == null)
-                throw new InvalidOperationException("没有找到设备菜单！！");
+            Name = "默认变量表",
+            Icon = SegoeFluentIcons.Tablet.Glyph,
+            Type = MenuType.VariableTableMenu,
+            ParentId = parentMenuId,
+            DataId = varTableId
+        };
+        var defTableRes = await db.Insertable<DbMenu>(defVarTableMenu).ExecuteCommandAsync();
+        return defTableRes;
+    }
 
-            // 添加菜单项
-            MenuBean menu = new MenuBean()
-            {
-                Name = device.Name,
-                Type = MenuType.DeviceMenu,
-                DataId = device.Id,
-                Icon = SegoeFluentIcons.Devices4.Glyph,
-            };
+    /// <summary>
+    /// 给设备添加默认变量表菜单
+    /// </summary>
+    /// <param name="device"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    // public async Task<bool> AddDeviceDefVarTableMenu(Device device)
+    // {
+    //     var db = DbContext.GetInstance();
+    //     try
+    //     {
+    //         await db.BeginTranAsync();
+    //         bool result = false;
+    //         var parentMenuId = await AddDeviceMenu(device, db);
+    //         var defTableRes = await AddDeviceDefTableMenu(device, parentMenuId, db);
+    //         var addTableRes = await AddVarTableMenu(parentMenuId, db);
+    //         // if ((addTableRes + defTableRes) != 2)
+    //         // {
+    //         //     // 如果出错删除原来添加的设备菜单
+    //         //     await db.Deleteable<DbMenu>().Where(m => m.Id == parentMenuId).ExecuteCommandAsync();
+    //         //     throw new InvalidOperationException("添加默认变量表时发生了错误！！");
+    //         // }
+    //
+    //         await db.CommitTranAsync();
+    //         return true;
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         await db.RollbackTranAsync();
+    //     }
+    //     finally
+    //     {
+    //     }
+    // }
 
-            menu.ParentId = deviceMainMenu.Id;
-            var addDeviceMenuId = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
-                .ExecuteReturnIdentityAsync();
-            if (addDeviceMenuId == 0)
-                throw new InvalidOperationException($"{menu.Name},设备菜单添加失败！！");
+    public async Task<int> AddVarTableMenu(DbDevice dbDevice, int parentMenuId, SqlSugarClient db)
+    {
+        var addVarTable = new MenuBean()
+        {
+            Name = "添加变量表",
+            Icon = SegoeFluentIcons.Add.Glyph,
+            Type = MenuType.AddVariableTableMenu,
+            ParentId = parentMenuId,
+            DataId = dbDevice.Id
+        };
+        var addTableRes = await db.Insertable<DbMenu>(addVarTable).ExecuteCommandAsync();
+        return addTableRes;
+    }
 
-            var defVarTable = await db.Queryable<DbVariableTable>()
-                .FirstAsync(v => v.DeviceId == device.Id && v.Name == "默认变量表");
-            if (defVarTable == null)
-                throw new InvalidOperationException($"没有找到{device.Name}的默认变量表。");
-            var defVarTableMenu = new MenuBean()
-            {
-                Name = "默认变量表",
-                Icon = SegoeFluentIcons.Tablet.Glyph,
-                Type = MenuType.VariableTableMenu,
-                ParentId = addDeviceMenuId,
-                DataId = defVarTable.Id
-            };
-            var addVarTable = new MenuBean()
-            {
-                Name = "添加变量表",
-                Icon = SegoeFluentIcons.Add.Glyph,
-                Type = MenuType.AddVariableTableMenu,
-                ParentId = addDeviceMenuId,
-            };
-            var defTableRes = await db.Insertable<DbMenu>(defVarTableMenu).ExecuteCommandAsync();
-            var addTableRes = await db.Insertable<DbMenu>(addVarTable).ExecuteCommandAsync();
-            if ((addTableRes + defTableRes) != 2)
-            {
-                // 如果出错删除原来添加的设备菜单
-                await db.Deleteable<DbMenu>().Where(m => m.Id == addDeviceMenuId).ExecuteCommandAsync();
-                throw new InvalidOperationException("添加默认变量表时发生了错误！！");
-            }
+   
+    /// <summary>
+    /// 添加设备菜单
+    /// </summary>
+    /// <param name="device"></param>
+    /// <param name="db"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task<int> AddDeviceMenu(DbDevice device, SqlSugarClient db)
+    {
+        var deviceMainMenu = await db.Queryable<DbMenu>().FirstAsync(m => m.Name == "设备");
+        if (deviceMainMenu == null)
+            throw new InvalidOperationException("没有找到设备菜单！！");
 
-
-            return true;
-        }
+        // 添加菜单项
+        MenuBean menu = new MenuBean()
+        {
+            Name = device.Name,
+            Type = MenuType.DeviceMenu,
+            DataId = device.Id,
+            Icon = SegoeFluentIcons.Devices4.Glyph,
+        };
+        menu.ParentId = deviceMainMenu.Id;
+        var addDeviceMenuId = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
+            .ExecuteReturnIdentityAsync();
+        return addDeviceMenuId;
     }
 
     public async Task<int> Edit(MenuBean menu)

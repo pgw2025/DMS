@@ -77,6 +77,7 @@ public partial class MainViewModel : ViewModelBase
 
                     break;
                 case MenuType.AddVariableTableMenu:
+                    
                     await AddVariableTable(menu);
                     break;
             }

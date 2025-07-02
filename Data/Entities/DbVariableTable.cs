@@ -18,8 +18,8 @@ public class DbVariableTable
     [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
     public ProtocolType ProtocolType { get; set; }
 
-    [Navigate(NavigateType.OneToMany, nameof(DbDataVariable.VariableTableId))]
-    public List<DbDataVariable>? DataVariables { get; set; }
+    [Navigate(NavigateType.OneToMany, nameof(DbVariableData.VariableTableId))]
+    public List<DbVariableData>? DataVariables { get; set; }
 
     [SugarColumn(IsNullable = true)] public int? DeviceId { get; set; }
 

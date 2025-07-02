@@ -4,8 +4,8 @@ using SqlSugar.DbConvert;
 
 namespace PMSWPF.Data.Entities;
 
-[SugarTable("DataVariable")]
-public class DbDataVariable
+[SugarTable("VariableData")]
+public class DbVariableData
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)] //数据库是自增才配自增 
     public int Id { get; set; }
@@ -28,13 +28,13 @@ public class DbDataVariable
 
     [SugarColumn(IsNullable = true)] public List<DbMqtt>? Mqtts { get; set; }
 
-    public string DataValue { get; set; }
-    public string DisplayValue { get; set; }
+    public string DataValue { get; set; } = String.Empty;
+    public string DisplayValue { get; set; } = String.Empty;
     public DateTime UpdateTime { get; set; }
 
     [SugarColumn(IsNullable = true)] public DbUser? UpdateUser { get; set; }
 
-    public string Converstion { get; set; }
+    public string Converstion { get; set; } = String.Empty;
     public bool IsDeleted { get; set; }
     public bool IsActive { get; set; }
     public bool IsSave { get; set; }
@@ -43,6 +43,6 @@ public class DbDataVariable
     public double AlarmMin { get; set; }
     public double AlarmMax { get; set; }
 
-    [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
+    [SugarColumn(ColumnDataType = "varchar(20)", IsNullable = true, SqlParameterDbType = typeof(EnumToStringConvert))]
     public SignalType SignalType { get; set; }
 }

@@ -15,6 +15,8 @@ public partial class Device : ObservableObject
     
     [ObservableProperty] private bool isActive = true;
     
+    [ObservableProperty] private bool isAddDefVarTable = true;
+    
     [ObservableProperty] private bool isRuning;
     
     [ObservableProperty] private string name;

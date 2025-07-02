@@ -61,19 +61,10 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <!-- 通讯协议-->
-            <TextBlock Text="设备通信协议"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox SelectedItem="{Binding Device.ProtocolType}"
-                      ItemsSource="{Binding Source={StaticResource protocolType} }">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-
+            <CheckBox FontSize="16"
+                      Content="是否添加默认变量表"
+                      Margin="0 30 0 0"
+                      IsChecked="{Binding Device.IsAddDefVarTable}" />
 
         </ikw:SimpleStackPanel>
         <!-- 右边列 -->

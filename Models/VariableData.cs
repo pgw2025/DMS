@@ -2,7 +2,7 @@
 
 namespace PMSWPF.Models;
 
-public class DataVariable
+public class VariableData
 {
     public int Id { get; set; }
     public string Name { get; set; }

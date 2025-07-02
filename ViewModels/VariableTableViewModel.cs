@@ -12,7 +12,7 @@ partial class VariableTableViewModel : ViewModelBase
 {
     // private readonly ILogger<VariableTableViewModel> _logger;
     [ObservableProperty] private VariableTable variableTable;
-    [ObservableProperty] private ObservableCollection<DataVariable> _dataVariables;
+    [ObservableProperty] private ObservableCollection<VariableData> _dataVariables;
 
     /// <summary>
     /// 是否是第一次加载,防止ToggleSwitch第一次加载触发改变事件
@@ -35,7 +35,7 @@ partial class VariableTableViewModel : ViewModelBase
         
         if (VariableTable.DataVariables != null)
         {
-            DataVariables = new ObservableCollection<DataVariable>(VariableTable.DataVariables);
+            DataVariables = new ObservableCollection<VariableData>(VariableTable.DataVariables);
         }
         IsLoadCompletion = true;
     }
