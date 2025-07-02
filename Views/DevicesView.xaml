@@ -22,7 +22,7 @@
                     <DockPanel>
                         <ui:ToggleSwitch DockPanel.Dock="Right"
                                          Margin="20 0 0 0 "
-                                         IsOn="{Binding IsActive}"
+                                         IsOn="{Binding IsFirstLoad}"
                                          OffContent="停止"
                                          OnContent="启动" />
                         <TextBlock FontSize="24"

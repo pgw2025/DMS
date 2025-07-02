@@ -28,8 +28,7 @@
         </ContextMenu>
         <DataTemplate x:Key="NavigationViewMenuItem"
                       DataType="{x:Type mo:MenuBean}">
-            <ui:NavigationViewItem 
-                                   Content="{Binding Name}"
+            <ui:NavigationViewItem Content="{Binding Name}"
                                    MenuItemsSource="{Binding Items }">
                 <ui:NavigationViewItem.Icon>
                     <ui:FontIcon Glyph="{Binding Icon}" />
@@ -50,6 +49,7 @@
                            MenuItemsSource="{Binding Menus}"
                            MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
                            SelectionChanged="NavigationView_SelectionChanged">
+            
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox AutomationProperties.Name="Search">
@@ -86,7 +86,7 @@
                         </DataTemplate>
                         <!-- 设备变量页 -->
                         <DataTemplate DataType="{x:Type vm:VariableTableViewModel}">
-                            <local:VariableTableView />
+                            <local:VariableTableView DataContext="{Binding }"/>
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>

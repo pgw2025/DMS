@@ -11,7 +11,8 @@ public partial class VariableTable:ObservableObject
     
     public ProtocolType ProtocolType { get; set; }
     public List<DataVariable> DataVariables { get; set; }
-    
+    [ObservableProperty]
+    private bool isActive;
     public int? DeviceId { get; set; }
     public Device? Device { get; set; }
 }

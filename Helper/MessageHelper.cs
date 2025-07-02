@@ -24,11 +24,8 @@ public class MessageHelper
     /// </summary>
     /// <param name="vm">导航View的ViewModel</param>
     /// <param name="param">带的参数</param>
-    public static void SendNavgatorMessage(ViewModelBase vm,Object param=null)
+    public static void SendNavgatorMessage(ViewModelBase vm)
     {
-        WeakReferenceMessenger.Default.Send<NavgatorMessage>(new NavgatorMessage(vm)
-        {
-            Parameters = param
-        });
+        WeakReferenceMessenger.Default.Send<NavgatorMessage>(new NavgatorMessage(vm));
     }
 }

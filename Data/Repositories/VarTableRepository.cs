@@ -18,4 +18,12 @@ public class VarTableRepository
             return await db.Insertable<DbVariableTable>(varTable.CopyTo<DbVariableTable>()).ExecuteReturnIdentityAsync();
         }
     }
+
+    public async Task<int> Edit(VariableTable variableTable)
+    {
+        using (var db = DbContext.GetInstance())
+        {
+            return await db.Updateable<DbVariableTable>(variableTable.CopyTo<DbVariableTable>()).ExecuteCommandAsync();
+        }
+    }
 }   

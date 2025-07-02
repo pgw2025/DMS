@@ -24,6 +24,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<MenuBean> _menus;
 
     private readonly MenuRepository _menuRepository;
+    private readonly VarTableRepository _varTableRepository;
 
 
     public MainViewModel(NavgatorServices navgatorServices, DataServices dataServices, IDialogService dialogService,
@@ -33,7 +34,8 @@ public partial class MainViewModel : ViewModelBase
         _dataServices = dataServices;
         _dialogService = dialogService;
         _logger = logger;
-
+        _varTableRepository = new VarTableRepository();
+        _menuRepository= new MenuRepository();
 
         _navgatorServices.OnViewModelChanged += () => { CurrentViewModel = _navgatorServices.CurrentViewModel; };
 
@@ -45,6 +47,10 @@ public partial class MainViewModel : ViewModelBase
         dataServices.OnMenuTreeListChanged += (menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
     }
 
+    /// <summary>
+    /// 菜单点击切换
+    /// </summary>
+    /// <param name="menu"></param>
     public async Task MenuSelectionChanged(MenuBean menu)
     {
         try
@@ -60,19 +66,22 @@ public partial class MainViewModel : ViewModelBase
                     break;
                 case MenuType.VariableTableMenu:
 
-                    VariableTableViewModel varTableVM = App.Current.Services.GetRequiredService<VariableTableViewModel>();
+                    VariableTableViewModel varTableVM =
+                        App.Current.Services.GetRequiredService<VariableTableViewModel>();
                     varTableVM.VariableTable =
                         DataServicesHelper.FindVarTableForDevice(_dataServices.Devices, menu.DataId);
+
+                    varTableVM.IsLoadCompletion = false;
                     menu.ViewModel = varTableVM;
                     menu.Data = varTableVM.VariableTable;
-                    
+
                     break;
                 case MenuType.AddVariableTableMenu:
                     await AddVariableTable(menu);
                     break;
             }
 
-            if (menu.Type==MenuType.AddVariableTableMenu)
+            if (menu.Type == MenuType.AddVariableTableMenu)
                 return;
 
             if (menu.ViewModel != null)
@@ -93,66 +102,77 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
+    
 
     private async Task AddVariableTable(MenuBean menu)
     {
         try
         {
-            if (menu.Parent != null && menu.Parent.Data != null)
+            // 1. 检查父级设备信息
+            if (menu.Parent?.Data is not Device device)
             {
-                Device device = (Device)menu.Parent.Data;
-                var varTable = await _dialogService.ShowAddVarTableDialog(device);
-                if (varTable != null)
-                {
-                    // 添加变量表
-                    varTable.DeviceId = device.Id;
-                    varTable.ProtocolType = device.ProtocolType;
-                    var addVarTableId = await new VarTableRepository().Add(varTable);
-                    if (addVarTableId > 0)
-                    {
-                        // 添加变量表菜单
-                        MenuBean newMenu = new MenuBean();
-                        newMenu.Icon = SegoeFluentIcons.Tablet.Glyph;
-                        newMenu.Name = varTable.Name;
-                        newMenu.DataId = addVarTableId;
-                        newMenu.Type = MenuType.VariableTableMenu;
-                        newMenu.ParentId = menu.Parent.Id;
-                        var addMenuRes = await new MenuRepository().Add(newMenu);
-                        if (addMenuRes > 0)
-                        {
-                            // 变量表菜单添加成功
-                            MessageHelper.SendLoadMessage(LoadTypes.Menu);
-                            MessageHelper.SendLoadMessage(LoadTypes.Devices);
-                            NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加成功",
-                                NotificationType.Success);
-                            _logger.LogInformation($"变量表:{varTable.Name},添加成功");
-                        }
-                        else
-                        {
-                            // 变量表菜单添加失败
-                            NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加菜单失败",
-                                NotificationType.Error);
-                            _logger.LogError($"变量表:{varTable.Name},添加菜单失败");
-                        }
-                    }
-                    else
-                    {
-                        // 变量表添加失败
-                        NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加失败", NotificationType.Error);
-                        _logger.LogError($"变量表:{varTable.Name},添加失败");
-                    }
-                }
+                _logger.LogWarning("尝试添加变量表时，Parent 或 Parent.Data 为空，或 Parent.Data 不是 Device 类型。");
+                NotificationHelper.ShowMessage("操作失败：无法获取有效的设备信息。", NotificationType.Error);
+                return;
+            }
+
+            // 2. 显示添加变量表对话框
+            var varTable = await _dialogService.ShowAddVarTableDialog(device);
+            if (varTable == null)
+            {
+                // 用户取消或未选择
+                return;
+            }
+
+            // 3. 设置变量表属性
+            varTable.IsActive = true;
+            varTable.DeviceId = device.Id;
+            varTable.ProtocolType = device.ProtocolType;
+
+            // 4. 添加变量表到数据库
+            // 假设 _varTableRepository.Add 返回一个布尔值表示成功，或者一个表示 ID 的整数
+            // 这里为了演示，我们假设它返回新添加的ID，如果失败则返回0
+            var addVarTableId = await _varTableRepository.Add(varTable);
+            if (addVarTableId <= 0)
+            {
+                NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加失败", NotificationType.Error);
+                _logger.LogError($"变量表:{varTable.Name},添加失败");
+                return; // 添加变量表失败，提前返回
+            }
+
+            // 5. 添加变量表菜单
+            MenuBean newMenu = new MenuBean
+            {
+                Icon = SegoeFluentIcons.Tablet.Glyph,
+                Name = varTable.Name,
+                DataId = addVarTableId, // 使用实际添加的ID
+                Type = MenuType.VariableTableMenu,
+                ParentId = menu.Parent.Id
+            };
+
+            var addMenuRes = await _menuRepository.Add(newMenu);
+            if (addMenuRes > 0)
+            {
+                // 变量表和菜单都添加成功
+                MessageHelper.SendLoadMessage(LoadTypes.Menu);
+                MessageHelper.SendLoadMessage(LoadTypes.Devices);
+                NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加成功", NotificationType.Success);
+                _logger.LogInformation($"变量表:{varTable.Name},添加成功");
+            }
+            else
+            {
+                // 变量表菜单添加失败 (此时变量表可能已添加成功，需要根据业务决定是否回滚)
+                NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加菜单失败", NotificationType.Error);
+                _logger.LogError($"变量表:{varTable.Name},添加菜单失败");
+                // 考虑：如果菜单添加失败，是否需要删除之前添加的变量表？
+                // 例如：await _varTableRepository.Delete(addVarTableId);
             }
         }
         catch (Exception e)
         {
-            _logger.LogError($"添加变量表时出现了错误:{e}");
+            // 捕获并记录所有未预料的异常
+            _logger.LogError(e, "添加变量表时出现了未预期的错误。");
             NotificationHelper.ShowMessage($"添加变量表时出现了错误:{e.Message}", NotificationType.Error);
         }
-    }
-
-
-    public override void OnLoaded()
-    {
     }
 }

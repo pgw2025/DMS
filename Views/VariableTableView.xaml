@@ -8,29 +8,43 @@
              xmlns:vm="clr-namespace:PMSWPF.ViewModels"
              xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
              mc:Ignorable="d"
+             Loaded="VariableTableView_OnLoaded"
              d:DataContext="{d:DesignInstance vm:VariableTableViewModel}"
-             d:DesignHeight="600" d:DesignWidth="800">
+             d:DesignHeight="600"
+             d:DesignWidth="800">
     <UserControl.Resources>
         <!-- 标签字体的样式 -->
-        <Style TargetType="TextBlock" x:Key="VarTableLabelStyle">
-            <Setter Property="Foreground" Value="#555" />
-            <Setter Property="FontSize" Value="20" />
+        <Style TargetType="TextBlock"
+               x:Key="VarTableLabelStyle">
+            <Setter Property="Foreground"
+                    Value="#555" />
+            <Setter Property="FontSize"
+                    Value="16" />
+            <Setter Property="VerticalAlignment"
+                    Value="Center" />
         </Style>
         <!-- 值字体的样式 -->
-        <Style TargetType="TextBlock" x:Key="VarTableValueStyle">
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="MinWidth" Value="120" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <Style TargetType="TextBlock"
+               x:Key="VarTableValueStyle">
+            <Setter Property="FontWeight"
+                    Value="Bold" />
+            <Setter Property="FontSize"
+                    Value="16" />
+            <Setter Property="MinWidth"
+                    Value="100" />
+            <Setter Property="VerticalAlignment"
+                    Value="Center" />
         </Style>
     </UserControl.Resources>
-        
-       <DockPanel>
 
-        <ikw:SimpleStackPanel Margin="10" DockPanel.Dock="Top">
+    <DockPanel>
+
+        <ikw:SimpleStackPanel Margin="10"
+                              DockPanel.Dock="Top">
             <!-- 操作菜单 -->
             <controls:CommandBar x:Name="PrimaryCommandBar"
-                                 DefaultLabelPosition="Right" IsOpen="False">
+                                 DefaultLabelPosition="Right"
+                                 IsOpen="False">
                 <ui:AppBarButton x:Name="AddButton"
                                  Command="{Binding AddDeviceCommand}"
                                  Label="Add">
@@ -53,24 +67,40 @@
                 </ui:AppBarButton>
                 <ui:CommandBar.SecondaryCommands>
                     <ui:AppBarButton x:Name="SettingsButton"
-
-                                     Icon="Setting" Label="Settings" />
+                                     Icon="Setting"
+                                     Label="Settings" />
                 </ui:CommandBar.SecondaryCommands>
             </controls:CommandBar>
             <!-- 变量表的名称描述等信息 -->
-            <ikw:SimpleStackPanel Margin="10" Orientation="Horizontal" Spacing="10">
-                <TextBlock Style="{StaticResource VarTableLabelStyle}" Text="变量表名称:" />
-                <TextBlock Style="{StaticResource VarTableValueStyle}" Text="{Binding VariableTable.Name}" />
-                <TextBlock Style="{StaticResource VarTableLabelStyle}" Text="变量表描述:" />
-                <TextBlock Style="{StaticResource VarTableValueStyle}" Text="{Binding VariableTable.Description}" />
-                <TextBlock Style="{StaticResource VarTableLabelStyle}" Text="所属设备:" />
-                <TextBlock Style="{StaticResource VarTableValueStyle}" Text="默认变量表" />
+            <ikw:SimpleStackPanel Margin="5"
+                                  Orientation="Horizontal"
+                                  Spacing="10">
+                <ui:ToggleSwitch 
+                    OnContent="启用"
+                    OffContent="停用"
+                    Toggled="OnIsActiveChanged"
+                    FontSize="16"
+                    IsOn="{Binding VariableTable.IsActive}"/>
+                <TextBlock Style="{StaticResource VarTableLabelStyle}"
+                           Text="变量表名称:" />
+                <TextBlock Style="{StaticResource VarTableValueStyle}"
+                           Text="{Binding VariableTable.Name}" />
+                <TextBlock Style="{StaticResource VarTableLabelStyle}"
+                           Text="变量表描述:" />
+                <TextBlock Style="{StaticResource VarTableValueStyle}"
+                           Text="{Binding VariableTable.Description}" />
+                <TextBlock Style="{StaticResource VarTableLabelStyle}"
+                           Text="所属设备:" />
+                <TextBlock Style="{StaticResource VarTableValueStyle}"
+                           Text="{Binding VariableTable.Device.Name}" />
+               
+                
             </ikw:SimpleStackPanel>
 
 
         </ikw:SimpleStackPanel>
 
         <DataGrid Margin="10" />
-       </DockPanel>
+    </DockPanel>
 
 </UserControl>

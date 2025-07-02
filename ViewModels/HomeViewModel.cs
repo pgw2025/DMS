@@ -2,7 +2,6 @@
 
 public class HomeViewModel : ViewModelBase
 {
-    public override void OnLoaded()
-    {
-    }
+
+
 }

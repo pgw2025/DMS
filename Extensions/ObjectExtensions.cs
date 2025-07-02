@@ -76,16 +76,26 @@ public static class ObjectExtensions
                     targetProperty.SetValue(ttarget, sourceValue);
                 }
                 // 场景 2: 属性类型不同，但可能是泛型 List<T> 类型
-                else if(isTargetList && isSourceList)
+                else if (isTargetList && isSourceList)
                 {
                     CopyGenericList(ttarget, sourceProperty, targetProperty, sourceValue);
                 }
+                // 场景 3: 属性类型不同，但是属性名称一样
                 else
                 {
                     var sObj = sourceProperty.GetValue(tsource);
+                    if (sObj == null)
+                    {
+                        continue;
+                    }
                     var tObj = targetProperty.GetValue(ttarget);
-                    // if (sObj == null && tObj == null)
-                    //     CopyTo(sObj,tObj);
+                    if (tObj == null)
+                    {
+                        tObj=Activator.CreateInstance(targetProperty.PropertyType);
+                    }
+                    
+                    CopyTo(sObj,tObj);
+                    targetProperty.SetValue(ttarget,tObj);
                 }
             }
         }

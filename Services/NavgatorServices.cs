@@ -1,42 +1,62 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using PMSWPF.Enums;
+using PMSWPF.Helper;
 using PMSWPF.Message;
 using PMSWPF.ViewModels;
 
 namespace PMSWPF.Services;
 
-public class NavgatorServices : ObservableRecipient, IRecipient<NavgatorMessage>
+public partial class NavgatorServices : ObservableRecipient, IRecipient<NavgatorMessage>
 {
-    private ViewModelBase currentViewModel;
+    private readonly ILogger<NavgatorServices> _logger;
 
-    public NavgatorServices()
+    [ObservableProperty] private ViewModelBase currentViewModel;
+
+    public NavgatorServices(ILogger<NavgatorServices> logger)
     {
+        _logger = logger;
         IsActive = true;
     }
 
-    public ViewModelBase CurrentViewModel
+    partial void OnCurrentViewModelChanging(ViewModelBase viewModel)
     {
-        get => currentViewModel;
-        set
-        {
-            currentViewModel = value;
-            OnViewModelChanged?.Invoke();
-            currentViewModel.OnLoaded();
-        }
+        viewModel?.OnLoading();
     }
+
+    partial void OnCurrentViewModelChanged(ViewModelBase viewModel)
+    {
+        OnViewModelChanged?.Invoke();
+        viewModel?.OnLoaded();
+    }
+
+    // public ViewModelBase CurrentViewModel
+    // {
+    //     get => currentViewModel;
+    //     set
+    //     {
+    //         value?.OnLoading();
+    //         currentViewModel = value;
+    //         OnViewModelChanged?.Invoke();
+    //         currentViewModel?.OnLoaded();
+    //     }
+    // }
+
 
     public void Receive(NavgatorMessage message)
     {
-        CurrentViewModel = message.Value;
-        CurrentViewModel.NavgateParameters = message.Parameters;
+        try
+        {
+            CurrentViewModel = message.Value;
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowMessage($"切换视图时发生了错误：{e.Message}", NotificationType.Error);
+            _logger.LogError($"切换视图时发生了错误：{e}");
+        }
     }
 
     public event Action OnViewModelChanged;
-
-    public void NavigateTo<T>() where T : ViewModelBase
-    {
-        // Application.Current
-        CurrentViewModel = App.Current.Services.GetService<T>();
-    }
 }

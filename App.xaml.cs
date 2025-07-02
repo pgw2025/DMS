@@ -50,7 +50,7 @@ public partial class App : Application
         container.AddSingleton<HomeView>();
         container.AddSingleton<DevicesView>();
         container.AddSingleton<DataTransformViewModel>();
-        container.AddSingleton<VariableTableViewModel>();
+        container.AddTransient<VariableTableViewModel>();
         container.AddSingleton<VariableTableView>();
         container.AddScoped<DeviceDetailViewModel>();
         container.AddScoped<DeviceDetailView>();

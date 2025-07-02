@@ -12,6 +12,7 @@ public class DbVariableTable
 
     public string Name { get; set; }
 
+    public bool IsActive { get; set; }
     [SugarColumn(IsNullable = true)] public string? Description { get; set; }
 
     [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
