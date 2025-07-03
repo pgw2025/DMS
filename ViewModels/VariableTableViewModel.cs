@@ -13,7 +13,6 @@ namespace PMSWPF.ViewModels;
 
 partial class VariableTableViewModel : ViewModelBase
 {
-
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private readonly IDialogService _dialogService;
 
@@ -50,6 +49,7 @@ partial class VariableTableViewModel : ViewModelBase
             DataVariables = new ObservableCollection<VariableData>(VariableTable.DataVariables);
         }
 
+
         IsLoadCompletion = true;
     }
 
@@ -62,13 +62,12 @@ partial class VariableTableViewModel : ViewModelBase
             var varData = await _dialogService.ShowAddVarDataDialog();
             // // 如果用户取消或对话框未返回设备，则直接返回
             if (varData == null)
-            {
-                // _logger.LogInformation("用户取消了添加设备操作。");
                 return;
-            }
 
             varData.VariableTableId = variableTable.Id;
             var addVarData = await _varDataRepository.AddAsync(varData);
+            DataVariables?.Add(addVarData);
+            variableTable.DataVariables?.Add(addVarData);
             var msg = addVarData.Id > 0 ? $"添加变量成功:{varData?.Name}" : $"添加变量成功:{varData.Name}";
             var type = addVarData.Id > 0 ? NotificationType.Success : NotificationType.Error;
             NotificationHelper.ShowMessage(msg, type);
@@ -78,7 +77,6 @@ partial class VariableTableViewModel : ViewModelBase
             string msg = $"添加变量的过程中发生了不可预期的错误：";
             Logger.Error(msg + e);
             NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
-            
         }
     }
 

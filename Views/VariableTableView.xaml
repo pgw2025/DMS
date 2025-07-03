@@ -45,8 +45,7 @@
             <controls:CommandBar x:Name="PrimaryCommandBar"
                                  DefaultLabelPosition="Right"
                                  IsOpen="False">
-                <ui:AppBarButton 
-                                 Command="{Binding AddVarDataCommand}"
+                <ui:AppBarButton Command="{Binding AddVarDataCommand}"
                                  CommandParameter="{Binding VariableTable}"
                                  Label="添加变量">
                     <ui:AppBarButton.Icon>
@@ -76,12 +75,11 @@
             <ikw:SimpleStackPanel Margin="5"
                                   Orientation="Horizontal"
                                   Spacing="10">
-                <ui:ToggleSwitch 
-                    OnContent="启用"
-                    OffContent="停用"
-                    Toggled="OnIsActiveChanged"
-                    FontSize="16"
-                    IsOn="{Binding VariableTable.IsActive}"/>
+                <ui:ToggleSwitch OnContent="启用"
+                                 OffContent="停用"
+                                 Toggled="OnIsActiveChanged"
+                                 FontSize="16"
+                                 IsOn="{Binding VariableTable.IsActive}" />
                 <TextBlock Style="{StaticResource VarTableLabelStyle}"
                            Text="变量表名称:" />
                 <TextBlock Style="{StaticResource VarTableValueStyle}"
@@ -94,14 +92,36 @@
                            Text="所属设备:" />
                 <TextBlock Style="{StaticResource VarTableValueStyle}"
                            Text="{Binding VariableTable.Device.Name}" />
-               
-                
+
+
             </ikw:SimpleStackPanel>
 
 
         </ikw:SimpleStackPanel>
 
-        <DataGrid Margin="10" />
+        <DataGrid Margin="10"
+                  AutoGenerateColumns="False"
+                  CanUserSortColumns="True"
+                  ItemsSource="{Binding DataVariables}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="名称" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="描述" Binding="{Binding Description}" />
+                <DataGridTextColumn Header="节点ID" Binding="{Binding NodeId}" />
+                <DataGridTextColumn Header="协议类型" Binding="{Binding ProtocolType}" />
+                <DataGridTextColumn Header="数据类型" Binding="{Binding DataType}" />
+                <DataGridTextColumn Header="信号类型" Binding="{Binding SignalType}" />
+                <DataGridTextColumn Header="当前值" Binding="{Binding DataValue}" />
+                <DataGridTextColumn Header="显示值" Binding="{Binding DisplayValue}" />
+                <DataGridTextColumn Header="更新时间" Binding="{Binding UpdateTime}" />
+                <DataGridTextColumn Header="转换规则" Binding="{Binding Converstion}" />
+                <DataGridCheckBoxColumn Header="启用" Binding="{Binding IsActive}" />
+                <DataGridCheckBoxColumn Header="保存" Binding="{Binding IsSave}" />
+                <DataGridTextColumn Header="保存范围" Binding="{Binding SaveRange}" />
+                <DataGridCheckBoxColumn Header="报警" Binding="{Binding IsAlarm}" />
+                <DataGridTextColumn Header="报警最小值" Binding="{Binding AlarmMin}" />
+                <DataGridTextColumn Header="报警最大值" Binding="{Binding AlarmMax}" />
+            </DataGrid.Columns>
+        </DataGrid>
     </DockPanel>
 
 </UserControl>

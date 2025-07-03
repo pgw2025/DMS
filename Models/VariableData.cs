@@ -38,14 +38,14 @@ public class VariableData
     public string Description { get; set; } = String.Empty;
 
     /// <summary>
-    /// 变量经过转换或格式化后的显示值。
-    /// </summary>
-    public string DisplayValue { get; set; } = String.Empty;
-
-    /// <summary>
     /// 变量唯一标识符。
     /// </summary>
     public int Id { get; set; }
+
+    /// <summary>
+    /// 变量经过转换或格式化后的显示值。
+    /// </summary>
+    public string DisplayValue { get; set; } = String.Empty;
 
     /// <summary>
     /// 指示是否需要对变量进行报警监测。

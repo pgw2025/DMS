@@ -12,21 +12,37 @@ using PMSWPF.Services;
 
 namespace PMSWPF.ViewModels;
 
+/// <summary>
+/// 主视图模型，负责应用程序的主导航和数据管理。
+/// </summary>
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly NavgatorServices _navgatorServices;
     private readonly DataServices _dataServices;
     private readonly IDialogService _dialogService;
     private readonly ILogger<MainViewModel> _logger;
-
-
-    [ObservableProperty] private ViewModelBase currentViewModel;
-    [ObservableProperty] private ObservableCollection<MenuBean> _menus;
-
     private readonly MenuRepository _menuRepository;
+    private readonly NavgatorServices _navgatorServices;
     private readonly VarTableRepository _varTableRepository;
 
+    /// <summary>
+    /// 当前显示的视图模型。
+    /// </summary>
+    [ObservableProperty]
+    private ViewModelBase currentViewModel;
 
+    /// <summary>
+    /// 应用程序的菜单列表。
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<MenuBean> _menus;
+
+    /// <summary>
+    /// 初始化 <see cref="MainViewModel"/> 类的新实例。
+    /// </summary>
+    /// <param name="navgatorServices">导航服务。</param>
+    /// <param name="dataServices">数据服务。</param>
+    /// <param name="dialogService">对话框服务。</param>
+    /// <param name="logger">日志记录器。</param>
     public MainViewModel(NavgatorServices navgatorServices, DataServices dataServices, IDialogService dialogService,
         ILogger<MainViewModel> logger)
     {
@@ -35,7 +51,7 @@ public partial class MainViewModel : ViewModelBase
         _dialogService = dialogService;
         _logger = logger;
         _varTableRepository = new VarTableRepository();
-        _menuRepository= new MenuRepository();
+        _menuRepository = new MenuRepository();
 
         _navgatorServices.OnViewModelChanged += () => { CurrentViewModel = _navgatorServices.CurrentViewModel; };
 
@@ -48,63 +64,9 @@ public partial class MainViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// 菜单点击切换
+    /// 添加变量表。
     /// </summary>
-    /// <param name="menu"></param>
-    public async Task MenuSelectionChanged(MenuBean menu)
-    {
-        try
-        {
-            switch (menu.Type)
-            {
-                case MenuType.MainMenu:
-                    menu.ViewModel = DataServicesHelper.GetMainViewModel(menu.Name);
-                    break;
-                case MenuType.DeviceMenu:
-                    menu.ViewModel = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
-                    menu.Data = _dataServices.Devices.FirstOrDefault(d => d.Id == menu.DataId);
-                    break;
-                case MenuType.VariableTableMenu:
-
-                    VariableTableViewModel varTableVM =
-                        App.Current.Services.GetRequiredService<VariableTableViewModel>();
-                    varTableVM.VariableTable =
-                        DataServicesHelper.FindVarTableForDevice(_dataServices.Devices, menu.DataId);
-
-                    varTableVM.IsLoadCompletion = false;
-                    menu.ViewModel = varTableVM;
-                    menu.Data = varTableVM.VariableTable;
-
-                    break;
-                case MenuType.AddVariableTableMenu:
-                    
-                    await AddVariableTable(menu);
-                    break;
-            }
-
-            if (menu.Type == MenuType.AddVariableTableMenu)
-                return;
-
-            if (menu.ViewModel != null)
-            {
-                MessageHelper.SendNavgatorMessage(menu.ViewModel);
-                _logger.LogInformation($"导航到：{menu.Name}");
-            }
-            else
-            {
-                NotificationHelper.ShowMessage($"菜单：{menu.Name},没有对应的ViewModel.");
-                _logger.LogInformation($"菜单：{menu.Name},没有对应的ViewModel.");
-            }
-        }
-        catch (Exception e)
-        {
-            _logger.LogError($"菜单切换是出现了错误:{e}");
-            NotificationHelper.ShowMessage($"菜单切换是出现了错误:{e.Message}", NotificationType.Error);
-        }
-    }
-
-    
-
+    /// <param name="menu">当前菜单项，用于获取父级设备信息。</param>
     private async Task AddVariableTable(MenuBean menu)
     {
         try
@@ -116,7 +78,7 @@ public partial class MainViewModel : ViewModelBase
                 NotificationHelper.ShowMessage("操作失败：无法获取有效的设备信息。", NotificationType.Error);
                 return;
             }
-            
+
 
             // 2. 显示添加变量表对话框
             var varTable = await _dialogService.ShowAddVarTableDialog();
@@ -175,6 +137,62 @@ public partial class MainViewModel : ViewModelBase
             // 捕获并记录所有未预料的异常
             _logger.LogError(e, "添加变量表时出现了未预期的错误。");
             NotificationHelper.ShowMessage($"添加变量表时出现了错误:{e.Message}", NotificationType.Error);
+        }
+    }
+
+    /// <summary>
+    /// 处理菜单选择变化的逻辑。
+    /// </summary>
+    /// <param name="menu">被选中的菜单项。</param>
+    public async Task MenuSelectionChanged(MenuBean menu)
+    {
+        try
+        {
+            switch (menu.Type)
+            {
+                case MenuType.MainMenu:
+                    menu.ViewModel = DataServicesHelper.GetMainViewModel(menu.Name);
+                    break;
+                case MenuType.DeviceMenu:
+                    menu.ViewModel = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
+                    menu.Data = _dataServices.Devices.FirstOrDefault(d => d.Id == menu.DataId);
+                    break;
+                case MenuType.VariableTableMenu:
+
+                    VariableTableViewModel varTableVM =
+                        App.Current.Services.GetRequiredService<VariableTableViewModel>();
+                    varTableVM.VariableTable =
+                        DataServicesHelper.FindVarTableForDevice(_dataServices.Devices, menu.DataId);
+
+                    varTableVM.IsLoadCompletion = false;
+                    menu.ViewModel = varTableVM;
+                    menu.Data = varTableVM.VariableTable;
+
+                    break;
+                case MenuType.AddVariableTableMenu:
+
+                    await AddVariableTable(menu);
+                    break;
+            }
+
+            if (menu.Type == MenuType.AddVariableTableMenu)
+                return;
+
+            if (menu.ViewModel != null)
+            {
+                MessageHelper.SendNavgatorMessage(menu.ViewModel);
+                _logger.LogInformation($"导航到：{menu.Name}");
+            }
+            else
+            {
+                NotificationHelper.ShowMessage($"菜单：{menu.Name},没有对应的ViewModel.");
+                _logger.LogInformation($"菜单：{menu.Name},没有对应的ViewModel.");
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"菜单切换是出现了错误:{e}");
+            NotificationHelper.ShowMessage($"菜单切换是出现了错误:{e.Message}", NotificationType.Error);
         }
     }
 }
