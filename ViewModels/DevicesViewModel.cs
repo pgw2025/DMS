@@ -11,19 +11,36 @@ using PMSWPF.Services;
 
 namespace PMSWPF.ViewModels;
 
+/// <summary>
+/// 设备管理视图模型，负责设备的增删改查操作。
+/// </summary>
 public partial class DevicesViewModel : ViewModelBase
 {
+    private readonly DataServices _dataServices;
+    private readonly IDialogService _dialogService;
     private readonly DeviceRepository _deviceRepository;
     private readonly ILogger<DevicesViewModel> _logger;
-    private readonly IDialogService _dialogService;
-    private readonly DataServices _dataServices;
-
-
-    [ObservableProperty] private ObservableCollection<Device> _devices;
-    [ObservableProperty] private Device _selectedDevice;
     private readonly MenuRepository _menuRepository;
     private readonly VarTableRepository _varTableRepository;
 
+    /// <summary>
+    /// 设备列表。
+    /// </summary>
+    [ObservableProperty]
+    private ObservableCollection<Device> _devices;
+
+    /// <summary>
+    /// 当前选中的设备。
+    /// </summary>
+    [ObservableProperty]
+    private Device _selectedDevice;
+
+    /// <summary>
+    /// 初始化 <see cref="DevicesViewModel"/> 类的新实例。
+    /// </summary>
+    /// <param name="logger">日志记录器。</param>
+    /// <param name="dialogService">对话框服务。</param>
+    /// <param name="dataServices">数据服务。</param>
     public DevicesViewModel(
         ILogger<DevicesViewModel> logger, IDialogService dialogService, DataServices dataServices
     )
@@ -39,10 +56,8 @@ public partial class DevicesViewModel : ViewModelBase
         _dataServices.OnDeviceListChanged += (devices) => { Devices = new ObservableCollection<Device>(devices); };
     }
 
-
-    
     /// <summary>
-    /// 添加设备
+    /// 添加设备命令。
     /// </summary>
     [RelayCommand]
     public async void AddDevice()
@@ -55,44 +70,13 @@ public partial class DevicesViewModel : ViewModelBase
             _logger.LogInformation("用户取消了添加设备操作。");
             return;
         }
+
         await _deviceRepository.AddDeviceAndMenu(device);
     }
 
-
     /// <summary>
-    /// 编辑设备
+    /// 删除设备命令。
     /// </summary>
-    [RelayCommand]
-    public async void EditDevice()
-    {
-        try
-        {
-            if (SelectedDevice == null)
-            {
-                NotificationHelper.ShowMessage("你没有选择任何设备，请选择设备后再点击编辑设备", NotificationType.Error);
-                return;
-            }
-
-            var editDievce = await _dialogService.ShowEditDeviceDialog(SelectedDevice);
-            if (editDievce != null)
-            {
-                // 更新菜单
-                var res = await _deviceRepository.Edit(editDievce);
-                var menu = DataServicesHelper.FindMenusForDevice(editDievce, _dataServices.MenuTrees);
-                if (menu != null)
-                    await _menuRepository.Edit(menu);
-
-                MessageHelper.SendLoadMessage(LoadTypes.Menu);
-                MessageHelper.SendLoadMessage(LoadTypes.Devices);
-            }
-        }
-        catch (Exception e)
-        {
-            NotificationHelper.ShowMessage($"编辑设备的过程中发生错误：{e.Message}", NotificationType.Error);
-            _logger.LogError($"编辑设备的过程中发生错误：{e}");
-        }
-    }
-
     [RelayCommand]
     public async void DeleteDevice()
     {
@@ -124,6 +108,40 @@ public partial class DevicesViewModel : ViewModelBase
         {
             NotificationHelper.ShowMessage($"删除设备的过程中发生错误：{e.Message}", NotificationType.Error);
             _logger.LogError($"删除设备的过程中发生错误：{e}");
+        }
+    }
+
+    /// <summary>
+    /// 编辑设备命令。
+    /// </summary>
+    [RelayCommand]
+    public async void EditDevice()
+    {
+        try
+        {
+            if (SelectedDevice == null)
+            {
+                NotificationHelper.ShowMessage("你没有选择任何设备，请选择设备后再点击编辑设备", NotificationType.Error);
+                return;
+            }
+
+            var editDievce = await _dialogService.ShowEditDeviceDialog(SelectedDevice);
+            if (editDievce != null)
+            {
+                // 更新菜单
+                var res = await _deviceRepository.Edit(editDievce);
+                var menu = DataServicesHelper.FindMenusForDevice(editDievce, _dataServices.MenuTrees);
+                if (menu != null)
+                    await _menuRepository.Edit(menu);
+
+                MessageHelper.SendLoadMessage(LoadTypes.Menu);
+                MessageHelper.SendLoadMessage(LoadTypes.Devices);
+            }
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowMessage($"编辑设备的过程中发生错误：{e.Message}", NotificationType.Error);
+            _logger.LogError($"编辑设备的过程中发生错误：{e}");
         }
     }
 }
