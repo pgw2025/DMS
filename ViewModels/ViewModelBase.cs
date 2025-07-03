@@ -13,6 +13,11 @@ public abstract class ViewModelBase : ObservableObject
     {
         
     }
+    
+    public virtual async Task<bool> OnExitAsync()
+    {
+        return true;
+    }
 
 
 

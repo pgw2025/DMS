@@ -13,7 +13,8 @@ public partial class NavgatorServices : ObservableRecipient, IRecipient<Navgator
 {
     private readonly ILogger<NavgatorServices> _logger;
 
-    [ObservableProperty] private ViewModelBase currentViewModel;
+    // [ObservableProperty]
+    private ViewModelBase currentViewModel;
 
     public NavgatorServices(ILogger<NavgatorServices> logger)
     {
@@ -21,35 +22,44 @@ public partial class NavgatorServices : ObservableRecipient, IRecipient<Navgator
         IsActive = true;
     }
 
-    partial void OnCurrentViewModelChanging(ViewModelBase viewModel)
-    {
-        viewModel?.OnLoading();
-    }
-
-    partial void OnCurrentViewModelChanged(ViewModelBase viewModel)
-    {
-        OnViewModelChanged?.Invoke();
-        viewModel?.OnLoaded();
-    }
-
-    // public ViewModelBase CurrentViewModel
+    // partial void OnCurrentViewModelChanging(ViewModelBase viewModel)
     // {
-    //     get => currentViewModel;
-    //     set
-    //     {
-    //         value?.OnLoading();
-    //         currentViewModel = value;
-    //         OnViewModelChanged?.Invoke();
-    //         currentViewModel?.OnLoaded();
-    //     }
+    //     viewModel?.OnLoading();
+    // }
+    //
+    // partial void OnCurrentViewModelChanged(ViewModelBase viewModel)
+    // {
+    //     OnViewModelChanged?.Invoke();
+    //     viewModel?.OnLoaded();
     // }
 
+    public ViewModelBase CurrentViewModel
+    {
+        get => currentViewModel;
+        set { currentViewModel = value; }
+    }
 
-    public void Receive(NavgatorMessage message)
+
+    public async void Receive(NavgatorMessage message)
     {
         try
         {
+            ViewModelBase nextViewModel = message.Value;
+            //如果OnExit返回False终止跳转
+
+            if (currentViewModel != null)
+            {
+                var isExit = await currentViewModel.OnExitAsync();
+                if (!isExit)
+                {
+                    return;
+                }
+            }
+
+            nextViewModel?.OnLoading();
             CurrentViewModel = message.Value;
+            OnViewModelChanged?.Invoke();
+            currentViewModel?.OnLoaded();
         }
         catch (Exception e)
         {

@@ -63,6 +63,52 @@ partial class VariableTableViewModel : ViewModelBase
 
         IsLoadCompletion = true;
     }
+    /// <summary>
+    /// 退出当前实体时调用
+    /// </summary>
+    /// <returns></returns>
+    public override async Task<bool> OnExitAsync()
+    {
+        var modifiedDatas = DataVariables.Where(d => d.IsModified == true)
+                                         .ToList();
+        if (modifiedDatas.Count == 0)
+            return true;
+        var isExit = await _dialogService.ShowConfrimeDialog(
+            "数据未保存", $"你有{modifiedDatas.Count}个修改的变量没有保存，离开后这些数据就可能丢失了确认要离开吗？", "离开");
+        if (!isExit)
+        {
+            // 不保存数据，还原原来的数据
+            foreach (var modifiedData in modifiedDatas)
+            {
+                var oldData  = _originalDataVariables.First(od=>od.Id ==modifiedData.Id);
+                oldData.CopyTo( modifiedData);
+                modifiedData.IsModified = false;
+            }
+
+            return false;
+
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 保存修改过的变量数据
+    /// </summary>
+    [RelayCommand]
+    private async void SaveModifiedVarData()
+    {
+        var modifiedDatas = DataVariables.Where(d => d.IsModified == true)
+                                         .ToList();
+        ///更新数据库
+        await _varDataRepository.UpdateAsync(modifiedDatas);
+        // 还原修改状态
+        foreach (var modifiedData in modifiedDatas)
+        {
+            modifiedData.IsModified = false;
+        }
+        NotificationHelper.ShowMessage($"修改的{modifiedDatas.Count}变量保存成功.", NotificationType.Success);
+    }
 
     [RelayCommand]
     public async void EditVarData(VariableTable variableTable)
@@ -74,7 +120,6 @@ partial class VariableTableViewModel : ViewModelBase
             // // 如果用户取消或对话框未返回设备，则直接返回
             if (varData == null)
                 return;
-
             varData.VariableTableId = variableTable.Id;
             // 更新数据库
             await _varDataRepository.UpdateAsync(varData);
@@ -106,12 +151,14 @@ partial class VariableTableViewModel : ViewModelBase
                 return;
 
             varData.VariableTableId = variableTable.Id;
-            var addVarData = await _varDataRepository.AddAsync(varData);
-            DataVariables?.Add(addVarData);
-            variableTable.DataVariables?.Add(addVarData);
-            var msg = addVarData.Id > 0 ? $"添加变量成功:{varData?.Name}" : $"添加变量成功:{varData.Name}";
-            var type = addVarData.Id > 0 ? NotificationType.Success : NotificationType.Error;
-            NotificationHelper.ShowMessage(msg, type);
+            // 更新数据库
+            await _varDataRepository.UpdateAsync(varData);
+            // 更新当前页面的
+            var index = variableTable.DataVariables.IndexOf(SelectedVariableData);
+            // 更新变量表中的
+            if (index >= 0 && index < variableTable.DataVariables.Count)
+                variableTable.DataVariables[index] = varData;
+            NotificationHelper.ShowMessage($"添加变量成功:{varData?.Name}", NotificationType.Success);
         }
         catch (Exception e)
         {

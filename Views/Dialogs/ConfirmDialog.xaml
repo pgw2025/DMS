@@ -20,10 +20,11 @@
 
     </ui:ContentDialog.Resources>
 
-    <Grid Width="480"
+    <Grid Width="360"
           Margin="10">
         <TextBlock Margin="20"
-                   FontSize="18"
+                   FontSize="14"
+                   TextWrapping="Wrap"
                    FontWeight="Bold"
                    Text="{Binding Message}">
         </TextBlock>

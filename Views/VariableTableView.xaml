@@ -61,11 +61,19 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
+                
                 <ui:AppBarButton Command="{Binding EditVarDataCommand}"
                                  CommandParameter="{Binding VariableTable}"
                                  Label="编辑变量">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                    </ui:AppBarButton.Icon>
+
+                </ui:AppBarButton>
+                <ui:AppBarButton  Command="{Binding SaveModifiedVarDataCommand}"
+                                 Label="保存变量">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon  Icon="{x:Static ui:SegoeFluentIcons.Save}" />
                     </ui:AppBarButton.Icon>
 
                 </ui:AppBarButton>

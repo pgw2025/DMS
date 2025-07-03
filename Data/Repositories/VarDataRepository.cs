@@ -86,6 +86,26 @@ public class VarDataRepository
             return result;
         }
     }
+    
+    /// <summary>
+    /// 更新VariableData
+    /// </summary>
+    /// <param name="variableData">VariableData实体</param>
+    /// <returns></returns>
+    public async Task<int> UpdateAsync(List<VariableData> variableDatas)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        using (var _db = DbContext.GetInstance())
+        {
+            var dbVarDatas = variableDatas.Select(vd=>vd.CopyTo<DbVariableData>());
+            var result = await _db.Updateable(dbVarDatas.ToList()).ExecuteCommandAsync();
+           
+            stopwatch.Stop();
+            Logger.Info($"更新VariableData  {variableDatas.Count()}个 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
+        }
+    }
 
     /// <summary>
     /// 根据ID删除VariableData

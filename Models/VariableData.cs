@@ -22,7 +22,8 @@ public partial class VariableData : ObservableObject
     /// <summary>
     /// 数据转换规则或表达式。
     /// </summary>
-    public string Converstion { get; set; } = String.Empty;
+    [ObservableProperty]
+    private string converstion  = String.Empty;
 
     /// <summary>
     /// 数据类型，例如Int、Float、String等。
@@ -32,12 +33,14 @@ public partial class VariableData : ObservableObject
     /// <summary>
     /// 变量当前原始数据值。
     /// </summary>
-    public string DataValue { get; set; } = String.Empty;
+    [ObservableProperty]
+    private string dataValue  = String.Empty;
 
     /// <summary>
     /// 变量描述。
     /// </summary>
-    public string Description { get; set; } = String.Empty;
+    [ObservableProperty]
+    private string description = String.Empty;
 
     /// <summary>
     /// 变量唯一标识符。
@@ -47,7 +50,8 @@ public partial class VariableData : ObservableObject
     /// <summary>
     /// 变量经过转换或格式化后的显示值。
     /// </summary>
-    public string DisplayValue { get; set; } = String.Empty;
+    [ObservableProperty]
+    private string displayValue  = String.Empty;
 
     /// <summary>
     /// 指示是否需要对变量进行报警监测。
@@ -83,7 +87,8 @@ public partial class VariableData : ObservableObject
     /// <summary>
     /// 变量名称。
     /// </summary>
-    public string Name { get; set; }
+    [ObservableProperty]
+    private string name;
 
     /// <summary>
     /// 节点ID，用于标识变量在设备或系统中的唯一路径。
@@ -108,7 +113,8 @@ public partial class VariableData : ObservableObject
     /// <summary>
     /// 变量数据最后更新时间。
     /// </summary>
-    public DateTime UpdateTime { get; set; } = DateTime.Now;
+   [ObservableProperty]
+    private DateTime updateTime  = DateTime.Now;
 
     /// <summary>
     /// 最后更新变量数据的用户。
