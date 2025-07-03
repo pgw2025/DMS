@@ -1,15 +1,17 @@
-﻿using PMSWPF.Enums;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using PMSWPF.Enums;
 
 namespace PMSWPF.Models;
 
 /// <summary>
 /// 表示变量数据信息。
 /// </summary>
-public class VariableData
+public partial class VariableData : ObservableObject
 {
     /// <summary>
     /// 报警的最大值阈值。
     /// </summary>
+
     public double AlarmMax { get; set; }
 
     /// <summary>
@@ -63,6 +65,12 @@ public class VariableData
     public bool IsDeleted { get; set; }
 
     /// <summary>
+    /// 指示变量是否已被修改了。
+    /// </summary>
+    [ObservableProperty]
+    private bool isModified;
+
+    /// <summary>
     /// 指示是否需要保存变量数据。
     /// </summary>
     public bool IsSave { get; set; }
@@ -111,4 +119,5 @@ public class VariableData
     /// 关联的变量表ID。
     /// </summary>
     public int VariableTableId { get; set; }
+
 }

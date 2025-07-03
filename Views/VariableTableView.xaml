@@ -8,11 +8,20 @@
              xmlns:vm="clr-namespace:PMSWPF.ViewModels"
              xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
              mc:Ignorable="d"
+             xmlns:vc="clr-namespace:PMSWPF.ValueConverts"
+             xmlns:ex="clr-namespace:PMSWPF.Extensions"
+             xmlns:en="clr-namespace:PMSWPF.Enums"
              Loaded="VariableTableView_OnLoaded"
              d:DataContext="{d:DesignInstance vm:VariableTableViewModel}"
              d:DesignHeight="600"
              d:DesignWidth="800">
     <UserControl.Resources>
+        <ex:EnumBindingSource x:Key="signalType"
+                              EnumType="{x:Type en:SignalType}" />
+        <ex:EnumBindingSource x:Key="protocolType"
+                              EnumType="{x:Type en:ProtocolType}" />
+        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+
         <!-- 标签字体的样式 -->
         <Style TargetType="TextBlock"
                x:Key="VarTableLabelStyle">
@@ -101,27 +110,93 @@
         </ikw:SimpleStackPanel>
 
         <DataGrid Margin="10"
+                  CellEditEnding="DataGrid_OnCellEditEnding"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="True"
                   SelectedItem="{Binding SelectedVariableData}"
                   ItemsSource="{Binding DataVariables}">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <!-- <Setter Property="Background" Value="#fff"/> -->
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsModified}"
+                                     Value="True">
+                            <Setter Property="Background"
+                                    Value="Pink" />
+                            <Setter Property="Foreground"
+                                    Value="#000" />
+                            <Setter Property="FontWeight"
+                                    Value="Bold" />
+                        </DataTrigger>
+
+                        <Trigger Property="IsMouseOver"
+                                 Value="True">
+                            <Setter Property="Background"
+                                    Value="LightBlue" />
+                        </Trigger>
+                        <Trigger Property="IsSelected"
+                                 Value="True">
+                            <Setter Property="Background"
+                                    Value="DodgerBlue" />
+                            <Setter Property="Foreground"
+                                    Value="White" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
+
             <DataGrid.Columns>
-                <DataGridTextColumn Header="名称" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="描述" Binding="{Binding Description}" />
-                <DataGridTextColumn Header="节点ID" Binding="{Binding NodeId}" />
-                <DataGridTextColumn Header="协议类型" Binding="{Binding ProtocolType}" />
-                <DataGridTextColumn Header="数据类型" Binding="{Binding DataType}" />
-                <DataGridTextColumn Header="信号类型" Binding="{Binding SignalType}" />
-                <DataGridTextColumn Header="当前值" Binding="{Binding DataValue}" />
-                <DataGridTextColumn Header="显示值" Binding="{Binding DisplayValue}" />
-                <DataGridTextColumn Header="更新时间" Binding="{Binding UpdateTime}" />
-                <DataGridTextColumn Header="转换规则" Binding="{Binding Converstion}" />
-                <DataGridCheckBoxColumn Header="启用" Binding="{Binding IsActive}" />
-                <DataGridCheckBoxColumn Header="保存" Binding="{Binding IsSave}" />
-                <DataGridTextColumn Header="保存范围" Binding="{Binding SaveRange}" />
-                <DataGridCheckBoxColumn Header="报警" Binding="{Binding IsAlarm}" />
-                <DataGridTextColumn Header="报警最小值" Binding="{Binding AlarmMin}" />
-                <DataGridTextColumn Header="报警最大值" Binding="{Binding AlarmMax}" />
+                <DataGridTextColumn Header="名称"
+                                    Binding="{Binding Name}" />
+                <DataGridTextColumn Header="描述"
+                                    Binding="{Binding Description}" />
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="节点ID"
+                                    Binding="{Binding NodeId}" />
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="协议类型"
+                                    Binding="{Binding ProtocolType}" />
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="数据类型"
+                                    Binding="{Binding DataType}" />
+                <DataGridTemplateColumn Header="信号类型">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding SignalType, Converter={StaticResource EnumDescriptionConverter}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding Source={StaticResource signalType}}"
+                                      SelectedItem="{Binding SignalType}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="当前值"
+                                    Binding="{Binding DataValue}" />
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="显示值"
+                                    Binding="{Binding DisplayValue}" />
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="更新时间"
+                                    Binding="{Binding UpdateTime}" />
+                <DataGridTextColumn Header="转换规则"
+                                    Binding="{Binding Converstion}" />
+                <DataGridCheckBoxColumn Header="启用"
+                                        Binding="{Binding IsActive}" />
+                <DataGridCheckBoxColumn Header="保存"
+                                        Binding="{Binding IsSave}" />
+                <DataGridTextColumn Header="保存范围"
+                                    Binding="{Binding SaveRange}" />
+                <DataGridCheckBoxColumn Header="报警"
+                                        Binding="{Binding IsAlarm}" />
+                <DataGridTextColumn Header="报警最小值"
+                                    Binding="{Binding AlarmMin}" />
+                <DataGridTextColumn Header="报警最大值"
+                                    Binding="{Binding AlarmMax}" />
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

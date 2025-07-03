@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Newtonsoft.Json;
 using NLog;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
+using PMSWPF.Extensions;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 using PMSWPF.Services;
@@ -22,6 +24,8 @@ partial class VariableTableViewModel : ViewModelBase
 
     [ObservableProperty]
     private ObservableCollection<VariableData> _dataVariables;
+
+    private ObservableCollection<VariableData> _originalDataVariables;
 
     [ObservableProperty]
     private VariableData _selectedVariableData;
@@ -50,6 +54,10 @@ partial class VariableTableViewModel : ViewModelBase
         if (VariableTable.DataVariables != null)
         {
             DataVariables = new ObservableCollection<VariableData>(VariableTable.DataVariables);
+            // 3. 创建原始数据的深拷贝备份
+            // 推荐使用 JSON 序列化/反序列化进行深度拷贝
+            var serialized = JsonConvert.SerializeObject(DataVariables);
+            _originalDataVariables = JsonConvert.DeserializeObject<ObservableCollection<VariableData>>(serialized);
         }
 
 
@@ -113,6 +121,13 @@ partial class VariableTableViewModel : ViewModelBase
         }
     }
 
+    public void OnVarTableDataChanged(VariableData varData)
+    {
+        var originelData = _originalDataVariables.FirstOrDefault(d => d.Id == varData.Id);
+
+        // varData.IsModified = originelData.Equals(varData);
+        // varData.IsModified = originelData.ValueEquals(varData);
+    }
 
     public async Task OnIsActiveChanged(bool active)
     {
