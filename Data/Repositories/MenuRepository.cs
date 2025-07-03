@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using NLog;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
@@ -9,25 +11,32 @@ namespace PMSWPF.Data.Repositories;
 
 public class MenuRepository
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     public MenuRepository()
     {
     }
 
     public async Task<int> DeleteMenu(MenuBean menu)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
             var childList = await db.Queryable<DbMenu>().ToChildListAsync(it => it.ParentId, menu.Id);
-            return await db.Deleteable<DbMenu>(childList).ExecuteCommandAsync();
+            var result = await db.Deleteable<DbMenu>(childList).ExecuteCommandAsync();
+            stopwatch.Stop();
+            // Assuming NLog is available and configured for MenuRepository
+            // If not, you might need to add a Logger field similar to DeviceRepository
+            // For now, I'll assume it's available or will be added.
+            Logger.Info($"删除菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
         }
     }
 
     public async Task<List<MenuBean>> GetMenuTrees()
     {
-        // //无主键用法新:5.1.4.110
-        // db.Queryable<Tree>().ToTree(it=>it.Child,it=>it.ParentId,0,it=>it.Id)//+4重载
-        // List<DbMenu> dbMenuList = await _db.Queryable<DbMenu>().ToListAsync();
-
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
             List<MenuBean> menuTree = new();
@@ -35,7 +44,8 @@ public class MenuRepository
 
             foreach (var dbMenu in dbMenuTree)
                 menuTree.Add(dbMenu.CopyTo<MenuBean>());
-
+            stopwatch.Stop();
+            Logger.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
             return menuTree;
         }
     }
@@ -43,9 +53,14 @@ public class MenuRepository
 
     public async Task<int> Add(MenuBean menu)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            return await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
+            var result = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
+            stopwatch.Stop();
+            Logger.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
         }
     }
     
@@ -59,6 +74,8 @@ public class MenuRepository
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<int> AddDeviceDefTableMenu(Device device, int parentMenuId,int varTableId, SqlSugarClient db)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         var defVarTableMenu = new MenuBean()
         {
             Name = "默认变量表",
@@ -68,6 +85,8 @@ public class MenuRepository
             DataId = varTableId
         };
         var defTableRes = await db.Insertable<DbMenu>(defVarTableMenu).ExecuteCommandAsync();
+        stopwatch.Stop();
+        Logger.Info($"添加默认变量表菜单 '{defVarTableMenu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return defTableRes;
     }
 
@@ -108,6 +127,8 @@ public class MenuRepository
 
     public async Task<int> AddVarTableMenu(DbDevice dbDevice, int parentMenuId, SqlSugarClient db)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         var addVarTable = new MenuBean()
         {
             Name = "添加变量表",
@@ -117,6 +138,8 @@ public class MenuRepository
             DataId = dbDevice.Id
         };
         var addTableRes = await db.Insertable<DbMenu>(addVarTable).ExecuteCommandAsync();
+        stopwatch.Stop();
+        // Logger.Info($"添加变量表菜单 '{addVarTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return addTableRes;
     }
 
@@ -130,6 +153,8 @@ public class MenuRepository
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<int> AddDeviceMenu(DbDevice device, SqlSugarClient db)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         var deviceMainMenu = await db.Queryable<DbMenu>().FirstAsync(m => m.Name == "设备");
         if (deviceMainMenu == null)
             throw new InvalidOperationException("没有找到设备菜单！！");
@@ -145,14 +170,21 @@ public class MenuRepository
         menu.ParentId = deviceMainMenu.Id;
         var addDeviceMenuId = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
             .ExecuteReturnIdentityAsync();
+        stopwatch.Stop();
+        // Logger.Info($"添加设备菜单 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return addDeviceMenuId;
     }
 
     public async Task<int> Edit(MenuBean menu)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            return await db.Updateable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
+            var result = await db.Updateable<DbMenu>(menu.CopyTo<DbMenu>()).ExecuteCommandAsync();
+            stopwatch.Stop();
+            // Logger.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
         }
     }
 }

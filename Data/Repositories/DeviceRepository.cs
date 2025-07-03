@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using NLog;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
@@ -21,12 +22,22 @@ public class DeviceRepository
     }
 
 
+    /// <summary>
+    /// 编辑设备信息。
+    /// </summary>
+    /// <param name="device">要编辑的设备对象。</param>
+    /// <returns>受影响的行数。</returns>
     public async Task<int> Edit(Device device)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            return await db.Updateable<DbDevice>(device.CopyTo<DbDevice>())
-                           .ExecuteCommandAsync();
+            var result = await db.Updateable<DbDevice>(device.CopyTo<DbDevice>())
+                               .ExecuteCommandAsync();
+            stopwatch.Stop();
+            Logger.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
         }
     }
 
@@ -39,8 +50,11 @@ public class DeviceRepository
     {
         using (var db = DbContext.GetInstance())
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             var dlist = await db.Queryable<DbDevice>()
                                 .Includes(d => d.VariableTables, dv => dv.Device)
+                                .Includes(d => d.VariableTables, dvd => dvd.DataVariables ,data=>data.VariableTable)
                                 .ToListAsync();
             var devices = new List<Device>();
             foreach (var dbDevice in dlist)
@@ -48,26 +62,48 @@ public class DeviceRepository
                 var device = dbDevice.CopyTo<Device>();
                 devices.Add(device);
             }
+            stopwatch.Stop();
+            Logger.Info($"加载设备列表总耗时：{stopwatch.ElapsedMilliseconds}ms");
 
             return devices;
         }
     }
 
+    /// <summary>
+    /// 根据ID获取设备信息。
+    /// </summary>
+    /// <param name="id">设备ID。</param>
+    /// <returns>对应的DbDevice对象。</returns>
     public async Task<DbDevice> GetById(int id)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            return await db.Queryable<DbDevice>()
-                           .FirstAsync(p => p.Id == id);
+            var result = await db.Queryable<DbDevice>()
+                               .FirstAsync(p => p.Id == id);
+            stopwatch.Stop();
+            Logger.Info($"根据ID '{id}' 获取设备耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
         }
     }
 
+    /// <summary>
+    /// 根据ID删除设备。
+    /// </summary>
+    /// <param name="id">要删除的设备ID。</param>
+    /// <returns>受影响的行数。</returns>
     public async Task<int> DeleteById(int id)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            return await db.Deleteable<DbDevice>(new DbDevice { Id = id })
-                           .ExecuteCommandAsync();
+            var result = await db.Deleteable<DbDevice>(new DbDevice { Id = id })
+                               .ExecuteCommandAsync();
+            stopwatch.Stop();
+            Logger.Info($"删除设备ID '{id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
         }
     }
 
@@ -77,6 +113,8 @@ public class DeviceRepository
     /// <param name="device"></param>
     public async Task AddDeviceAndMenu(Device device)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         var db = DbContext.GetInstance();
         try
         {
@@ -123,6 +161,11 @@ public class DeviceRepository
             Logger.Error(errorMsg + e);
             NotificationHelper.ShowMessage(errorMsg + e.Message, NotificationType.Error);
         }
+        finally
+        {
+            stopwatch.Stop();
+            Logger.Info($"添加设备 '{device.Name}' 及相关菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
+        }
     }
 
     /// <summary>
@@ -134,6 +177,8 @@ public class DeviceRepository
     /// <exception cref="InvalidOperationException"></exception>
     private async Task<DbDevice> Add(Device device, SqlSugarClient db)
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         var exist = await db.Queryable<DbDevice>()
                             .Where(d => d.Name == device.Name)
                             .FirstAsync();
@@ -142,7 +187,10 @@ public class DeviceRepository
         var dbDevice = new DbDevice();
         device.CopyTo(dbDevice);
         // 是否添加默认变量表
-        return await db.Insertable<DbDevice>(dbDevice)
+        var result = await db.Insertable<DbDevice>(dbDevice)
                        .ExecuteReturnEntityAsync();
+        stopwatch.Stop();
+        Logger.Info($"单独添加设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
     }
 }

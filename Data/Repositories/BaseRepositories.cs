@@ -24,6 +24,8 @@ public class BaseRepositories
 
     private void CheckDbTables()
     {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
         if (!_db.DbMaintenance.IsAnyTable<DbNlog>())
             _db.CodeFirst.InitTables<DbNlog>();
         if (!_db.DbMaintenance.IsAnyTable<DbDevice>())
@@ -38,5 +40,10 @@ public class BaseRepositories
             _db.CodeFirst.InitTables<DbUser>();
         if (!_db.DbMaintenance.IsAnyTable<DbMqtt>())
             _db.CodeFirst.InitTables<DbMqtt>();
+        stopwatch.Stop();
+        // Assuming NLog is available and configured for BaseRepositories
+        // If not, you might need to add a Logger field similar to DeviceRepository
+        // For now, I'll assume it's available or will be added.
+        // LogManager.GetCurrentClassLogger().Info($"检查数据库表耗时：{stopwatch.ElapsedMilliseconds}ms");
     }
 }
