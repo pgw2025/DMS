@@ -94,14 +94,14 @@ public partial class App : Application
             if (ex != null)
             {
                 // 可以使用一个专用的 Logger 来记录未处理异常
-                LogManager.GetLogger("UnhandledExceptionLogger").Fatal(ex, "应用程序发生未处理的异常。");
+                LogManager.GetLogger("UnhandledExceptionLogger").Fatal($"应用程序发生未处理的异常:{ex}");
             }
         };
 
         // 捕获 Dispatcher 线程上的未处理异常 (UI 线程)
         this.DispatcherUnhandledException += (sender, args) =>
         {
-            LogManager.GetLogger("DispatcherExceptionLogger").Fatal(args.Exception, "UI 线程发生未处理的异常。");
+            LogManager.GetLogger("DispatcherExceptionLogger").Fatal( $"UI 线程发生未处理的异常:{args.Exception}");
             // 标记为已处理，防止应用程序崩溃 (生产环境慎用，可能掩盖问题)
             // args.Handled = true; 
         };
@@ -110,7 +110,7 @@ public partial class App : Application
         // 可以通过以下方式捕获 Task 中的异常。
         TaskScheduler.UnobservedTaskException += (sender, args) =>
         {
-            LogManager.GetLogger("UnobservedTaskExceptionLogger").Fatal(args.Exception, "异步任务发生未观察到的异常。");
+            LogManager.GetLogger("UnobservedTaskExceptionLogger").Fatal( $"异步任务发生未观察到的异常:{args.Exception}");
             // args.SetObserved(); // 标记为已观察，防止进程终止
         };
 
