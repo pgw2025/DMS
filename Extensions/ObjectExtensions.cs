@@ -93,9 +93,13 @@ public static class ObjectExtensions
                     {
                         tObj=Activator.CreateInstance(targetProperty.PropertyType);
                     }
+
+                    if (sObj!=null && tObj!=null)
+                    {
+                        CopyTo(sObj,tObj);
+                        targetProperty.SetValue(ttarget,tObj);
+                    }
                     
-                    CopyTo(sObj,tObj);
-                    targetProperty.SetValue(ttarget,tObj);
                 }
             }
         }
