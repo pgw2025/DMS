@@ -52,8 +52,9 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
-                <ui:AppBarButton x:Name="EditButton"
-                                 Label="Edit">
+                <ui:AppBarButton Command="{Binding EditVarDataCommand}"
+                                 CommandParameter="{Binding VariableTable}"
+                                 Label="编辑变量">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                     </ui:AppBarButton.Icon>
@@ -102,6 +103,7 @@
         <DataGrid Margin="10"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="True"
+                  SelectedItem="{Binding SelectedVariableData}"
                   ItemsSource="{Binding DataVariables}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="名称" Binding="{Binding Name}" />

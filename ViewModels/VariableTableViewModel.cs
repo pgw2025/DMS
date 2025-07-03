@@ -23,6 +23,9 @@ partial class VariableTableViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<VariableData> _dataVariables;
 
+    [ObservableProperty]
+    private VariableData _selectedVariableData;
+
     /// <summary>
     /// 是否是第一次加载,防止ToggleSwitch第一次加载触发改变事件
     /// </summary>
@@ -52,6 +55,36 @@ partial class VariableTableViewModel : ViewModelBase
 
         IsLoadCompletion = true;
     }
+
+    [RelayCommand]
+    public async void EditVarData(VariableTable variableTable)
+    {
+        try
+        {
+            // // 1. 显示添加设备对话框
+            var varData = await _dialogService.ShowEditVarDataDialog(SelectedVariableData);
+            // // 如果用户取消或对话框未返回设备，则直接返回
+            if (varData == null)
+                return;
+
+            varData.VariableTableId = variableTable.Id;
+            // 更新数据库
+            await _varDataRepository.UpdateAsync(varData);
+            // 更新当前页面的
+            var index = variableTable.DataVariables.IndexOf(SelectedVariableData);
+            // 更新变量表中的
+            if (index >= 0 && index < variableTable.DataVariables.Count)
+                variableTable.DataVariables[index] = varData;
+            NotificationHelper.ShowMessage($"编辑变量成功:{varData?.Name}", NotificationType.Success);
+        }
+        catch (Exception e)
+        {
+            string msg = $"编辑变量的过程中发生了不可预期的错误：";
+            Logger.Error(msg + e);
+            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+        }
+    }
+
 
     [RelayCommand]
     public async void AddVarData(VariableTable variableTable)

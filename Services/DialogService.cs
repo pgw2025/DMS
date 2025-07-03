@@ -93,4 +93,18 @@ public class DialogService :IDialogService
         MessageBox.Show(message);
     }
 
+    public async Task<VariableData> ShowEditVarDataDialog(VariableData variableData)
+    {
+        VarDataDialogViewModel vm = new();
+        vm.Title = "编辑变量";
+        vm.PrimaryButtonText =  "编辑变量";
+        vm.VariableData = variableData;
+        var dialog = new VarDataDialog(vm);
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary)
+        {
+            return vm.VariableData;
+        }
+        return null;
+    }
 }
