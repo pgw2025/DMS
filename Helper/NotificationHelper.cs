@@ -8,6 +8,7 @@ namespace PMSWPF.Helper;
 public class NotificationHelper
 {
     private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+    
     public static void ShowMessage(string msg, NotificationType notificationType = NotificationType.Info,
         bool isGlobal = false)
     {

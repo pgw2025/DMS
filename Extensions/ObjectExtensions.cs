@@ -71,7 +71,7 @@ public static class ObjectExtensions
                                     targetProperty.PropertyType.GetGenericTypeDefinition() == typeof(List<>);
 
                 // 场景 1: 属性类型完全相同
-                if (targetProperty.PropertyType == sourceProperty.PropertyType)
+                if (targetProperty.PropertyType.FullName == sourceProperty.PropertyType.FullName)
                 {
                     targetProperty.SetValue(ttarget, sourceValue);
                 }

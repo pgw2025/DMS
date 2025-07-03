@@ -1,4 +1,5 @@
 ﻿using iNKORE.UI.WPF.Modern.Controls;
+using NPOI.SS.Formula.Functions;
 using PMSWPF.Models;
 using PMSWPF.ViewModels.Dialogs;
 using PMSWPF.Views.Dialogs;
@@ -56,7 +57,7 @@ public class DialogService :IDialogService
         return false;
     }
 
-    public async Task<VariableTable> ShowAddVarTableDialog(Device device)
+    public async Task<VariableTable> ShowAddVarTableDialog()
     {
         VarTableDialogViewModel vm = new();
         vm.Title = "添加变量表";
@@ -67,6 +68,21 @@ public class DialogService :IDialogService
         if (res == ContentDialogResult.Primary)
         {
             return vm.VariableTable;
+        }
+        return null;
+    }
+    
+    public async Task<VariableData> ShowAddVarDataDialog()
+    {
+        VarDataDialogViewModel vm = new();
+        vm.Title = "添加变量";
+        vm.PrimaryButtonText =  "添加变量";
+        vm.VariableData = new VariableData();
+        var dialog = new VarDataDialog(vm);
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary)
+        {
+            return vm.VariableData;
         }
         return null;
     }

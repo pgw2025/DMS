@@ -16,18 +16,17 @@ public class DeviceRepository
 
     public DeviceRepository()
     {
-        _menuRepository=new MenuRepository();
-        _varTableRepository=new VarTableRepository();
+        _menuRepository = new MenuRepository();
+        _varTableRepository = new VarTableRepository();
     }
 
-   
 
-    
     public async Task<int> Edit(Device device)
     {
         using (var db = DbContext.GetInstance())
         {
-            return await db.Updateable<DbDevice>(device.CopyTo<DbDevice>()).ExecuteCommandAsync();
+            return await db.Updateable<DbDevice>(device.CopyTo<DbDevice>())
+                           .ExecuteCommandAsync();
         }
     }
 
@@ -40,7 +39,9 @@ public class DeviceRepository
     {
         using (var db = DbContext.GetInstance())
         {
-            var dlist = await db.Queryable<DbDevice>().Includes(d => d.VariableTables, dv => dv.Device).ToListAsync();
+            var dlist = await db.Queryable<DbDevice>()
+                                .Includes(d => d.VariableTables, dv => dv.Device)
+                                .ToListAsync();
             var devices = new List<Device>();
             foreach (var dbDevice in dlist)
             {
@@ -56,7 +57,8 @@ public class DeviceRepository
     {
         using (var db = DbContext.GetInstance())
         {
-            return await db.Queryable<DbDevice>().FirstAsync(p => p.Id == id);
+            return await db.Queryable<DbDevice>()
+                           .FirstAsync(p => p.Id == id);
         }
     }
 
@@ -64,10 +66,11 @@ public class DeviceRepository
     {
         using (var db = DbContext.GetInstance())
         {
-            return await db.Deleteable<DbDevice>(new DbDevice { Id = id }).ExecuteCommandAsync();
+            return await db.Deleteable<DbDevice>(new DbDevice { Id = id })
+                           .ExecuteCommandAsync();
         }
     }
-    
+
     /// <summary>
     /// 添加设备，包括菜单
     /// </summary>
@@ -101,11 +104,11 @@ public class DeviceRepository
             if (device.IsAddDefVarTable)
             {
                 var defVarTable = await _varTableRepository.AddDeviceDefVarTable(addDevice, db);
-                await _menuRepository.AddDeviceDefTableMenu(device, addDeviceMenuId, defVarTable.Id,db);
+                await _menuRepository.AddDeviceDefTableMenu(device, addDeviceMenuId, defVarTable.Id, db);
             }
 
             // 添加添加变量表的菜单
-            await _menuRepository.AddVarTableMenu(addDevice,addDeviceMenuId, db);
+            await _menuRepository.AddVarTableMenu(addDevice, addDeviceMenuId, db);
             await db.CommitTranAsync();
             // 菜单也添加成功，通知 UI 更新
             MessageHelper.SendLoadMessage(LoadTypes.Menu);
@@ -117,9 +120,8 @@ public class DeviceRepository
             await db.RollbackTranAsync();
             // 捕获并记录所有未预期的异常
             string errorMsg = $"在添加设备过程中发生未预期错误：";
-            Logger.Error(errorMsg+e);
-            NotificationHelper.ShowMessage(errorMsg+e.Message, NotificationType.Error);
-
+            Logger.Error(errorMsg + e);
+            NotificationHelper.ShowMessage(errorMsg + e.Message, NotificationType.Error);
         }
     }
 
@@ -132,12 +134,15 @@ public class DeviceRepository
     /// <exception cref="InvalidOperationException"></exception>
     private async Task<DbDevice> Add(Device device, SqlSugarClient db)
     {
-        var exist = await db.Queryable<DbDevice>().Where(d => d.Name == device.Name).FirstAsync();
+        var exist = await db.Queryable<DbDevice>()
+                            .Where(d => d.Name == device.Name)
+                            .FirstAsync();
         if (exist != null)
             throw new InvalidOperationException("设备名称已经存在。");
         var dbDevice = new DbDevice();
         device.CopyTo(dbDevice);
         // 是否添加默认变量表
-        return await db.Insertable<DbDevice>(dbDevice).ExecuteReturnEntityAsync();
+        return await db.Insertable<DbDevice>(dbDevice)
+                       .ExecuteReturnEntityAsync();
     }
 }

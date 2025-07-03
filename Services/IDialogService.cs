@@ -9,7 +9,9 @@ public interface IDialogService
     
     Task<bool> ShowConfrimeDialog(string title, string message,string buttonText="确认");
     
-    Task<VariableTable> ShowAddVarTableDialog(Device device);
+    Task<VariableTable> ShowAddVarTableDialog();
+    
+    Task<VariableData> ShowAddVarDataDialog();
 
     void ShowMessageDialog(string title, string message);
 }

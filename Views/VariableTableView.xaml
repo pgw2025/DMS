@@ -45,9 +45,10 @@
             <controls:CommandBar x:Name="PrimaryCommandBar"
                                  DefaultLabelPosition="Right"
                                  IsOpen="False">
-                <ui:AppBarButton x:Name="AddButton"
-                                 Command="{Binding AddDeviceCommand}"
-                                 Label="Add">
+                <ui:AppBarButton 
+                                 Command="{Binding AddVarDataCommand}"
+                                 CommandParameter="{Binding VariableTable}"
+                                 Label="添加变量">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                     </ui:AppBarButton.Icon>

@@ -116,9 +116,10 @@ public partial class MainViewModel : ViewModelBase
                 NotificationHelper.ShowMessage("操作失败：无法获取有效的设备信息。", NotificationType.Error);
                 return;
             }
+            
 
             // 2. 显示添加变量表对话框
-            var varTable = await _dialogService.ShowAddVarTableDialog(device);
+            var varTable = await _dialogService.ShowAddVarTableDialog();
             if (varTable == null)
             {
                 // 用户取消或未选择

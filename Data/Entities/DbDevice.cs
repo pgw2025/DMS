@@ -13,7 +13,8 @@ public class DbDevice
 
     public string Name { get; set; }
 
-    [SugarColumn(IsNullable = true)] public string? Description { get; set; }
+    [SugarColumn(IsNullable = true)]
+    public string? Description { get; set; }
 
     public string Ip { get; set; }
     public bool IsActive { get; set; }

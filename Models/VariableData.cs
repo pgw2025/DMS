@@ -4,24 +4,108 @@ namespace PMSWPF.Models;
 
 public class VariableData
 {
+    /// <summary>
+    /// 变量唯一标识符
+    /// </summary>
     public int Id { get; set; }
+    /// <summary>
+    /// 关联的变量表ID
+    /// </summary>
+    public int VariableTableId { get; set; }
+
+
+    /// <summary>
+    /// 变量名称
+    /// </summary>
     public string Name { get; set; }
-    public string Description { get; set; }
+
+    /// <summary>
+    /// 变量描述
+    /// </summary>
+    public string Description { get; set; }=String.Empty;
+
+    /// <summary>
+    /// 节点ID，用于标识变量在设备或系统中的唯一路径
+    /// </summary>
     public string NodeId { get; set; }
+
+    /// <summary>
+    /// 协议类型，例如Modbus、OPC UA等
+    /// </summary>
     public ProtocolType ProtocolType { get; set; }
+
+    /// <summary>
+    /// 数据类型，例如Int、Float、String等
+    /// </summary>
     public string DataType { get; set; }
-    public List<Mqtt> Mqtts { get; set; }
-    public string DataValue { get; set; }
-    public string DisplayValue { get; set; }
-    public DateTime UpdateTime { get; set; }
-    public User UpdateUser { get; set; }
-    public string Converstion { get; set; }
-    public bool IsDeleted { get; set; }
-    public bool IsActive { get; set; }
-    public bool IsSave { get; set; }
-    public double SaveRange { get; set; }
-    public bool IsAlarm { get; set; }
-    public double AlarmMin { get; set; }
-    public double AlarmMax { get; set; }
+
+    /// <summary>
+    /// 信号类型，例如模拟量、数字量等
+    /// </summary>
     public SignalType SignalType { get; set; }
+
+    /// <summary>
+    /// 变量当前原始数据值
+    /// </summary>
+    public string DataValue { get; set; }=String.Empty;
+
+    /// <summary>
+    /// 变量经过转换或格式化后的显示值
+    /// </summary>
+    public string DisplayValue { get; set; }=String.Empty;
+
+    /// <summary>
+    /// 变量数据最后更新时间
+    /// </summary>
+    public DateTime UpdateTime { get; set; }=DateTime.Now;
+
+    /// <summary>
+    /// 最后更新变量数据的用户
+    /// </summary>
+    public User UpdateUser { get; set; }
+
+    /// <summary>
+    /// 关联的MQTT配置列表
+    /// </summary>
+    public List<Mqtt> Mqtts { get; set; }
+
+    /// <summary>
+    /// 数据转换规则或表达式
+    /// </summary>
+    public string Converstion { get; set; }=String.Empty;
+
+    /// <summary>
+    /// 指示变量是否处于激活状态
+    /// </summary>
+    public bool IsActive { get; set; }
+
+    /// <summary>
+    /// 指示是否需要保存变量数据
+    /// </summary>
+    public bool IsSave { get; set; }
+
+    /// <summary>
+    /// 数据保存的范围或阈值
+    /// </summary>
+    public double SaveRange { get; set; }
+
+    /// <summary>
+    /// 指示是否需要对变量进行报警监测
+    /// </summary>
+    public bool IsAlarm { get; set; }
+
+    /// <summary>
+    /// 报警的最小值阈值
+    /// </summary>
+    public double AlarmMin { get; set; }
+
+    /// <summary>
+    /// 报警的最大值阈值
+    /// </summary>
+    public double AlarmMax { get; set; }
+
+    /// <summary>
+    /// 指示变量是否已被逻辑删除
+    /// </summary>
+    public bool IsDeleted { get; set; }
 }
