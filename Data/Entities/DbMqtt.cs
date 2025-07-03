@@ -4,6 +4,7 @@ using SqlSugar.DbConvert;
 
 namespace PMSWPF.Data.Entities;
 
+[SugarTable("Mqtt")]
 public class DbMqtt
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)] //数据库是自增才配自增
@@ -39,27 +40,27 @@ public class DbMqtt
     /// <summary>
     /// MQTT客户端登录用户名
     /// </summary>
-    public string UserName { get; set; }
+    public string UserName { get; set; } = String.Empty;
 
     /// <summary>
     /// MQTT客户端登录密码
     /// </summary>
-    public string PassWord { get; set; } //变量状态 
+    public string PassWord { get; set; } = String.Empty;
 
     /// <summary>
     /// MQTT客户端ID
     /// </summary>
-    public string ClientID { get; set; }
+    public string ClientID { get; set; }= String.Empty;
 
     /// <summary>
     /// MQTT发布主题
     /// </summary>
-    public string PublishTopic { get; set; }
+    public string PublishTopic { get; set; } = String.Empty;
 
     /// <summary>
     /// MQTT订阅主题
     /// </summary>
-    public string SubTopics { get; set; }
+    public string SubTopics { get; set; }= String.Empty;
 
     /// <summary>
     /// 是否设置为默认MQTT客户端
@@ -67,9 +68,9 @@ public class DbMqtt
     public int IsDefault { get; set; }
 
     /// <summary>
-    /// 连接时间
+    /// 创建时间
     /// </summary>
-    public DateTime ConnTime { get; set; }
+    public DateTime CreateTime { get; set; }= DateTime.Now;
 
     /// <summary>
     /// MQTT备注
