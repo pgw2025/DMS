@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net8.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
@@ -9,17 +10,21 @@
         <ApplicationIcon>AppIcon2.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
-        <PackageReference Include="HandyControl" Version="3.5.1"/>
-        <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5"/>
-        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135"/>
-        <PackageReference Include="MySql.Data" Version="9.3.0"/>
-        <PackageReference Include="NLog" Version="6.0.0"/>
-        <PackageReference Include="NLog.Database" Version="6.0.0"/>
-        <PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178"/>
-        <PackageReference Include="SqlSugarCoreNoDrive" Version="5.1.4.193"/>
+        <Compile Remove="PMSWPF.Tests\**\*.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="HandyControl" Version="3.5.1" />
+        <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+        <PackageReference Include="MySql.Data" Version="9.3.0" />
+        <PackageReference Include="NLog" Version="6.0.0" />
+        <PackageReference Include="NLog.Database" Version="6.0.0" />
+        <PackageReference Include="NPOI" Version="2.7.4" />
+        <PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178" />
+        <PackageReference Include="SqlSugarCoreNoDrive" Version="5.1.4.193" />
     </ItemGroup>
     <ItemGroup>
         <None Update="Config\nlog.config">
