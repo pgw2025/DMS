@@ -61,7 +61,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
-                
+
                 <ui:AppBarButton Command="{Binding EditVarDataCommand}"
                                  CommandParameter="{Binding VariableTable}"
                                  Label="编辑变量">
@@ -70,13 +70,24 @@
                     </ui:AppBarButton.Icon>
 
                 </ui:AppBarButton>
-                <ui:AppBarButton  Command="{Binding SaveModifiedVarDataCommand}"
+                <ui:AppBarButton Command="{Binding SaveModifiedVarDataCommand}"
                                  Label="保存变量">
                     <ui:AppBarButton.Icon>
-                        <ui:FontIcon  Icon="{x:Static ui:SegoeFluentIcons.Save}" />
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" />
                     </ui:AppBarButton.Icon>
 
                 </ui:AppBarButton>
+                <ui:AppBarButton 
+                    Command="{Binding ImprotFromTiaVarTableCommand}"
+                    Label="从TIA变量表导入">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
+                    </ui:AppBarButton.Icon>
+
+                </ui:AppBarButton>
+
+               
+
                 <ui:AppBarButton x:Name="ShareButton"
                                  Label="Share">
                     <ui:AppBarButton.Icon>
@@ -88,6 +99,7 @@
                                      Icon="Setting"
                                      Label="Settings" />
                 </ui:CommandBar.SecondaryCommands>
+
             </controls:CommandBar>
             <!-- 变量表的名称描述等信息 -->
             <ikw:SimpleStackPanel Margin="5"
@@ -110,6 +122,10 @@
                            Text="所属设备:" />
                 <TextBlock Style="{StaticResource VarTableValueStyle}"
                            Text="{Binding VariableTable.Device.Name}" />
+                <TextBlock Style="{StaticResource VarTableLabelStyle}"
+                           Text="协议:" />
+                <TextBlock Style="{StaticResource VarTableValueStyle}"
+                           Text="{Binding VariableTable.ProtocolType}" />
 
 
             </ikw:SimpleStackPanel>
@@ -163,9 +179,9 @@
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="节点ID"
                                     Binding="{Binding NodeId}" />
-                <DataGridTextColumn IsReadOnly="True"
-                                    Header="协议类型"
-                                    Binding="{Binding ProtocolType}" />
+                <!-- <DataGridTextColumn IsReadOnly="True" -->
+                <!--                     Header="协议类型" -->
+                <!--                     Binding="{Binding ProtocolType}" /> -->
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="数据类型"
                                     Binding="{Binding DataType}" />
@@ -181,7 +197,7 @@
                                       SelectedItem="{Binding SignalType}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
@@ -189,11 +205,18 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn IsReadOnly="True"
+                                    Header="S7地址"
+                                    Binding="{Binding S7Address}" />
+                <DataGridTextColumn IsReadOnly="True"
                                     Header="当前值"
                                     Binding="{Binding DataValue}" />
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="显示值"
                                     Binding="{Binding DisplayValue}" />
+                
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="创建时间"
+                                    Binding="{Binding CreateTime}" />
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="更新时间"
                                     Binding="{Binding UpdateTime}" />

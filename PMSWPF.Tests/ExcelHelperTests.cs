@@ -1,9 +1,10 @@
-
 using NUnit.Framework;
 using PMSWPF.Helper;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using PMSWPF.Enums;
+using PMSWPF.Models;
 
 namespace PMSWPF.Tests
 {
@@ -17,7 +18,7 @@ namespace PMSWPF.Tests
         {
             // Create a temporary file for testing
             // _testFilePath = Path.Combine(Path.GetTempPath(), "test.xlsx");
-            _testFilePath =  "e:/test.xlsx";
+            _testFilePath = "e:/test.xlsx";
         }
 
         [TearDown]
@@ -35,10 +36,10 @@ namespace PMSWPF.Tests
         {
             // Arrange
             var data = new List<TestData>
-            {
-                new TestData { Id = 1, Name = "Test1" },
-                new TestData { Id = 2, Name = "Test2" }
-            };
+                       {
+                           new TestData { Id = 1, Name = "Test1" },
+                           new TestData { Id = 2, Name = "Test2" }
+                       };
 
             // Act
             ExcelHelper.ExportToExcel(data, _testFilePath);
@@ -85,14 +86,50 @@ namespace PMSWPF.Tests
         }
 
         [Test]
+        public void ImportVarDataFormExcel()
+        {
+            // Act
+            _testFilePath = "C:\\Users\\Administrator\\Desktop\\浓度变量.xlsx";
+            var dataTable = ExcelHelper.ImportFromExcel(_testFilePath);
+            // 判断表头的名字
+            if (dataTable.Columns[0].ColumnName != "Name" || dataTable.Columns[2].ColumnName != "Data Type" &&
+                dataTable.Columns[3].ColumnName != "Logical Address")
+                throw new AggregateException(
+                    "Excel表格式不正确：第一列的名字是：Name,第三列的名字是：Data Type,Data Type,第四列的名字是：Logical Address,请检查");
+            
+            
+            List<VariableData> variableDatas = new List<VariableData>();
+            foreach (DataRow dataRow in dataTable.Rows)
+            {
+                VariableData variableData = new VariableData();
+                variableData.Name=dataRow["Name"].ToString();
+                variableData.DataType=SiemensHelper.S7ToCSharpTypeString(dataRow["Data Type"].ToString()) ;
+                var exS7Addr=dataRow["Logical Address"].ToString();
+                if (exS7Addr.StartsWith("%"))
+                {
+                    variableData.S7Address = exS7Addr.Substring(1);
+                }
+
+                variableData.ProtocolType = ProtocolType.S7;
+                variableData.SignalType = SignalType.OtherASignal;
+                variableDatas.Add(variableData);
+            }
+            Assert.Greater(variableDatas.Count, 0);
+            // Assert
+            //     Assert.AreEqual(2, result.Rows.Count);FDFD
+            //     Assert.AreEqual("1", result.Rows[0]["Id"]);
+            //     Assert.AreEqual("Test1", result.Rows[0]["Name"]);
+        }
+
+        [Test]
         public void ImportFromExcel_ToListOfObjects_ReturnsCorrectData()
         {
             // Arrange
             var data = new List<TestData>
-            {
-                new TestData { Id = 1, Name = "Test1" },
-                new TestData { Id = 2, Name = "Test2" }
-            };
+                       {
+                           new TestData { Id = 1, Name = "Test1" },
+                           new TestData { Id = 2, Name = "Test2" }
+                       };
             ExcelHelper.ExportToExcel(data, _testFilePath);
 
             // Act

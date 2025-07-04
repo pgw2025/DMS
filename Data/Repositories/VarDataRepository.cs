@@ -68,6 +68,32 @@ public class VarDataRepository
             return dbVarData.CopyTo<VariableData>();
         }
     }
+    
+    /// <summary>
+    /// 新增VariableData
+    /// </summary>
+    /// <param name="variableData">VariableData实体</param>
+    /// <returns></returns>
+    public async Task<List<VariableData>> AddAsync(List<VariableData> variableDatas)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        
+        List<VariableData>  variableDataList = new List<VariableData>();
+        using (var _db = DbContext.GetInstance())
+        {
+            List<DbVariableData> dbVarDataList = variableDatas.Select(varData=>varData.CopyTo<DbVariableData>()).ToList();
+            foreach (var dbVariableData in dbVarDataList)
+            {
+                var resVarData = await _db.Insertable(dbVariableData).ExecuteReturnEntityAsync();
+                variableDataList.Add(resVarData.CopyTo<VariableData>());
+            }
+            
+            stopwatch.Stop();
+            Logger.Info($"新增VariableData{dbVarDataList.Count}个， 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return variableDataList;
+        }
+    }
 
     /// <summary>
     /// 更新VariableData

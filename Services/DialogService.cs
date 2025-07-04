@@ -107,4 +107,16 @@ public class DialogService :IDialogService
         }
         return null;
     }
+
+    public async Task<string> ShowImportExcelDialog()
+    {
+        var vm = new ImportExcelDialogViewModel();
+        var dialog = new ImportExcelDialog(vm);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return vm.FilePath;
+        }
+        return null;
+    }
 }

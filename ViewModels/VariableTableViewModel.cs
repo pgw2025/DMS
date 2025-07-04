@@ -63,6 +63,7 @@ partial class VariableTableViewModel : ViewModelBase
 
         IsLoadCompletion = true;
     }
+
     /// <summary>
     /// 退出当前实体时调用
     /// </summary>
@@ -80,13 +81,12 @@ partial class VariableTableViewModel : ViewModelBase
             // 不保存数据，还原原来的数据
             foreach (var modifiedData in modifiedDatas)
             {
-                var oldData  = _originalDataVariables.First(od=>od.Id ==modifiedData.Id);
-                oldData.CopyTo( modifiedData);
+                var oldData = _originalDataVariables.First(od => od.Id == modifiedData.Id);
+                oldData.CopyTo(modifiedData);
                 modifiedData.IsModified = false;
             }
 
             return false;
-
         }
 
         return true;
@@ -107,11 +107,12 @@ partial class VariableTableViewModel : ViewModelBase
         {
             modifiedData.IsModified = false;
         }
+
         NotificationHelper.ShowMessage($"修改的{modifiedDatas.Count}变量保存成功.", NotificationType.Success);
     }
 
     [RelayCommand]
-    public async void EditVarData(VariableTable variableTable)
+    private async void EditVarData(VariableTable variableTable)
     {
         try
         {
@@ -138,9 +139,53 @@ partial class VariableTableViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private async void ImprotFromTiaVarTable()
+    {
+        try
+        {
+            // 让用户选择导入的Excel文件
+            var filePath = await _dialogService.ShowImportExcelDialog();
+            if (string.IsNullOrEmpty(filePath))
+                return;
+            // 读取Excel转换成VariableData列表
+            var importVarDataList = ExcelHelper.ImprotFromTiaVariableTable(filePath);
+            if (importVarDataList.Count == 0)
+                return;
+
+            foreach (var variableData in importVarDataList)
+            {
+                variableData.CreateTime=DateTime.Now;
+                variableData.VariableTableId = VariableTable.Id;
+            }
+            // 插入数据库
+            var resVarDataList= await _varDataRepository.AddAsync(importVarDataList);
+            //更新界面
+            // variableTable.DataVariables.AddRange(resVarDataList);
+            foreach (var variableData in resVarDataList)
+            {
+                variableTable.DataVariables.Add(variableData);
+            }
+            DataVariables=new ObservableCollection<VariableData>(resVarDataList);
+
+            string msgSuccess = $"成功导入变量：{resVarDataList.Count}个。";
+            Logger.Info(msgSuccess);
+            NotificationHelper.ShowMessage(msgSuccess, NotificationType.Success);
+            
+        }
+        catch (Exception e)
+        {
+            string msg = $"从TIA导入变量的过程中发生了不可预期的错误：";
+            Logger.Error(msg + e);
+            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+        }
+        
+        
+    }
+
 
     [RelayCommand]
-    public async void AddVarData(VariableTable variableTable)
+    private async void AddVarData(VariableTable variableTable)
     {
         try
         {
@@ -154,6 +199,7 @@ partial class VariableTableViewModel : ViewModelBase
             // 更新数据库
             await _varDataRepository.UpdateAsync(varData);
             // 更新当前页面的
+            DataVariables.Add(varData);
             var index = variableTable.DataVariables.IndexOf(SelectedVariableData);
             // 更新变量表中的
             if (index >= 0 && index < variableTable.DataVariables.Count)
@@ -168,13 +214,17 @@ partial class VariableTableViewModel : ViewModelBase
         }
     }
 
-    public void OnVarTableDataChanged(VariableData varData)
-    {
-        var originelData = _originalDataVariables.FirstOrDefault(d => d.Id == varData.Id);
+    // [RelayCommand]
+    // private async void ImportFromExcel()
+    // {
+    //     var filePath = await _dialogService.ShowImportExcelDialog();
+    //     if (!string.IsNullOrEmpty(filePath))
+    //     {
+    //         // TODO: Implement Excel import logic using the filePath
+    //         NotificationHelper.ShowMessage($"Successfully imported from {filePath}", NotificationType.Success);
+    //     }
+    // }
 
-        // varData.IsModified = originelData.Equals(varData);
-        // varData.IsModified = originelData.ValueEquals(varData);
-    }
 
     public async Task OnIsActiveChanged(bool active)
     {

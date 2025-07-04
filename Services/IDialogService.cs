@@ -15,4 +15,5 @@ public interface IDialogService
 
     void ShowMessageDialog(string title, string message);
     Task<VariableData> ShowEditVarDataDialog(VariableData variableData);
+    Task<string> ShowImportExcelDialog();
 }
