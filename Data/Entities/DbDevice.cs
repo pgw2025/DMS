@@ -50,6 +50,11 @@ public class DbDevice
     public string Name { get; set; }
 
     /// <summary>
+    /// 设备的端口号。
+    /// </summary>
+    public int Prot { get; set; }
+
+    /// <summary>
     /// 设备的通信协议类型。
     /// </summary>
     [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]

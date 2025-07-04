@@ -59,6 +59,12 @@ public partial class Device : ObservableObject
     private string name;
 
     /// <summary>
+    /// 设备的端口号。
+    /// </summary>
+    [ObservableProperty]
+    private int prot;
+
+    /// <summary>
     /// 设备的通信协议类型。
     /// </summary>
     public ProtocolType ProtocolType { get; set; }

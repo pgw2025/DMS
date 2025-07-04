@@ -68,8 +68,9 @@
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                     </ui:AppBarButton.Icon>
-
                 </ui:AppBarButton>
+                
+               
                 <ui:AppBarButton Command="{Binding SaveModifiedVarDataCommand}"
                                  Label="保存变量">
                     <ui:AppBarButton.Icon>

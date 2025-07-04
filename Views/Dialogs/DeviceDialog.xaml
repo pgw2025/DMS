@@ -82,7 +82,7 @@
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
             <TextBox AcceptsReturn="True"
-                     Text="{Binding Device.Ip, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding Device.Prot, UpdateSourceTrigger=PropertyChanged}" />
 
 
             <!-- 通讯协议-->
