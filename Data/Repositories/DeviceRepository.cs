@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using NLog;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
@@ -33,12 +34,27 @@ public class DeviceRepository
         stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            var result = await db.Updateable<DbDevice>(device.CopyTo<DbDevice>())
-                               .ExecuteCommandAsync();
+            var result = await Edit(device, db);
             stopwatch.Stop();
             Logger.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
+    }
+
+    /// <summary>
+    /// 编辑设备信息。支持事务
+    /// </summary>
+    /// <param name="device">要编辑的设备对象。</param>
+    /// <returns>受影响的行数。</returns>
+    public async Task<int> Edit(Device device, SqlSugarClient db)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await db.Updateable<DbDevice>(device.CopyTo<DbDevice>())
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        Logger.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
     }
 
 
@@ -54,7 +70,7 @@ public class DeviceRepository
             stopwatch.Start();
             var dlist = await db.Queryable<DbDevice>()
                                 .Includes(d => d.VariableTables, dv => dv.Device)
-                                .Includes(d => d.VariableTables, dvd => dvd.DataVariables ,data=>data.VariableTable)
+                                .Includes(d => d.VariableTables, dvd => dvd.DataVariables, data => data.VariableTable)
                                 .ToListAsync();
             var devices = new List<Device>();
             foreach (var dbDevice in dlist)
@@ -62,6 +78,7 @@ public class DeviceRepository
                 var device = dbDevice.CopyTo<Device>();
                 devices.Add(device);
             }
+
             stopwatch.Stop();
             Logger.Info($"加载设备列表总耗时：{stopwatch.ElapsedMilliseconds}ms");
 
@@ -81,37 +98,79 @@ public class DeviceRepository
         using (var db = DbContext.GetInstance())
         {
             var result = await db.Queryable<DbDevice>()
-                               .FirstAsync(p => p.Id == id);
+                                 .FirstAsync(p => p.Id == id);
             stopwatch.Stop();
             Logger.Info($"根据ID '{id}' 获取设备耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
 
+
     /// <summary>
-    /// 根据ID删除设备。
+    /// 删除设备。
     /// </summary>
     /// <param name="id">要删除的设备ID。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> DeleteById(int id)
+    public async Task<int> Delete(Device device, List<MenuBean> menus)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            var result = await db.Deleteable<DbDevice>(new DbDevice { Id = id })
-                               .ExecuteCommandAsync();
-            stopwatch.Stop();
-            Logger.Info($"删除设备ID '{id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result;
+            await db.BeginTranAsync();
+            try
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                var res = await Delete(device, menus, db);
+
+                stopwatch.Stop();
+                Logger.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
+                await db.CommitTranAsync();
+                return res;
+            }
+            catch (Exception e)
+            {
+                await db.RollbackTranAsync();
+                throw;
+            }
+
+            return 0;
         }
     }
 
+
     /// <summary>
-    /// 添加设备，包括菜单
+    /// 删除设备。
     /// </summary>
     /// <param name="device"></param>
-    public async Task AddDeviceAndMenu(Device device)
+    /// <param name="menus"></param>
+    /// <param name="db"></param>
+    /// <param name="id">要删除的设备ID。</param>
+    /// <returns>受影响的行数。</returns>
+    public async Task<int> Delete(Device device, List<MenuBean> menus, SqlSugarClient db)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await db.Deleteable<DbDevice>(new DbDevice { Id = device.Id })
+                             .ExecuteCommandAsync();
+        // 删除变量表
+        await _varTableRepository.Delete(device.VariableTables, db);
+
+        // 删除菜单
+        var menu = DataServicesHelper.FindMenusForDevice(device, menus);
+        if (menu == null)
+            throw new NullReferenceException($"没有找到设备:{device.Name},的菜单对象。");
+        await _menuRepository.DeleteMenu(menu, db);
+        stopwatch.Stop();
+        Logger.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
+
+
+    /// <summary>
+    /// 添加设备
+    /// </summary>
+    /// <param name="device"></param>
+    public async Task Add(Device device)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -120,33 +179,18 @@ public class DeviceRepository
         {
             // 开启事务
             await db.BeginTranAsync();
+            //查询设备的名字是否存在
+
+            var exist = await db.Queryable<DbDevice>()
+                                .Where(d => d.Name == device.Name)
+                                .FirstAsync();
+            if (exist != null)
+                throw new InvalidOperationException("设备名称已经存在。");
+
             // 2. 将设备添加到数据库
             var addDevice = await Add(device, db);
-            // 如果数据库添加失败
-            if (addDevice == null)
-            {
-                string addDeviceErrorMsg = $"添加设备失败：{device.Name}";
-                Logger.Error(addDeviceErrorMsg);
-                NotificationHelper.ShowMessage(addDeviceErrorMsg, NotificationType.Error);
-                return; // 提前返回
-            }
 
-            // 3. 设备成功添加到数据库，进行菜单添加
-            // 这里立即发出成功的通知和日志
-            string addDeviceSuccessMsg = $"添加设备成功：{device.Name}";
-            Logger.Info(addDeviceSuccessMsg);
-            NotificationHelper.ShowMessage(addDeviceSuccessMsg, NotificationType.Success);
 
-            // 4. 为新设备添加菜单
-            var addDeviceMenuId = await _menuRepository.AddDeviceMenu(addDevice, db);
-            if (device.IsAddDefVarTable)
-            {
-                var defVarTable = await _varTableRepository.AddDeviceDefVarTable(addDevice, db);
-                await _menuRepository.AddDeviceDefTableMenu(device, addDeviceMenuId, defVarTable.Id, db);
-            }
-
-            // 添加添加变量表的菜单
-            await _menuRepository.AddVarTableMenu(addDevice, addDeviceMenuId, db);
             await db.CommitTranAsync();
             // 菜单也添加成功，通知 UI 更新
             MessageHelper.SendLoadMessage(LoadTypes.Menu);
@@ -175,22 +219,41 @@ public class DeviceRepository
     /// <param name="db"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private async Task<DbDevice> Add(Device device, SqlSugarClient db)
+    private async Task<Device> Add(Device device, SqlSugarClient db)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var exist = await db.Queryable<DbDevice>()
-                            .Where(d => d.Name == device.Name)
-                            .FirstAsync();
-        if (exist != null)
-            throw new InvalidOperationException("设备名称已经存在。");
-        var dbDevice = new DbDevice();
-        device.CopyTo(dbDevice);
-        // 是否添加默认变量表
-        var result = await db.Insertable<DbDevice>(dbDevice)
-                       .ExecuteReturnEntityAsync();
-        stopwatch.Stop();
-        Logger.Info($"单独添加设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
+        ;
+        // 添加设备
+        var addDevice = await db.Insertable<DbDevice>(device.CopyTo<DbDevice>())
+                                .ExecuteReturnEntityAsync();
+
+        // 4. 为新设备添加菜单
+        var addDeviceMenuId = await _menuRepository.Add(addDevice, db);
+        
+        if (device.IsAddDefVarTable)
+        {
+            // 添加默认变量表
+            var varTable = new VariableTable();
+            device.VariableTables = new List<VariableTable>();
+            varTable.IsActive = true;
+            varTable.DeviceId = addDevice.Id;
+            varTable.Name = "默认变量表";
+            varTable.Description = "默认变量表";
+            varTable.ProtocolType = device.ProtocolType;
+            device.VariableTables.Add(varTable);
+            var addVarTable = await _varTableRepository.Add(varTable, db);
+            // 添加添加变量表的菜单
+            var varTableMenu = new MenuBean()
+                               {
+                                   Name = "默认变量表",
+                                   Icon = SegoeFluentIcons.Tablet.Glyph,
+                                   Type = MenuType.VariableTableMenu,
+                                   ParentId = addDeviceMenuId,
+                                   DataId = addVarTable.Id
+                               };
+            await _menuRepository.Add(varTableMenu, db);
+        }
+
+        await _menuRepository.AddVarTableMenu(addDevice, addDeviceMenuId, db);
+        return addDevice.CopyTo<Device>();
     }
 }

@@ -25,20 +25,33 @@ public class DataServicesHelper
 
         return varTable;
     }
-    public static MenuBean FindMenusForDevice(Device device,List<MenuBean> menus)
+    
+    
+    
+    
+    public static MenuBean FindMenusForDevice(Device device, IEnumerable<MenuBean> menus)
     {
-        foreach (var mainMenu in menus)
+        if (menus == null)
         {
-            if (mainMenu.Items == null || mainMenu.Items.Count == 0)
-                continue;
-            foreach (var secondMenu in mainMenu.Items)
+            return null;
+        }
+
+        foreach (var menu in menus)
+        {
+            // 检查当前菜单项是否匹配
+            if (menu.Type==MenuType.DeviceMenu && menu.DataId ==device.Id)
             {
-                if (secondMenu.Type == MenuType.DeviceMenu && secondMenu.Data != null && secondMenu.Data == device)
-                {
-                    return secondMenu;
-                }
+                return menu;
+            }
+
+            // 递归搜索子菜单
+            var foundInSubMenu = FindMenusForDevice(device, menu.Items);
+            if (foundInSubMenu != null)
+            {
+                return foundInSubMenu;
             }
         }
+
         return null;
     }
     

@@ -4,6 +4,7 @@ using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using PMSWPF.Data;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Helper;
@@ -69,6 +70,7 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="menu">当前菜单项，用于获取父级设备信息。</param>
     private async Task AddVariableTable(MenuBean menu)
     {
+        var db = DbContext.GetInstance();
         try
         {
             // 1. 检查父级设备信息
@@ -94,29 +96,25 @@ public partial class MainViewModel : ViewModelBase
             varTable.ProtocolType = device.ProtocolType;
 
             // 4. 添加变量表到数据库
-            // 假设 _varTableRepository.Add 返回一个布尔值表示成功，或者一个表示 ID 的整数
+            // 假设 _varTableRepository.AddAsync 返回一个布尔值表示成功，或者一个表示 ID 的整数
             // 这里为了演示，我们假设它返回新添加的ID，如果失败则返回0
-            var addVarTableId = await _varTableRepository.Add(varTable);
-            if (addVarTableId <= 0)
-            {
-                NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加失败", NotificationType.Error);
-                _logger.LogError($"变量表:{varTable.Name},添加失败");
-                return; // 添加变量表失败，提前返回
-            }
+            await db.BeginTranAsync();
+            var addVarTable = await _varTableRepository.Add(varTable,db);
 
             // 5. 添加变量表菜单
             MenuBean newMenu = new MenuBean
             {
                 Icon = SegoeFluentIcons.Tablet.Glyph,
                 Name = varTable.Name,
-                DataId = addVarTableId, // 使用实际添加的ID
+                DataId = addVarTable.Id, // 使用实际添加的ID
                 Type = MenuType.VariableTableMenu,
                 ParentId = menu.Parent.Id
             };
 
-            var addMenuRes = await _menuRepository.Add(newMenu);
+            var addMenuRes = await _menuRepository.Add(newMenu,db);
             if (addMenuRes > 0)
             {
+               await db.CommitTranAsync();
                 // 变量表和菜单都添加成功
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);
@@ -125,6 +123,7 @@ public partial class MainViewModel : ViewModelBase
             }
             else
             {
+                await db.RollbackTranAsync();
                 // 变量表菜单添加失败 (此时变量表可能已添加成功，需要根据业务决定是否回滚)
                 NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加菜单失败", NotificationType.Error);
                 _logger.LogError($"变量表:{varTable.Name},添加菜单失败");
@@ -134,8 +133,9 @@ public partial class MainViewModel : ViewModelBase
         }
         catch (Exception e)
         {
+            await db.RollbackTranAsync();
             // 捕获并记录所有未预料的异常
-            _logger.LogError(e, "添加变量表时出现了未预期的错误。");
+            _logger.LogError($"添加变量表时出现了未预期的错误:{e}");
             NotificationHelper.ShowMessage($"添加变量表时出现了错误:{e.Message}", NotificationType.Error);
         }
     }

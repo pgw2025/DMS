@@ -62,16 +62,24 @@ public partial class DevicesViewModel : ViewModelBase
     [RelayCommand]
     public async void AddDevice()
     {
-        // 1. 显示添加设备对话框
-        var device = await _dialogService.ShowAddDeviceDialog();
-        // 如果用户取消或对话框未返回设备，则直接返回
-        if (device == null)
+        try
         {
-            _logger.LogInformation("用户取消了添加设备操作。");
-            return;
-        }
+            // 1. 显示添加设备对话框
+            var device = await _dialogService.ShowAddDeviceDialog();
+            // 如果用户取消或对话框未返回设备，则直接返回
+            if (device == null)
+            {
+                _logger.LogInformation("用户取消了添加设备操作。");
+                return;
+            }
 
-        await _deviceRepository.AddDeviceAndMenu(device);
+            await _deviceRepository.Add(device);
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowMessage($"添加设备的过程中发生错误：{e.Message}", NotificationType.Error);
+            _logger.LogError($"添加设备的过程中发生错误：{e}");
+        }
     }
 
     /// <summary>
@@ -80,6 +88,7 @@ public partial class DevicesViewModel : ViewModelBase
     [RelayCommand]
     public async void DeleteDevice()
     {
+        
         try
         {
             if (SelectedDevice == null)
@@ -92,12 +101,9 @@ public partial class DevicesViewModel : ViewModelBase
             var isDel = await _dialogService.ShowConfrimeDialog("删除设备", msg, "删除设备");
             if (isDel)
             {
+                
                 // 删除设备
-                await _deviceRepository.DeleteById(SelectedDevice.Id);
-                // 删除菜单
-                var menu = DataServicesHelper.FindMenusForDevice(SelectedDevice, _dataServices.MenuTrees);
-                if (menu != null)
-                    await _menuRepository.DeleteMenu(menu);
+                await _deviceRepository.Delete(SelectedDevice ,_dataServices.MenuTrees);
 
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);

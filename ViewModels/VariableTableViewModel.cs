@@ -162,16 +162,14 @@ partial class VariableTableViewModel : ViewModelBase
                 variableData.VariableTableId = VariableTable.Id;
             }
             // 插入数据库
-            var resVarDataList= await _varDataRepository.AddAsync(importVarDataList);
+            var resVarDataCount= await _varDataRepository.AddAsync(importVarDataList);
             //更新界面
             // variableTable.DataVariables.AddRange(resVarDataList);
-            foreach (var variableData in resVarDataList)
-            {
-                variableTable.DataVariables.Add(variableData);
-            }
-            DataVariables=new ObservableCollection<VariableData>(resVarDataList);
+            variableTable.DataVariables= await _varDataRepository.GetAllAsync();
+            DataVariables=new ObservableCollection<VariableData>(variableTable.DataVariables);
             processingDialog?.Hide();
-            string msgSuccess = $"成功导入变量：{resVarDataList.Count}个。";
+            
+            string msgSuccess = $"成功导入变量：{resVarDataCount}个。";
             Logger.Info(msgSuccess);
             NotificationHelper.ShowMessage(msgSuccess, NotificationType.Success);
             

@@ -12,36 +12,102 @@
              d:DesignWidth="300">
     <UserControl.Resources>
         <DataTemplate x:Key="DeviceItemTemplate">
-            <Border Background="#eee"
-                    CornerRadius="10"
-                    Margin="3"
-                    Padding="10">
-                <ikw:SimpleStackPanel Spacing="10"
-                                      Width="300"
-                                      Height="200">
-                    <DockPanel>
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    BorderBrush="{DynamicResource SystemControlHighlightBaseMediumLowBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Margin="5"
+                    Padding="15">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="1"
+                                      Color="Black"
+                                      Opacity="0.1"
+                                      BlurRadius="5" />
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!--  Row 0: Header with Name and ToggleSwitch  -->
+                    <DockPanel Grid.Row="0"
+                               Margin="0,0,0,10">
                         <ui:ToggleSwitch DockPanel.Dock="Right"
-                                         Margin="20 0 0 0 "
-                                         IsOn="{Binding IsFirstLoad}"
+                                         IsOn="{Binding IsRuning}"
                                          OffContent="停止"
                                          OnContent="启动" />
-                        <TextBlock FontSize="24"
-                                   FontWeight="Bold"
-                                   Text="{Binding Name }" />
+                        <TextBlock Text="{Binding Name}"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
                     </DockPanel>
 
-                    <TextBlock Text="{Binding Description }" />
-                    <TextBlock Text="{Binding Ip }" />
-                    <ListBox ItemsSource="{Binding VariableTables }">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding Name}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ikw:SimpleStackPanel>
-            </Border>
+                    <!--  Row 1: Details with Icons  -->
+                    <StackPanel Grid.Row="1"
+                                Margin="0,0,0,10">
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding Description}"
+                                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Connect}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock>
+                                <Run Text="{Binding Ip, FallbackValue='192.168.1.1'}" />
+                                <Run Text=":" />
+                                <Run Text="{Binding Prot, FallbackValue='102'}" />
+                            </TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock>
+                                <Run Text="{Binding DeviceType, FallbackValue='S7_1200'}" />
+                                <Run Text=" / " />
+                                <Run Text="{Binding ProtocolType, FallbackValue='S7'}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
 
+                    <!--  Row 2: Variable Tables  -->
+                    <GroupBox Grid.Row="2"
+                              Header="变量表"
+                              Padding="5">
+                        <ListBox ItemsSource="{Binding VariableTables}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{DynamicResource SystemControlBackgroundListLowBrush}"
+                                            CornerRadius="4"
+                                            Padding="8,4"
+                                            Margin="2">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </GroupBox>
+                </Grid>
+            </Border>
         </DataTemplate>
     </UserControl.Resources>
 
