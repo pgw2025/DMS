@@ -158,7 +158,6 @@ public partial class MainViewModel : ViewModelBase
                     menu.Data = _dataServices.Devices.FirstOrDefault(d => d.Id == menu.DataId);
                     break;
                 case MenuType.VariableTableMenu:
-
                     VariableTableViewModel varTableVM =
                         App.Current.Services.GetRequiredService<VariableTableViewModel>();
                     varTableVM.VariableTable =

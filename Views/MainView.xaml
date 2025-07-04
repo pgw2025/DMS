@@ -76,6 +76,10 @@
                         <DataTemplate DataType="{x:Type vm:DataTransformViewModel}">
                             <local:DataTransformView />
                         </DataTemplate>
+                        <!-- Mqtt服务器页 -->
+                        <DataTemplate DataType="{x:Type vm:MqttsViewModel}">
+                            <local:MqttsView />
+                        </DataTemplate>
                         <!-- 设置页 -->
                         <DataTemplate DataType="{x:Type vm:SettingViewModel}">
                             <local:SettingView />

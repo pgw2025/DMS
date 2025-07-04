@@ -83,6 +83,9 @@ public class DataServicesHelper
             case "设备":
                 navgateVM = App.Current.Services.GetRequiredService<DevicesViewModel>();
                 break;
+            case "Mqtt服务器":
+                navgateVM = App.Current.Services.GetRequiredService<MqttsViewModel>();
+                break;
             case "数据转换":
                 navgateVM = App.Current.Services.GetRequiredService<DataTransformViewModel>();
                 break;

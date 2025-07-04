@@ -77,6 +77,8 @@ public partial class App : Application
         container.AddSingleton<VariableTableView>();
         container.AddScoped<DeviceDetailViewModel>();
         container.AddScoped<DeviceDetailView>();
+        container.AddScoped<MqttsViewModel>();
+        container.AddScoped<MqttsView>();
         Services = container.BuildServiceProvider();
         // 启动服务
         Services.GetRequiredService<GrowlNotificationService>();

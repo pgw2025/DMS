@@ -46,7 +46,7 @@ public class MqttRepository
             var result = await _db.Queryable<DbMqtt>().ToListAsync();
             stopwatch.Stop();
             Logger.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.CopyTo<List<Mqtt>>();
+            return result.Select(m=>m.CopyTo<Mqtt>()).ToList();
         }
     }
 

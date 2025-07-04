@@ -33,8 +33,20 @@ public partial class MqttsViewModel : ViewModelBase
         _dialogService = dialogService;
         _dataServices = dataServices;
 
-        MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
-        _dataServices.OnMqttListChanged += (mqtts) => { Mqtts = new ObservableCollection<Mqtt>(mqtts); };
+        if (dataServices.Mqtts == null || dataServices.Mqtts.Count == 0)
+        {
+            MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
+        }
+        else
+        {
+            Mqtts = new ObservableCollection<Mqtt>(dataServices.Mqtts);
+        }
+
+        
+        _dataServices.OnMqttListChanged += (mqtts) =>
+        {
+            Mqtts = new ObservableCollection<Mqtt>(mqtts);
+        };
     }
 
     [RelayCommand]
