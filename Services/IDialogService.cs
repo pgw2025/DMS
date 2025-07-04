@@ -1,4 +1,5 @@
-﻿using PMSWPF.Models;
+﻿using iNKORE.UI.WPF.Modern.Controls;
+using PMSWPF.Models;
 
 namespace PMSWPF.Services;
 
@@ -16,4 +17,5 @@ public interface IDialogService
     void ShowMessageDialog(string title, string message);
     Task<VariableData> ShowEditVarDataDialog(VariableData variableData);
     Task<string> ShowImportExcelDialog();
+    ContentDialog ShowProcessingDialog(string title, string message);
 }

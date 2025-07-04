@@ -1,4 +1,5 @@
-﻿using iNKORE.UI.WPF.Modern.Controls;
+﻿using HandyControl.Tools.Extension;
+using iNKORE.UI.WPF.Modern.Controls;
 using NPOI.SS.Formula.Functions;
 using PMSWPF.Models;
 using PMSWPF.ViewModels.Dialogs;
@@ -118,5 +119,15 @@ public class DialogService :IDialogService
             return vm.FilePath;
         }
         return null;
+    }
+
+    public ContentDialog ShowProcessingDialog(string title, string message)
+    {
+        ProcessingDialogViewModel vm = new ProcessingDialogViewModel();
+        vm.Title = title;
+        vm.Message = message;
+        var dialog = new ProcessingDialog(vm);
+        _ = dialog.ShowAsync(); // 不await，让它在后台显示
+        return dialog;
     }
 }

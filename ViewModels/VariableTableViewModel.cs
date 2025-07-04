@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using iNKORE.UI.WPF.Modern.Controls;
 using Newtonsoft.Json;
 using NLog;
 using PMSWPF.Data.Repositories;
@@ -142,6 +143,7 @@ partial class VariableTableViewModel : ViewModelBase
     [RelayCommand]
     private async void ImprotFromTiaVarTable()
     {
+        ContentDialog processingDialog = null;
         try
         {
             // 让用户选择导入的Excel文件
@@ -152,7 +154,8 @@ partial class VariableTableViewModel : ViewModelBase
             var importVarDataList = ExcelHelper.ImprotFromTiaVariableTable(filePath);
             if (importVarDataList.Count == 0)
                 return;
-
+           processingDialog= _dialogService.ShowProcessingDialog("正在处理...", "正在导入变量,请稍等片刻....");
+            
             foreach (var variableData in importVarDataList)
             {
                 variableData.CreateTime=DateTime.Now;
@@ -167,7 +170,7 @@ partial class VariableTableViewModel : ViewModelBase
                 variableTable.DataVariables.Add(variableData);
             }
             DataVariables=new ObservableCollection<VariableData>(resVarDataList);
-
+            processingDialog?.Hide();
             string msgSuccess = $"成功导入变量：{resVarDataList.Count}个。";
             Logger.Info(msgSuccess);
             NotificationHelper.ShowMessage(msgSuccess, NotificationType.Success);
