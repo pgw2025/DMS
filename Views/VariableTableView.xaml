@@ -149,6 +149,42 @@
                   SelectionMode="Extended"
                   SelectedItem="{Binding SelectedVariableData}"
                   ItemsSource="{Binding DataVariables}">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="添加变量"
+                              Command="{Binding AddVarDataCommand}"
+                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext.VariableTable}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="编辑变量"
+                              Command="{Binding EditVarDataCommand}"
+                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext.VariableTable}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="删除变量"
+                              Click="DeleteVarData_Click">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="保存变量"
+                              Command="{Binding SaveModifiedVarDataCommand}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="从TIA变量表导入"
+                              Command="{Binding ImprotFromTiaVarTableCommand}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <!-- <Setter Property="Background" Value="#fff"/> -->
