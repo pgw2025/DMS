@@ -198,18 +198,53 @@ partial class VariableTableViewModel : ViewModelBase
 
             varData.VariableTableId = variableTable.Id;
             // 更新数据库
-            await _varDataRepository.UpdateAsync(varData);
+            await _varDataRepository.AddAsync(varData);
             // 更新当前页面的
             DataVariables.Add(varData);
-            var index = variableTable.DataVariables.IndexOf(SelectedVariableData);
-            // 更新变量表中的
-            if (index >= 0 && index < variableTable.DataVariables.Count)
-                variableTable.DataVariables[index] = varData;
             NotificationHelper.ShowMessage($"添加变量成功:{varData?.Name}", NotificationType.Success);
         }
         catch (Exception e)
         {
             string msg = $"添加变量的过程中发生了不可预期的错误：";
+            Logger.Error(msg + e);
+            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async void DeleteVarData()
+    {
+        if (SelectedVariableData == null)
+        {
+            NotificationHelper.ShowMessage("请选择要删除的变量", NotificationType.Warning);
+            return;
+        }
+
+        var confirm = await _dialogService.ShowConfrimeDialog(
+            "删除确认",
+            $"确定要删除变量 \"{SelectedVariableData.Name}\" 吗？",
+            "删除");
+
+        if (!confirm)
+            return;
+
+        try
+        {
+            var result = await _varDataRepository.DeleteAsync(SelectedVariableData);
+            if (result > 0)
+            {
+                var dataName = SelectedVariableData.Name;
+                DataVariables.Remove(SelectedVariableData);
+                NotificationHelper.ShowMessage($"变量 \"{dataName}\" 删除成功", NotificationType.Success);
+            }
+            else
+            {
+                NotificationHelper.ShowMessage($"变量 \"{SelectedVariableData.Name}\" 删除失败", NotificationType.Error);
+            }
+        }
+        catch (Exception e)
+        {
+            string msg = $"删除变量的过程中发生了不可预期的错误：";
             Logger.Error(msg + e);
             NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
         }

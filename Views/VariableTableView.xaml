@@ -69,6 +69,13 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
+
+                <ui:AppBarButton Command="{Binding DeleteVarDataCommand}"
+                                 Label="删除变量">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
                 
                
                 <ui:AppBarButton Command="{Binding SaveModifiedVarDataCommand}"
