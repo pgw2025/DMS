@@ -79,6 +79,62 @@
                                 <Run Text="{Binding Platform, FallbackValue='EMQX'}" />
                             </TextBlock>
                         </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Contact}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding ClientID}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OtherUser}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding UserName}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Lock}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding PassWord}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Send}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding PublishTopic}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SubscriptionAdd}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding SubTopics}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Calendar}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding ConnTime}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FavoriteStar}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding IsDefault}" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
