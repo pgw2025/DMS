@@ -212,17 +212,18 @@ partial class VariableTableViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async void DeleteVarData()
+    public async Task DeleteVarData(List<VariableData> variablesToDelete)
     {
-        if (SelectedVariableData == null)
+        if (variablesToDelete == null || !variablesToDelete.Any())
         {
             NotificationHelper.ShowMessage("请选择要删除的变量", NotificationType.Warning);
             return;
         }
 
+        var names = string.Join("、", variablesToDelete.Select(v => v.Name));
         var confirm = await _dialogService.ShowConfrimeDialog(
             "删除确认",
-            $"确定要删除变量 \"{SelectedVariableData.Name}\" 吗？",
+            $"确定要删除选中的 {variablesToDelete.Count} 个变量吗？\n\n{names}",
             "删除");
 
         if (!confirm)
@@ -230,16 +231,18 @@ partial class VariableTableViewModel : ViewModelBase
 
         try
         {
-            var result = await _varDataRepository.DeleteAsync(SelectedVariableData);
+            var result = await _varDataRepository.DeleteAsync(variablesToDelete);
             if (result > 0)
             {
-                var dataName = SelectedVariableData.Name;
-                DataVariables.Remove(SelectedVariableData);
-                NotificationHelper.ShowMessage($"变量 \"{dataName}\" 删除成功", NotificationType.Success);
+                foreach (var variable in variablesToDelete)
+                {
+                    DataVariables.Remove(variable);
+                }
+                NotificationHelper.ShowMessage($"成功删除 {result} 个变量", NotificationType.Success);
             }
             else
             {
-                NotificationHelper.ShowMessage($"变量 \"{SelectedVariableData.Name}\" 删除失败", NotificationType.Error);
+                NotificationHelper.ShowMessage("删除变量失败", NotificationType.Error);
             }
         }
         catch (Exception e)

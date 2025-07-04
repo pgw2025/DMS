@@ -70,8 +70,8 @@
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
 
-                <ui:AppBarButton Command="{Binding DeleteVarDataCommand}"
-                                 Label="删除变量">
+                <ui:AppBarButton Label="删除变量"
+                                 Click="DeleteVarData_Click">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
                     </ui:AppBarButton.Icon>
@@ -141,10 +141,12 @@
 
         </ikw:SimpleStackPanel>
 
-        <DataGrid Margin="10"
+        <DataGrid x:Name="BasicGridView"
+                  Margin="10"
                   CellEditEnding="DataGrid_OnCellEditEnding"
                   AutoGenerateColumns="False"
                   CanUserSortColumns="True"
+                  SelectionMode="Extended"
                   SelectedItem="{Binding SelectedVariableData}"
                   ItemsSource="{Binding DataVariables}">
             <DataGrid.RowStyle>

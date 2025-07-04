@@ -108,4 +108,18 @@ public partial class VariableTableView : UserControl
             NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
         }
     }
+
+    private async void DeleteVarData_Click(object sender, RoutedEventArgs e)
+    {
+        _viewModel = (VariableTableViewModel)this.DataContext;
+        var selectedVariables = BasicGridView.SelectedItems.Cast<VariableData>().ToList();
+        if (selectedVariables.Any())
+        {
+            await _viewModel.DeleteVarData(selectedVariables);
+        }
+        else
+        {
+            NotificationHelper.ShowMessage("请选择要删除的变量", NotificationType.Warning);
+        }
+    }
 }

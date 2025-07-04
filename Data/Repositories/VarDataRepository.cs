@@ -273,7 +273,7 @@ public class VarDataRepository
         stopwatch.Start();
         using var _db = DbContext.GetInstance();
 
-        var dbList = variableDatas.Select(vd => vd.CopyTo<DbVariableData>());
+        var dbList = variableDatas.Select(vd => vd.CopyTo<DbVariableData>()).ToList();
         var result = await _db.Deleteable<DbVariableData>(dbList)
                               .ExecuteCommandAsync();
         stopwatch.Stop();
