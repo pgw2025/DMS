@@ -18,6 +18,7 @@ namespace PMSWPF.Services
         private readonly DataServices _dataServices;
         private readonly Dictionary<int, Plc> _s7PlcClients = new Dictionary<int, Plc>();
         private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(1); // 轮询间隔
+        private List<Device>? _s7Devices;
 
         public S7BackgroundService(ILogger<S7BackgroundService> logger, DataServices dataServices)
         {
@@ -28,6 +29,8 @@ namespace PMSWPF.Services
 
         private void HandleDeviceListChanged(List<Device> devices)
         {
+            _s7Devices = devices.Where(d => d.ProtocolType == ProtocolType.S7 && d.IsActive)
+                                .ToList();
             // 当设备列表变化时，更新PLC客户端
             // 这里需要更复杂的逻辑来处理连接的关闭和新连接的建立
             // 简单起见，这里只做日志记录
@@ -39,6 +42,9 @@ namespace PMSWPF.Services
             _logger.LogInformation("S7 Background Service is starting.");
 
             stoppingToken.Register(() => _logger.LogInformation("S7 Background Service is stopping."));
+
+            _s7Devices = _dataServices.Devices?.Where(d => d.ProtocolType == ProtocolType.S7 && d.IsActive)
+                                      .ToList();
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -62,15 +68,13 @@ namespace PMSWPF.Services
 
         private async Task PollS7Devices(CancellationToken stoppingToken)
         {
-            var s7Devices = _dataServices.Devices?.Where(d => d.ProtocolType == ProtocolType.S7 && d.IsActive).ToList();
-
-            if (s7Devices == null || !s7Devices.Any())
+            if (_s7Devices == null || !_s7Devices.Any())
             {
                 _logger.LogDebug("No active S7 devices found to poll.");
                 return;
             }
 
-            foreach (var device in s7Devices)
+            foreach (var device in _s7Devices)
             {
                 if (stoppingToken.IsCancellationRequested) return;
 
@@ -107,10 +111,14 @@ namespace PMSWPF.Services
                 }
 
                 // Filter variables for the current device and S7 protocol
-                var s7Variables = device.VariableTables
-                                        ?.SelectMany(vt => vt.DataVariables)
-                                        .Where(vd => vd.ProtocolType == ProtocolType.S7 && vd.IsActive)
-                                        .ToList();
+                var s7VariablesTemp = device
+                                      .VariableTables.Where(vd => vd.ProtocolType == ProtocolType.S7 && vd.IsActive)
+                                      .ToList();
+
+                var s7Variables = s7VariablesTemp.SelectMany(vt => vt.DataVariables)
+                                                 .ToList();
+                // ?.SelectMany(vt => vt.DataVariables)
+
 
                 if (s7Variables == null || !s7Variables.Any())
                 {
@@ -119,7 +127,8 @@ namespace PMSWPF.Services
                 }
 
                 // Batch read variables
-                var addressesToRead = s7Variables.Select(vd => vd.S7Address).ToList();
+                var addressesToRead = s7Variables.Select(vd => vd.S7Address)
+                                                 .ToList();
                 if (!addressesToRead.Any()) continue;
 
                 try
@@ -146,7 +155,8 @@ namespace PMSWPF.Services
                             {
                                 // Update the variable's DataValue and DisplayValue
                                 variable.DataValue = value.ToString();
-                                variable.DisplayValue = SiemensHelper.ConvertS7Value(value, variable.DataType, variable.Converstion);
+                                variable.DisplayValue
+                                    = SiemensHelper.ConvertS7Value(value, variable.DataType, variable.Converstion);
                                 _logger.LogDebug($"Read {variable.Name}: {variable.DataValue}");
                             }
                         }
@@ -176,6 +186,7 @@ namespace PMSWPF.Services
                     _logger.LogInformation($"Closed S7 PLC connection: {plcClient.IP}");
                 }
             }
+
             _s7PlcClients.Clear();
 
             await base.StopAsync(stoppingToken);
