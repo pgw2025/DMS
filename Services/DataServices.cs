@@ -18,12 +18,15 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     [ObservableProperty] private List<Device> _devices;
     [ObservableProperty] private List<VariableTable> _variableTables;
     [ObservableProperty] private List<MenuBean> menuTrees;
+    [ObservableProperty] private List<Mqtt> _mqtts;
     private readonly DeviceRepository _deviceRepository;
     private readonly MenuRepository _menuRepository;
+    private readonly MqttRepository _mqttRepository;
 
 
     public event Action<List<Device>> OnDeviceListChanged;
     public event Action<List<MenuBean>> OnMenuTreeListChanged;
+    public event Action<List<Mqtt>> OnMqttListChanged;
 
 
     partial void OnDevicesChanged(List<Device> devices)
@@ -36,6 +39,11 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         OnMenuTreeListChanged?.Invoke(MenuTrees);
     }
 
+    partial void OnMqttsChanged(List<Mqtt> mqtts)
+    {
+        OnMqttListChanged?.Invoke(mqtts);
+    }
+
 
     public DataServices(ILogger<DataServices> logger)
     {
@@ -43,6 +51,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         IsActive = true;
         _deviceRepository = new DeviceRepository();
         _menuRepository = new MenuRepository();
+        _mqttRepository = new MqttRepository();
     }
 
 
@@ -60,12 +69,16 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 case LoadTypes.All:
                     await LoadDevices();
                     await LoadMenus();
+                    await LoadMqtts();
                     break;
                 case LoadTypes.Devices:
                     await LoadDevices();
                     break;
                 case LoadTypes.Menu:
                     await LoadMenus();
+                    break;
+                case LoadTypes.Mqtts:
+                    await LoadMqtts();
                     break;
             }
         }
@@ -89,5 +102,10 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             MenuHelper.MenuAddParent(menu);
             DataServicesHelper.SortMenus(menu);
         }
+    }
+
+    private async Task LoadMqtts()
+    {
+        Mqtts = await _mqttRepository.GetAll();
     }
 }

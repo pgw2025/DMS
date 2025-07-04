@@ -7,7 +7,8 @@ public interface IDialogService
 {
     Task<Device> ShowAddDeviceDialog();
     Task<Device> ShowEditDeviceDialog(Device device);
-    
+    Task<Mqtt> ShowAddMqttDialog();
+    Task<Mqtt> ShowEditMqttDialog(Mqtt mqtt);
     Task<bool> ShowConfrimeDialog(string title, string message,string buttonText="确认");
     
     Task<VariableTable> ShowAddVarTableDialog();

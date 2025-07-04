@@ -35,6 +35,20 @@
       <Compile Remove="Data\Repositories\BaseRepositories.cs" />
     </ItemGroup>
     <ItemGroup>
+      <Page Update="Views\MqttsView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+      <Compile Update="Views\MqttsView.xaml.cs">
+        <DependentUpon>MqttsView.xaml</DependentUpon>
+      </Compile>
+      <Page Update="Views\Dialogs\MqttDialog.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+      <Compile Update="Views\Dialogs\MqttDialog.xaml.cs">
+        <DependentUpon>MqttDialog.xaml</DependentUpon>
+      </Compile>
+    </ItemGroup>
+    <ItemGroup>
       <None Remove="Assets\AppIcon.png" />
       <Resource Include="Assets\AppIcon.png" />
     </ItemGroup>

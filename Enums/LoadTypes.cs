@@ -4,6 +4,6 @@ public enum LoadTypes
 {
     Devices,
     Menu,
-    Mqtt,
+    Mqtts,
     All
 }

@@ -43,6 +43,34 @@ public class DialogService :IDialogService
         
     }
 
+    public async Task<Mqtt> ShowAddMqttDialog()
+    {
+        var mqtt = new Mqtt();
+        MqttDialogViewModel vm = new MqttDialogViewModel(mqtt);
+        vm.Title = "添加MQTT";
+        vm.PrimaryButContent = "添加MQTT";
+        return await ShowConentDialog(vm, mqtt);
+    }
+
+    public async Task<Mqtt> ShowEditMqttDialog(Mqtt mqtt)
+    {
+        MqttDialogViewModel vm = new MqttDialogViewModel(mqtt);
+        vm.Title = "编辑MQTT";
+        vm.PrimaryButContent = "编辑MQTT";
+        return await ShowConentDialog(vm, mqtt);
+    }
+
+    private static async Task<Mqtt> ShowConentDialog(MqttDialogViewModel viewModel, Mqtt mqtt)
+    {
+        var dialog = new MqttDialog(viewModel);
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary)
+        {
+            return mqtt;
+        }
+        return null;
+    }
+
     public async Task<bool> ShowConfrimeDialog(string title, string message,string buttonText="确认")
     {
         ConfrimDialogViewModel vm = new ConfrimDialogViewModel();
