@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using PMSWPF.Enums;
 using SqlSugar;
 using SqlSugar.DbConvert;
+using S7.Net; // Add this using directive
 
 namespace PMSWPF.Models;
 
@@ -63,6 +64,24 @@ public partial class Device : ObservableObject
     /// </summary>
     [ObservableProperty]
     private int prot;
+
+    /// <summary>
+    /// PLC的CPU类型。
+    /// </summary>
+    [ObservableProperty]
+    private CpuType cpuType;
+
+    /// <summary>
+    /// PLC的机架号。
+    /// </summary>
+    [ObservableProperty]
+    private short rack;
+
+    /// <summary>
+    /// PLC的槽号。
+    /// </summary>
+    [ObservableProperty]
+    private short slot;
 
     /// <summary>
     /// 设备的通信协议类型。

@@ -51,4 +51,20 @@ public static class SiemensHelper
                 return "object";
         }
     }
+
+    /// <summary>
+    /// 将S7读取到的值转换为显示值
+    /// </summary>
+    /// <param name="value">S7读取到的原始值</param>
+    /// <param name="dataType">变量的数据类型</param>
+    /// <param name="conversion">转换规则</param>
+    /// <returns>显示值</returns>
+    public static string ConvertS7Value(object value, string dataType, string conversion)
+    {
+        if (value == null) return string.Empty;
+
+        // For now, a simple conversion to string. More complex logic can be added here.
+        // Based on dataType and conversion, you might parse, format, or apply formulas.
+        return value.ToString();
+    }
 }

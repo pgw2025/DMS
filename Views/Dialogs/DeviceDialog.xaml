@@ -97,7 +97,38 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <!-- 通讯协议-->
+
+            <!-- S7 Specific Properties -->
+            <StackPanel x:Name="S7PropertiesPanel" Visibility="Visible" Background="LightGray">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Device.ProtocolType}"
+                                         Value="{x:Static en:ProtocolType.S7}">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <!-- CpuType -->
+                <TextBlock Text="CPU 类型"
+                           HorizontalAlignment="Left"
+                           Style="{StaticResource TextBlockSubTitle}" />
+                <ComboBox SelectedItem="{Binding Device.CpuType}"
+                          ItemsSource="{Binding CpuTypes}" />
+
+                <!-- Rack -->
+                <TextBlock Text="机架号"
+                           HorizontalAlignment="Left"
+                           Style="{StaticResource TextBlockSubTitle}" />
+                <TextBox Text="{Binding Device.Rack, UpdateSourceTrigger=PropertyChanged}" />
+
+                <!-- Slot -->
+                <TextBlock Text="槽号"
+                           HorizontalAlignment="Left"
+                           Style="{StaticResource TextBlockSubTitle}" />
+                <TextBox Text="{Binding Device.Slot, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
             <CheckBox FontSize="16"
                       Content="是否启用"

@@ -2,6 +2,7 @@ using PMSWPF.Enums;
 using SqlSugar;
 using SqlSugar.DbConvert;
 using ProtocolType = PMSWPF.Enums.ProtocolType;
+using S7.Net; // Add this using directive
 
 namespace PMSWPF.Data.Entities;
 
@@ -53,6 +54,24 @@ public class DbDevice
     /// 设备的端口号。
     /// </summary>
     public int Prot { get; set; }
+
+    /// <summary>
+    /// PLC的CPU类型。
+    /// </summary>
+    [SugarColumn(ColumnDataType = "varchar(20)", IsNullable = true, SqlParameterDbType = typeof(EnumToStringConvert))]
+    public CpuType CpuType { get; set; }
+
+    /// <summary>
+    /// PLC的机架号。
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public short Rack { get; set; }
+
+    /// <summary>
+    /// PLC的槽号。
+    /// </summary>
+    /// [SugarColumn(IsNullable = true)]
+    public short Slot { get; set; }
 
     /// <summary>
     /// 设备的通信协议类型。
