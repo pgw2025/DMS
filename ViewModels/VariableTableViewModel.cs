@@ -254,20 +254,25 @@ partial class VariableTableViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ChangePollLevel()
+    public async Task ChangePollLevel(List<VariableData> variablesToChange)
     {
-        if (SelectedVariableData == null)
+        if (variablesToChange == null || !variablesToChange.Any())
         {
-            NotificationHelper.ShowMessage("请选择一个变量", NotificationType.Warning);
+            NotificationHelper.ShowMessage("请选择要修改轮询频率的变量", NotificationType.Warning);
             return;
         }
 
-        var newPollLevelType = await _dialogService.ShowPollLevelDialog(SelectedVariableData.PollLevelType);
+        var newPollLevelType = await _dialogService.ShowPollLevelDialog(variablesToChange.First().PollLevelType);
         if (newPollLevelType.HasValue)
         {
-            SelectedVariableData.PollLevelType = newPollLevelType.Value;
-            await _varDataRepository.UpdateAsync(SelectedVariableData);
-            NotificationHelper.ShowMessage($"变量 {SelectedVariableData.Name} 的轮询频率已更新", NotificationType.Success);
+            foreach (var variable in variablesToChange)
+            {
+                variable.PollLevelType = newPollLevelType.Value;
+                variable.IsModified=false;
+            }
+
+            await _varDataRepository.UpdateAsync(variablesToChange);
+            NotificationHelper.ShowMessage($"已成功更新 {variablesToChange.Count} 个变量的轮询频率", NotificationType.Success);
         }
     }
 
