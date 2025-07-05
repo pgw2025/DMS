@@ -80,6 +80,12 @@ public class DbVariableData
     public bool IsAlarm { get; set; }
 
     /// <summary>
+    /// 轮询级别，例如1秒、5秒等。
+    /// </summary>
+    [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
+    public PollLevelType PollLevelType { get; set; }
+
+    /// <summary>
     /// 指示变量是否已被逻辑删除。
     /// </summary>
     public bool IsDeleted { get; set; }

@@ -79,6 +79,11 @@ public partial class VariableData : ObservableObject
     public bool IsAlarm { get; set; }
 
     /// <summary>
+    /// 轮询级别，例如1秒、5秒等。
+    /// </summary>
+    public PollLevelType PollLevelType { get; set; } = PollLevelType.ThirtySeconds;
+
+    /// <summary>
     /// 指示变量是否已被逻辑删除。
     /// </summary>
     public bool IsDeleted { get; set; }
