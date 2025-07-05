@@ -72,6 +72,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<GrowlNotificationService>();
         services.AddHostedService<S7BackgroundService>(); // Register as HostedService
+        services.AddHostedService<MqttBackgroundService>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<DevicesViewModel>();
@@ -193,6 +194,7 @@ public partial class App : Application
         _db.CodeFirst.InitTables<DbVariableS7Data>();
         _db.CodeFirst.InitTables<DbUser>();
         _db.CodeFirst.InitTables<DbMqtt>();
+        _db.CodeFirst.InitTables<DbVariableDataMqtt>();
         _db.CodeFirst.InitTables<DbMenu>();
     }
 }
