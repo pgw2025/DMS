@@ -28,8 +28,14 @@ public partial class App : Application
     public App()
     {
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-                        .ConfigureServices((context, services) => { ConfigureServices(services); })
-                        .ConfigureLogging(loggingBuilder => { ConfigureLogging(loggingBuilder); })
+                        .ConfigureServices((context, services) =>
+                        {
+                            ConfigureServices(services);
+                        })
+                        .ConfigureLogging(loggingBuilder =>
+                        {
+                            ConfigureLogging(loggingBuilder);
+                        })
                         .Build();
         Services = Host.Services;
     }
@@ -85,6 +91,7 @@ public partial class App : Application
 
     private void ConfigureLogging(ILoggingBuilder loggingBuilder)
     {
+        LogManager.Setup().LoadConfigurationFromFile("Config/nlog.config");
         loggingBuilder.ClearProviders();
         loggingBuilder.SetMinimumLevel(LogLevel.Trace);
         loggingBuilder.AddNLog();
