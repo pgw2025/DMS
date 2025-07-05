@@ -18,7 +18,23 @@ namespace PMSWPF.Services
         private readonly ILogger<S7BackgroundService> _logger;
         private readonly DataServices _dataServices;
         private readonly Dictionary<int, Plc> _s7PlcClients = new Dictionary<int, Plc>();
-        private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(1); // 轮询间隔
+        
+        private readonly Dictionary<PollLevelType, TimeSpan> _pollingIntervals = new Dictionary<PollLevelType, TimeSpan>
+        {
+            { PollLevelType.TenMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenMilliseconds) },
+            { PollLevelType.HundredMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.HundredMilliseconds) },
+            { PollLevelType.FiveHundredMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.FiveHundredMilliseconds) },
+            { PollLevelType.OneSecond, TimeSpan.FromMilliseconds((int)PollLevelType.OneSecond) },
+            { PollLevelType.FiveSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.FiveSeconds) },
+            { PollLevelType.TenSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenSeconds) },
+            { PollLevelType.TwentySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TwentySeconds) },
+            { PollLevelType.ThirtySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtySeconds) },
+            { PollLevelType.OneMinute, TimeSpan.FromMilliseconds((int)PollLevelType.OneMinute) },
+            { PollLevelType.ThreeMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThreeMinutes) },
+            { PollLevelType.FiveMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.FiveMinutes) },
+            { PollLevelType.TenMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.TenMinutes) },
+            { PollLevelType.ThirtyMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtyMinutes) }
+        };
         private List<Device>? _s7Devices;
 
         public S7BackgroundService(ILogger<S7BackgroundService> logger, DataServices dataServices)
@@ -35,36 +51,27 @@ namespace PMSWPF.Services
             // 当设备列表变化时，更新PLC客户端
             // 这里需要更复杂的逻辑来处理连接的关闭和新连接的建立
             // 简单起见，这里只做日志记录
-            _logger.LogInformation("Device list changed. S7 clients might need to be reinitialized.");
+            _logger.LogInformation("设备列表已更改。S7客户端可能需要重新初始化。");
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("S7 Background Service is starting.");
+            _logger.LogInformation("S7后台服务正在启动。");
 
-            stoppingToken.Register(() => _logger.LogInformation("S7 Background Service is stopping."));
+            stoppingToken.Register(() => _logger.LogInformation("S7后台服务正在停止。"));
 
             _s7Devices = _dataServices.Devices?.Where(d => d.ProtocolType == ProtocolType.S7 && d.IsActive)
                                       .ToList();
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogDebug("S7 Background Service is doing background work.");
+                _logger.LogDebug("S7后台服务正在执行后台工作。");
 
                 await PollS7Devices(stoppingToken);
 
-                try
-                {
-                    await Task.Delay(_pollingInterval, stoppingToken);
-                }
-                catch (TaskCanceledException)
-                {
-                    // When the stopping token is canceled, a TaskCanceledException is thrown.
-                    // We should catch it to exit gracefully.
-                }
             }
 
-            _logger.LogInformation("S7 Background Service has stopped.");
+            _logger.LogInformation("S7后台服务已停止。");
         }
 
         /// <summary>
@@ -116,7 +123,8 @@ namespace PMSWPF.Services
         {
             if (_s7Devices == null || !_s7Devices.Any())
             {
-                _logger.LogDebug("No active S7 devices found to poll.");
+                _logger.LogDebug("未找到活跃的S7设备进行轮询。等待5秒后重试。");
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                 return;
             }
 
@@ -166,6 +174,19 @@ namespace PMSWPF.Services
                 {
                     if (stoppingToken.IsCancellationRequested) return; // 如果取消令牌被请求，则停止读取
 
+                    // 获取变量的轮询间隔
+                    if (!_pollingIntervals.TryGetValue(variable.PollLevelType, out var interval))
+                    {
+                        _logger.LogWarning($"未知轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
+                        continue;
+                    }
+
+                    // 检查是否达到轮询时间
+                    if ((DateTime.Now - variable.LastPollTime) < interval)
+                    {
+                        continue; // 未到轮询时间，跳过
+                    }
+
                     try
                     {
                         // 从PLC读取变量值
@@ -175,7 +196,8 @@ namespace PMSWPF.Services
                             // 更新变量的原始数据值和显示值
                             variable.DataValue = value.ToString();
                             variable.DisplayValue = SiemensHelper.ConvertS7Value(value, variable.DataType, variable.Converstion);
-                            // _logger.LogDebug($"已读取变量 {variable.Name}: {variable.DataValue}");
+                            variable.LastPollTime = DateTime.Now; // 更新最后轮询时间
+                            _logger.LogDebug($"已读取变量 {variable.Name}: {variable.DataValue}");
                         }
                     }
                     catch (Exception ex)

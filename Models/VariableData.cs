@@ -84,6 +84,11 @@ public partial class VariableData : ObservableObject
     public PollLevelType PollLevelType { get; set; } = PollLevelType.ThirtySeconds;
 
     /// <summary>
+    /// 最后一次轮询时间。
+    /// </summary>
+    public DateTime LastPollTime { get; set; } = DateTime.MinValue;
+
+    /// <summary>
     /// 指示变量是否已被逻辑删除。
     /// </summary>
     public bool IsDeleted { get; set; }
