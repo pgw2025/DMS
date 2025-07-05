@@ -191,6 +191,12 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="添加MQTT服务器"
+                              Click="AddMqttServerToVariables_Click">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.RowStyle>

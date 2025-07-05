@@ -1,5 +1,8 @@
 ﻿using System.Collections;
 using System.Reflection;
+using PMSWPF.Models;
+using PMSWPF.Data.Entities;
+using PMSWPF.Helper;
 
 namespace PMSWPF.Extensions;
 
@@ -60,6 +63,16 @@ public static class ObjectExtensions
             PropertyInfo targetProperty =
                 targetType.GetProperty(sourceProperty.Name, BindingFlags.Public | BindingFlags.Instance);
 
+            // 特殊处理 Mqtt.ConnTime 和 DbMqtt.CreateTime 的映射
+            if (sourceProperty.Name == "ConnTime" && targetType == typeof(DbMqtt))
+            {
+                targetProperty = targetType.GetProperty("CreateTime", BindingFlags.Public | BindingFlags.Instance);
+            }
+            else if (sourceProperty.Name == "CreateTime" && targetType == typeof(Mqtt))
+            {
+                targetProperty = targetType.GetProperty("ConnTime", BindingFlags.Public | BindingFlags.Instance);
+            }
+
             // 确保目标属性存在且可写
             if (targetProperty != null && targetProperty.CanWrite)
             {
@@ -78,7 +91,48 @@ public static class ObjectExtensions
                 // 场景 2: 属性类型不同，但可能是泛型 List<T> 类型
                 else if (isTargetList && isSourceList)
                 {
-                    CopyGenericList(ttarget, sourceProperty, targetProperty, sourceValue);
+                    // 特殊处理 Mqtts 列表的复制
+                    if (sourceProperty.Name == "Mqtts")
+                    {
+                        if (sourceType == typeof(VariableData) && targetType == typeof(DbVariableData))
+                        {
+                            // 从 VariableData (List<Mqtt>) 转换为 DbVariableData (List<DbMqtt>)
+                            var sourceMqtts = sourceValue as List<Mqtt>;
+                            if (sourceMqtts != null)
+                            {
+                                var targetMqtts = sourceMqtts.Select(m => m.CopyTo<DbMqtt>()).ToList();
+                                targetProperty.SetValue(ttarget, targetMqtts);
+                            }
+                            else
+                            {
+                                targetProperty.SetValue(ttarget, null);
+                            }
+                        }
+                        else if (sourceType == typeof(DbVariableData) && targetType == typeof(VariableData))
+                        {
+                            // 从 DbVariableData (List<DbMqtt>) 转换为 VariableData (List<Mqtt>)
+                            var sourceDbMqtts = sourceValue as List<DbMqtt>;
+                            if (sourceDbMqtts != null)
+                            {
+                                var targetMqtts = sourceDbMqtts.Select(m => m.CopyTo<Mqtt>()).ToList();
+                                targetProperty.SetValue(ttarget, targetMqtts);
+                            }
+                            else
+                            {
+                                targetProperty.SetValue(ttarget, null);
+                            }
+                        }
+                        else
+                        {
+                            // 其他 List<T> 类型，使用通用复制逻辑
+                            CopyGenericList(ttarget, sourceProperty, targetProperty, sourceValue);
+                        }
+                    }
+                    else
+                    {
+                        // 其他 List<T> 类型，使用通用复制逻辑
+                        CopyGenericList(ttarget, sourceProperty, targetProperty, sourceValue);
+                    }
                 }
                 // 场景 3: 属性类型不同，但是属性名称一样
                 else

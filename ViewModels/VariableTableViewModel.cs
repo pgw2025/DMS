@@ -282,6 +282,48 @@ partial class VariableTableViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    public async Task AddMqttServerToVariables(IList<VariableData> variablesToAddMqtt)
+    {
+        if (variablesToAddMqtt == null || !variablesToAddMqtt.Any())
+        {
+            NotificationHelper.ShowMessage("请选择要添加MQTT服务器的变量", NotificationType.Warning);
+            return;
+        }
+
+        try
+        {
+            var selectedMqtt = await _dialogService.ShowMqttSelectionDialog();
+            if (selectedMqtt == null)
+            {
+                return; // 用户取消选择
+            }
+
+            foreach (VariableData variable in variablesToAddMqtt)
+            {
+                if (variable.Mqtts == null)
+                {
+                    variable.Mqtts = new List<Mqtt>();
+                }
+                // 避免重复添加
+                if (!variable.Mqtts.Any(m => m.Id == selectedMqtt.Id))
+                {
+                    variable.Mqtts.Add(selectedMqtt);
+                    variable.IsModified = true; // 标记为已修改
+                }
+            }
+
+            // 批量更新数据库
+            await _varDataRepository.UpdateAsync(variablesToAddMqtt.ToList());
+            NotificationHelper.ShowMessage($"已成功为 {variablesToAddMqtt.Count} 个变量添加MQTT服务器: {selectedMqtt.Name}", NotificationType.Success);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "添加MQTT服务器到变量时发生错误。");
+            NotificationHelper.ShowMessage($"添加MQTT服务器失败: {ex.Message}", NotificationType.Error);
+        }
+    }
+
     // [RelayCommand]
     // private async void ImportFromExcel()
     // {

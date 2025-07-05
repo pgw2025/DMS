@@ -52,7 +52,7 @@ public partial class App : Application
         InitializeMenu()
             .Await((e) => { NotificationHelper.ShowMessage($"初始化主菜单失败：{e.Message}"); },
                    () => { MessageHelper.SendLoadMessage(LoadTypes.Menu); });
-
+        Host.Services.GetRequiredService<GrowlNotificationService>();
         MainWindow = Host.Services.GetRequiredService<MainView>();
         MainWindow.Show();
     }

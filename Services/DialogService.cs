@@ -171,4 +171,16 @@ public class DialogService :IDialogService
         }
         return null;
     }
+
+    public async Task<Mqtt?> ShowMqttSelectionDialog()
+    {
+        var vm = new MqttSelectionDialogViewModel();
+        var dialog = new MqttSelectionDialog(vm);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return vm.SelectedMqtt;
+        }
+        return null;
+    }
 }

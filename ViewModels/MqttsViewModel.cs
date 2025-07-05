@@ -62,6 +62,7 @@ public partial class MqttsViewModel : ViewModelBase
             }
 
             await _mqttRepository.Add(mqtt);
+            MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
         }
         catch (Exception e)
         {

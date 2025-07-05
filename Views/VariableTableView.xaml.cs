@@ -145,4 +145,27 @@ public partial class VariableTableView : UserControl
             NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
         }
     }
+
+    private async void AddMqttServerToVariables_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            _viewModel = (VariableTableViewModel)this.DataContext;
+            var selectedVariables = BasicGridView.SelectedItems.Cast<VariableData>().ToList();
+            if (selectedVariables.Any())
+            {
+                await _viewModel.AddMqttServerToVariables(selectedVariables);
+            }
+            else
+            {
+                NotificationHelper.ShowMessage("请选择要添加MQTT服务器的变量", NotificationType.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            string msg = "添加MQTT服务器时发生了错误：";
+            Logger.Error(msg + ex);
+            NotificationHelper.ShowMessage(msg + ex.Message, NotificationType.Error);
+        }
+    }
 }

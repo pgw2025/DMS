@@ -21,5 +21,5 @@ public interface IDialogService
     Task<string> ShowImportExcelDialog();
     ContentDialog ShowProcessingDialog(string title, string message);
     Task<PollLevelType?> ShowPollLevelDialog(PollLevelType pollLevelType);
-
+    Task<Mqtt?> ShowMqttSelectionDialog();
 }
