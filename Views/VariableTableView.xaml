@@ -239,7 +239,7 @@
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="数据类型"
                                     Binding="{Binding DataType}" />
-                <DataGridTemplateColumn Header="信号类型">
+                <DataGridTemplateColumn Header="信号类型" SortMemberPath="SignalType">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding SignalType, Converter={StaticResource EnumDescriptionConverter}}" />
@@ -258,7 +258,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="轮询频率">
+                <DataGridTemplateColumn Header="轮询频率" SortMemberPath="PollLevelType">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding PollLevelType, Converter={StaticResource EnumDescriptionConverter}}" />
