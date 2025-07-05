@@ -140,6 +140,6 @@ public class DbVariableData
     /// <summary>
     /// 关联的MQTT配置列表。
     /// </summary>
-    [SugarColumn(IsNullable = true)]
+    [Navigate(typeof(DbVariableDataMqtt), "VariableDataId", "MqttId")]
     public List<DbMqtt>? Mqtts { get; set; }
 }

@@ -81,4 +81,10 @@ public class DbMqtt
     /// MQTT客户端登录用户名。
     /// </summary>
     public string UserName { get; set; } = String.Empty;
+
+    /// <summary>
+    /// 关联的变量数据列表。
+    /// </summary>
+    [Navigate(typeof(DbVariableDataMqtt), "MqttId", "VariableDataId")]
+    public List<DbVariableData>? VariableDatas { get; set; }
 }
