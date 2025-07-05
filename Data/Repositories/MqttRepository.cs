@@ -36,7 +36,9 @@ public class MqttRepository
         stopwatch.Start();
         using (var _db = DbContext.GetInstance())
         {
-            var result = await _db.Queryable<DbMqtt>().In(id).SingleAsync();
+            var result = await _db.Queryable<DbMqtt>()
+                                  .In(id)
+                                  .SingleAsync();
             stopwatch.Stop();
             Logger.Info($"根据ID '{id}' 获取Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result.CopyTo<Mqtt>();
@@ -53,10 +55,12 @@ public class MqttRepository
         stopwatch.Start();
         using (var _db = DbContext.GetInstance())
         {
-            var result = await _db.Queryable<DbMqtt>().ToListAsync();
+            var result = await _db.Queryable<DbMqtt>()
+                                  .ToListAsync();
             stopwatch.Stop();
             Logger.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.Select(m=>m.CopyTo<Mqtt>()).ToList();
+            return result.Select(m => m.CopyTo<Mqtt>())
+                         .ToList();
         }
     }
 
@@ -69,32 +73,33 @@ public class MqttRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var db = DbContext.GetInstance())
+        using var db = DbContext.GetInstance();
+        await db.BeginTranAsync();
+        try
         {
-            await db.BeginTranAsync();
-            try
-            {
-                var result = await db.Insertable(mqtt.CopyTo<DbMqtt>()).ExecuteReturnIdentityAsync();
-                // Add menu entry
-                var menu = new MenuBean()
-                {
-                    Name = mqtt.Name,
-                    Icon = SegoeFluentIcons.Wifi.Glyph,
-                    Type = MenuType.MqttMenu,
-                    DataId = result
-                };
-                await _menuRepository.Add(menu, db);
-                await db.CommitTranAsync();
-                stopwatch.Stop();
-                Logger.Info($"新增Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-                return result;
-            }
-            catch (Exception ex)
-            {
-                await db.RollbackTranAsync();
-                Logger.Error(ex, $"添加MQTT配置 {{mqtt.Name}} 失败");
-                throw;
-            }
+            var result = await db.Insertable(mqtt.CopyTo<DbMqtt>())
+                                 .ExecuteReturnIdentityAsync();
+            var mqttMenu = await _menuRepository.GetMainMenuByName("Mqtt服务器");
+            // Add menu entry
+            var menu = new MenuBean()
+                       {
+                           Name = mqtt.Name,
+                           Icon = SegoeFluentIcons.Wifi.Glyph,
+                           Type = MenuType.MqttMenu,
+                           DataId = result,
+                           ParentId = mqttMenu.Id,
+                       };
+            await _menuRepository.Add(menu, db);
+            await db.CommitTranAsync();
+            stopwatch.Stop();
+            Logger.Info($"新增Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result;
+        }
+        catch (Exception ex)
+        {
+            await db.RollbackTranAsync();
+            Logger.Error(ex, $"添加MQTT配置 {{mqtt.Name}} 失败");
+            throw;
         }
     }
 
@@ -112,7 +117,8 @@ public class MqttRepository
             await db.BeginTranAsync();
             try
             {
-                var result = await db.Updateable(mqtt.CopyTo<DbMqtt>()).ExecuteCommandAsync();
+                var result = await db.Updateable(mqtt.CopyTo<DbMqtt>())
+                                     .ExecuteCommandAsync();
                 // Update menu entry
                 var menu = await _menuRepository.GetMenuByDataId(mqtt.Id, MenuType.MqttMenu);
                 if (menu != null)
@@ -120,6 +126,7 @@ public class MqttRepository
                     menu.Name = mqtt.Name;
                     await _menuRepository.Edit(menu, db);
                 }
+
                 await db.CommitTranAsync();
                 stopwatch.Stop();
                 Logger.Info($"更新Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -148,13 +155,12 @@ public class MqttRepository
             await db.BeginTranAsync();
             try
             {
-                var result = await db.Deleteable<DbMqtt>().In(mqtt.Id).ExecuteCommandAsync();
+                var result = await db.Deleteable<DbMqtt>()
+                                     .In(mqtt.Id)
+                                     .ExecuteCommandAsync();
                 // Delete menu entry
                 var menu = await _menuRepository.GetMenuByDataId(mqtt.Id, MenuType.MqttMenu);
-                if (menu != null)
-                {
-                    await _menuRepository.DeleteMenu(menu, db);
-                }
+                await _menuRepository.DeleteMenu(menu, db);
                 await db.CommitTranAsync();
                 stopwatch.Stop();
                 Logger.Info($"删除Mqtt配置ID '{mqtt.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");

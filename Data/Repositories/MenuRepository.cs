@@ -188,4 +188,11 @@ public class MenuRepository
             return result?.CopyTo<MenuBean>();
         }
     }
+
+    public async Task<MenuBean> GetMainMenuByName(string name)
+    {
+        using var db = DbContext.GetInstance();
+       var dbMenu= await db.Queryable<DbMenu>().FirstAsync(m => m.Name == name  && m.Type == MenuType.MainMenu);
+       return dbMenu.CopyTo<MenuBean>();
+    }
 }

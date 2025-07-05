@@ -150,13 +150,16 @@ public partial class MainViewModel : ViewModelBase
         {
             switch (menu.Type)
             {
+                // 导航到一级菜单
                 case MenuType.MainMenu:
                     menu.ViewModel = DataServicesHelper.GetMainViewModel(menu.Name);
                     break;
+                // 导航到设备下面的菜单
                 case MenuType.DeviceMenu:
                     menu.ViewModel = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
                     menu.Data = _dataServices.Devices.FirstOrDefault(d => d.Id == menu.DataId);
                     break;
+                // 导航到变量表菜单
                 case MenuType.VariableTableMenu:
                     VariableTableViewModel varTableVM =
                         App.Current.Services.GetRequiredService<VariableTableViewModel>();
@@ -166,16 +169,15 @@ public partial class MainViewModel : ViewModelBase
                     varTableVM.IsLoadCompletion = false;
                     menu.ViewModel = varTableVM;
                     menu.Data = varTableVM.VariableTable;
-
                     break;
+                // 导航到添加变量表的菜单
                 case MenuType.AddVariableTableMenu:
-
                     await AddVariableTable(menu);
+                    return;
                     break;
+                
             }
 
-            if (menu.Type == MenuType.AddVariableTableMenu)
-                return;
 
             if (menu.ViewModel != null)
             {

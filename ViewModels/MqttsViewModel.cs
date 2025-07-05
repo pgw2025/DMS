@@ -63,6 +63,7 @@ public partial class MqttsViewModel : ViewModelBase
 
             await _mqttRepository.Add(mqtt);
             MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
+            MessageHelper.SendLoadMessage(LoadTypes.Menu);
         }
         catch (Exception e)
         {
@@ -87,8 +88,8 @@ public partial class MqttsViewModel : ViewModelBase
             if (isDel)
             {
                 await _mqttRepository.Delete(SelectedMqtt);
-
                 MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
+                MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 NotificationHelper.ShowMessage($"删除MQTT成功,MQTT名：{SelectedMqtt.Name}", NotificationType.Success);
             }
         }
