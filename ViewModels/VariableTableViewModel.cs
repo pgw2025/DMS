@@ -59,6 +59,12 @@ partial class VariableTableViewModel : ViewModelBase
             // 推荐使用 JSON 序列化/反序列化进行深度拷贝
             var serialized = JsonConvert.SerializeObject(DataVariables);
             _originalDataVariables = JsonConvert.DeserializeObject<ObservableCollection<VariableData>>(serialized);
+
+            // 在数据加载完成后，将所有变量的 IsModified 状态重置为 false
+            foreach (var variableData in DataVariables)
+            {
+                variableData.IsModified = false;
+            }
         }
 
 

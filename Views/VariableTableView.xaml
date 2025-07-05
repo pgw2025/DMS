@@ -289,10 +289,10 @@
                 
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="创建时间"
-                                    Binding="{Binding CreateTime}" />
+                                    Binding="{Binding CreateTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="更新时间"
-                                    Binding="{Binding UpdateTime}" />
+                                    Binding="{Binding UpdateTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                 <DataGridTextColumn Header="转换规则"
                                     Binding="{Binding Converstion}" />
                 <DataGridCheckBoxColumn Header="启用"

@@ -21,22 +21,31 @@ namespace PMSWPF.Services
         private Thread _pollingThread;
         private CancellationTokenSource _cancellationTokenSource;
 
+        private int readCount = 0;
+        private int TGCount = 0;
+
         private readonly Dictionary<PollLevelType, TimeSpan> _pollingIntervals = new Dictionary<PollLevelType, TimeSpan>
-        {
-            { PollLevelType.TenMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenMilliseconds) },
-            { PollLevelType.HundredMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.HundredMilliseconds) },
-            { PollLevelType.FiveHundredMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.FiveHundredMilliseconds) },
-            { PollLevelType.OneSecond, TimeSpan.FromMilliseconds((int)PollLevelType.OneSecond) },
-            { PollLevelType.FiveSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.FiveSeconds) },
-            { PollLevelType.TenSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenSeconds) },
-            { PollLevelType.TwentySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TwentySeconds) },
-            { PollLevelType.ThirtySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtySeconds) },
-            { PollLevelType.OneMinute, TimeSpan.FromMilliseconds((int)PollLevelType.OneMinute) },
-            { PollLevelType.ThreeMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThreeMinutes) },
-            { PollLevelType.FiveMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.FiveMinutes) },
-            { PollLevelType.TenMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.TenMinutes) },
-            { PollLevelType.ThirtyMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtyMinutes) }
-        };
+            {
+                { PollLevelType.TenMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenMilliseconds) },
+                {
+                    PollLevelType.HundredMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.HundredMilliseconds)
+                },
+                {
+                    PollLevelType.FiveHundredMilliseconds,
+                    TimeSpan.FromMilliseconds((int)PollLevelType.FiveHundredMilliseconds)
+                },
+                { PollLevelType.OneSecond, TimeSpan.FromMilliseconds((int)PollLevelType.OneSecond) },
+                { PollLevelType.FiveSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.FiveSeconds) },
+                { PollLevelType.TenSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenSeconds) },
+                { PollLevelType.TwentySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TwentySeconds) },
+                { PollLevelType.ThirtySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtySeconds) },
+                { PollLevelType.OneMinute, TimeSpan.FromMilliseconds((int)PollLevelType.OneMinute) },
+                { PollLevelType.ThreeMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThreeMinutes) },
+                { PollLevelType.FiveMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.FiveMinutes) },
+                { PollLevelType.TenMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.TenMinutes) },
+                { PollLevelType.ThirtyMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtyMinutes) }
+            };
+
         private List<Device>? _s7Devices;
 
         public S7BackgroundService(ILogger<S7BackgroundService> logger, DataServices dataServices)
@@ -62,9 +71,9 @@ namespace PMSWPF.Services
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
             _pollingThread = new Thread(() => PollingLoop(_cancellationTokenSource.Token))
-            {
-                IsBackground = true
-            };
+                             {
+                                 IsBackground = true
+                             };
             _pollingThread.Start();
 
             return Task.CompletedTask;
@@ -81,9 +90,18 @@ namespace PMSWPF.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 // _logger.LogDebug("S7后台服务正在执行后台工作。");
+                // _logger.LogDebug($"开始轮询变量,当前时间：{DateTime.Now}");
+                readCount = 0;
+                TGCount = 0;
+                
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 PollS7Devices(stoppingToken);
+                stopwatch.Stop();
+                // _logger.LogDebug($"结束轮询变量,当前时间：{DateTime.Now}");
+                _logger.LogDebug($"读取变量数：{readCount}个，跳过变量数：{TGCount}总耗时：{stopwatch.ElapsedMilliseconds}ms");
+                
                 // 短暂休眠以防止CPU占用过高
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
             }
 
             _logger.LogInformation("S7轮询线程已停止。");
@@ -128,6 +146,7 @@ namespace PMSWPF.Services
                     return null; // 重新连接失败，返回null
                 }
             }
+
             return plcClient; // 返回连接成功的Plc客户端
         }
 
@@ -143,13 +162,15 @@ namespace PMSWPF.Services
                 try
                 {
                     // 使用CancellationToken来使等待可取消
-                    Task.Delay(TimeSpan.FromSeconds(5), stoppingToken).Wait(stoppingToken);
+                    Task.Delay(TimeSpan.FromSeconds(5), stoppingToken)
+                        .Wait(stoppingToken);
                 }
                 catch (OperationCanceledException)
                 {
                     // 如果在等待期间取消，则退出
                     return;
                 }
+
                 return;
             }
 
@@ -164,10 +185,9 @@ namespace PMSWPF.Services
                     continue; // 如果连接失败，则跳过当前设备
                 }
 
-                
+
                 // 读取设备变量
                 ReadDeviceVariables(plcClient, device, stoppingToken);
-                
             }
         }
 
@@ -196,6 +216,7 @@ namespace PMSWPF.Services
                 // 遍历并读取每个S7变量
                 foreach (var variable in s7Variables)
                 {
+                    // Stopwatch stopwatch = Stopwatch.StartNew();
                     if (stoppingToken.IsCancellationRequested) return; // 如果取消令牌被请求，则停止读取
 
                     // 获取变量的轮询间隔
@@ -204,33 +225,40 @@ namespace PMSWPF.Services
                         _logger.LogWarning($"未知轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
                         continue;
                     }
-                    Thread.Sleep(100);
-
+                    
                     // 检查是否达到轮询时间
                     if ((DateTime.Now - variable.LastPollTime) < interval)
                     {
+                        TGCount++;
                         continue; // 未到轮询时间，跳过
                     }
 
                     try
                     {
+                        
                         // 从PLC读取变量值
                         var value = plcClient.Read(variable.S7Address);
                         if (value != null)
                         {
                             // 更新变量的原始数据值和显示值
                             variable.DataValue = value.ToString();
-                            variable.DisplayValue = SiemensHelper.ConvertS7Value(value, variable.DataType, variable.Converstion);
+                            variable.DisplayValue
+                                = SiemensHelper.ConvertS7Value(value, variable.DataType, variable.Converstion);
+                            variable.UpdateTime = DateTime.Now;
+
                             variable.LastPollTime = DateTime.Now; // 更新最后轮询时间
+                            readCount++;
                             // _logger.LogDebug($"线程ID：{Environment.CurrentManagedThreadId},已读取变量 {variable.Name}: {variable.DataValue}");
                         }
+                       
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, $"从设备 {device.Name} 读取变量 {variable.Name} 失败。");
                     }
+                    // stopwatch.Stop();
+                    // _logger.LogInformation($"读取变量耗时:{stopwatch.ElapsedMilliseconds}ms ");
                 }
-                
             }
             catch (Exception ex)
             {
