@@ -174,4 +174,18 @@ public class MenuRepository
         Logger.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
+
+    public async Task<MenuBean?> GetMenuByDataId(int dataId, MenuType menuType)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        using (var db = DbContext.GetInstance())
+        {
+            var result = await db.Queryable<DbMenu>()
+                                 .FirstAsync(m => m.DataId == dataId && m.Type == menuType);
+            stopwatch.Stop();
+            Logger.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
+            return result?.CopyTo<MenuBean>();
+        }
+    }
 }
