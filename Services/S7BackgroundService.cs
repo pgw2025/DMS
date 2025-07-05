@@ -222,7 +222,7 @@ namespace PMSWPF.Services
                             variable.DataValue = value.ToString();
                             variable.DisplayValue = SiemensHelper.ConvertS7Value(value, variable.DataType, variable.Converstion);
                             variable.LastPollTime = DateTime.Now; // 更新最后轮询时间
-                            _logger.LogDebug($"线程ID：{Environment.CurrentManagedThreadId},已读取变量 {variable.Name}: {variable.DataValue}");
+                            // _logger.LogDebug($"线程ID：{Environment.CurrentManagedThreadId},已读取变量 {variable.Name}: {variable.DataValue}");
                         }
                     }
                     catch (Exception ex)

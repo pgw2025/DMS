@@ -81,7 +81,8 @@ public partial class VariableData : ObservableObject
     /// <summary>
     /// 轮询级别，例如1秒、5秒等。
     /// </summary>
-    public PollLevelType PollLevelType { get; set; } = PollLevelType.ThirtySeconds;
+    [ObservableProperty]
+    private PollLevelType pollLevelType = PollLevelType.ThirtySeconds;
 
     /// <summary>
     /// 最后一次轮询时间。
@@ -148,4 +149,8 @@ public partial class VariableData : ObservableObject
     /// </summary>
     public List<Mqtt> Mqtts { get; set; }
 
+    partial void OnPollLevelTypeChanged(PollLevelType value)
+    {
+        IsModified = true;
+    }
 }

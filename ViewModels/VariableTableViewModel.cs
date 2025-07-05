@@ -253,6 +253,24 @@ partial class VariableTableViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private async Task ChangePollLevel()
+    {
+        if (SelectedVariableData == null)
+        {
+            NotificationHelper.ShowMessage("请选择一个变量", NotificationType.Warning);
+            return;
+        }
+
+        var newPollLevelType = await _dialogService.ShowPollLevelDialog(SelectedVariableData.PollLevelType);
+        if (newPollLevelType.HasValue)
+        {
+            SelectedVariableData.PollLevelType = newPollLevelType.Value;
+            await _varDataRepository.UpdateAsync(SelectedVariableData);
+            NotificationHelper.ShowMessage($"变量 {SelectedVariableData.Name} 的轮询频率已更新", NotificationType.Success);
+        }
+    }
+
     // [RelayCommand]
     // private async void ImportFromExcel()
     // {

@@ -1,4 +1,5 @@
 ﻿using iNKORE.UI.WPF.Modern.Controls;
+using PMSWPF.Enums;
 using PMSWPF.Models;
 
 namespace PMSWPF.Services;
@@ -19,4 +20,6 @@ public interface IDialogService
     Task<VariableData> ShowEditVarDataDialog(VariableData variableData);
     Task<string> ShowImportExcelDialog();
     ContentDialog ShowProcessingDialog(string title, string message);
+    Task<PollLevelType?> ShowPollLevelDialog(PollLevelType pollLevelType);
+
 }

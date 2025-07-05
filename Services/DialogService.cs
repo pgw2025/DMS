@@ -1,6 +1,7 @@
 ﻿using HandyControl.Tools.Extension;
 using iNKORE.UI.WPF.Modern.Controls;
 using NPOI.SS.Formula.Functions;
+using PMSWPF.Enums;
 using PMSWPF.Models;
 using PMSWPF.ViewModels.Dialogs;
 using PMSWPF.Views.Dialogs;
@@ -157,5 +158,17 @@ public class DialogService :IDialogService
         var dialog = new ProcessingDialog(vm);
         _ = dialog.ShowAsync(); // 不await，让它在后台显示
         return dialog;
+    }
+
+    public async Task<PollLevelType?> ShowPollLevelDialog(PollLevelType pollLevelType)
+    {
+        var vm = new PollLevelDialogViewModel(pollLevelType);
+        var dialog = new PollLevelDialog(vm);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return vm.SelectedPollLevelType;
+        }
+        return null;
     }
 }

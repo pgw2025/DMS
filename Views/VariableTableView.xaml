@@ -21,6 +21,8 @@
         <ex:EnumBindingSource x:Key="protocolType"
                               EnumType="{x:Type en:ProtocolType}" />
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <ex:EnumBindingSource x:Key="pollLevelType"
+                              EnumType="{x:Type en:PollLevelType}" />
 
         <!-- 标签字体的样式 -->
         <Style TargetType="TextBlock"
@@ -183,6 +185,12 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="修改轮询频率"
+                              Command="{Binding  ChangePollLevelCommand}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.RowStyle>
@@ -241,6 +249,25 @@
                         <DataTemplate>
                             <ComboBox ItemsSource="{Binding Source={StaticResource signalType}}"
                                       SelectedItem="{Binding SignalType}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="轮询频率">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding PollLevelType, Converter={StaticResource EnumDescriptionConverter}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding Source={StaticResource pollLevelType}}"
+                                      SelectedItem="{Binding PollLevelType}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
