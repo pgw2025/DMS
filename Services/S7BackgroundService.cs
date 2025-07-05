@@ -18,7 +18,9 @@ namespace PMSWPF.Services
         private readonly ILogger<S7BackgroundService> _logger;
         private readonly DataServices _dataServices;
         private readonly Dictionary<int, Plc> _s7PlcClients = new Dictionary<int, Plc>();
-        
+        private Thread _pollingThread;
+        private CancellationTokenSource _cancellationTokenSource;
+
         private readonly Dictionary<PollLevelType, TimeSpan> _pollingIntervals = new Dictionary<PollLevelType, TimeSpan>
         {
             { PollLevelType.TenMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenMilliseconds) },
@@ -54,10 +56,23 @@ namespace PMSWPF.Services
             _logger.LogInformation("设备列表已更改。S7客户端可能需要重新初始化。");
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("S7后台服务正在启动。");
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
+            _pollingThread = new Thread(() => PollingLoop(_cancellationTokenSource.Token))
+            {
+                IsBackground = true
+            };
+            _pollingThread.Start();
+
+            return Task.CompletedTask;
+        }
+
+        private void PollingLoop(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation("S7轮询线程已启动。");
             stoppingToken.Register(() => _logger.LogInformation("S7后台服务正在停止。"));
 
             _s7Devices = _dataServices.Devices?.Where(d => d.ProtocolType == ProtocolType.S7 && d.IsActive)
@@ -65,21 +80,22 @@ namespace PMSWPF.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogDebug("S7后台服务正在执行后台工作。");
-
-                await PollS7Devices(stoppingToken);
-
+                // _logger.LogDebug("S7后台服务正在执行后台工作。");
+                PollS7Devices(stoppingToken);
+                // 短暂休眠以防止CPU占用过高
+                Thread.Sleep(100);
             }
 
-            _logger.LogInformation("S7后台服务已停止。");
+            _logger.LogInformation("S7轮询线程已停止。");
         }
+
 
         /// <summary>
         /// 初始化或重新连接PLC客户端
         /// </summary>
         /// <param name="device">S7设备</param>
         /// <returns>连接成功的Plc客户端实例，如果连接失败则返回null</returns>
-        private async Task<Plc?> InitializePlcClient(Device device)
+        private Plc? InitializePlcClient(Device device)
         {
             // 检查字典中是否已存在该设备的PLC客户端
             if (!_s7PlcClients.TryGetValue(device.Id, out var plcClient))
@@ -88,7 +104,7 @@ namespace PMSWPF.Services
                 try
                 {
                     plcClient = new Plc(device.CpuType, device.Ip, (short)device.Prot, device.Rack, device.Slot);
-                    await plcClient.OpenAsync(); // 尝试打开连接
+                    plcClient.Open(); // 尝试打开连接
                     _s7PlcClients[device.Id] = plcClient; // 将新创建的客户端添加到字典
                     _logger.LogInformation($"已连接到S7 PLC: {device.Name} ({device.Ip})");
                 }
@@ -103,7 +119,7 @@ namespace PMSWPF.Services
                 // 如果存在但未连接，则尝试重新连接
                 try
                 {
-                    await plcClient.OpenAsync(); // 尝试重新打开连接
+                    plcClient.Open(); // 尝试重新打开连接
                     _logger.LogInformation($"已重新连接到S7 PLC: {device.Name} ({device.Ip})");
                 }
                 catch (Exception ex)
@@ -119,12 +135,21 @@ namespace PMSWPF.Services
         /// 轮询S7设备数据
         /// </summary>
         /// <param name="stoppingToken">取消令牌</param>
-        private async Task PollS7Devices(CancellationToken stoppingToken)
+        private void PollS7Devices(CancellationToken stoppingToken)
         {
             if (_s7Devices == null || !_s7Devices.Any())
             {
                 _logger.LogDebug("未找到活跃的S7设备进行轮询。等待5秒后重试。");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                try
+                {
+                    // 使用CancellationToken来使等待可取消
+                    Task.Delay(TimeSpan.FromSeconds(5), stoppingToken).Wait(stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // 如果在等待期间取消，则退出
+                    return;
+                }
                 return;
             }
 
@@ -133,7 +158,7 @@ namespace PMSWPF.Services
                 if (stoppingToken.IsCancellationRequested) return;
 
                 // 尝试获取或初始化PLC客户端连接
-                var plcClient = await InitializePlcClient(device);
+                var plcClient = InitializePlcClient(device);
                 if (plcClient == null)
                 {
                     continue; // 如果连接失败，则跳过当前设备
@@ -141,7 +166,7 @@ namespace PMSWPF.Services
 
                 
                 // 读取设备变量
-                await ReadDeviceVariables(plcClient, device, stoppingToken);
+                ReadDeviceVariables(plcClient, device, stoppingToken);
                 
             }
         }
@@ -152,7 +177,7 @@ namespace PMSWPF.Services
         /// <param name="plcClient">已连接的Plc客户端实例。</param>
         /// <param name="device">S7设备。</param>
         /// <param name="stoppingToken">取消令牌。</param>
-        private async Task ReadDeviceVariables(Plc plcClient, Device device, CancellationToken stoppingToken)
+        private void ReadDeviceVariables(Plc plcClient, Device device, CancellationToken stoppingToken)
         {
             // 过滤出当前设备和S7协议相关的变量
             var s7Variables = device.VariableTables
@@ -168,7 +193,6 @@ namespace PMSWPF.Services
 
             try
             {
-                Stopwatch sw = Stopwatch.StartNew();
                 // 遍历并读取每个S7变量
                 foreach (var variable in s7Variables)
                 {
@@ -180,6 +204,7 @@ namespace PMSWPF.Services
                         _logger.LogWarning($"未知轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
                         continue;
                     }
+                    Thread.Sleep(100);
 
                     // 检查是否达到轮询时间
                     if ((DateTime.Now - variable.LastPollTime) < interval)
@@ -190,14 +215,14 @@ namespace PMSWPF.Services
                     try
                     {
                         // 从PLC读取变量值
-                        var value = await plcClient.ReadAsync(variable.S7Address);
+                        var value = plcClient.Read(variable.S7Address);
                         if (value != null)
                         {
                             // 更新变量的原始数据值和显示值
                             variable.DataValue = value.ToString();
                             variable.DisplayValue = SiemensHelper.ConvertS7Value(value, variable.DataType, variable.Converstion);
                             variable.LastPollTime = DateTime.Now; // 更新最后轮询时间
-                            _logger.LogDebug($"已读取变量 {variable.Name}: {variable.DataValue}");
+                            _logger.LogDebug($"线程ID：{Environment.CurrentManagedThreadId},已读取变量 {variable.Name}: {variable.DataValue}");
                         }
                     }
                     catch (Exception ex)
@@ -206,8 +231,6 @@ namespace PMSWPF.Services
                     }
                 }
                 
-                sw.Stop();
-                _logger.LogInformation($"从: {device.Name} ({device.Ip})读取变量总耗时：{sw.ElapsedMilliseconds}ms");
             }
             catch (Exception ex)
             {
@@ -218,6 +241,11 @@ namespace PMSWPF.Services
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("S7 Background Service is stopping.");
+
+            // Signal the polling thread to stop
+            _cancellationTokenSource?.Cancel();
+            // Wait for the polling thread to finish
+            _pollingThread?.Join();
 
             // Close all active PLC connections
             foreach (var plcClient in _s7PlcClients.Values)
