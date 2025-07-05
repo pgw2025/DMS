@@ -8,6 +8,7 @@ using PMSWPF.Enums;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 using PMSWPF.Services;
+using PMSWPF.Views;
 
 namespace PMSWPF.ViewModels;
 
@@ -17,6 +18,7 @@ public partial class MqttsViewModel : ViewModelBase
     private readonly IDialogService _dialogService;
     private readonly MqttRepository _mqttRepository;
     private readonly ILogger<MqttsViewModel> _logger;
+    private readonly NavgatorServices _navgatorServices;
 
     [ObservableProperty]
     private ObservableCollection<Mqtt> _mqtts;
@@ -25,13 +27,14 @@ public partial class MqttsViewModel : ViewModelBase
     private Mqtt _selectedMqtt;
 
     public MqttsViewModel(
-        ILogger<MqttsViewModel> logger, IDialogService dialogService, DataServices dataServices
+        ILogger<MqttsViewModel> logger, IDialogService dialogService, DataServices dataServices, NavgatorServices navgatorServices
     )
     {
         _mqttRepository = new MqttRepository();
         _logger = logger;
         _dialogService = dialogService;
         _dataServices = dataServices;
+        _navgatorServices = navgatorServices;
 
         if (dataServices.Mqtts == null || dataServices.Mqtts.Count == 0)
         {
@@ -123,5 +126,19 @@ public partial class MqttsViewModel : ViewModelBase
             NotificationHelper.ShowMessage($"编辑MQTT的过程中发生错误：{e.Message}", NotificationType.Error);
             _logger.LogError($"编辑MQTT的过程中发生错误：{e}");
         }
+    }
+
+    /// <summary>
+    /// 导航到MQTT服务器详情页面。
+    /// </summary>
+    [RelayCommand]
+    private void NavigateToMqttDetail()
+    {
+        // if (SelectedMqtt == null)
+        // {
+        //     NotificationHelper.ShowMessage("请选择一个MQTT服务器以查看详情。", NotificationType.Warning);
+        //     return;
+        // }
+        // _navgatorServices.NavigateTo<MqttServerDetailView>(SelectedMqtt);
     }
 }

@@ -92,6 +92,10 @@
                         <DataTemplate DataType="{x:Type vm:VariableTableViewModel}">
                             <local:VariableTableView DataContext="{Binding }"/>
                         </DataTemplate>
+                        <!-- Mqtt服务器详情页 -->
+                        <DataTemplate DataType="{x:Type vm:MqttServerDetailViewModel}">
+                            <local:MqttServerDetailView DataContext="{Binding }"/>
+                        </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
 

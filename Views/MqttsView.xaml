@@ -166,6 +166,13 @@
                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
                 </ui:AppBarButton.Icon>
             </ui:AppBarButton>
+            <!-- 查看详情 -->
+            <ui:AppBarButton Command="{Binding NavigateToMqttDetailCommand}"
+                             Label="查看详情">
+                <ui:AppBarButton.Icon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Document}" />
+                </ui:AppBarButton.Icon>
+            </ui:AppBarButton>
             <ui:AppBarButton x:Name="ShareButton"
                              Label="Share">
                 <ui:AppBarButton.Icon>

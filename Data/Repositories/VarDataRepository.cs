@@ -50,7 +50,8 @@ public class VarDataRepository
                                   .ToListAsync();
             stopwatch.Stop();
             Logger.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.Select(d=>d.CopyTo<VariableData>()).ToList();
+            return result.Select(d => d.CopyTo<VariableData>())
+                         .ToList();
         }
     }
 
@@ -139,7 +140,8 @@ public class VarDataRepository
         stopwatch.Start();
         Stopwatch stopwatch2 = new Stopwatch();
         stopwatch2.Start();
-        var dbList = variableDatas.Select(vb => vb.CopyTo<DbVariableData>()).ToList();
+        var dbList = variableDatas.Select(vb => vb.CopyTo<DbVariableData>())
+                                  .ToList();
         stopwatch2.Stop();
         Logger.Info($"复制 VariableData'{variableDatas.Count()}'个， 耗时：{stopwatch2.ElapsedMilliseconds}ms");
 
@@ -157,13 +159,14 @@ public class VarDataRepository
     /// </summary>
     /// <param name="variableData">VariableData实体</param>
     /// <returns></returns>
-    public async Task<int> UpdateAsync(VariableData variableData)
+    public async Task<bool> UpdateAsync(VariableData variableData)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         using (var _db = DbContext.GetInstance())
         {
-            var result = await _db.Updateable(variableData.CopyTo<DbVariableData>())
+            var result = await _db.UpdateNav(variableData.CopyTo<DbVariableData>())
+                                  .Include(d => d.Mqtts)
                                   .ExecuteCommandAsync();
             stopwatch.Stop();
             Logger.Info($"更新VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -176,7 +179,7 @@ public class VarDataRepository
     /// </summary>
     /// <param name="variableData">VariableData实体</param>
     /// <returns></returns>
-    public async Task<int> UpdateAsync(List<VariableData> variableDatas)
+    public async Task<bool> UpdateAsync(List<VariableData> variableDatas)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -195,13 +198,14 @@ public class VarDataRepository
     /// </summary>
     /// <param name="variableData">VariableData实体</param>
     /// <returns></returns>
-    public async Task<int> UpdateAsync(List<VariableData> variableDatas, SqlSugarClient db)
+    public async Task<bool> UpdateAsync(List<VariableData> variableDatas, SqlSugarClient db)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
         var dbVarDatas = variableDatas.Select(vd => vd.CopyTo<DbVariableData>());
-        var result = await db.Updateable(dbVarDatas.ToList())
+        var result = await db.UpdateNav(dbVarDatas.ToList())
+                             .Include(d => d.Mqtts)
                              .ExecuteCommandAsync();
 
         stopwatch.Stop();
@@ -273,7 +277,8 @@ public class VarDataRepository
         stopwatch.Start();
         using var _db = DbContext.GetInstance();
 
-        var dbList = variableDatas.Select(vd => vd.CopyTo<DbVariableData>()).ToList();
+        var dbList = variableDatas.Select(vd => vd.CopyTo<DbVariableData>())
+                                  .ToList();
         var result = await _db.Deleteable<DbVariableData>(dbList)
                               .ExecuteCommandAsync();
         stopwatch.Stop();

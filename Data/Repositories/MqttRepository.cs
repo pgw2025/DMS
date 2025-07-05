@@ -55,7 +55,7 @@ public class MqttRepository
         stopwatch.Start();
         using (var _db = DbContext.GetInstance())
         {
-            var result = await _db.Queryable<DbMqtt>()
+            var result = await _db.Queryable<DbMqtt>().Includes(m=>m.VariableDatas)
                                   .ToListAsync();
             stopwatch.Stop();
             Logger.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");

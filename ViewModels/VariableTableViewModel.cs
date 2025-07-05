@@ -309,7 +309,7 @@ partial class VariableTableViewModel : ViewModelBase
                 if (!variable.Mqtts.Any(m => m.Id == selectedMqtt.Id))
                 {
                     variable.Mqtts.Add(selectedMqtt);
-                    variable.IsModified = true; // 标记为已修改
+                    // variable.IsModified = true; // 标记为已修改
                 }
             }
 

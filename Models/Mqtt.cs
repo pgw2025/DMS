@@ -76,4 +76,9 @@ public class Mqtt
     /// MQTT客户端登录用户名。
     /// </summary>
     public string UserName { get; set; }
+    
+    /// <summary>
+    /// 关联的变量数据列表。
+    /// </summary>
+    public List<VariableData>? VariableDatas { get; set; }
 }

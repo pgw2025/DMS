@@ -89,6 +89,7 @@ public partial class App : Application
         services.AddScoped<DeviceDetailView>();
         services.AddScoped<MqttsViewModel>();
         services.AddScoped<MqttsView>();
+        services.AddScoped<MqttServerDetailViewModel>();
     }
 
     private void ConfigureLogging(ILoggingBuilder loggingBuilder)

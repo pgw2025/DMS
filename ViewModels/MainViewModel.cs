@@ -175,6 +175,12 @@ public partial class MainViewModel : ViewModelBase
                     await AddVariableTable(menu);
                     return;
                     break;
+                // 导航到Mqtt服务器
+                case MenuType.MqttMenu:
+                    var mqttVM = App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
+                    mqttVM.CurrentMqtt=_dataServices.Mqtts.FirstOrDefault(d=>d.Id == menu.DataId);
+                    menu.ViewModel = mqttVM;
+                    break;
                 
             }
 
