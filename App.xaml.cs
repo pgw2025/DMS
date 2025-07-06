@@ -81,7 +81,7 @@ public partial class App : Application
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<GrowlNotificationService>();
         services.AddHostedService<S7BackgroundService>(); // Register as HostedService
-        // services.AddHostedService<MqttBackgroundService>();
+        services.AddHostedService<MqttBackgroundService>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<DevicesViewModel>();

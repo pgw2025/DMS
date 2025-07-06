@@ -129,7 +129,7 @@ namespace PMSWPF.Services
 
                                 // 发布MQTT消息。
                                 await client.PublishAsync(message);
-                                NlogHelper.Info($"Published {variable.Name} = {variable.DataValue} to {topic}/{variable.Name}"); // 记录发布信息
+                                NlogHelper.Info($"Published {variable.Name} = {variable.DataValue} to {topic}/{variable.Name}",throttle:true); // 记录发布信息
                                 variable.IsModified = false; // 发布后重置修改标志。
                             }
                         }
