@@ -127,8 +127,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         catch (Exception e)
         {
             // 捕获加载数据时发生的异常，并通过通知和日志记录错误信息。
-            NotificationHelper.ShowMessage($"加载数据出现了错误：{e.Message}");
-            _logger.LogError($"加载数据出现了错误：{e}");
+            NotificationHelper.ShowError($"加载数据出现了错误：{e.Message}", e);
         }
     }
 

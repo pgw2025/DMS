@@ -115,7 +115,7 @@ partial class VariableTableViewModel : ViewModelBase
             modifiedData.IsModified = false;
         }
 
-        NotificationHelper.ShowMessage($"修改的{modifiedDatas.Count}变量保存成功.", NotificationType.Success);
+        NotificationHelper.ShowSuccess($"修改的{modifiedDatas.Count}变量保存成功.");
     }
 
     [RelayCommand]
@@ -136,7 +136,7 @@ partial class VariableTableViewModel : ViewModelBase
             // 更新变量表中的
             if (index >= 0 && index < variableTable.DataVariables.Count)
                 variableTable.DataVariables[index] = varData;
-            NotificationHelper.ShowMessage($"编辑变量成功:{varData?.Name}", NotificationType.Success);
+            NotificationHelper.ShowSuccess($"编辑变量成功:{varData?.Name}");
         }
         catch (Exception e)
         {
@@ -175,7 +175,7 @@ partial class VariableTableViewModel : ViewModelBase
             
             string msgSuccess = $"成功导入变量：{resVarDataCount}个。";
             Logger.Info(msgSuccess);
-            NotificationHelper.ShowMessage(msgSuccess, NotificationType.Success);
+            NotificationHelper.ShowSuccess(msgSuccess);
             
         }
         catch (Exception e)
@@ -203,7 +203,7 @@ partial class VariableTableViewModel : ViewModelBase
             await _varDataRepository.AddAsync(varData);
             // 更新当前页面的
             DataVariables.Add(varData);
-            NotificationHelper.ShowMessage($"添加变量成功:{varData?.Name}", NotificationType.Success);
+            NotificationHelper.ShowSuccess($"添加变量成功:{varData?.Name}");
         }
         catch (Exception e)
         {
@@ -216,7 +216,7 @@ partial class VariableTableViewModel : ViewModelBase
     {
         if (variablesToDelete == null || !variablesToDelete.Any())
         {
-            NotificationHelper.ShowMessage("请选择要删除的变量", NotificationType.Warning);
+            NotificationHelper.ShowInfo("请选择要删除的变量");
             return;
         }
 
@@ -238,11 +238,11 @@ partial class VariableTableViewModel : ViewModelBase
                 {
                     DataVariables.Remove(variable);
                 }
-                NotificationHelper.ShowMessage($"成功删除 {result} 个变量", NotificationType.Success);
+                NotificationHelper.ShowSuccess($"成功删除 {result} 个变量");
             }
             else
             {
-                NotificationHelper.ShowMessage("删除变量失败", NotificationType.Error);
+                NotificationHelper.ShowError("删除变量失败");
             }
         }
         catch (Exception e)
@@ -256,7 +256,7 @@ partial class VariableTableViewModel : ViewModelBase
     {
         if (variablesToChange == null || !variablesToChange.Any())
         {
-            NotificationHelper.ShowMessage("请选择要修改轮询频率的变量", NotificationType.Warning);
+            NotificationHelper.ShowInfo("请选择要修改轮询频率的变量");
             return;
         }
 
@@ -270,7 +270,7 @@ partial class VariableTableViewModel : ViewModelBase
             }
 
             await _varDataRepository.UpdateAsync(variablesToChange);
-            NotificationHelper.ShowMessage($"已成功更新 {variablesToChange.Count} 个变量的轮询频率", NotificationType.Success);
+            NotificationHelper.ShowSuccess($"已成功更新 {variablesToChange.Count} 个变量的轮询频率");
         }
     }
 
@@ -279,7 +279,7 @@ partial class VariableTableViewModel : ViewModelBase
     {
         if (variablesToAddMqtt == null || !variablesToAddMqtt.Any())
         {
-            NotificationHelper.ShowMessage("请选择要添加MQTT服务器的变量", NotificationType.Warning);
+            NotificationHelper.ShowInfo("请选择要添加MQTT服务器的变量");
             return;
         }
 
@@ -307,7 +307,7 @@ partial class VariableTableViewModel : ViewModelBase
 
             // 批量更新数据库
             await _varDataRepository.UpdateAsync(variablesToAddMqtt.ToList());
-            NotificationHelper.ShowMessage($"已成功为 {variablesToAddMqtt.Count} 个变量添加MQTT服务器: {selectedMqtt.Name}", NotificationType.Success);
+            NotificationHelper.ShowSuccess($"已成功为 {variablesToAddMqtt.Count} 个变量添加MQTT服务器: {selectedMqtt.Name}");
         }
         catch (Exception ex)
         {
@@ -333,11 +333,11 @@ partial class VariableTableViewModel : ViewModelBase
         if (res > 0)
         {
             var statusMessage = active ? "已启用" : "已停用";
-            NotificationHelper.ShowMessage($"变量表：{VariableTable.Name},{statusMessage}", NotificationType.Success);
+            NotificationHelper.ShowSuccess($"变量表：{VariableTable.Name},{statusMessage}");
         }
         else
         {
-            NotificationHelper.ShowMessage($"变量表：{VariableTable.Name},状态修改失败，状态：{active}", NotificationType.Error);
+            NotificationHelper.ShowError($"变量表：{VariableTable.Name},状态修改失败，状态：{active}");
             // _logger.LogInformation($"变量表：{VariableTable.Name},状态修改失败，状态：{active}");
         }
     }

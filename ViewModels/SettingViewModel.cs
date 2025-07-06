@@ -114,12 +114,12 @@ public partial class SettingViewModel : ViewModelBase
             using (var db = DbContext.GetInstance())
             {
                 await db.Ado.OpenAsync();
-                NotificationHelper.ShowMessage("连接成功！");
+                NotificationHelper.ShowSuccess("连接成功！");
             }
         }
         catch (Exception ex)
         {
-            NotificationHelper.ShowMessage($"连接失败：{ex.Message}");
+            NotificationHelper.ShowError($"连接失败：{ex.Message}", ex);
         }
     }
 }

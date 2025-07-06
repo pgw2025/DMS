@@ -63,8 +63,7 @@ public partial class NavgatorServices : ObservableRecipient, IRecipient<Navgator
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowMessage($"切换视图时发生了错误：{e.Message}", NotificationType.Error);
-            _logger.LogError($"切换视图时发生了错误：{e}");
+            NotificationHelper.ShowError($"切换视图时发生了错误：{e.Message}", e);
         }
     }
 

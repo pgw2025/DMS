@@ -81,7 +81,7 @@ public partial class MqttsViewModel : ViewModelBase
         {
             if (SelectedMqtt == null)
             {
-                NotificationHelper.ShowMessage("你没有选择任何MQTT，请选择MQTT后再点击删除", NotificationType.Error);
+                NotificationHelper.ShowError("你没有选择任何MQTT，请选择MQTT后再点击删除");
                 return;
             }
 
@@ -92,7 +92,7 @@ public partial class MqttsViewModel : ViewModelBase
                 await _mqttRepository.Delete(SelectedMqtt);
                 MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
-                NotificationHelper.ShowMessage($"删除MQTT成功,MQTT名：{SelectedMqtt.Name}", NotificationType.Success);
+                NotificationHelper.ShowSuccess($"删除MQTT成功,MQTT名：{SelectedMqtt.Name}");
             }
         }
         catch (Exception e)
@@ -108,7 +108,7 @@ public partial class MqttsViewModel : ViewModelBase
         {
             if (SelectedMqtt == null)
             {
-                NotificationHelper.ShowMessage("你没有选择任何MQTT，请选择MQTT后再点击编辑", NotificationType.Error);
+                NotificationHelper.ShowError("你没有选择任何MQTT，请选择MQTT后再点击编辑");
                 return;
             }
 

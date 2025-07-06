@@ -201,9 +201,7 @@ public class DeviceRepository
             // 中间出错了 回滚
             await db.RollbackTranAsync();
             // 捕获并记录所有未预期的异常
-            string errorMsg = $"在添加设备过程中发生未预期错误：";
-            Logger.Error(errorMsg + e);
-            NotificationHelper.ShowMessage(errorMsg + e.Message, NotificationType.Error);
+            NotificationHelper.ShowError("添加设备的过程中发生了不可预期的错误：" + e.Message, e);
         }
         finally
         {

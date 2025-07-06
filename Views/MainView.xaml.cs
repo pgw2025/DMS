@@ -43,7 +43,7 @@ public partial class MainView : Window
         }
         else
         {
-            NotificationHelper.ShowMessage("选择的菜单项为空！", NotificationType.Error);
+            NotificationHelper.ShowError("选择的菜单项为空！");
         }
     }
 

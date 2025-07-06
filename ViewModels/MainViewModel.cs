@@ -77,7 +77,7 @@ public partial class MainViewModel : ViewModelBase
             if (menu.Parent?.Data is not Device device)
             {
                 _logger.LogWarning("尝试添加变量表时，Parent 或 Parent.Data 为空，或 Parent.Data 不是 Device 类型。");
-                NotificationHelper.ShowMessage("操作失败：无法获取有效的设备信息。", NotificationType.Error);
+                NotificationHelper.ShowError("操作失败：无法获取有效的设备信息。");
                 return;
             }
 
@@ -118,14 +118,14 @@ public partial class MainViewModel : ViewModelBase
                 // 变量表和菜单都添加成功
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);
-                NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加成功", NotificationType.Success);
+                NotificationHelper.ShowSuccess($"变量表:{varTable.Name},添加成功");
                 _logger.LogInformation($"变量表:{varTable.Name},添加成功");
             }
             else
             {
                 await db.RollbackTranAsync();
                 // 变量表菜单添加失败 (此时变量表可能已添加成功，需要根据业务决定是否回滚)
-                NotificationHelper.ShowMessage($"变量表:{varTable.Name},添加菜单失败", NotificationType.Error);
+                NotificationHelper.ShowError($"变量表:{varTable.Name},添加菜单失败");
                 _logger.LogError($"变量表:{varTable.Name},添加菜单失败");
                 // 考虑：如果菜单添加失败，是否需要删除之前添加的变量表？
                 // 例如：await _varTableRepository.Delete(addVarTableId);
@@ -190,7 +190,7 @@ public partial class MainViewModel : ViewModelBase
             }
             else
             {
-                NotificationHelper.ShowMessage($"菜单：{menu.Name},没有对应的ViewModel.");
+                NotificationHelper.ShowInfo($"菜单：{menu.Name},没有对应的ViewModel.");
                 _logger.LogInformation($"菜单：{menu.Name},没有对应的ViewModel.");
             }
         }

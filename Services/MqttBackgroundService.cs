@@ -203,14 +203,14 @@ namespace PMSWPF.Services
                 client.UseConnectedHandler(e =>
                 {
                     Logger.Info($"Connected to MQTT broker: {mqtt.Name}");
-                    NotificationHelper.ShowMessage($"已连接到MQTT服务器: {mqtt.Name}", NotificationType.Success);
+                    NotificationHelper.ShowSuccess($"已连接到MQTT服务器: {mqtt.Name}");
                 });
 
                 // 设置断开连接事件处理程序。
                 client.UseDisconnectedHandler(async e =>
                 {
                     Logger.Warn($"Disconnected from MQTT broker: {mqtt.Name}. Reason: {e.Reason}");
-                    NotificationHelper.ShowMessage($"与MQTT服务器断开连接: {mqtt.Name}", NotificationType.Warning);
+                    NotificationHelper.ShowInfo($"与MQTT服务器断开连接: {mqtt.Name}");
                     // 尝试重新连接。
                     await Task.Delay(TimeSpan.FromSeconds(5)); // 等待5秒后重连
                     try
@@ -231,7 +231,7 @@ namespace PMSWPF.Services
             catch (Exception ex)
             {
                 Logger.Error(ex, $"Failed to connect to MQTT broker: {mqtt.Name}");
-                NotificationHelper.ShowMessage($"连接MQTT服务器失败: {mqtt.Name} - {ex.Message}", NotificationType.Error);
+                NotificationHelper.ShowError($"连接MQTT服务器失败: {mqtt.Name} - {ex.Message}", ex);
             }
         }
 

@@ -92,7 +92,7 @@ public partial class DevicesViewModel : ViewModelBase
         {
             if (SelectedDevice == null)
             {
-                NotificationHelper.ShowMessage("你没有选择任何设备，请选择设备后再点击删除设备", NotificationType.Error);
+                NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击删除设备");
                 return;
             }
 
@@ -106,7 +106,7 @@ public partial class DevicesViewModel : ViewModelBase
 
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);
-                NotificationHelper.ShowMessage($"删除设备成功,设备名：{SelectedDevice.Name}", NotificationType.Success);
+                NotificationHelper.ShowSuccess($"删除设备成功,设备名：{SelectedDevice.Name}");
             }
         }
         catch (Exception e)
@@ -125,7 +125,7 @@ public partial class DevicesViewModel : ViewModelBase
         {
             if (SelectedDevice == null)
             {
-                NotificationHelper.ShowMessage("你没有选择任何设备，请选择设备后再点击编辑设备", NotificationType.Error);
+                NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击编辑设备");
                 return;
             }
 

@@ -81,7 +81,7 @@ namespace PMSWPF.ViewModels
             //     await _dataServices.UpdateVariableDataAsync(variable);
             // }
 
-            NotificationHelper.ShowMessage("MQTT服务器详情保存功能待实现。", NotificationType.Info);
+            NotificationHelper.ShowInfo("MQTT服务器详情保存功能待实现。");
             _logger.LogInformation("Save changes for MQTT server detail initiated.");
         }
 
@@ -94,7 +94,7 @@ namespace PMSWPF.ViewModels
         {
             if (CurrentMqtt == null || variablesToRemove == null || variablesToRemove.Count == 0)
             {
-                NotificationHelper.ShowMessage("请选择要移除的变量。", NotificationType.Warning);
+                NotificationHelper.ShowInfo("请选择要移除的变量。");
                 return;
             }
 
@@ -117,7 +117,7 @@ namespace PMSWPF.ViewModels
 
             // TODO: 这里需要调用DataServices来更新数据库中VariableData的Mqtt关联
             // 例如：await _dataServices.UpdateVariableDataAssociationsAsync(variablesToRemove);
-            NotificationHelper.ShowMessage("变量移除成功，请记得保存更改。", NotificationType.Success);
+            NotificationHelper.ShowSuccess("变量移除成功，请记得保存更改。");
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace PMSWPF.ViewModels
             // TODO: 实现选择变量的对话框，让用户选择要添加的变量
             // 例如：var selectedVariables = await _dialogService.ShowVariableSelectionDialogAsync();
             // 这里只是一个占位符，实际需要一个UI来选择变量
-            NotificationHelper.ShowMessage("添加变量功能待实现，需要一个变量选择对话框。", NotificationType.Info);
+            NotificationHelper.ShowInfo("添加变量功能待实现，需要一个变量选择对话框。");
             _logger.LogInformation("Add variables to MQTT server initiated.");
 
             // 假设我们已经通过对话框获取到了一些要添加的变量

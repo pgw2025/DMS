@@ -40,7 +40,7 @@ public partial class VariableTableView : UserControl
         }
         catch (Exception exception)
         {
-            NotificationHelper.ShowMessage($"修改变量表启用，停用时发生了错误：{exception.Message}");
+            NotificationHelper.ShowError($"修改变量表启用，停用时发生了错误：{exception.Message}", exception);
         }
     }
 
@@ -103,9 +103,7 @@ public partial class VariableTableView : UserControl
         }
         catch (Exception e)
         {
-            string msg = "编辑变量表数据时发生了错误：";
-            Logger.Error(msg + e);
-            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+            NotificationHelper.ShowError("变量表编辑的过过程中发生了错误：" + e.Message, e);
         }
     }
 
@@ -119,7 +117,7 @@ public partial class VariableTableView : UserControl
         }
         else
         {
-            NotificationHelper.ShowMessage("请选择要删除的变量", NotificationType.Warning);
+            NotificationHelper.ShowInfo("请选择要删除的变量");
         }
     }
 
@@ -135,14 +133,12 @@ public partial class VariableTableView : UserControl
             }
             else
             {
-                NotificationHelper.ShowMessage("请选择要修改轮询频率的变量", NotificationType.Warning);
+                NotificationHelper.ShowInfo("请选择要修改轮询频率的变量");
             }
         }
         catch (Exception e)
         {
-            string msg = "修改轮询时间时发生了错误：";
-            Logger.Error(msg + e);
-            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+            NotificationHelper.ShowError("修改轮询频率的过程中发生了错误：" + e.Message, e);
         }
     }
 
@@ -158,14 +154,12 @@ public partial class VariableTableView : UserControl
             }
             else
             {
-                NotificationHelper.ShowMessage("请选择要添加MQTT服务器的变量", NotificationType.Warning);
+                NotificationHelper.ShowInfo("请选择要添加MQTT服务器的变量");
             }
         }
         catch (Exception ex)
         {
-            string msg = "添加MQTT服务器时发生了错误：";
-            Logger.Error(msg + ex);
-            NotificationHelper.ShowMessage(msg + ex.Message, NotificationType.Error);
+            NotificationHelper.ShowError("给变量添加MQTT服务器的过程中发生了错误：" + ex.Message, ex);
         }
     }
 }
