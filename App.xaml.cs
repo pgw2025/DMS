@@ -48,11 +48,20 @@ public partial class App : Application
     {
         base.OnStartup(e);
         await Host.StartAsync();
-        InitializeDataBase();
-        InitializeMenu()
-            .Await((e) => { NotificationHelper.ShowMessage($"初始化主菜单失败：{e.Message}"); },
-                   () => { MessageHelper.SendLoadMessage(LoadTypes.Menu); });
-        Host.Services.GetRequiredService<GrowlNotificationService>();
+
+        try
+        {
+            InitializeDataBase();
+            InitializeMenu()
+                .Await((e) => { NotificationHelper.ShowMessage($"初始化主菜单失败：{e.Message}"); },
+                       () => { MessageHelper.SendLoadMessage(LoadTypes.Menu); });
+            Host.Services.GetRequiredService<GrowlNotificationService>();
+        }
+        catch (Exception exception)
+        {
+            NotificationHelper.ShowMessage("加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}",NotificationType.Error);
+        }
+        
         MainWindow = Host.Services.GetRequiredService<MainView>();
         MainWindow.Show();
     }

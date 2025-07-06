@@ -21,10 +21,12 @@
         <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
         <PackageReference Include="MQTTnet" Version="3.0.16" />
         <PackageReference Include="MySql.Data" Version="9.3.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="NLog" Version="6.0.0" />
         <PackageReference Include="NLog.Database" Version="6.0.0" />
         <PackageReference Include="NPOI" Version="2.7.4" />
         <PackageReference Include="S7netplus" Version="0.20.0" />
+        <PackageReference Include="SqlSugarCore" Version="5.1.4.197" />
         <PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178" />
         <PackageReference Include="SqlSugarCoreNoDrive" Version="5.1.4.193" />
     </ItemGroup>
