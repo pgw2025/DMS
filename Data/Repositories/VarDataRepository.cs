@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using NLog;
 using PMSWPF.Data.Entities;
 using PMSWPF.Extensions;
+using PMSWPF.Helper;
 using PMSWPF.Models;
 using SqlSugar;
 
@@ -14,7 +14,6 @@ namespace PMSWPF.Data.Repositories;
 /// </summary>
 public class VarDataRepository
 {
-    private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// 根据ID获取VariableData
@@ -31,7 +30,7 @@ public class VarDataRepository
                                   .In(id)
                                   .SingleAsync();
             stopwatch.Stop();
-            Logger.Info($"根据ID '{id}' 获取VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"根据ID '{id}' 获取VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -49,7 +48,7 @@ public class VarDataRepository
             var result = await _db.Queryable<DbVariableData>()
                                   .ToListAsync();
             stopwatch.Stop();
-            Logger.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result.Select(d => d.CopyTo<VariableData>())
                          .ToList();
         }
@@ -70,7 +69,7 @@ public class VarDataRepository
                                   .Select(dbVarData => dbVarData.CopyTo<VariableData>())
                                   .ToListAsync();
             stopwatch.Stop();
-            Logger.Info($"获取变量表的所有变量{result.Count()}个耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"获取变量表的所有变量{result.Count()}个耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -88,7 +87,7 @@ public class VarDataRepository
         {
             var varData = await AddAsync(variableData, db);
             stopwatch.Stop();
-            Logger.Info($"新增VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"新增VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return varData;
         }
     }
@@ -106,7 +105,7 @@ public class VarDataRepository
         var dbVarData = await db.Insertable(variableData.CopyTo<DbVariableData>())
                                 .ExecuteReturnEntityAsync();
         stopwatch.Stop();
-        Logger.Info($"新增VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"新增VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return dbVarData.CopyTo<VariableData>();
     }
 
@@ -123,7 +122,7 @@ public class VarDataRepository
         {
             var varData = await AddAsync(variableDatas, db);
             stopwatch.Stop();
-            Logger.Info($"新增VariableData '{variableDatas.Count()}'个， 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"新增VariableData '{variableDatas.Count()}'个， 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return varData;
         }
     }
@@ -143,13 +142,13 @@ public class VarDataRepository
         var dbList = variableDatas.Select(vb => vb.CopyTo<DbVariableData>())
                                   .ToList();
         stopwatch2.Stop();
-        Logger.Info($"复制 VariableData'{variableDatas.Count()}'个， 耗时：{stopwatch2.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"复制 VariableData'{variableDatas.Count()}'个， 耗时：{stopwatch2.ElapsedMilliseconds}ms");
 
         var res = await db.Insertable<DbVariableData>(dbList)
                           .ExecuteCommandAsync();
 
         stopwatch.Stop();
-        Logger.Info($"新增VariableData '{variableDatas.Count()}'个， 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"新增VariableData '{variableDatas.Count()}'个， 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return res;
     }
 
@@ -169,7 +168,7 @@ public class VarDataRepository
                                   .Include(d => d.Mqtts)
                                   .ExecuteCommandAsync();
             stopwatch.Stop();
-            Logger.Info($"更新VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"更新VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -188,7 +187,7 @@ public class VarDataRepository
             var result = await UpdateAsync(variableDatas, _db);
 
             stopwatch.Stop();
-            Logger.Info($"更新VariableData  {variableDatas.Count()}个 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"更新VariableData  {variableDatas.Count()}个 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -209,7 +208,7 @@ public class VarDataRepository
                              .ExecuteCommandAsync();
 
         stopwatch.Stop();
-        Logger.Info($"更新VariableData  {variableDatas.Count()}个 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"更新VariableData  {variableDatas.Count()}个 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -225,7 +224,7 @@ public class VarDataRepository
         using var db = DbContext.GetInstance();
         var result = await DeleteAsync(variableData, db);
         stopwatch.Stop();
-        Logger.Info($"删除VariableData: '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"删除VariableData: '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -244,7 +243,7 @@ public class VarDataRepository
                               .Where(d => d.Id == variableData.Id)
                               .ExecuteCommandAsync();
         stopwatch.Stop();
-        Logger.Info($"删除VariableData: '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"删除VariableData: '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -262,7 +261,7 @@ public class VarDataRepository
         var result = await DeleteAsync(variableDatas, db);
 
         stopwatch.Stop();
-        Logger.Info($"删除VariableData: '{variableDatas.Count()}'个 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"删除VariableData: '{variableDatas.Count()}'个 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -282,7 +281,7 @@ public class VarDataRepository
         var result = await _db.Deleteable<DbVariableData>(dbList)
                               .ExecuteCommandAsync();
         stopwatch.Stop();
-        Logger.Info($"删除VariableData: '{variableDatas.Count()}'个 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"删除VariableData: '{variableDatas.Count()}'个 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 }

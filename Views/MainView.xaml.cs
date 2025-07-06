@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using PMSWPF.Enums;
 using PMSWPF.Helper;
 using PMSWPF.Models;
@@ -16,17 +15,15 @@ namespace PMSWPF.Views;
 public partial class MainView : Window
 {
     private readonly DataServices _dataServices;
-    private readonly ILogger<MainView> _logger;
     private MainViewModel _viewModel;
 
-    public MainView(DataServices dataServices, ILogger<MainView> logger)
+    public MainView(DataServices dataServices)
     {
         InitializeComponent();
         _viewModel = App.Current.Services.GetRequiredService<MainViewModel>();
         _dataServices = dataServices;
-        _logger = logger;
         DataContext = _viewModel;
-        _logger.LogInformation("主界面加载成功");
+        NlogHelper.Info("主界面加载成功");
     }
 
     /// <summary>

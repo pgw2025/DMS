@@ -11,14 +11,11 @@ namespace PMSWPF.Services;
 
 public partial class NavgatorServices : ObservableRecipient, IRecipient<NavgatorMessage>
 {
-    private readonly ILogger<NavgatorServices> _logger;
-
     // [ObservableProperty]
     private ViewModelBase currentViewModel;
 
-    public NavgatorServices(ILogger<NavgatorServices> logger)
+    public NavgatorServices()
     {
-        _logger = logger;
         IsActive = true;
     }
 

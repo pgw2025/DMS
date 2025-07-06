@@ -18,34 +18,47 @@ namespace PMSWPF.Services;
 /// </summary>
 public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 {
-    // 日志记录器，用于记录数据服务中的操作和错误。
-    private readonly ILogger<DataServices> _logger;
     // 设备列表，使用ObservableProperty特性，当值改变时会自动触发属性变更通知。
-    [ObservableProperty] private List<Device> _devices;
+    [ObservableProperty]
+    private List<Device> _devices;
+
     // 变量表列表。
-    [ObservableProperty] private List<VariableTable> _variableTables;
+    [ObservableProperty]
+    private List<VariableTable> _variableTables;
+
     // 变量数据列表。
-    [ObservableProperty] private List<VariableData> _variableDatas;
+    [ObservableProperty]
+    private List<VariableData> _variableDatas;
+
     // 菜单树列表。
-    [ObservableProperty] private List<MenuBean> menuTrees;
+    [ObservableProperty]
+    private List<MenuBean> menuTrees;
+
     // MQTT配置列表。
-    [ObservableProperty] private List<Mqtt> _mqtts;
+    [ObservableProperty]
+    private List<Mqtt> _mqtts;
 
     // 设备数据仓库，用于设备数据的CRUD操作。
     private readonly DeviceRepository _deviceRepository;
+
     // 菜单数据仓库，用于菜单数据的CRUD操作。
     private readonly MenuRepository _menuRepository;
+
     // MQTT数据仓库，用于MQTT配置数据的CRUD操作。
     private readonly MqttRepository _mqttRepository;
+
     // 变量数据仓库，用于变量数据的CRUD操作。
     private readonly VarDataRepository _varDataRepository;
 
     // 设备列表变更事件，当设备列表数据更新时触发。
     public event EventHandler<List<Device>> OnDeviceListChanged;
+
     // 菜单树列表变更事件，当菜单树数据更新时触发。
     public event EventHandler<List<MenuBean>> OnMenuTreeListChanged;
+
     // MQTT列表变更事件，当MQTT配置数据更新时触发。
     public event EventHandler<List<Mqtt>> OnMqttListChanged;
+
     // 变量数据变更事件，当变量数据更新时触发。
     public event EventHandler<List<VariableData>> OnVariableDataChanged;
 
@@ -86,9 +99,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// 注入ILogger<DataServices>，并初始化各个数据仓库。
     /// </summary>
     /// <param name="logger">日志记录器实例。</param>
-    public DataServices(ILogger<DataServices> logger)
+    public DataServices()
     {
-        _logger = logger;
         IsActive = true; // 激活消息接收器
         _deviceRepository = new DeviceRepository();
         _menuRepository = new MenuRepository();

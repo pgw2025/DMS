@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using NLog;
 using PMSWPF.Data.Entities;
+using PMSWPF.Helper;
 
 namespace PMSWPF.Data.Repositories;
 
@@ -11,7 +11,6 @@ namespace PMSWPF.Data.Repositories;
 /// </summary>
 public class UserRepository
 {
-    private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// 根据ID获取用户
@@ -26,7 +25,7 @@ public class UserRepository
         {
             var result = await _db.Queryable<DbUser>().In(id).SingleAsync();
             stopwatch.Stop();
-            Logger.Info($"根据ID '{id}' 获取用户耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"根据ID '{id}' 获取用户耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -43,7 +42,7 @@ public class UserRepository
         {
             var result = await _db.Queryable<DbUser>().ToListAsync();
             stopwatch.Stop();
-            Logger.Info($"获取所有用户耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"获取所有用户耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -61,7 +60,7 @@ public class UserRepository
         {
             var result = await _db.Insertable(user).ExecuteReturnIdentityAsync();
             stopwatch.Stop();
-            Logger.Info($"新增用户 '{user.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"新增用户 '{user.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -79,7 +78,7 @@ public class UserRepository
         {
             var result = await _db.Updateable(user).ExecuteCommandAsync();
             stopwatch.Stop();
-            Logger.Info($"更新用户 '{user.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"更新用户 '{user.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -97,7 +96,7 @@ public class UserRepository
         {
             var result = await _db.Deleteable<DbUser>().In(id).ExecuteCommandAsync();
             stopwatch.Stop();
-            Logger.Info($"删除用户ID '{id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"删除用户ID '{id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }

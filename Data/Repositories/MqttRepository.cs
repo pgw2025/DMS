@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using NLog;
 using PMSWPF.Data.Entities;
 using PMSWPF.Models;
 using PMSWPF.Extensions;
@@ -18,7 +17,6 @@ namespace PMSWPF.Data.Repositories;
 public class MqttRepository
 {
     private readonly MenuRepository _menuRepository;
-    private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
     public MqttRepository()
     {
@@ -40,7 +38,7 @@ public class MqttRepository
                                   .In(id)
                                   .SingleAsync();
             stopwatch.Stop();
-            Logger.Info($"根据ID '{id}' 获取Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"根据ID '{id}' 获取Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result.CopyTo<Mqtt>();
         }
     }
@@ -58,7 +56,7 @@ public class MqttRepository
             var result = await _db.Queryable<DbMqtt>().Includes(m=>m.VariableDatas)
                                   .ToListAsync();
             stopwatch.Stop();
-            Logger.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result.Select(m => m.CopyTo<Mqtt>())
                          .ToList();
         }
@@ -92,13 +90,13 @@ public class MqttRepository
             await _menuRepository.Add(menu, db);
             await db.CommitTranAsync();
             stopwatch.Stop();
-            Logger.Info($"新增Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"新增Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
         catch (Exception ex)
         {
             await db.RollbackTranAsync();
-            Logger.Error(ex, $"添加MQTT配置 {{mqtt.Name}} 失败");
+            NlogHelper.Error( $"添加MQTT配置 {{mqtt.Name}} 失败",ex);
             throw;
         }
     }
@@ -129,13 +127,13 @@ public class MqttRepository
 
                 await db.CommitTranAsync();
                 stopwatch.Stop();
-                Logger.Info($"更新Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+                NlogHelper.Info($"更新Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
                 return result;
             }
             catch (Exception ex)
             {
                 await db.RollbackTranAsync();
-                Logger.Error(ex, $"更新MQTT配置 {{mqtt.Name}} 失败");
+                NlogHelper.Error($"更新MQTT配置 {{mqtt.Name}} 失败", ex);
                 throw;
             }
         }
@@ -163,13 +161,13 @@ public class MqttRepository
                 await _menuRepository.DeleteMenu(menu, db);
                 await db.CommitTranAsync();
                 stopwatch.Stop();
-                Logger.Info($"删除Mqtt配置ID '{mqtt.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+                NlogHelper.Info($"删除Mqtt配置ID '{mqtt.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
                 return result;
             }
             catch (Exception ex)
             {
                 await db.RollbackTranAsync();
-                Logger.Error(ex, $"删除MQTT配置 {{mqtt.Name}} 失败");
+                NlogHelper.Error( $"删除MQTT配置 {{mqtt.Name}} 失败",ex);
                 throw;
             }
         }

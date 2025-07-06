@@ -1,17 +1,18 @@
 using System.Diagnostics;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using NLog;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
+using PMSWPF.Helper;
 using PMSWPF.Models;
 using SqlSugar;
+
+using PMSWPF.Helper;
 
 namespace PMSWPF.Data.Repositories;
 
 public class MenuRepository
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public MenuRepository()
     {
@@ -36,7 +37,7 @@ public class MenuRepository
         var result = await db.Deleteable<DbMenu>(childList)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        Logger.Info($"删除菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"删除菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -53,7 +54,7 @@ public class MenuRepository
             foreach (var dbMenu in dbMenuTree)
                 menuTree.Add(dbMenu.CopyTo<MenuBean>());
             stopwatch.Stop();
-            Logger.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
             return menuTree;
         }
     }
@@ -66,7 +67,7 @@ public class MenuRepository
         using var db = DbContext.GetInstance();
         var result = await Add(menu, db);
         stopwatch.Stop();
-        Logger.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -84,7 +85,7 @@ public class MenuRepository
         var result = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        Logger.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -104,7 +105,7 @@ public class MenuRepository
         var addTableRes = await db.Insertable<DbMenu>(addVarTable)
                                   .ExecuteCommandAsync();
         stopwatch.Stop();
-        // Logger.Info($"添加变量表菜单 '{addVarTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        // NlogHelper.Info($"添加变量表菜单 '{addVarTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return addTableRes;
     }
 
@@ -137,7 +138,7 @@ public class MenuRepository
         var addDeviceMenuId = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
                                       .ExecuteReturnIdentityAsync();
         stopwatch.Stop();
-        Logger.Info($"添加设备菜单 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"添加设备菜单 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return addDeviceMenuId;
     }
 
@@ -154,7 +155,7 @@ public class MenuRepository
         {
             var result = await Edit(menu, db);
             stopwatch.Stop();
-            Logger.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -171,7 +172,7 @@ public class MenuRepository
         var result = await db.Updateable<DbMenu>(menu.CopyTo<DbMenu>())
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        Logger.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -184,7 +185,7 @@ public class MenuRepository
             var result = await db.Queryable<DbMenu>()
                                  .FirstAsync(m => m.DataId == dataId && m.Type == menuType);
             stopwatch.Stop();
-            Logger.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result?.CopyTo<MenuBean>();
         }
     }

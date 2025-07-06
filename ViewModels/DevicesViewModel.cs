@@ -19,7 +19,7 @@ public partial class DevicesViewModel : ViewModelBase
     private readonly DataServices _dataServices;
     private readonly IDialogService _dialogService;
     private readonly DeviceRepository _deviceRepository;
-    private readonly ILogger<DevicesViewModel> _logger;
+    
     private readonly MenuRepository _menuRepository;
     private readonly VarTableRepository _varTableRepository;
 
@@ -42,13 +42,13 @@ public partial class DevicesViewModel : ViewModelBase
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="dataServices">数据服务。</param>
     public DevicesViewModel(
-        ILogger<DevicesViewModel> logger, IDialogService dialogService, DataServices dataServices
+        IDialogService dialogService, DataServices dataServices
     )
     {
         _deviceRepository = new DeviceRepository();
         _varTableRepository = new VarTableRepository();
         _menuRepository = new MenuRepository();
-        _logger = logger;
+        
         _dialogService = dialogService;
         _dataServices = dataServices;
 
@@ -69,7 +69,7 @@ public partial class DevicesViewModel : ViewModelBase
             // 如果用户取消或对话框未返回设备，则直接返回
             if (device == null)
             {
-                _logger.LogInformation("用户取消了添加设备操作。");
+                NlogHelper.Info("用户取消了添加设备操作。");
                 return;
             }
 

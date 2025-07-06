@@ -3,20 +3,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using iNKORE.UI.WPF.Modern.Controls;
 using Newtonsoft.Json;
-using NLog;
 using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 using PMSWPF.Services;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace PMSWPF.ViewModels;
 
 partial class VariableTableViewModel : ViewModelBase
 {
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     private readonly IDialogService _dialogService;
 
     // private readonly ILogger<VariableTableViewModel> _logger;
@@ -174,7 +171,7 @@ partial class VariableTableViewModel : ViewModelBase
             processingDialog?.Hide();
             
             string msgSuccess = $"成功导入变量：{resVarDataCount}个。";
-            Logger.Info(msgSuccess);
+            NlogHelper.Info(msgSuccess);
             NotificationHelper.ShowSuccess(msgSuccess);
             
         }

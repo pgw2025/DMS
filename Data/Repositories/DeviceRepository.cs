@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using NLog;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
@@ -14,7 +13,6 @@ public class DeviceRepository
 {
     private readonly MenuRepository _menuRepository;
     private readonly VarTableRepository _varTableRepository;
-    private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
     public DeviceRepository()
     {
@@ -36,7 +34,7 @@ public class DeviceRepository
         {
             var result = await Edit(device, db);
             stopwatch.Stop();
-            Logger.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -53,7 +51,7 @@ public class DeviceRepository
         var result = await db.Updateable<DbDevice>(device.CopyTo<DbDevice>())
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        Logger.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -80,7 +78,7 @@ public class DeviceRepository
             }
 
             stopwatch.Stop();
-            Logger.Info($"加载设备列表总耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"加载设备列表总耗时：{stopwatch.ElapsedMilliseconds}ms");
 
             return devices;
         }
@@ -100,7 +98,7 @@ public class DeviceRepository
             var result = await db.Queryable<DbDevice>()
                                  .FirstAsync(p => p.Id == id);
             stopwatch.Stop();
-            Logger.Info($"根据ID '{id}' 获取设备耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"根据ID '{id}' 获取设备耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -123,7 +121,7 @@ public class DeviceRepository
                 var res = await Delete(device, menus, db);
 
                 stopwatch.Stop();
-                Logger.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
+                NlogHelper.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
                 await db.CommitTranAsync();
                 return res;
             }
@@ -161,7 +159,7 @@ public class DeviceRepository
             throw new NullReferenceException($"没有找到设备:{device.Name},的菜单对象。");
         await _menuRepository.DeleteMenu(menu, db);
         stopwatch.Stop();
-        Logger.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -206,7 +204,7 @@ public class DeviceRepository
         finally
         {
             stopwatch.Stop();
-            Logger.Info($"添加设备 '{device.Name}' 及相关菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"添加设备 '{device.Name}' 及相关菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
         }
     }
 

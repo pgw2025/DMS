@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
-using NLog;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Options;
@@ -20,8 +19,6 @@ namespace PMSWPF.Services
     /// </summary>
     public class MqttBackgroundService : BackgroundService
     {
-        // NLog日志记录器，用于记录服务运行时的信息、警告和错误。
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         // 数据服务实例，用于访问和操作应用程序数据，如MQTT配置和变量数据。
         private readonly DataServices _dataServices;
         // 存储MQTT客户端实例的字典，键为MQTT配置ID，值为IMqttClient对象。
@@ -52,7 +49,7 @@ namespace PMSWPF.Services
         /// <returns>表示异步操作的任务。</returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Logger.Info("MqttBackgroundService started."); // 记录服务启动信息
+            NlogHelper.Info("MqttBackgroundService started."); // 记录服务启动信息
 
             // 订阅MQTT列表和变量数据变化的事件，以便在数据更新时重新加载配置和数据。
             _dataServices.OnMqttListChanged += HandleMqttListChanged;
@@ -76,7 +73,7 @@ namespace PMSWPF.Services
         /// <returns>表示异步操作的任务。</returns>
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
-            Logger.Info("MqttBackgroundService stopping."); // 记录服务停止信息
+            NlogHelper.Info("MqttBackgroundService stopping."); // 记录服务停止信息
 
             // 停止定时器。
             _timer?.Change(Timeout.Infinite, 0);
@@ -132,7 +129,7 @@ namespace PMSWPF.Services
 
                                 // 发布MQTT消息。
                                 await client.PublishAsync(message);
-                                Logger.Info($"Published {variable.Name} = {variable.DataValue} to {topic}/{variable.Name}"); // 记录发布信息
+                                NlogHelper.Info($"Published {variable.Name} = {variable.DataValue} to {topic}/{variable.Name}"); // 记录发布信息
                                 variable.IsModified = false; // 发布后重置修改标志。
                             }
                         }
@@ -172,7 +169,7 @@ namespace PMSWPF.Services
                         await client.DisconnectAsync();
                     }
                     _mqttClients.Remove(id);
-                    Logger.Info($"Disconnected and removed MQTT client for ID: {id}");
+                    NlogHelper.Info($"Disconnected and removed MQTT client for ID: {id}");
                 }
                 _mqttConfigurations.Remove(id);
                 _mqttVariableData.Remove(id);
@@ -202,14 +199,14 @@ namespace PMSWPF.Services
                 // 设置连接成功事件处理程序。
                 client.UseConnectedHandler(e =>
                 {
-                    Logger.Info($"Connected to MQTT broker: {mqtt.Name}");
+                    NlogHelper.Info($"Connected to MQTT broker: {mqtt.Name}");
                     NotificationHelper.ShowSuccess($"已连接到MQTT服务器: {mqtt.Name}");
                 });
 
                 // 设置断开连接事件处理程序。
                 client.UseDisconnectedHandler(async e =>
                 {
-                    Logger.Warn($"Disconnected from MQTT broker: {mqtt.Name}. Reason: {e.Reason}");
+                    NlogHelper.Warn($"Disconnected from MQTT broker: {mqtt.Name}. Reason: {e.Reason}");
                     NotificationHelper.ShowInfo($"与MQTT服务器断开连接: {mqtt.Name}");
                     // 尝试重新连接。
                     await Task.Delay(TimeSpan.FromSeconds(5)); // 等待5秒后重连
@@ -219,7 +216,7 @@ namespace PMSWPF.Services
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error(ex, $"Failed to reconnect to MQTT broker: {mqtt.Name}");
+                        NlogHelper.Error($"Failed to reconnect to MQTT broker: {mqtt.Name}",ex );
                     }
                 });
 
@@ -230,7 +227,6 @@ namespace PMSWPF.Services
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, $"Failed to connect to MQTT broker: {mqtt.Name}");
                 NotificationHelper.ShowError($"连接MQTT服务器失败: {mqtt.Name} - {ex.Message}", ex);
             }
         }
@@ -271,7 +267,7 @@ namespace PMSWPF.Services
         /// <param name="mqtts">更新后的MQTT配置列表。</param>
         private async void HandleMqttListChanged(object sender, List<Mqtt> mqtts)
         {
-            Logger.Info("MQTT list changed. Reloading configurations."); // 记录MQTT列表变化信息
+            NlogHelper.Info("MQTT list changed. Reloading configurations."); // 记录MQTT列表变化信息
             // 重新加载MQTT配置和变量数据。
             await LoadMqttConfigurations();
             await LoadVariableData(); // 重新加载变量数据，以防关联发生变化
@@ -284,7 +280,7 @@ namespace PMSWPF.Services
         /// <param name="variableDatas">更新后的变量数据列表。</param>
         private async void HandleVariableDataChanged(object sender, List<VariableData> variableDatas)
         {
-            Logger.Info("Variable data changed. Reloading variable associations."); // 记录变量数据变化信息
+            NlogHelper.Info("Variable data changed. Reloading variable associations."); // 记录变量数据变化信息
             // 重新加载变量数据。
             await LoadVariableData();
         }

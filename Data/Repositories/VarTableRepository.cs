@@ -2,16 +2,15 @@ using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
 using PMSWPF.Extensions;
+using PMSWPF.Helper;
 using PMSWPF.Models;
 using SqlSugar;
 using System.Diagnostics;
-using NLog;
 
 namespace PMSWPF.Data.Repositories;
 
 public class VarTableRepository
 {
-    private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// 添加变量表
@@ -27,7 +26,7 @@ public class VarTableRepository
             var addVarTable = await Add(varTable, db);
 
             stopwatch.Stop();
-            Logger.Info($"添加变量表 '{varTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"添加变量表 '{varTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return addVarTable;
         }
     }
@@ -47,7 +46,7 @@ public class VarTableRepository
         var addVarTabel = await db.Insertable<DbVariableTable>(variableTable.CopyTo<DbVariableTable>())
                                   .ExecuteReturnEntityAsync();
         stopwatch.Stop();
-        Logger.Info($"添加设备 '{addVarTabel.Name}' 的默认变量表耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"添加设备 '{addVarTabel.Name}' 的默认变量表耗时：{stopwatch.ElapsedMilliseconds}ms");
         return addVarTabel.CopyTo<VariableTable>();
     }
 
@@ -64,7 +63,7 @@ public class VarTableRepository
         {
             var result = await Edit(variableTable, db);
             stopwatch.Stop();
-            Logger.Info($"编辑变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"编辑变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -81,7 +80,7 @@ public class VarTableRepository
         var result = await db.Updateable<DbVariableTable>(variableTable.CopyTo<DbVariableTable>())
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        Logger.Info($"编辑变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"编辑变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     
@@ -98,7 +97,7 @@ public class VarTableRepository
         {
             var result = await Delete(variableTable, db);
             stopwatch.Stop();
-            Logger.Info($"删除变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+            NlogHelper.Info($"删除变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
     }
@@ -118,7 +117,7 @@ public class VarTableRepository
        var res= await db.Deleteable<DbVariableTable>(varTable.CopyTo<DbVariableTable>())
                 .ExecuteCommandAsync();
        stopwatch.Stop();
-       Logger.Info($"删除变量表 '{varTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+       NlogHelper.Info($"删除变量表 '{varTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
        return res;
     }
 

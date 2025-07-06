@@ -18,19 +18,21 @@ namespace PMSWPF.Services
     /// </summary>
     public class S7BackgroundService : BackgroundService
     {
-        // 日志记录器，用于记录服务运行时的信息、警告和错误。
-        private readonly ILogger<S7BackgroundService> _logger;
         // 数据服务实例，用于访问和操作应用程序数据，如设备配置。
         private readonly DataServices _dataServices;
+
         // 存储S7 PLC客户端实例的字典，键为设备ID，值为Plc对象。
         private readonly Dictionary<int, Plc> _s7PlcClients = new Dictionary<int, Plc>();
+
         // 轮询数据的线程。
         private Thread _pollingThread;
+
         // 用于取消轮询操作的CancellationTokenSource。
         private CancellationTokenSource _cancellationTokenSource;
 
         // 读取变量计数器。
         private int readCount = 0;
+
         // 跳过变量计数器（未到轮询时间）。
         private int TGCount = 0;
 
@@ -65,9 +67,8 @@ namespace PMSWPF.Services
         /// </summary>
         /// <param name="logger">日志记录器实例。</param>
         /// <param name="dataServices">数据服务实例。</param>
-        public S7BackgroundService(ILogger<S7BackgroundService> logger, DataServices dataServices)
+        public S7BackgroundService(DataServices dataServices)
         {
-            _logger = logger;
             _dataServices = dataServices;
             // 订阅设备列表变更事件，以便在设备配置更新时重新加载。
             _dataServices.OnDeviceListChanged += HandleDeviceListChanged;
@@ -86,7 +87,7 @@ namespace PMSWPF.Services
             // 当设备列表变化时，更新PLC客户端
             // 这里需要更复杂的逻辑来处理连接的关闭和新连接的建立
             // 简单起见，这里只做日志记录
-            _logger.LogInformation("设备列表已更改。S7客户端可能需要重新初始化。");
+            NlogHelper.Info("设备列表已更改。S7客户端可能需要重新初始化。");
         }
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace PMSWPF.Services
         /// <returns>表示异步操作的任务。</returns>
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("S7后台服务正在启动。");
+            NlogHelper.Info("S7后台服务正在启动。");
             // 创建一个CancellationTokenSource，用于控制轮询线程的取消。
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
@@ -116,9 +117,9 @@ namespace PMSWPF.Services
         /// <param name="stoppingToken">用于取消轮询的CancellationToken。</param>
         private void PollingLoop(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("S7轮询线程已启动。");
+            NlogHelper.Info("S7轮询线程已启动。");
             // 注册取消回调，当服务停止时记录日志。
-            stoppingToken.Register(() => _logger.LogInformation("S7后台服务正在停止。"));
+            stoppingToken.Register(() => NlogHelper.Info("S7后台服务正在停止。"));
 
             // 初始加载S7设备列表。
             _s7Devices = _dataServices.Devices?.Where(d => d.ProtocolType == ProtocolType.S7 && d.IsActive)
@@ -131,18 +132,18 @@ namespace PMSWPF.Services
                 // _logger.LogDebug($"开始轮询变量,当前时间：{DateTime.Now}");
                 readCount = 0;
                 TGCount = 0;
-                
+
                 Stopwatch stopwatch = Stopwatch.StartNew(); // 启动计时器，测量轮询耗时
                 PollS7Devices(stoppingToken); // 执行S7设备轮询
                 stopwatch.Stop(); // 停止计时器
                 // _logger.LogDebug($"结束轮询变量,当前时间：{DateTime.Now}");
-                _logger.LogDebug($"读取变量数：{readCount}个，跳过变量数：{TGCount}总耗时：{stopwatch.ElapsedMilliseconds}ms");
-                
+                NlogHelper.Info($"读取变量数：{readCount}个，跳过变量数：{TGCount}总耗时：{stopwatch.ElapsedMilliseconds}ms");
+
                 // 短暂休眠以防止CPU占用过高，并控制轮询频率。
                 Thread.Sleep(1000);
             }
 
-            _logger.LogInformation("S7轮询线程已停止。");
+            NlogHelper.Info("S7轮询线程已停止。");
         }
 
 
@@ -162,11 +163,11 @@ namespace PMSWPF.Services
                     plcClient = new Plc(device.CpuType, device.Ip, (short)device.Prot, device.Rack, device.Slot);
                     plcClient.Open(); // 尝试打开连接。
                     _s7PlcClients[device.Id] = plcClient; // 将新创建的客户端添加到字典。
-                    _logger.LogInformation($"已连接到S7 PLC: {device.Name} ({device.Ip})");
+                    NlogHelper.Info($"已连接到S7 PLC: {device.Name} ({device.Ip})");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"连接S7 PLC失败: {device.Name} ({device.Ip})");
+                    NotificationHelper.ShowError($"连接S7 PLC失败: {device.Name} ({device.Ip})", ex);
                     return null; // 连接失败，返回null。
                 }
             }
@@ -176,11 +177,11 @@ namespace PMSWPF.Services
                 try
                 {
                     plcClient.Open(); // 尝试重新打开连接。
-                    _logger.LogInformation($"已重新连接到S7 PLC: {device.Name} ({device.Ip})");
+                    NlogHelper.Info($"已重新连接到S7 PLC: {device.Name} ({device.Ip})");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"重新连接S7 PLC失败: {device.Name} ({device.Ip})");
+                    NotificationHelper.ShowError($"重新连接S7 PLC失败: {device.Name} ({device.Ip})", ex);
                     return null; // 重新连接失败，返回null。
                 }
             }
@@ -197,7 +198,8 @@ namespace PMSWPF.Services
             // 如果没有活跃的S7设备，则等待一段时间后重试。
             if (_s7Devices == null || !_s7Devices.Any())
             {
-                _logger.LogDebug("未找到活跃的S7设备进行轮询。等待5秒后重试。");
+                NlogHelper.Info(
+                    "未找到活跃的S7设备进行轮询。等待5秒后重试。");
                 try
                 {
                     // 使用CancellationToken来使等待可取消。
@@ -247,7 +249,7 @@ namespace PMSWPF.Services
 
             if (!s7Variables.Any())
             {
-                _logger.LogDebug($"设备 {device.Name} 没有找到活跃的S7变量。");
+                NlogHelper.Info($"设备 {device.Name} 没有找到活跃的S7变量。");
                 return;
             }
 
@@ -262,10 +264,10 @@ namespace PMSWPF.Services
                     // 获取变量的轮询间隔。
                     if (!_pollingIntervals.TryGetValue(variable.PollLevelType, out var interval))
                     {
-                        _logger.LogWarning($"未知轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
+                        NlogHelper.Info($"未知轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
                         continue;
                     }
-                    
+
                     // 检查是否达到轮询时间。
                     if ((DateTime.Now - variable.LastPollTime) < interval)
                     {
@@ -275,7 +277,6 @@ namespace PMSWPF.Services
 
                     try
                     {
-                        
                         // 从PLC读取变量值。
                         var value = plcClient.Read(variable.S7Address);
                         if (value != null)
@@ -290,19 +291,18 @@ namespace PMSWPF.Services
                             readCount++;
                             // _logger.LogDebug($"线程ID：{Environment.CurrentManagedThreadId},已读取变量 {variable.Name}: {variable.DataValue}");
                         }
-                       
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"从设备 {device.Name} 读取变量 {variable.Name} 失败。");
+                        NotificationHelper.ShowError( $"从设备 {device.Name} 读取变量 {variable.Name} 失败。",ex);
                     }
                     // stopwatch.Stop();
-                    // _logger.LogInformation($"读取变量耗时:{stopwatch.ElapsedMilliseconds}ms ");
+                    //   NlogHelper.Info($"读取变量耗时:{stopwatch.ElapsedMilliseconds}ms ");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"设备 {device.Name} 批量读取过程中发生错误。");
+                NotificationHelper.ShowError($"设备 {device.Name} 批量读取过程中发生错误。",ex);
             }
         }
 
@@ -313,7 +313,7 @@ namespace PMSWPF.Services
         /// <returns>表示异步操作的任务。</returns>
         public override async Task StopAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("S7 Background Service is stopping.");
+            NlogHelper.Info("S7 Background Service is stopping.");
 
             // 发出信号，请求轮询线程停止。
             _cancellationTokenSource?.Cancel();
@@ -326,7 +326,7 @@ namespace PMSWPF.Services
                 if (plcClient.IsConnected)
                 {
                     plcClient.Close();
-                    _logger.LogInformation($"Closed S7 PLC connection: {plcClient.IP}");
+                    NlogHelper.Info($"Closed S7 PLC connection: {plcClient.IP}");
                 }
             }
 
