@@ -15,8 +15,9 @@
     <PackageReference Include="NUnit" Version="3.14.0" />
     <PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="SqlSugarCore" Version="5.1.4.145" />
+    <PackageReference Include="SqlSugarCore" Version="5.1.4.197" />
     <PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178" />
+    <PackageReference Include="NLog" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +26,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PMSWPF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Config\nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

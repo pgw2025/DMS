@@ -60,4 +60,20 @@ public class DbNlog
     /// </summary>
     [SugarColumn(IsNullable = true)]
     public string ThreadName { get; set; }
+
+    /// <summary>
+    /// 线程名称。
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string CallerFilePath { get; set; }
+    /// <summary>
+    /// 线程名称。
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public int CallerLineNumber { get; set; }
+    /// <summary>
+    /// 线程名称。
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string CallerMember { get; set; }
 }
