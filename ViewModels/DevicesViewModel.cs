@@ -77,8 +77,7 @@ public partial class DevicesViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowMessage($"添加设备的过程中发生错误：{e.Message}", NotificationType.Error);
-            _logger.LogError($"添加设备的过程中发生错误：{e}");
+            NotificationHelper.ShowError($"添加设备的过程中发生错误：{e.Message}", e);
         }
     }
 
@@ -112,8 +111,7 @@ public partial class DevicesViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowMessage($"删除设备的过程中发生错误：{e.Message}", NotificationType.Error);
-            _logger.LogError($"删除设备的过程中发生错误：{e}");
+            NotificationHelper.ShowError($"删除设备的过程中发生错误：{e.Message}", e);
         }
     }
 
@@ -146,8 +144,7 @@ public partial class DevicesViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowMessage($"编辑设备的过程中发生错误：{e.Message}", NotificationType.Error);
-            _logger.LogError($"编辑设备的过程中发生错误：{e}");
+            NotificationHelper.ShowError($"编辑设备的过程中发生错误：{e.Message}", e);
         }
     }
 }

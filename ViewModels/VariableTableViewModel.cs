@@ -140,9 +140,7 @@ partial class VariableTableViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            string msg = $"编辑变量的过程中发生了不可预期的错误：";
-            Logger.Error(msg + e);
-            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+            NotificationHelper.ShowError($"编辑变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -182,9 +180,7 @@ partial class VariableTableViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            string msg = $"从TIA导入变量的过程中发生了不可预期的错误：";
-            Logger.Error(msg + e);
-            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+            NotificationHelper.ShowError($"从TIA导入变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
         
         
@@ -211,9 +207,7 @@ partial class VariableTableViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            string msg = $"添加变量的过程中发生了不可预期的错误：";
-            Logger.Error(msg + e);
-            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+            NotificationHelper.ShowError($"添加变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -253,9 +247,7 @@ partial class VariableTableViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            string msg = $"删除变量的过程中发生了不可预期的错误：";
-            Logger.Error(msg + e);
-            NotificationHelper.ShowMessage(msg + e.Message, NotificationType.Error);
+            NotificationHelper.ShowError($"删除变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -319,8 +311,7 @@ partial class VariableTableViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "添加MQTT服务器到变量时发生错误。");
-            NotificationHelper.ShowMessage($"添加MQTT服务器失败: {ex.Message}", NotificationType.Error);
+            NotificationHelper.ShowError($"添加MQTT服务器失败: {ex.Message}", ex);
         }
     }
 

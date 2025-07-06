@@ -134,9 +134,7 @@ public partial class MainViewModel : ViewModelBase
         catch (Exception e)
         {
             await db.RollbackTranAsync();
-            // 捕获并记录所有未预料的异常
-            _logger.LogError($"添加变量表时出现了未预期的错误:{e}");
-            NotificationHelper.ShowMessage($"添加变量表时出现了错误:{e.Message}", NotificationType.Error);
+            NotificationHelper.ShowError($"添加变量表时出现了错误:{e.Message}", e);
         }
     }
 
@@ -198,8 +196,7 @@ public partial class MainViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            _logger.LogError($"菜单切换是出现了错误:{e}");
-            NotificationHelper.ShowMessage($"菜单切换是出现了错误:{e.Message}", NotificationType.Error);
+            NotificationHelper.ShowError($"菜单切换时出现了错误:{e.Message}", e);
         }
     }
 }
