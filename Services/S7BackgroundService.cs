@@ -137,10 +137,10 @@ namespace PMSWPF.Services
                 PollS7Devices(stoppingToken); // 执行S7设备轮询
                 stopwatch.Stop(); // 停止计时器
                 // _logger.LogDebug($"结束轮询变量,当前时间：{DateTime.Now}");
-                NlogHelper.Info($"读取变量数：{readCount}个，跳过变量数：{TGCount}总耗时：{stopwatch.ElapsedMilliseconds}ms");
+                NlogHelper.Info($"读取变量数：{readCount}个，跳过变量数：{TGCount}",throttle:true);
 
                 // 短暂休眠以防止CPU占用过高，并控制轮询频率。
-                Thread.Sleep(1000);
+                Thread.Sleep(100);
             }
 
             NlogHelper.Info("S7轮询线程已停止。");
@@ -199,7 +199,7 @@ namespace PMSWPF.Services
             if (_s7Devices == null || !_s7Devices.Any())
             {
                 NlogHelper.Info(
-                    "未找到活跃的S7设备进行轮询。等待5秒后重试。");
+                    "未找到活跃的S7设备进行轮询。等待5秒后重试。",throttle:true);
                 try
                 {
                     // 使用CancellationToken来使等待可取消。
