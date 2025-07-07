@@ -7,17 +7,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PMSWPF.Services;
 
 namespace PMSWPF.ViewModels;
 
 public partial class SettingViewModel : ViewModelBase
 {
     private ConnectionSettings _connectionSettings;
+    private readonly S7BackgroundService _s7BackgroundService;
+    private readonly MqttBackgroundService _mqttBackgroundService;
 
-    public SettingViewModel()
+    public SettingViewModel(S7BackgroundService s7BackgroundService, MqttBackgroundService mqttBackgroundService)
     {
         _connectionSettings = ConnectionSettings.Load();
         AvailableDbTypes = Enum.GetNames(typeof(SqlSugar.DbType)).ToList();
+        _s7BackgroundService = s7BackgroundService;
+        _mqttBackgroundService = mqttBackgroundService;
     }
 
     public List<string> AvailableDbTypes { get; set; }
@@ -116,6 +121,14 @@ public partial class SettingViewModel : ViewModelBase
                 _connectionSettings.EnableS7Service = value;
                 OnPropertyChanged();
                 _connectionSettings.Save();
+                if (value)
+                {
+                    _s7BackgroundService.StartService();
+                }
+                else
+                {
+                    _s7BackgroundService.StopService();
+                }
             }
         }
     }
@@ -130,6 +143,14 @@ public partial class SettingViewModel : ViewModelBase
                 _connectionSettings.EnableMqttService = value;
                 OnPropertyChanged();
                 _connectionSettings.Save();
+                if (value)
+                {
+                    _mqttBackgroundService.StartService();
+                }
+                else
+                {
+                    _mqttBackgroundService.StopService();
+                }
             }
         }
     }

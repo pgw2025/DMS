@@ -16,7 +16,7 @@ namespace PMSWPF.Services
     /// <summary>
     /// S7后台服务，继承自BackgroundService，用于在后台周期性地轮询S7 PLC设备数据。
     /// </summary>
-    public class S7BackgroundService : BackgroundService
+    public class S7BackgroundService
     {
         // 数据服务实例，用于访问和操作应用程序数据，如设备配置。
         private readonly DataServices _dataServices;
@@ -91,15 +91,13 @@ namespace PMSWPF.Services
         }
 
         /// <summary>
-        /// 后台服务的执行方法，当服务启动时调用。
+        /// 启动S7后台服务。
         /// </summary>
-        /// <param name="stoppingToken">用于取消操作的CancellationToken。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        public void StartService()
         {
             NlogHelper.Info("S7后台服务正在启动。");
             // 创建一个CancellationTokenSource，用于控制轮询线程的取消。
-            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+            _cancellationTokenSource = new CancellationTokenSource();
 
             // 创建并启动轮询线程。
             _pollingThread = new Thread(() => PollingLoop(_cancellationTokenSource.Token))
@@ -107,8 +105,6 @@ namespace PMSWPF.Services
                                  IsBackground = true // 设置为后台线程，随主程序退出而退出
                              };
             _pollingThread.Start();
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -307,11 +303,9 @@ namespace PMSWPF.Services
         }
 
         /// <summary>
-        /// 后台服务的停止方法，当服务停止时调用。
+        /// 停止S7后台服务。
         /// </summary>
-        /// <param name="stoppingToken">用于取消操作的CancellationToken。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        public override async Task StopAsync(CancellationToken stoppingToken)
+        public void StopService()
         {
             NlogHelper.Info("S7 Background Service is stopping.");
 
@@ -332,7 +326,7 @@ namespace PMSWPF.Services
 
             _s7PlcClients.Clear(); // 清空PLC客户端字典。
 
-            await base.StopAsync(stoppingToken);
+            
         }
     }
 }

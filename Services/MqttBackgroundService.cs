@@ -17,7 +17,7 @@ namespace PMSWPF.Services
     /// <summary>
     /// MQTT后台服务，继承自BackgroundService，用于在后台管理MQTT连接和数据发布。
     /// </summary>
-    public class MqttBackgroundService : BackgroundService
+    public class MqttBackgroundService
     {
         // 数据服务实例，用于访问和操作应用程序数据，如MQTT配置和变量数据。
         private readonly DataServices _dataServices;
@@ -43,11 +43,9 @@ namespace PMSWPF.Services
         }
 
         /// <summary>
-        /// 后台服务的执行方法，当服务启动时调用。
+        /// 启动MQTT后台服务。
         /// </summary>
-        /// <param name="stoppingToken">用于取消操作的CancellationToken。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async void StartService()
         {
             NlogHelper.Info("MqttBackgroundService started."); // 记录服务启动信息
 
@@ -63,15 +61,13 @@ namespace PMSWPF.Services
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5)); // 每5秒轮询一次
 
             // 使服务保持运行，直到收到停止请求。
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+            // await Task.Delay(Timeout.Infinite, stoppingToken);
         }
 
         /// <summary>
-        /// 后台服务的停止方法，当服务停止时调用。
+        /// 停止MQTT后台服务。
         /// </summary>
-        /// <param name="stoppingToken">用于取消操作的CancellationToken。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        public override async Task StopAsync(CancellationToken stoppingToken)
+        public async void StopService()
         {
             NlogHelper.Info("MqttBackgroundService stopping."); // 记录服务停止信息
 
@@ -95,7 +91,7 @@ namespace PMSWPF.Services
             _mqttConfigurations.Clear();
             _mqttVariableData.Clear();
 
-            await base.StopAsync(stoppingToken);
+            
         }
 
         /// <summary>
