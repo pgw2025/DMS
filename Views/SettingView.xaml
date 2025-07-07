@@ -108,6 +108,25 @@
 
         </ui:SettingsExpander>
 
+        <ui:SettingsExpander Header="后台服务"
+                             Description="后台服务相关配置">
+            <ui:SettingsExpander.HeaderIcon>
+                <ui:FontIcon Glyph="&#xE91B;" />
+            </ui:SettingsExpander.HeaderIcon>
+            <ui:SettingsExpander.Items>
+                <ui:SettingsCard Header="是否启动S7后台服务"
+                                 Description="关闭后，将不再轮询S7设备"
+                                 IsClickEnabled="True">
+                    <ui:ToggleSwitch IsOn="{Binding EnableS7Service, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+                <ui:SettingsCard Header="是否启动Mqtt后台服务"
+                                 Description="关闭后，将不再启动Mqtt服务"
+                                 IsClickEnabled="True">
+                    <ui:ToggleSwitch IsOn="{Binding EnableMqttService, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+            </ui:SettingsExpander.Items>
+        </ui:SettingsExpander>
+
         <ui:SettingsExpander Header="SettingsExpander"
                              Description="The SettingsExpander has the same properties as a SettingsCard">
             <ui:SettingsExpander.HeaderIcon>

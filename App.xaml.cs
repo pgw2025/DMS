@@ -13,6 +13,7 @@ using PMSWPF.Services;
 using PMSWPF.ViewModels;
 using PMSWPF.Views;
 using Microsoft.Extensions.Hosting;
+using PMSWPF.Config;
 using PMSWPF.ViewModels.Dialogs;
 using SqlSugar;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -81,8 +82,14 @@ public partial class App : Application
         services.AddSingleton<NavgatorServices>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<GrowlNotificationService>();
-        services.AddHostedService<S7BackgroundService>(); // Register as HostedService
-        services.AddHostedService<MqttBackgroundService>();
+        if (ConnectionSettings.Load().EnableS7Service)
+        {
+            services.AddHostedService<S7BackgroundService>(); // Register as HostedService
+        }
+        if (ConnectionSettings.Load().EnableMqttService)
+        {
+            services.AddHostedService<MqttBackgroundService>();
+        }
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<DevicesViewModel>();

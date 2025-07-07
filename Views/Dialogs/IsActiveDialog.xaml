@@ -1,0 +1,22 @@
+<controls:ContentDialog x:Class="PMSWPF.Views.Dialogs.IsActiveDialog"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
+                        xmlns:vm="clr-namespace:PMSWPF.ViewModels.Dialogs"
+                        mc:Ignorable="d"
+                        d:DataContext="{d:DesignInstance vm:IsActiveDialogViewModel}"
+                        Title="修改激活状态"
+                        PrimaryButtonText="确定"
+                        SecondaryButtonText="取消"
+                        PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+                        SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="10">
+            <TextBlock Text="请选择新的激活状态:" Margin="0,0,0,10" FontWeight="Bold"/>
+            <RadioButton Content="启用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=True}" Command="{Binding SelectIsActiveCommand}" CommandParameter="True" Margin="0,0,0,5"/>
+            <RadioButton Content="停用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=False}" Command="{Binding SelectIsActiveCommand}" CommandParameter="False"/>
+        </StackPanel>
+    </Grid>
+</controls:ContentDialog>

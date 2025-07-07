@@ -106,6 +106,34 @@ public partial class SettingViewModel : ViewModelBase
         }
     }
 
+    public bool EnableS7Service
+    {
+        get => _connectionSettings.EnableS7Service;
+        set
+        {
+            if (_connectionSettings.EnableS7Service != value)
+            {
+                _connectionSettings.EnableS7Service = value;
+                OnPropertyChanged();
+                _connectionSettings.Save();
+            }
+        }
+    }
+
+    public bool EnableMqttService
+    {
+        get => _connectionSettings.EnableMqttService;
+        set
+        {
+            if (_connectionSettings.EnableMqttService != value)
+            {
+                _connectionSettings.EnableMqttService = value;
+                OnPropertyChanged();
+                _connectionSettings.Save();
+            }
+        }
+    }
+
     [RelayCommand]
     private async Task TestConnection()
     {
