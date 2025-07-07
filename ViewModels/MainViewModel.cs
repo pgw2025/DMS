@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows; // Add this using directive
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input; // Add this using directive
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +64,27 @@ public partial class MainViewModel : ViewModelBase
         MessageHelper.SendLoadMessage(LoadTypes.All);
         // 当菜单加载成功后，在前台显示菜单
         dataServices.OnMenuTreeListChanged += (sender, menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
+    }
+
+    /// <summary>
+    /// 显示主窗口的命令。
+    /// </summary>
+    [RelayCommand]
+    private void ShowWindow()
+    {
+        if (Application.Current.MainWindow is Views.MainView mainWindow)
+        {
+            mainWindow.ShowApplication();
+        }
+    }
+
+    /// <summary>
+    /// 退出应用程序的命令。
+    /// </summary>
+    [RelayCommand]
+    private void ExitApplication()
+    {
+        Application.Current.Shutdown();
     }
 
     /// <summary>

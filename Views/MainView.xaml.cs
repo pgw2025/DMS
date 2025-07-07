@@ -12,6 +12,8 @@ namespace PMSWPF.Views;
 /// <summary>
 ///     MainView.xaml 的交互逻辑
 /// </summary>
+// using Hardcodet.NotifyIcon.Wpf;
+
 public partial class MainView : Window
 {
     private readonly DataServices _dataServices;
@@ -24,7 +26,25 @@ public partial class MainView : Window
         _dataServices = dataServices;
         DataContext = _viewModel;
         NlogHelper.Info("主界面加载成功");
+
+        // Set the NotifyIcon's DataContext to the ViewModel
+        MyNotifyIcon.DataContext = _viewModel;
     }
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        // Hide the window instead of closing it
+        e.Cancel = true;
+        Hide();
+    }
+
+    public void ShowApplication()
+    {
+        Show();
+        WindowState = WindowState.Normal;
+        Activate();
+    }
+
 
     /// <summary>
     ///     左边菜单项被点击的事件，切换右边的视图

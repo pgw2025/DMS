@@ -8,12 +8,15 @@
         xmlns:vm="clr-namespace:PMSWPF.ViewModels"
         xmlns:mo="clr-namespace:PMSWPF.Models"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:tb="http://hardcodet.net/taskbar"
+        xmlns:taskbarNotification="http://www.hardcodet.net/taskbar"
         Title="设备管理系统"
         Width="1080"
         Height="800"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Loaded="MainView_OnLoaded"
+        Closing="Window_Closing"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.SystemBackdropType="Mica"
         d:DataContext="{d:DesignInstance vm:MainViewModel}"
@@ -37,6 +40,17 @@
         </DataTemplate>
     </Window.Resources>
     <Grid>
+        <taskbarNotification:TaskbarIcon x:Name="MyNotifyIcon"
+                        ToolTipText="设备管理系统"
+                        IconSource="/AppIcon2.ico"
+                        DoubleClickCommand="{Binding ShowWindowCommand}">
+            <taskbarNotification:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="显示窗口" Command="{Binding ShowWindowCommand}" />
+                    <MenuItem Header="退出" Command="{Binding ExitApplicationCommand}" />
+                </ContextMenu>
+            </taskbarNotification:TaskbarIcon.ContextMenu>
+        </taskbarNotification:TaskbarIcon>
         <ui:NavigationView ExpandedModeThresholdWidth="500"
                            IsTabStop="False"
                            PaneDisplayMode="Left"
@@ -49,7 +63,7 @@
                            MenuItemsSource="{Binding Menus}"
                            MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
                            SelectionChanged="NavigationView_SelectionChanged">
-            
+
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox AutomationProperties.Name="Search">

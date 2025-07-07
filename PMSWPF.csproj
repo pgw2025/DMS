@@ -15,6 +15,7 @@
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="HandyControl" Version="3.5.1" />
+        <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
         <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
@@ -55,6 +56,7 @@
     <ItemGroup>
       <None Remove="Assets\AppIcon.png" />
       <Resource Include="Assets\AppIcon.png" />
+      <Resource Include="AppIcon2.ico" />
     </ItemGroup>
 
 </Project>
