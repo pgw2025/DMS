@@ -78,8 +78,8 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
-                
-               
+
+
                 <ui:AppBarButton Command="{Binding SaveModifiedVarDataCommand}"
                                  Label="保存变量">
                     <ui:AppBarButton.Icon>
@@ -87,16 +87,14 @@
                     </ui:AppBarButton.Icon>
 
                 </ui:AppBarButton>
-                <ui:AppBarButton 
-                    Command="{Binding ImprotFromTiaVarTableCommand}"
-                    Label="从TIA变量表导入">
+                <ui:AppBarButton Command="{Binding ImprotFromTiaVarTableCommand}"
+                                 Label="从TIA变量表导入">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
                     </ui:AppBarButton.Icon>
 
                 </ui:AppBarButton>
 
-               
 
                 <ui:AppBarButton x:Name="ShareButton"
                                  Label="Share">
@@ -136,8 +134,13 @@
                            Text="协议:" />
                 <TextBlock Style="{StaticResource VarTableValueStyle}"
                            Text="{Binding VariableTable.ProtocolType}" />
-
-
+                <TextBlock Style="{StaticResource VarTableLabelStyle}"
+                           Text="搜索:" />
+                <TextBox Width="200"
+                         HorizontalAlignment="Left"
+                         Margin="5,0,0,0"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         ui:ControlHelper.PlaceholderText="搜索变量..." />
             </ikw:SimpleStackPanel>
 
 
@@ -150,7 +153,7 @@
                   CanUserSortColumns="True"
                   SelectionMode="Extended"
                   SelectedItem="{Binding SelectedVariableData}"
-                  ItemsSource="{Binding DataVariables}">
+                  ItemsSource="{Binding VariableDataView}">
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="添加变量"
@@ -245,7 +248,8 @@
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="数据类型"
                                     Binding="{Binding DataType}" />
-                <DataGridTemplateColumn Header="信号类型" SortMemberPath="SignalType">
+                <DataGridTemplateColumn Header="信号类型"
+                                        SortMemberPath="SignalType">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding SignalType, Converter={StaticResource EnumDescriptionConverter}}" />
@@ -264,10 +268,12 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="轮询频率" SortMemberPath="PollLevelType">
+                <DataGridTemplateColumn Header="轮询频率"
+                                        SortMemberPath="PollLevelType">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding PollLevelType, Converter={StaticResource EnumDescriptionConverter}}" />
+                            <TextBlock
+                                Text="{Binding PollLevelType, Converter={StaticResource EnumDescriptionConverter}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
@@ -292,7 +298,7 @@
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="显示值"
                                     Binding="{Binding DisplayValue}" />
-                
+
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="创建时间"
                                     Binding="{Binding CreateTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />

@@ -1,4 +1,7 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -16,17 +19,17 @@ partial class VariableTableViewModel : ViewModelBase
 {
     private readonly IDialogService _dialogService;
 
-    // private readonly ILogger<VariableTableViewModel> _logger;
     [ObservableProperty]
     private VariableTable variableTable;
-
-    [ObservableProperty]
-    private ObservableCollection<VariableData> _dataVariables;
-
-    private ObservableCollection<VariableData> _originalDataVariables;
+    private ObservableCollection<VariableData> _dataVariables = new ObservableCollection<VariableData>();
 
     [ObservableProperty]
     private VariableData _selectedVariableData;
+
+    [ObservableProperty]
+    private string _searchText;
+
+    public ICollectionView VariableDataView { get; private set; }
 
     /// <summary>
     /// 是否是第一次加载,防止ToggleSwitch第一次加载触发改变事件
@@ -35,30 +38,62 @@ partial class VariableTableViewModel : ViewModelBase
 
     private readonly VarTableRepository _varTableRepository;
     private readonly VarDataRepository _varDataRepository;
+    private ObservableCollection<VariableData>? _originalDataVariables;
 
 
     public VariableTableViewModel(IDialogService dialogService)
     {
         _dialogService = dialogService;
         IsLoadCompletion = false;
-        // _logger = logger;
         _varTableRepository = new VarTableRepository();
         _varDataRepository = new VarDataRepository();
+        _dataVariables = new ObservableCollection<VariableData>(); // Initialize here
+        VariableDataView = CollectionViewSource.GetDefaultView(_dataVariables);
+        VariableDataView.Filter = FilterVariables;
     }
+
+    private bool FilterVariables(object item)
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            return true;
+        }
+
+        if (item is VariableData variable)
+        {
+            var searchTextLower = SearchText.ToLower();
+            return variable.Name?.ToLower().Contains(searchTextLower) == true ||
+                   variable.Description?.ToLower().Contains(searchTextLower) == true ||
+                   variable.NodeId?.ToLower().Contains(searchTextLower) == true ||
+                   variable.S7Address?.ToLower().Contains(searchTextLower) == true ||
+                   variable.DataValue?.ToLower().Contains(searchTextLower) == true ||
+                   variable.DisplayValue?.ToLower().Contains(searchTextLower) == true;
+        }
+        return false;
+    }
+
+    partial void OnSearchTextChanged(string value)
+    {
+        VariableDataView?.Refresh();
+    }
+
 
 
     public override void OnLoaded()
     {
         if (VariableTable.DataVariables != null)
         {
-            DataVariables = new ObservableCollection<VariableData>(VariableTable.DataVariables);
+            _dataVariables = new ObservableCollection<VariableData>(VariableTable.DataVariables);
+            VariableDataView = CollectionViewSource.GetDefaultView(_dataVariables);
+            VariableDataView.Filter = FilterVariables;
+
             // 3. 创建原始数据的深拷贝备份
             // 推荐使用 JSON 序列化/反序列化进行深度拷贝
-            var serialized = JsonConvert.SerializeObject(DataVariables);
+            var serialized = JsonConvert.SerializeObject(_dataVariables);
             _originalDataVariables = JsonConvert.DeserializeObject<ObservableCollection<VariableData>>(serialized);
 
             // 在数据加载完成后，将所有变量的 IsModified 状态重置为 false
-            foreach (var variableData in DataVariables)
+            foreach (var variableData in _dataVariables)
             {
                 variableData.IsModified = false;
             }
@@ -74,7 +109,7 @@ partial class VariableTableViewModel : ViewModelBase
     /// <returns></returns>
     public override async Task<bool> OnExitAsync()
     {
-        var modifiedDatas = DataVariables.Where(d => d.IsModified == true)
+        var modifiedDatas = _dataVariables.Where(d => d.IsModified == true)
                                          .ToList();
         if (modifiedDatas.Count == 0)
             return true;
@@ -102,7 +137,7 @@ partial class VariableTableViewModel : ViewModelBase
     [RelayCommand]
     private async void SaveModifiedVarData()
     {
-        var modifiedDatas = DataVariables.Where(d => d.IsModified == true)
+        var modifiedDatas = _dataVariables.Where(d => d.IsModified == true)
                                          .ToList();
         ///更新数据库
         await _varDataRepository.UpdateAsync(modifiedDatas);
@@ -167,7 +202,7 @@ partial class VariableTableViewModel : ViewModelBase
             //更新界面
             // variableTable.DataVariables.AddRange(resVarDataList);
             variableTable.DataVariables= await _varDataRepository.GetAllAsync();
-            DataVariables=new ObservableCollection<VariableData>(variableTable.DataVariables);
+            _dataVariables=new ObservableCollection<VariableData>(variableTable.DataVariables);
             processingDialog?.Hide();
             
             string msgSuccess = $"成功导入变量：{resVarDataCount}个。";
@@ -199,7 +234,7 @@ partial class VariableTableViewModel : ViewModelBase
             // 更新数据库
             await _varDataRepository.AddAsync(varData);
             // 更新当前页面的
-            DataVariables.Add(varData);
+            _dataVariables.Add(varData);
             NotificationHelper.ShowSuccess($"添加变量成功:{varData?.Name}");
         }
         catch (Exception e)
@@ -233,7 +268,7 @@ partial class VariableTableViewModel : ViewModelBase
             {
                 foreach (var variable in variablesToDelete)
                 {
-                    DataVariables.Remove(variable);
+                    _dataVariables.Remove(variable);
                 }
                 NotificationHelper.ShowSuccess($"成功删除 {result} 个变量");
             }
