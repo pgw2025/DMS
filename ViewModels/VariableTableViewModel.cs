@@ -41,6 +41,9 @@ partial class VariableTableViewModel : ViewModelBase
     private ObservableCollection<VariableData>? _originalDataVariables;
 
 
+    [ObservableProperty]
+    private bool _isS7ProtocolSelected;
+
     public VariableTableViewModel(IDialogService dialogService)
     {
         _dialogService = dialogService;
@@ -81,6 +84,8 @@ partial class VariableTableViewModel : ViewModelBase
 
     public override void OnLoaded()
     {
+        IsS7ProtocolSelected = VariableTable.ProtocolType == ProtocolType.S7;
+
         if (VariableTable.DataVariables != null)
         {
             _dataVariables = new ObservableCollection<VariableData>(VariableTable.DataVariables);

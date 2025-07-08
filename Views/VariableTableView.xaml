@@ -23,6 +23,7 @@
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
         <ex:EnumBindingSource x:Key="pollLevelType"
                               EnumType="{x:Type en:PollLevelType}" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <!-- 标签字体的样式 -->
         <Style TargetType="TextBlock"
@@ -88,7 +89,8 @@
 
                 </ui:AppBarButton>
                 <ui:AppBarButton Command="{Binding ImprotFromTiaVarTableCommand}"
-                                 Label="从TIA变量表导入">
+                                 Label="从TIA变量表导入"
+                                 Visibility="{Binding IsS7ProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
                     </ui:AppBarButton.Icon>
@@ -183,7 +185,8 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="从TIA变量表导入"
-                              Command="{Binding ImprotFromTiaVarTableCommand}">
+                              Command="{Binding ImprotFromTiaVarTableCommand}"
+                              Visibility="{Binding IsS7ProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
                         </MenuItem.Icon>
