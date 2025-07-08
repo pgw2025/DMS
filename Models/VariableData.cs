@@ -155,6 +155,11 @@ public partial class VariableData : ObservableObject
     public int VariableTableId { get; set; }
 
     /// <summary>
+    /// 关联的变量表实体。
+    /// </summary>
+    public VariableTable? VariableTable { get; set; }
+
+    /// <summary>
     /// 关联的MQTT配置列表。
     /// </summary>
     public List<Mqtt> Mqtts { get; set; }

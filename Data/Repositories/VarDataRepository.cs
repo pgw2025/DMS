@@ -46,6 +46,8 @@ public class VarDataRepository
         using (var _db = DbContext.GetInstance())
         {
             var result = await _db.Queryable<DbVariableData>()
+                                  .Includes(d => d.VariableTable)
+                                  .Includes(d => d.VariableTable.Device)
                                   .ToListAsync();
             stopwatch.Stop();
             NlogHelper.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");

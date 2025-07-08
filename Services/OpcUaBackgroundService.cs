@@ -151,8 +151,13 @@ namespace PMSWPF.Services
             {
                 if (_opcUaVariables.TryGetValue(id, out var variable))
                 {
-                    // 断开与该变量相关的 OPC UA 会话。
-                    await DisconnectOpcUaSession(variable.OpcUaEndpointUrl);
+                    // 获取关联的设备信息
+                    var device = await _dataServices.GetDeviceByIdAsync(variable.VariableTable.DeviceId??0);
+                    if (device != null)
+                    {
+                        // 断开与该变量相关的 OPC UA 会话。
+                        await DisconnectOpcUaSession(device.OpcUaEndpointUrl);
+                    }
                     _opcUaVariables.Remove(id);
                 }
             }
@@ -160,20 +165,28 @@ namespace PMSWPF.Services
             // 处理新增或更新的变量。
             foreach (var variable in opcUaVariables)
             {
+                // 获取关联的设备信息
+                var device = await _dataServices.GetDeviceByIdAsync(variable.VariableTable.DeviceId??0);
+                if (device == null)
+                {
+                    NlogHelper.Warn($"变量 '{variable.Name}' (ID: {variable.Id}) 关联的设备不存在。");
+                    continue;
+                }
+
                 if (!_opcUaVariables.ContainsKey(variable.Id))
                 {
                     // 如果是新变量，则添加到字典并建立连接和订阅。
                     _opcUaVariables.Add(variable.Id, variable);
-                    await ConnectAndSubscribeOpcUa(variable);
+                    await ConnectAndSubscribeOpcUa(variable, device);
                 }
                 else
                 {
                     // 如果变量已存在，则更新其信息。
                     _opcUaVariables[variable.Id] = variable;
                     // 如果终结点 URL 对应的会话已断开，则尝试重新连接。
-                    if (_opcUaSessions.ContainsKey(variable.OpcUaEndpointUrl) && !_opcUaSessions[variable.OpcUaEndpointUrl].Connected)
+                    if (_opcUaSessions.ContainsKey(device.OpcUaEndpointUrl) && !_opcUaSessions[device.OpcUaEndpointUrl].Connected)
                     {
-                        await ConnectAndSubscribeOpcUa(variable);
+                        await ConnectAndSubscribeOpcUa(variable, device);
                     }
                 }
             }
@@ -183,10 +196,11 @@ namespace PMSWPF.Services
         /// 连接到 OPC UA 服务器并订阅指定的变量。
         /// </summary>
         /// <param name="variable">要订阅的变量信息。</param>
-        private async Task ConnectAndSubscribeOpcUa(VariableData variable)
+        /// <param name="device">变量所属的设备信息。</param>
+        private async Task ConnectAndSubscribeOpcUa(VariableData variable, Device device)
         {
             NlogHelper.Info($"正在为变量 '{variable.Name}' 连接和订阅 OPC UA 服务器...");
-            if (string.IsNullOrEmpty(variable.OpcUaEndpointUrl) || string.IsNullOrEmpty(variable.OpcUaNodeId))
+            if (string.IsNullOrEmpty(device.OpcUaEndpointUrl) || string.IsNullOrEmpty(variable.OpcUaNodeId))
             {
                 NlogHelper.Warn($"OPC UA variable {variable.Name} has invalid EndpointUrl or NodeId.");
                 return;
@@ -194,9 +208,9 @@ namespace PMSWPF.Services
 
             Session session = null;
             // 检查是否已存在到该终结点的活动会话。
-            if (_opcUaSessions.TryGetValue(variable.OpcUaEndpointUrl, out session) && session.Connected)
+            if (_opcUaSessions.TryGetValue(device.OpcUaEndpointUrl, out session) && session.Connected)
             {
-                NlogHelper.Info($"Already connected to OPC UA endpoint: {variable.OpcUaEndpointUrl}");
+                NlogHelper.Info($"Already connected to OPC UA endpoint: {device.OpcUaEndpointUrl}");
             }
             else
             {
@@ -221,12 +235,12 @@ namespace PMSWPF.Services
                     }
 
                     // 4. 发现服务器提供的终结点。
-                    DiscoveryClient discoveryClient = DiscoveryClient.Create(new Uri(variable.OpcUaEndpointUrl));
-                    EndpointDescriptionCollection endpoints = discoveryClient.GetEndpoints(new Opc.Ua.StringCollection { variable.OpcUaEndpointUrl });
+                    DiscoveryClient discoveryClient = DiscoveryClient.Create(new Uri(device.OpcUaEndpointUrl));
+                    EndpointDescriptionCollection endpoints = discoveryClient.GetEndpoints(new Opc.Ua.StringCollection { device.OpcUaEndpointUrl });
                     
                     // 简化处理：选择第一个无安全策略的终结点。在生产环境中应选择合适的安全策略。
                     // ConfiguredEndpoint configuredEndpoint = new ConfiguredEndpoint(null, endpoints.First(e => e.SecurityMode == MessageSecurityMode.None), config);
-                    EndpointDescription selectedEndpoint = CoreClientUtils.SelectEndpoint(application.ApplicationConfiguration, variable.OpcUaEndpointUrl, false);
+                    EndpointDescription selectedEndpoint = CoreClientUtils.SelectEndpoint(application.ApplicationConfiguration, device.OpcUaEndpointUrl, false);
                     EndpointConfiguration endpointConfiguration = EndpointConfiguration.Create(application.ApplicationConfiguration);
                     ConfiguredEndpoint configuredEndpoint = new ConfiguredEndpoint(null, selectedEndpoint, endpointConfiguration);
 
@@ -240,9 +254,9 @@ namespace PMSWPF.Services
                         new UserIdentity(new AnonymousIdentityToken()), // 使用匿名用户身份
                         null);
 
-                    _opcUaSessions[variable.OpcUaEndpointUrl] = session;
-                    NlogHelper.Info($"Connected to OPC UA server: {variable.OpcUaEndpointUrl}");
-                    NotificationHelper.ShowSuccess($"已连接到 OPC UA 服务器: {variable.OpcUaEndpointUrl}");
+                    _opcUaSessions[device.OpcUaEndpointUrl] = session;
+                    NlogHelper.Info($"Connected to OPC UA server: {device.OpcUaEndpointUrl}");
+                    NotificationHelper.ShowSuccess($"已连接到 OPC UA 服务器: {device.OpcUaEndpointUrl}");
 
                     // 6. 创建订阅。
                     Subscription subscription = new Subscription(session.DefaultSubscription);
@@ -250,7 +264,7 @@ namespace PMSWPF.Services
                     session.AddSubscription(subscription);
                     subscription.Create();
 
-                    _opcUaSubscriptions[variable.OpcUaEndpointUrl] = subscription;
+                    _opcUaSubscriptions[device.OpcUaEndpointUrl] = subscription;
 
                     // 7. 创建监控项并添加到订阅中。
                     MonitoredItem monitoredItem = new MonitoredItem(subscription.DefaultItem);
@@ -268,8 +282,8 @@ namespace PMSWPF.Services
                 }
                 catch (Exception ex)
                 {
-                    NlogHelper.Error($"连接或订阅 OPC UA 服务器失败: {variable.OpcUaEndpointUrl} - {ex.Message}", ex);
-                    NotificationHelper.ShowError($"连接或订阅 OPC UA 服务器失败: {variable.OpcUaEndpointUrl} - {ex.Message}", ex);
+                    NlogHelper.Error($"连接或订阅 OPC UA 服务器失败: {device.OpcUaEndpointUrl} - {ex.Message}", ex);
+                    NotificationHelper.ShowError($"连接或订阅 OPC UA 服务器失败: {device.OpcUaEndpointUrl} - {ex.Message}", ex);
                 }
             }
         }

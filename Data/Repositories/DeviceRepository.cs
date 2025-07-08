@@ -89,7 +89,7 @@ public class DeviceRepository
     /// </summary>
     /// <param name="id">设备ID。</param>
     /// <returns>对应的DbDevice对象。</returns>
-    public async Task<DbDevice> GetById(int id)
+    public async Task<Device> GetById(int id)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -99,7 +99,7 @@ public class DeviceRepository
                                  .FirstAsync(p => p.Id == id);
             stopwatch.Stop();
             NlogHelper.Info($"根据ID '{id}' 获取设备耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result;
+            return result.CopyTo<Device>();
         }
     }
 
@@ -252,4 +252,6 @@ public class DeviceRepository
         await _menuRepository.AddVarTableMenu(addDevice, addDeviceMenuId, db);
         return addDevice.CopyTo<Device>();
     }
+
+ 
 }

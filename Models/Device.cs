@@ -89,6 +89,12 @@ public partial class Device : ObservableObject
     public ProtocolType ProtocolType { get; set; }
 
     /// <summary>
+    /// OPC UA Endpoint URL。
+    /// </summary>
+    [ObservableProperty]
+    private string? opcUaEndpointUrl;
+
+    /// <summary>
     /// 设备关联的变量表列表。
     /// </summary>
     public List<VariableTable>? VariableTables { get; set; }

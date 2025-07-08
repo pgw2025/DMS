@@ -194,6 +194,16 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     }
 
     /// <summary>
+    /// 异步根据ID获取设备数据。
+    /// </summary>
+    /// <param name="id">设备ID。</param>
+    /// <returns>设备对象，如果不存在则为null。</returns>
+    public async Task<Device> GetDeviceByIdAsync(int id)
+    {
+        return await _deviceRepository.GetById(id);
+    }
+
+    /// <summary>
     /// 异步加载变量数据。
     /// </summary>
     /// <returns>表示异步操作的任务。</returns>

@@ -80,6 +80,12 @@ public class DbDevice
     public ProtocolType ProtocolType { get; set; }
 
     /// <summary>
+    /// OPC UA Endpoint URL。
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string? OpcUaEndpointUrl { get; set; }
+
+    /// <summary>
     /// 设备关联的变量表列表。
     /// </summary>
     [Navigate(NavigateType.OneToMany, nameof(DbVariableTable.DeviceId))]
