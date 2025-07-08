@@ -77,6 +77,10 @@ public partial class App : Application
         {
             Host.Services.GetRequiredService<MqttBackgroundService>().StartService();
         }
+        if (connectionSettings.EnableOpcUaService)
+        {
+            Host.Services.GetRequiredService<OpcUaBackgroundService>().StartService();
+        }
     }
 
     protected override async void OnExit(ExitEventArgs e)
@@ -84,6 +88,7 @@ public partial class App : Application
         // 停止服务
         Host.Services.GetRequiredService<S7BackgroundService>().StopService();
         Host.Services.GetRequiredService<MqttBackgroundService>().StopService();
+        await Host.Services.GetRequiredService<OpcUaBackgroundService>().StopService();
 
         await Host.StopAsync();
         Host.Dispose();
@@ -99,6 +104,7 @@ public partial class App : Application
         services.AddSingleton<GrowlNotificationService>();
         services.AddSingleton<S7BackgroundService>();
         services.AddSingleton<MqttBackgroundService>();
+        services.AddSingleton<OpcUaBackgroundService>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<DevicesViewModel>();

@@ -32,6 +32,18 @@ public class DbVariableData
     public string S7Address { get; set; } = String.Empty;
 
     /// <summary>
+    /// OPC UA Endpoint URL。
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string? OpcUaEndpointUrl { get; set; }
+
+    /// <summary>
+    /// OPC UA Node ID。
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string? OpcUaNodeId { get; set; }
+
+    /// <summary>
     /// 变量描述。
     /// </summary>
     [SugarColumn(IsNullable = true)]

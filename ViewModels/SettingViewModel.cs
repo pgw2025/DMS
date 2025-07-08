@@ -16,13 +16,15 @@ public partial class SettingViewModel : ViewModelBase
     private ConnectionSettings _connectionSettings;
     private readonly S7BackgroundService _s7BackgroundService;
     private readonly MqttBackgroundService _mqttBackgroundService;
+    private readonly OpcUaBackgroundService _opcUaBackgroundService;
 
-    public SettingViewModel(S7BackgroundService s7BackgroundService, MqttBackgroundService mqttBackgroundService)
+    public SettingViewModel(S7BackgroundService s7BackgroundService, MqttBackgroundService mqttBackgroundService, OpcUaBackgroundService opcUaBackgroundService)
     {
         _connectionSettings = ConnectionSettings.Load();
         AvailableDbTypes = Enum.GetNames(typeof(SqlSugar.DbType)).ToList();
         _s7BackgroundService = s7BackgroundService;
         _mqttBackgroundService = mqttBackgroundService;
+        _opcUaBackgroundService = opcUaBackgroundService;
     }
 
     public List<string> AvailableDbTypes { get; set; }
@@ -150,6 +152,28 @@ public partial class SettingViewModel : ViewModelBase
                 else
                 {
                     _mqttBackgroundService.StopService();
+                }
+            }
+        }
+    }
+
+    public bool EnableOpcUaService
+    {
+        get => _connectionSettings.EnableOpcUaService;
+        set
+        {
+            if (_connectionSettings.EnableOpcUaService != value)
+            {
+                _connectionSettings.EnableOpcUaService = value;
+                OnPropertyChanged();
+                _connectionSettings.Save();
+                if (value)
+                {
+                    _opcUaBackgroundService.StartService();
+                }
+                else
+                {
+                    _opcUaBackgroundService.StopService();
                 }
             }
         }

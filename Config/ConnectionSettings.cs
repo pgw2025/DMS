@@ -14,6 +14,7 @@ namespace PMSWPF.Config
         public string Database { get; set; } = "pmswpf";
         public bool EnableS7Service { get; set; } = true;
         public bool EnableMqttService { get; set; } = true;
+        public bool EnableOpcUaService { get; set; } = true;
 
         private static readonly string SettingsFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "connectionSettings.json");
 

@@ -124,6 +124,11 @@
                                  IsClickEnabled="True">
                     <ui:ToggleSwitch IsOn="{Binding EnableMqttService, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:SettingsCard>
+                <ui:SettingsCard Header="是否启动OpcUa后台服务"
+                                 Description="关闭后，将不再启动OpcUa服务"
+                                 IsClickEnabled="True">
+                    <ui:ToggleSwitch IsOn="{Binding EnableOpcUaService, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
             </ui:SettingsExpander.Items>
         </ui:SettingsExpander>
 

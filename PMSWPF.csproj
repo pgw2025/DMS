@@ -26,6 +26,7 @@
         <PackageReference Include="NLog" Version="6.0.0" />
         <PackageReference Include="NLog.Database" Version="6.0.0" />
         <PackageReference Include="NPOI" Version="2.7.4" />
+        <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.376.235" />
         <PackageReference Include="S7netplus" Version="0.20.0" />
         <PackageReference Include="SqlSugarCore" Version="5.1.4.197" />
         <PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178" />

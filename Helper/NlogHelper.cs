@@ -70,7 +70,7 @@ public static class NlogHelper
     /// <summary>
     /// 定义节流的时间窗口（单位：秒）。
     /// </summary>
-    private const int ThrottleTimeSeconds = 10;
+    private const int ThrottleTimeSeconds = 30;
 
     /// <summary>
     /// 内部核心日志记录方法，包含了节流逻辑。

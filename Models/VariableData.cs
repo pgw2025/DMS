@@ -29,6 +29,16 @@ public partial class VariableData : ObservableObject
     /// </summary>
     public string S7Address { get; set; }
 
+    /// <summary>
+    /// OPC UA Endpoint URL。
+    /// </summary>
+    public string? OpcUaEndpointUrl { get; set; }
+
+    /// <summary>
+    /// OPC UA Node ID。
+    /// </summary>
+    public string? OpcUaNodeId { get; set; }
+
 
     /// <summary>
     /// 变量描述。
