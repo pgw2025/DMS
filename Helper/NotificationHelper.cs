@@ -99,7 +99,7 @@ public static class NotificationHelper
     /// <param name="throttle">是否启用通知节流。</param>
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowMessage(string msg, NotificationType notificationType = NotificationType.Info, bool throttle = false,
+    public static void ShowMessage(string msg, NotificationType notificationType = NotificationType.Info, bool throttle = true,
                                    [CallerFilePath] string callerFilePath = "",
                                    [CallerLineNumber] int callerLineNumber = 0)
     {
@@ -115,7 +115,7 @@ public static class NotificationHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowError(string msg, Exception exception = null, bool throttle = false,
+    public static void ShowError(string msg, Exception exception = null, bool throttle = true,
                                  [CallerFilePath] string callerFilePath = "",
                                  [CallerMemberName] string callerMember = "",
                                  [CallerLineNumber] int callerLineNumber = 0)
@@ -131,7 +131,7 @@ public static class NotificationHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowSuccess(string msg, bool throttle = false,
+    public static void ShowSuccess(string msg, bool throttle = true,
                                    [CallerFilePath] string callerFilePath = "",
                                    [CallerMemberName] string callerMember = "",
                                    [CallerLineNumber] int callerLineNumber = 0)
@@ -147,7 +147,7 @@ public static class NotificationHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowInfo(string msg, bool throttle = false,
+    public static void ShowInfo(string msg, bool throttle = true,
                                 [CallerFilePath] string callerFilePath = "",
                                 [CallerMemberName] string callerMember = "",
                                 [CallerLineNumber] int callerLineNumber = 0)

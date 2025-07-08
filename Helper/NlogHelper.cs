@@ -174,7 +174,7 @@ public static class NlogHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void Error(string msg, Exception exception = null, bool throttle = false,
+    public static void Error(string msg, Exception exception = null, bool throttle = true,
                              [CallerFilePath] string callerFilePath = "",
                              [CallerMemberName] string callerMember = "",
                              [CallerLineNumber] int callerLineNumber = 0)
@@ -190,7 +190,7 @@ public static class NlogHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void Info(string msg, bool throttle = false,
+    public static void Info(string msg, bool throttle = true,
                             [CallerFilePath] string callerFilePath = "",
                             [CallerMemberName] string callerMember = "",
                             [CallerLineNumber] int callerLineNumber = 0)
@@ -206,7 +206,7 @@ public static class NlogHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void Warn(string msg, bool throttle = false,
+    public static void Warn(string msg, bool throttle = true,
                             [CallerFilePath] string callerFilePath = "",
                             [CallerMemberName] string callerMember = "",
                             [CallerLineNumber] int callerLineNumber = 0)
@@ -222,7 +222,7 @@ public static class NlogHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void Trace(string msg, bool throttle = false,
+    public static void Trace(string msg, bool throttle = true,
                              [CallerFilePath] string callerFilePath = "",
                              [CallerMemberName] string callerMember = "",
                              [CallerLineNumber] int callerLineNumber = 0)
