@@ -141,34 +141,41 @@ namespace PMSWPF.Services
         private async Task LoadMqttConfigurations()
         {
             // 从数据服务获取所有MQTT配置。
-            var mqtts = await _dataServices.GetMqttsAsync();
-            foreach (var mqtt in mqtts)
+            var allMqtts = await _dataServices.GetMqttsAsync();
+            var activeMqtts = allMqtts.Where(m => m.IsActive).ToList();
+            var activeMqttIds = activeMqtts.Select(m => m.Id).ToHashSet();
+
+            // 断开并移除不再活跃或已删除的MQTT客户端。
+            var clientsToDisconnect = _mqttClients.Keys.Except(activeMqttIds).ToList();
+            foreach (var id in clientsToDisconnect)
             {
-                // 如果客户端字典中不包含当前MQTT配置的客户端，则尝试连接。
+                if (_mqttClients.TryGetValue(id, out var client))
+                {
+                    if (client.IsConnected)
+                    {
+                        await client.DisconnectAsync();
+                        // 更新模型中的连接状态
+                        if (_mqttConfigurations.TryGetValue(id, out var mqttConfig))
+                        {
+                            mqttConfig.IsConnected = false;
+                        }
+                    }
+                    _mqttClients.Remove(id);
+                    NlogHelper.Info($"Disconnected and removed MQTT client for ID: {id} (no longer active or removed).");
+                }
+                _mqttConfigurations.Remove(id);
+                _mqttVariableData.Remove(id);
+            }
+
+            // 连接或更新活跃的客户端。
+            foreach (var mqtt in activeMqtts)
+            {
                 if (!_mqttClients.ContainsKey(mqtt.Id))
                 {
                     await ConnectMqttClient(mqtt);
                 }
-                // 更新或添加MQTT配置到字典。
+                // 始终更新或添加MQTT配置到字典。
                 _mqttConfigurations[mqtt.Id] = mqtt;
-            }
-
-            // 断开并移除不再配置中的MQTT客户端。
-            var removedMqttIds = _mqttClients.Keys.Except(mqtts.Select(m => m.Id)).ToList();
-            foreach (var id in removedMqttIds)
-            {
-                if (_mqttClients.ContainsKey(id))
-                {
-                    var client = _mqttClients[id];
-                    if (client.IsConnected)
-                    {
-                        await client.DisconnectAsync();
-                    }
-                    _mqttClients.Remove(id);
-                    NlogHelper.Info($"Disconnected and removed MQTT client for ID: {id}");
-                }
-                _mqttConfigurations.Remove(id);
-                _mqttVariableData.Remove(id);
             }
         }
 
@@ -197,6 +204,7 @@ namespace PMSWPF.Services
                 {
                     NlogHelper.Info($"Connected to MQTT broker: {mqtt.Name}");
                     NotificationHelper.ShowSuccess($"已连接到MQTT服务器: {mqtt.Name}");
+                    mqtt.IsConnected = true;
                 });
 
                 // 设置断开连接事件处理程序。
@@ -204,6 +212,7 @@ namespace PMSWPF.Services
                 {
                     NlogHelper.Warn($"Disconnected from MQTT broker: {mqtt.Name}. Reason: {e.Reason}");
                     NotificationHelper.ShowInfo($"与MQTT服务器断开连接: {mqtt.Name}");
+                    mqtt.IsConnected = false;
                     // 尝试重新连接。
                     await Task.Delay(TimeSpan.FromSeconds(5)); // 等待5秒后重连
                     try

@@ -12,12 +12,21 @@
              d:DesignWidth="300">
     <UserControl.Resources>
         <DataTemplate x:Key="MqttItemTemplate">
-            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-                    BorderBrush="{DynamicResource SystemControlHighlightBaseMediumLowBrush}"
+            <Border BorderBrush="{DynamicResource SystemControlHighlightBaseMediumLowBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Margin="5"
                     Padding="15">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                <Setter Property="Background" Value="LightGreen" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <Border.Effect>
                     <DropShadowEffect ShadowDepth="1"
                                       Color="Black"

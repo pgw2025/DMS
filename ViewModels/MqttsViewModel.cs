@@ -20,8 +20,32 @@ public partial class MqttsViewModel : ViewModelBase
     private readonly ILogger<MqttsViewModel> _logger;
     private readonly NavgatorServices _navgatorServices;
 
-    [ObservableProperty]
     private ObservableCollection<Mqtt> _mqtts;
+
+    public ObservableCollection<Mqtt> Mqtts
+    {
+        get => _mqtts;
+        set
+        {
+            if (_mqtts != null)
+            {
+                foreach (var mqtt in _mqtts)
+                {
+                    mqtt.PropertyChanged -= Mqtt_PropertyChanged;
+                }
+            }
+
+            SetProperty(ref _mqtts, value);
+
+            if (_mqtts != null)
+            {
+                foreach (var mqtt in _mqtts)
+                {
+                    mqtt.PropertyChanged += Mqtt_PropertyChanged;
+                }
+            }
+        }
+    }
 
     [ObservableProperty]
     private Mqtt _selectedMqtt;
@@ -50,6 +74,26 @@ public partial class MqttsViewModel : ViewModelBase
         {
             Mqtts = new ObservableCollection<Mqtt>(mqtts);
         };
+    }
+
+    private async void Mqtt_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Mqtt.IsActive))
+        {
+            if (sender is Mqtt mqtt)
+            {
+                try
+                {
+                    await _mqttRepository.Edit(mqtt);
+                    NotificationHelper.ShowSuccess($"MQTT: {mqtt.Name} 的启用状态已更新。");
+                    MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
+                }
+                catch (Exception ex)
+                {
+                    NotificationHelper.ShowError($"更新MQTT启用状态失败: {mqtt.Name} - {ex.Message}", ex);
+                }
+            }
+        }
     }
 
     [RelayCommand]

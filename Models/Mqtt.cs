@@ -1,11 +1,12 @@
-﻿using PMSWPF.Enums;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using PMSWPF.Enums;
 
 namespace PMSWPF.Models;
 
 /// <summary>
 /// 表示MQTT配置信息。
 /// </summary>
-public class Mqtt
+public partial class Mqtt : ObservableObject
 {
     /// <summary>
     /// MQTT客户端ID。
@@ -30,7 +31,8 @@ public class Mqtt
     /// <summary>
     /// 是否启用此MQTT配置。
     /// </summary>
-    public bool IsActive { get; set; }
+    [ObservableProperty]
+    private bool _isActive;
 
     /// <summary>
     /// 是否设置为默认MQTT客户端。
@@ -81,4 +83,10 @@ public class Mqtt
     /// 关联的变量数据列表。
     /// </summary>
     public List<VariableData>? VariableDatas { get; set; }
+
+    /// <summary>
+    /// 是否连接。
+    /// </summary>
+    [ObservableProperty]
+    private bool _isConnected;
 }
