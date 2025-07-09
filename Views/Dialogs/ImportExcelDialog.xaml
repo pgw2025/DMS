@@ -44,10 +44,25 @@
                   ItemsSource="{Binding VariableData}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False">
+            <DataGrid.Style>
+                <Style BasedOn="{StaticResource {x:Type DataGrid}}"
+                       TargetType="DataGrid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding VariableData.Count}"
+                                     Value="0">
+                            <Setter Property="Visibility"
+                                    Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Style>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="名称" Binding="{Binding Name}" />
-                <DataGridTextColumn Header="数据类型" Binding="{Binding DataType}" />
-                <DataGridTextColumn Header="S7地址" Binding="{Binding S7Address}" />
+                <DataGridTextColumn Header="名称"
+                                    Binding="{Binding Name}" />
+                <DataGridTextColumn Header="数据类型"
+                                    Binding="{Binding DataType}" />
+                <DataGridTextColumn Header="S7地址"
+                                    Binding="{Binding S7Address}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
