@@ -22,5 +22,5 @@ public interface IDialogService
     ContentDialog ShowProcessingDialog(string title, string message);
     Task<PollLevelType?> ShowPollLevelDialog(PollLevelType pollLevelType);
     Task<Mqtt?> ShowMqttSelectionDialog();
-    Task<List<VariableData>> ShowOpcUaImportDialog();
+    Task<List<VariableData>> ShowOpcUaImportDialog(string endpointUrl);
 }

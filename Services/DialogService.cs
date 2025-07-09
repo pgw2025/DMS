@@ -180,9 +180,10 @@ public class DialogService :IDialogService
         return result == ContentDialogResult.Primary ? vm.SelectedMqtt : null;
     }
 
-    public async Task<List<VariableData>> ShowOpcUaImportDialog()
+    public async Task<List<VariableData>> ShowOpcUaImportDialog(string endpointUrl)
     {
        var vm= new OpcUaImportDialogViewModel();
+       vm.EndpointUrl = endpointUrl;
         var dialog = new OpcUaImportDialog(vm);
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary ? vm.GetSelectedVariables().ToList() : null;

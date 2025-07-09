@@ -37,6 +37,8 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
     {
         OpcUaNodes = new ObservableCollection<OpcUaNode>();
         SelectedNodeVariables = new ObservableCollection<VariableData>();
+        // Automatically connect when the ViewModel is created
+        _ = Connect().ConfigureAwait(false);
     }
 
     [RelayCommand]

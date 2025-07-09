@@ -232,7 +232,13 @@ partial class VariableTableViewModel : ViewModelBase
     {
         try
         {
-            var importedVariables = await _dialogService.ShowOpcUaImportDialog();
+            string opcUaEndpointUrl = VariableTable?.Device?.OpcUaEndpointUrl;
+            if (string.IsNullOrEmpty(opcUaEndpointUrl))
+            {
+                NotificationHelper.ShowError("OPC UA Endpoint URL 未设置。请在设备详情中配置。");
+                return;
+            }
+            var importedVariables = await _dialogService.ShowOpcUaImportDialog(opcUaEndpointUrl);
             if (importedVariables == null || !importedVariables.Any())
             {
                 return; // 用户取消或没有选择任何变量
