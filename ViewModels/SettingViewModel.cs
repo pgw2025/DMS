@@ -179,6 +179,20 @@ public partial class SettingViewModel : ViewModelBase
         }
     }
 
+    public bool MinimizeToTrayOnClose
+    {
+        get => _connectionSettings.MinimizeToTrayOnClose;
+        set
+        {
+            if (_connectionSettings.MinimizeToTrayOnClose != value)
+            {
+                _connectionSettings.MinimizeToTrayOnClose = value;
+                OnPropertyChanged(nameof(MinimizeToTrayOnClose));
+                _connectionSettings.Save();
+            }
+        }
+    }
+
     [RelayCommand]
     private async Task TestConnection()
     {

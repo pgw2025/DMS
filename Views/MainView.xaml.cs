@@ -33,9 +33,17 @@ public partial class MainView : Window
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        // Hide the window instead of closing it
-        e.Cancel = true;
-        Hide();
+        var settings = Config.ConnectionSettings.Load();
+        if (settings.MinimizeToTrayOnClose)
+        {
+            // Hide the window instead of closing it
+            e.Cancel = true;
+            Hide();
+        }
+        else
+        {
+            Application.Current.Shutdown();
+        }
     }
 
     public void ShowApplication()

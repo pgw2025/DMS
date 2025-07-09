@@ -9,6 +9,19 @@
              d:DesignHeight="450"
              d:DesignWidth="800">
     <StackPanel>
+        <ui:SettingsExpander Header="通用设置"
+                             Description="通用程序行为设置">
+            <ui:SettingsExpander.HeaderIcon>
+                <ui:FontIcon Glyph="&#xE713;" />
+            </ui:SettingsExpander.HeaderIcon>
+            <ui:SettingsExpander.Items>
+                <ui:SettingsCard Header="点击关闭按钮时最小化到通知栏"
+                                 Description="开启后，点击主窗口的关闭按钮会将程序最小化到系统通知栏，而不是直接退出。"
+                                 IsClickEnabled="True">
+                    <ui:ToggleSwitch IsOn="{Binding MinimizeToTrayOnClose, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+            </ui:SettingsExpander.Items>
+        </ui:SettingsExpander>
 
         <ui:SettingsExpander x:Name="dbSettingCard"
                              Header="设置数据库"
@@ -131,6 +144,8 @@
                 </ui:SettingsCard>
             </ui:SettingsExpander.Items>
         </ui:SettingsExpander>
+
+       
 
         <ui:SettingsExpander Header="SettingsExpander"
                              Description="The SettingsExpander has the same properties as a SettingsCard">

@@ -15,6 +15,7 @@ namespace PMSWPF.Config
         public bool EnableS7Service { get; set; } = true;
         public bool EnableMqttService { get; set; } = true;
         public bool EnableOpcUaService { get; set; } = true;
+        public bool MinimizeToTrayOnClose { get; set; } = true;
 
         private static readonly string SettingsFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "connectionSettings.json");
 
