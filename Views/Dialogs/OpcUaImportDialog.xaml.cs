@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using iNKORE.UI.WPF.Modern.Controls;
 using PMSWPF.Models;
@@ -39,6 +40,19 @@ public partial class OpcUaImportDialog : ContentDialog
         if (e.NewValue is OpcUaNode selectedNode)
         {
             await ViewModel.LoadNodeVariables(selectedNode);
+        }
+    }
+
+
+    private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        if (args.AddedItems!=null && args.AddedItems.Count>0)
+        {
+            foreach (var item in args.AddedItems)
+            {
+                ViewModel.SelectedVariables.Add((VariableData)item);
+            }
+            
         }
     }
 }

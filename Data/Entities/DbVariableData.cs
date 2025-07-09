@@ -24,6 +24,7 @@ public class DbVariableData
     /// <summary>
     /// 节点ID，用于标识变量在设备或系统中的唯一路径。
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string NodeId { get; set; } = String.Empty;
     
     /// <summary>

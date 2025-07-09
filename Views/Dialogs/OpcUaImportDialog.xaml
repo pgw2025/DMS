@@ -25,14 +25,26 @@
         </Grid.ColumnDefinitions>
 
         <!-- 连接设置 -->
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Endpoint URL:" VerticalAlignment="Center" Margin="0,0,5,0" />
-            <TextBox Text="{Binding EndpointUrl, UpdateSourceTrigger=PropertyChanged}" Width="300" Margin="0,0,10,0" />
-            <Button Content="连接" Command="{Binding ConnectCommand}" />
+        <StackPanel Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,10">
+            <TextBlock Text="Endpoint URL:"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0" />
+            <TextBox Text="{Binding EndpointUrl, UpdateSourceTrigger=PropertyChanged}"
+                     Width="300"
+                     Margin="0,0,10,0" />
+            <Button Content="连接"
+                    Command="{Binding ConnectCommand}" />
         </StackPanel>
 
         <!-- 节点树 -->
-        <TreeView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding OpcUaNodes}" Margin="0,0,10,0" SelectedItemChanged="TreeView_SelectedItemChanged">
+        <TreeView Grid.Row="1"
+                  Grid.Column="0"
+                  ItemsSource="{Binding OpcUaNodes}"
+                  Margin="0,0,10,0"
+                  SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                     <TextBlock Text="{Binding DisplayName}" />
@@ -41,23 +53,32 @@
         </TreeView>
 
         <!-- 变量列表 -->
-        <DataGrid Grid.Row="1" Grid.Column="1" ItemsSource="{Binding SelectedNodeVariables}" AutoGenerateColumns="False" IsReadOnly="True">
+        <DataGrid Grid.Row="1"
+                  Grid.Column="1"
+                  ItemsSource="{Binding SelectedNodeVariables}"
+                  SelectionChanged="Selector_OnSelectionChanged"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding DataContext.SelectAllVariables, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                            <CheckBox
+                                IsChecked="{Binding DataContext.SelectAllVariables, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.HeaderTemplate>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" />
+                            <CheckBox IsChecked="{Binding IsSelect, UpdateSourceTrigger=PropertyChanged}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="名称" Binding="{Binding DisplayName}" />
-                <DataGridTextColumn Header="节点ID" Binding="{Binding NodeId}" />
-                <DataGridTextColumn Header="数据类型" Binding="{Binding DataType}" />
+                <DataGridTextColumn Header="名称"
+                                    Binding="{Binding  Name}" />
+                <DataGridTextColumn Header="节点ID"
+                                    Binding="{Binding OpcUaNodeId}" />
+                <DataGridTextColumn Header="数据类型"
+                                    Binding="{Binding DataType}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

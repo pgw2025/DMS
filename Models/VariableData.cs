@@ -79,6 +79,12 @@ public partial class VariableData : ObservableObject
     public bool IsActive { get; set; }
 
     /// <summary>
+    /// 指示变量是否被选中
+    /// </summary>
+    [ObservableProperty]
+    public bool isSelect;
+
+    /// <summary>
     /// 指示是否需要保存变量数据。
     /// </summary>
     public bool IsSave { get; set; }

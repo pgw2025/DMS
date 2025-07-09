@@ -23,6 +23,8 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<VariableData> _selectedNodeVariables;
 
+    public List<VariableData> SelectedVariables { get; set; }=new List<VariableData>();
+
     [ObservableProperty]
     private bool _selectAllVariables;
 
@@ -55,7 +57,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
             };
 
             ApplicationConfiguration config = await application.LoadApplicationConfiguration(false);
-            
+
             // var config = new ApplicationConfiguration()
             //              {
             //                  ApplicationName = application.ApplicationName,
@@ -127,33 +129,60 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
                 null);
                 */
 
-            
-            
+
             // 1. 创建应用程序配置
             var application = new ApplicationInstance
-            {
-                ApplicationName = "OpcUADemoClient",
-                ApplicationType = ApplicationType.Client,
-                ConfigSectionName = "Opc.Ua.Client"
-            };
+                              {
+                                  ApplicationName = "OpcUADemoClient",
+                                  ApplicationType = ApplicationType.Client,
+                                  ConfigSectionName = "Opc.Ua.Client"
+                              };
 
             var config = new ApplicationConfiguration()
-            {
-                ApplicationName = application.ApplicationName,
-                ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:OpcUADemoClient",
-                ApplicationType = application.ApplicationType,
-                SecurityConfiguration = new SecurityConfiguration
-                {
-                    ApplicationCertificate = new CertificateIdentifier { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/MachineDefault", SubjectName = application.ApplicationName },
-                    TrustedIssuerCertificates = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Certificate Authorities" },
-                    TrustedPeerCertificates = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Applications" },
-                    RejectedCertificateStore = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/RejectedCertificates" },
-                    AutoAcceptUntrustedCertificates = true // 自动接受不受信任的证书 (仅用于测试)
-                },
-                TransportQuotas = new TransportQuotas { OperationTimeout = 15000 },
-                ClientConfiguration = new ClientConfiguration { DefaultSessionTimeout = 60000 },
-                TraceConfiguration = new TraceConfiguration { OutputFilePath = "./Logs/OpcUaClient.log", DeleteOnLoad = true, TraceMasks = Utils.TraceMasks.Error | Utils.TraceMasks.Security }
-            };
+                         {
+                             ApplicationName = application.ApplicationName,
+                             ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:OpcUADemoClient",
+                             ApplicationType = application.ApplicationType,
+                             SecurityConfiguration = new SecurityConfiguration
+                                                     {
+                                                         ApplicationCertificate = new CertificateIdentifier
+                                                             {
+                                                                 StoreType = "Directory",
+                                                                 StorePath
+                                                                     = "%CommonApplicationData%/OPC Foundation/CertificateStores/MachineDefault",
+                                                                 SubjectName = application.ApplicationName
+                                                             },
+                                                         TrustedIssuerCertificates
+                                                             = new CertificateTrustList
+                                                               {
+                                                                   StoreType = "Directory",
+                                                                   StorePath
+                                                                       = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Certificate Authorities"
+                                                               },
+                                                         TrustedPeerCertificates
+                                                             = new CertificateTrustList
+                                                               {
+                                                                   StoreType = "Directory",
+                                                                   StorePath
+                                                                       = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Applications"
+                                                               },
+                                                         RejectedCertificateStore
+                                                             = new CertificateTrustList
+                                                               {
+                                                                   StoreType = "Directory",
+                                                                   StorePath
+                                                                       = "%CommonApplicationData%/OPC Foundation/CertificateStores/RejectedCertificates"
+                                                               },
+                                                         AutoAcceptUntrustedCertificates = true // 自动接受不受信任的证书 (仅用于测试)
+                                                     },
+                             TransportQuotas = new TransportQuotas { OperationTimeout = 15000 },
+                             ClientConfiguration = new ClientConfiguration { DefaultSessionTimeout = 60000 },
+                             TraceConfiguration = new TraceConfiguration
+                                                  {
+                                                      OutputFilePath = "./Logs/OpcUaClient.log", DeleteOnLoad = true,
+                                                      TraceMasks = Utils.TraceMasks.Error | Utils.TraceMasks.Security
+                                                  }
+                         };
             application.ApplicationConfiguration = config;
 
             // 验证并检查证书
@@ -162,7 +191,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
 
             // 2. 查找并选择端点 (将 useSecurity 设置为 false 以进行诊断)
             var selectedEndpoint = CoreClientUtils.SelectEndpoint(EndpointUrl, false);
-            
+
             _session = await Session.Create(
                 config,
                 new ConfiguredEndpoint(null, selectedEndpoint, EndpointConfiguration.Create(config)),
@@ -183,6 +212,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
             NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
         }
     }
+
     /// <summary>
     /// 处理来自服务器的数据变化通知
     /// </summary>
@@ -190,7 +220,8 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
     {
         foreach (var value in item.DequeueValues())
         {
-            Console.WriteLine($"[通知] {item.DisplayName}: {value.Value} | 时间戳: {value.SourceTimestamp.ToLocalTime()} | 状态: {value.StatusCode}");
+            Console.WriteLine(
+                $"[通知] {item.DisplayName}: {value.Value} | 时间戳: {value.SourceTimestamp.ToLocalTime()} | 状态: {value.StatusCode}");
         }
     }
 
@@ -309,13 +340,42 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
                 // 如果是变量，添加到右侧列表
                 if (nodeType == NodeType.Variable)
                 {
+                    // Read the DataType attribute
+                    ReadValueId readValueId = new ReadValueId
+                                              {
+                                                  NodeId = opcUaNode.NodeId,
+                                                  AttributeId = Attributes.DataType,
+                                                  // You might need to specify IndexRange and DataEncoding if dealing with arrays or specific encodings
+                                              };
+
+                    DataValueCollection results;
+                    DiagnosticInfoCollection diagnosticInfos;
+
+                    _session.Read(
+                        null, // RequestHeader
+                        0, // MaxAge
+                        TimestampsToReturn.Source,
+                        new ReadValueIdCollection { readValueId },
+                        out results,
+                        out diagnosticInfos
+                    );
+
+                    string dataType = string.Empty;
+
+                    if (results != null && results.Count > 0 && results[0].Value != null)
+                    {
+                        // Convert the NodeId of the DataType to a readable string
+                        NodeId dataTypeNodeId = (NodeId)results[0].Value;
+                        dataType = _session.NodeCache.GetDisplayText(dataTypeNodeId);
+                    }
+
                     SelectedNodeVariables.Add(new VariableData
                                               {
                                                   Name = opcUaNode.DisplayName,
-                                                  NodeId = opcUaNode.NodeId.ToString(),
                                                   OpcUaNodeId = opcUaNode.NodeId.ToString(),
                                                   ProtocolType = ProtocolType.OpcUA,
-                                                  IsActive = true // 默认选中
+                                                  IsActive = true, // Default selected
+                                                  DataType = dataType // Assign the read DataType
                                               });
                 }
             }
@@ -335,6 +395,6 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
 
     public ObservableCollection<VariableData> GetSelectedVariables()
     {
-        return new ObservableCollection<VariableData>(SelectedNodeVariables.Where(v => v.IsActive));
+        return new ObservableCollection<VariableData>(SelectedVariables);
     }
 }
