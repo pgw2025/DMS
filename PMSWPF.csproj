@@ -38,6 +38,11 @@
         </None>
     </ItemGroup>
     <ItemGroup>
+        <None Update="PMSWPF.OpcUaClient.Config.xml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
       <Compile Remove="Data\Repositories\BaseRepositories.cs" />
     </ItemGroup>
     <ItemGroup>

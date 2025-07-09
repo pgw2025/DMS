@@ -29,6 +29,7 @@ public class DbVariableData
     /// <summary>
     /// 节点ID，用于标识变量在设备或系统中的唯一路径。
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string S7Address { get; set; } = String.Empty;
 
     /// <summary>
@@ -94,7 +95,8 @@ public class DbVariableData
     /// <summary>
     /// 轮询级别，例如1秒、5秒等。
     /// </summary>
-    [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
+
+    [SugarColumn(ColumnDataType = "varchar(20)",IsNullable =true, SqlParameterDbType = typeof(EnumToStringConvert))]
     public PollLevelType PollLevelType { get; set; }
 
     /// <summary>

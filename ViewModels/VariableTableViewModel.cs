@@ -44,6 +44,9 @@ partial class VariableTableViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isS7ProtocolSelected;
 
+    [ObservableProperty]
+    private bool _isOpcUaProtocolSelected;
+
     public VariableTableViewModel(IDialogService dialogService)
     {
         _dialogService = dialogService;
@@ -85,6 +88,7 @@ partial class VariableTableViewModel : ViewModelBase
     public override void OnLoaded()
     {
         IsS7ProtocolSelected = VariableTable.ProtocolType == ProtocolType.S7;
+        IsOpcUaProtocolSelected = VariableTable.ProtocolType == ProtocolType.OpcUA;
 
         if (VariableTable.DataVariables != null)
         {
@@ -221,6 +225,44 @@ partial class VariableTableViewModel : ViewModelBase
         }
         
         
+    }
+
+    [RelayCommand]
+    private async Task ImportFromOpcUaServer()
+    {
+        try
+        {
+            var importedVariables = await _dialogService.ShowOpcUaImportDialog();
+            if (importedVariables == null || !importedVariables.Any())
+            {
+                return; // 用户取消或没有选择任何变量
+            }
+
+            ContentDialog processingDialog = _dialogService.ShowProcessingDialog("正在处理...", "正在导入OPC UA变量,请稍等片刻....");
+
+            foreach (var variableData in importedVariables)
+            {
+                variableData.CreateTime = DateTime.Now;
+                variableData.VariableTableId = VariableTable.Id;
+                variableData.ProtocolType = ProtocolType.OpcUA; // 确保协议类型正确
+            }
+
+            // 插入数据库
+            var resVarDataCount = await _varDataRepository.AddAsync(importedVariables);
+
+            // 更新界面
+            variableTable.DataVariables = await _varDataRepository.GetAllAsync();
+            _dataVariables = new ObservableCollection<VariableData>(variableTable.DataVariables);
+            processingDialog?.Hide();
+
+            string msgSuccess = $"成功导入OPC UA变量：{resVarDataCount}个。";
+            NlogHelper.Info(msgSuccess);
+            NotificationHelper.ShowSuccess(msgSuccess);
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowError($"从OPC UA服务器导入变量的过程中发生了不可预期的错误：{e.Message}", e);
+        }
     }
 
 

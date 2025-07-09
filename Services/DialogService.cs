@@ -177,10 +177,14 @@ public class DialogService :IDialogService
         var vm = new MqttSelectionDialogViewModel();
         var dialog = new MqttSelectionDialog(vm);
         var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
-        {
-            return vm.SelectedMqtt;
-        }
-        return null;
+        return result == ContentDialogResult.Primary ? vm.SelectedMqtt : null;
+    }
+
+    public async Task<List<VariableData>> ShowOpcUaImportDialog()
+    {
+       var vm= new OpcUaImportDialogViewModel();
+        var dialog = new OpcUaImportDialog(vm);
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary ? vm.GetSelectedVariables().ToList() : null;
     }
 }

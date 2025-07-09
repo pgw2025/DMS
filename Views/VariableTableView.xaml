@@ -97,6 +97,15 @@
 
                 </ui:AppBarButton>
 
+                <ui:AppBarButton Command="{Binding ImportFromOpcUaServerCommand}"
+                                 Label="从OPC UA服务器导入"
+                                 Visibility="{Binding IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
+                    </ui:AppBarButton.Icon>
+
+                </ui:AppBarButton>
+
 
                 <ui:AppBarButton x:Name="ShareButton"
                                  Label="Share">
@@ -187,6 +196,13 @@
                     <MenuItem Header="从TIA变量表导入"
                               Command="{Binding ImprotFromTiaVarTableCommand}"
                               Visibility="{Binding IsS7ProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="从OPC UA服务器导入"
+                              Command="{Binding ImportFromOpcUaServerCommand}"
+                              Visibility="{Binding IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
                         </MenuItem.Icon>

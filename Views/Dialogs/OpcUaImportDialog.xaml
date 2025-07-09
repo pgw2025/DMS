@@ -1,0 +1,64 @@
+<controls:ContentDialog x:Class="PMSWPF.Views.Dialogs.OpcUaImportDialog"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
+                        xmlns:vm="clr-namespace:PMSWPF.ViewModels.Dialogs"
+                        mc:Ignorable="d"
+                        d:DataContext="{d:DesignInstance vm:OpcUaImportDialogViewModel}"
+                        Title="从OPC UA服务器导入变量"
+                        PrimaryButtonText="导入"
+                        SecondaryButtonText="取消"
+                        PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+                        SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
+                        Width="800"
+                        Height="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- 连接设置 -->
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Endpoint URL:" VerticalAlignment="Center" Margin="0,0,5,0" />
+            <TextBox Text="{Binding EndpointUrl, UpdateSourceTrigger=PropertyChanged}" Width="300" Margin="0,0,10,0" />
+            <Button Content="连接" Command="{Binding ConnectCommand}" />
+        </StackPanel>
+
+        <!-- 节点树 -->
+        <TreeView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding OpcUaNodes}" Margin="0,0,10,0" SelectedItemChanged="TreeView_SelectedItemChanged">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding DisplayName}" />
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+        <!-- 变量列表 -->
+        <DataGrid Grid.Row="1" Grid.Column="1" ItemsSource="{Binding SelectedNodeVariables}" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding DataContext.SelectAllVariables, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="名称" Binding="{Binding DisplayName}" />
+                <DataGridTextColumn Header="节点ID" Binding="{Binding NodeId}" />
+                <DataGridTextColumn Header="数据类型" Binding="{Binding DataType}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</controls:ContentDialog>
