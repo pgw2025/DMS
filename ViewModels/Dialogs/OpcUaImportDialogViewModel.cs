@@ -28,6 +28,9 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
     [ObservableProperty]
     private bool _selectAllVariables;
 
+    [ObservableProperty]
+    private bool _isConnected;
+
     private Session _session;
 
     public OpcUaImportDialogViewModel()
@@ -49,86 +52,9 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
                 _session = null;
             }
 
-            /*ApplicationInstance application = new ApplicationInstance
-            {
-                ApplicationName = "PMSWPF OPC UA Client",
-                ApplicationType = ApplicationType.Client,
-                ConfigSectionName = "PMSWPF.OpcUaClient"
-            };
-
-            ApplicationConfiguration config = await application.LoadApplicationConfiguration(false);
-
-            // var config = new ApplicationConfiguration()
-            //              {
-            //                  ApplicationName = application.ApplicationName,
-            //                  ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:OpcUADemoClient",
-            //                  ApplicationType = application.ApplicationType,
-            //                  SecurityConfiguration = new SecurityConfiguration
-            //                                          {
-            //                                              ApplicationCertificate = new CertificateIdentifier { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/MachineDefault", SubjectName = application.ApplicationName },
-            //                                              TrustedIssuerCertificates = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Certificate Authorities" },
-            //                                              TrustedPeerCertificates = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Applications" },
-            //                                              RejectedCertificateStore = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/RejectedCertificates" },
-            //                                              AutoAcceptUntrustedCertificates = true // 自动接受不受信任的证书 (仅用于测试)
-            //                                          },
-            //                  TransportQuotas = new TransportQuotas { OperationTimeout = 15000 },
-            //                  ClientConfiguration = new ClientConfiguration { DefaultSessionTimeout = 60000 },
-            //                  TraceConfiguration = new TraceConfiguration { OutputFilePath = "./Logs/OpcUaClient.log", DeleteOnLoad = true, TraceMasks = Utils.TraceMasks.Error | Utils.TraceMasks.Security }
-            //              };
-            //
-            // bool haveAppCertificate = await application.CheckApplicationInstanceCertificate(false, 0);
-            // if (!haveAppCertificate)
-            // {
-            //     throw new Exception("Application instance certificate invalid!");
-            // }
-            //
-            // EndpointDescription selectedEndpoint
-            //     = CoreClientUtils.SelectEndpoint(application.ApplicationConfiguration, EndpointUrl, false);
-            // EndpointConfiguration endpointConfiguration
-            //     = EndpointConfiguration.Create(application.ApplicationConfiguration);
-            // ConfiguredEndpoint configuredEndpoint
-            //     = new ConfiguredEndpoint(null, selectedEndpoint, endpointConfiguration);
-             // var config = new ApplicationConfiguration()
-             //             {
-             //                 ApplicationName = application.ApplicationName,
-             //                 ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:OpcUADemoClient",
-             //                 ApplicationType = application.ApplicationType,
-             //                 SecurityConfiguration = new SecurityConfiguration
-             //                                         {
-             //                                             ApplicationCertificate = new CertificateIdentifier { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/MachineDefault", SubjectName = application.ApplicationName },
-             //                                             TrustedIssuerCertificates = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Certificate Authorities" },
-             //                                             TrustedPeerCertificates = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Applications" },
-             //                                             RejectedCertificateStore = new CertificateTrustList { StoreType = "Directory", StorePath = "%CommonApplicationData%/OPC Foundation/CertificateStores/RejectedCertificates" },
-             //                                             AutoAcceptUntrustedCertificates = true // 自动接受不受信任的证书 (仅用于测试)
-             //                                         },
-             //                 TransportQuotas = new TransportQuotas { OperationTimeout = 15000 },
-             //                 ClientConfiguration = new ClientConfiguration { DefaultSessionTimeout = 60000 },
-             //                 TraceConfiguration = new TraceConfiguration { OutputFilePath = "./Logs/OpcUaClient.log", DeleteOnLoad = true, TraceMasks = Utils.TraceMasks.Error | Utils.TraceMasks.Security }
-             //             };
-
-            bool haveAppCertificate = await application.CheckApplicationInstanceCertificate(false, 0);
-            if (!haveAppCertificate)
-            {
-                throw new Exception("Application instance certificate invalid!");
-            }
-
-            EndpointDescription selectedEndpoint
-                = CoreClientUtils.SelectEndpoint(application.ApplicationConfiguration, EndpointUrl, false);
-            EndpointConfiguration endpointConfiguration
-                = EndpointConfiguration.Create(application.ApplicationConfiguration);
-            ConfiguredEndpoint configuredEndpoint
-                = new ConfiguredEndpoint(null, selectedEndpoint, endpointConfiguration);
-
-            _session = await Session.Create(
-                config,
-                configuredEndpoint,
-                false,
-                "PMSWPF OPC UA Session",
-                60000,
-                new UserIdentity(new AnonymousIdentityToken()),
-                null);
-                */
-
+            IsConnected = false;
+            OpcUaNodes.Clear();
+            SelectedNodeVariables.Clear();
 
             // 1. 创建应用程序配置
             var application = new ApplicationInstance
@@ -202,12 +128,14 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
                 null);
 
             NotificationHelper.ShowSuccess($"已连接到 OPC UA 服务器: {EndpointUrl}");
+            IsConnected = true;
 
             // 浏览根节点
             await BrowseNodes(OpcUaNodes, ObjectIds.ObjectsFolder);
         }
         catch (Exception ex)
         {
+            IsConnected = false;
             NlogHelper.Error($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
             NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
         }

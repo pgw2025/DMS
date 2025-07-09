@@ -45,6 +45,20 @@
                   ItemsSource="{Binding OpcUaNodes}"
                   Margin="0,0,10,0"
                   SelectedItemChanged="TreeView_SelectedItemChanged">
+            <TreeView.Style>
+                <Style TargetType="TreeView"
+                       BasedOn="{StaticResource {x:Type TreeView}}">
+                    <Setter Property="Visibility"
+                            Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsConnected}"
+                                     Value="True">
+                            <Setter Property="Visibility"
+                                    Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.Style>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                     <TextBlock Text="{Binding DisplayName}" />
@@ -59,6 +73,20 @@
                   SelectionChanged="Selector_OnSelectionChanged"
                   AutoGenerateColumns="False"
                   IsReadOnly="True">
+            <DataGrid.Style>
+                <Style TargetType="DataGrid"
+                       BasedOn="{StaticResource {x:Type DataGrid}}">
+                    <Setter Property="Visibility"
+                            Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsConnected}"
+                                     Value="True">
+                            <Setter Property="Visibility"
+                                    Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Style>
             <DataGrid.Columns>
                 <DataGridTemplateColumn>
                     <DataGridTemplateColumn.HeaderTemplate>
