@@ -68,11 +68,10 @@ public class VarDataRepository
         {
             var result = await _db.Queryable<DbVariableData>()
                                   .Where(d => d.VariableTableId == varTableId)
-                                  .Select(dbVarData => dbVarData.CopyTo<VariableData>())
                                   .ToListAsync();
             stopwatch.Stop();
             NlogHelper.Info($"获取变量表的所有变量{result.Count()}个耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result;
+            return result.Select(d=>d.CopyTo<VariableData>()).ToList();
         }
     }
 
