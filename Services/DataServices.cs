@@ -60,7 +60,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     public event EventHandler<List<Mqtt>> OnMqttListChanged;
 
     // 变量数据变更事件，当变量数据更新时触发。
-    public event EventHandler<List<VariableData>> OnVariableDataChanged;
+    public event Action<List<VariableData>> OnVariableDataChanged;
 
     /// <summary>
     /// 当_devices属性值改变时触发的局部方法，用于调用OnDeviceListChanged事件。
@@ -69,6 +69,20 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     partial void OnDevicesChanged(List<Device> devices)
     {
         OnDeviceListChanged?.Invoke(this, devices);
+        
+        
+        VariableDatas.Clear();
+        foreach (Device device in devices)
+        {
+            foreach (VariableTable variableTable in device.VariableTables)
+            {
+                foreach (VariableData variableData in variableTable.DataVariables)
+                {
+                    VariableDatas.Add(variableData);
+                }
+            }
+        }
+        OnVariableDataChanged?.Invoke(VariableDatas);
     }
 
     /// <summary>
@@ -106,6 +120,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         _menuRepository = new MenuRepository();
         _mqttRepository = new MqttRepository();
         _varDataRepository = new VarDataRepository();
+        _variableDatas = new List<VariableData>();
     }
 
     /// <summary>
@@ -123,7 +138,6 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                     await LoadDevices();
                     await LoadMenus();
                     await LoadMqtts();
-                    await LoadVariableDatas();
                     break;
                 case LoadTypes.Devices: // 仅加载设备数据
                     await LoadDevices();
@@ -184,14 +198,6 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         Mqtts = await _mqttRepository.GetAll();
     }
 
-    /// <summary>
-    /// 异步获取所有变量数据。
-    /// </summary>
-    /// <returns>包含所有变量数据的列表。</returns>
-    public async Task<List<VariableData>> GetAllVariableDataAsync()
-    {
-        return await _varDataRepository.GetAllAsync();
-    }
 
     /// <summary>
     /// 异步根据ID获取设备数据。
@@ -210,5 +216,15 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     private async Task LoadVariableDatas()
     {
         VariableDatas = await _varDataRepository.GetAllAsync();
+    }
+
+    /// <summary>
+    /// 异步更新变量数据。
+    /// </summary>
+    /// <param name="variableData">要更新的变量数据。</param>
+    /// <returns>表示异步操作的任务。</returns>
+    public async Task UpdateVariableDataAsync(VariableData variableData)
+    {
+        await _varDataRepository.UpdateAsync(variableData);
     }
 }

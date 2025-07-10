@@ -101,6 +101,12 @@ public class DbVariableData
     public PollLevelType PollLevelType { get; set; }
 
     /// <summary>
+    /// OPC UA更新类型，例如轮询或订阅。
+    /// </summary>
+    [SugarColumn(ColumnDataType = "varchar(20)", IsNullable = true, SqlParameterDbType = typeof(EnumToStringConvert))]
+    public OpcUaUpdateType OpcUaUpdateType { get; set; }
+
+    /// <summary>
     /// 指示变量是否已被逻辑删除。
     /// </summary>
     public bool IsDeleted { get; set; }

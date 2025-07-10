@@ -21,12 +21,16 @@ namespace PMSWPF.Services
     {
         // 数据服务实例，用于访问和操作应用程序数据，如MQTT配置和变量数据。
         private readonly DataServices _dataServices;
+
         // 存储MQTT客户端实例的字典，键为MQTT配置ID，值为IMqttClient对象。
         private readonly Dictionary<int, IMqttClient> _mqttClients;
+
         // 存储MQTT配置的字典，键为MQTT配置ID，值为Mqtt模型对象。
         private readonly Dictionary<int, Mqtt> _mqttConfigurations;
+
         // 存储与MQTT配置关联的变量数据的字典，键为MQTT配置ID，值为VariableData列表。
         private readonly Dictionary<int, List<VariableData>> _mqttVariableData;
+
         // 定时器，用于周期性地执行数据发布任务。
         private Timer _timer;
 
@@ -86,12 +90,11 @@ namespace PMSWPF.Services
                     await client.DisconnectAsync();
                 }
             }
+
             // 清空所有字典。
             _mqttClients.Clear();
             _mqttConfigurations.Clear();
             _mqttVariableData.Clear();
-
-            
         }
 
         /// <summary>
@@ -111,7 +114,7 @@ namespace PMSWPF.Services
                     foreach (var variable in variables)
                     {
                         // 如果变量已被修改（IsModified标志为true）。
-                        if (variable.IsModified) 
+                        if (variable.IsModified)
                         {
                             // 获取发布主题。
                             var topic = _mqttConfigurations[mqttConfigId].PublishTopic;
@@ -119,13 +122,15 @@ namespace PMSWPF.Services
                             {
                                 // 构建MQTT消息。
                                 var message = new MqttApplicationMessageBuilder()
-                                    .WithTopic($"{topic}/{variable.Name}") // 主题格式：PublishTopic/VariableName
-                                    .WithPayload(variable.DataValue) // 消息载荷为变量的值
-                                    .Build();
+                                              .WithTopic($"{topic}/{variable.Name}") // 主题格式：PublishTopic/VariableName
+                                              .WithPayload(variable.DataValue) // 消息载荷为变量的值
+                                              .Build();
 
                                 // 发布MQTT消息。
                                 await client.PublishAsync(message);
-                                NlogHelper.Info($"Published {variable.Name} = {variable.DataValue} to {topic}/{variable.Name}",throttle:true); // 记录发布信息
+                                NlogHelper.Info(
+                                    $"Published {variable.Name} = {variable.DataValue} to {topic}/{variable.Name}",
+                                    throttle: true); // 记录发布信息
                                 variable.IsModified = false; // 发布后重置修改标志。
                             }
                         }
@@ -142,11 +147,14 @@ namespace PMSWPF.Services
         {
             // 从数据服务获取所有MQTT配置。
             var allMqtts = await _dataServices.GetMqttsAsync();
-            var activeMqtts = allMqtts.Where(m => m.IsActive).ToList();
-            var activeMqttIds = activeMqtts.Select(m => m.Id).ToHashSet();
+            var activeMqtts = allMqtts.Where(m => m.IsActive)
+                                      .ToList();
+            var activeMqttIds = activeMqtts.Select(m => m.Id)
+                                           .ToHashSet();
 
             // 断开并移除不再活跃或已删除的MQTT客户端。
-            var clientsToDisconnect = _mqttClients.Keys.Except(activeMqttIds).ToList();
+            var clientsToDisconnect = _mqttClients.Keys.Except(activeMqttIds)
+                                                  .ToList();
             foreach (var id in clientsToDisconnect)
             {
                 if (_mqttClients.TryGetValue(id, out var client))
@@ -160,9 +168,12 @@ namespace PMSWPF.Services
                             mqttConfig.IsConnected = false;
                         }
                     }
+
                     _mqttClients.Remove(id);
-                    NlogHelper.Info($"Disconnected and removed MQTT client for ID: {id} (no longer active or removed).");
+                    NlogHelper.Info(
+                        $"Disconnected and removed MQTT client for ID: {id} (no longer active or removed).");
                 }
+
                 _mqttConfigurations.Remove(id);
                 _mqttVariableData.Remove(id);
             }
@@ -174,6 +185,7 @@ namespace PMSWPF.Services
                 {
                     await ConnectMqttClient(mqtt);
                 }
+
                 // 始终更新或添加MQTT配置到字典。
                 _mqttConfigurations[mqtt.Id] = mqtt;
             }
@@ -193,11 +205,11 @@ namespace PMSWPF.Services
                 var client = factory.CreateMqttClient();
                 // 构建MQTT客户端连接选项。
                 var options = new MqttClientOptionsBuilder()
-                    .WithClientId(mqtt.ClientID)
-                    .WithTcpServer(mqtt.Host, mqtt.Port)
-                    .WithCredentials(mqtt.UserName, mqtt.PassWord)
-                    .WithCleanSession() // 清理会话，每次连接都是新会话
-                    .Build();
+                              .WithClientId(mqtt.ClientID)
+                              .WithTcpServer(mqtt.Host, mqtt.Port)
+                              .WithCredentials(mqtt.UserName, mqtt.PassWord)
+                              .WithCleanSession() // 清理会话，每次连接都是新会话
+                              .Build();
 
                 // 设置连接成功事件处理程序。
                 client.UseConnectedHandler(e =>
@@ -221,7 +233,7 @@ namespace PMSWPF.Services
                     }
                     catch (Exception ex)
                     {
-                        NlogHelper.Error($"Failed to reconnect to MQTT broker: {mqtt.Name}",ex );
+                        NlogHelper.Error($"Failed to reconnect to MQTT broker: {mqtt.Name}", ex);
                     }
                 });
 
@@ -243,7 +255,9 @@ namespace PMSWPF.Services
         private async Task LoadVariableData()
         {
             // 从数据服务获取所有变量数据。
-            var allVariables = await _dataServices.GetAllVariableDataAsync();
+            var allVariables = _dataServices.VariableDatas;
+            if (!allVariables.Any())
+                return;
             _mqttVariableData.Clear(); // 清空现有数据
 
             // 遍历所有变量，并根据其关联的MQTT配置进行分组。
@@ -258,8 +272,10 @@ namespace PMSWPF.Services
                         {
                             _mqttVariableData[mqtt.Id] = new List<VariableData>();
                         }
+
                         // 将变量添加到对应MQTT配置的列表中。
-                        _mqttVariableData[mqtt.Id].Add(variable);
+                        _mqttVariableData[mqtt.Id]
+                            .Add(variable);
                     }
                 }
             }
@@ -283,7 +299,7 @@ namespace PMSWPF.Services
         /// </summary>
         /// <param name="sender">事件发送者。</param>
         /// <param name="variableDatas">更新后的变量数据列表。</param>
-        private async void HandleVariableDataChanged(object sender, List<VariableData> variableDatas)
+        private async void HandleVariableDataChanged( List<VariableData> variableDatas)
         {
             NlogHelper.Info("Variable data changed. Reloading variable associations."); // 记录变量数据变化信息
             // 重新加载变量数据。

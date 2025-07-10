@@ -29,6 +29,8 @@ namespace PMSWPF.Enums
         [Description("10分钟")]
         TenMinutes = 600000,
         [Description("30分钟")]
-        ThirtyMinutes = 1800000
+        ThirtyMinutes = 1800000,
+        [Description("1小时")]
+        OneHour = 3600000
     }
 }

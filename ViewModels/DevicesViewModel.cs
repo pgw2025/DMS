@@ -53,7 +53,10 @@ public partial class DevicesViewModel : ViewModelBase
         _dataServices = dataServices;
 
         MessageHelper.SendLoadMessage(LoadTypes.Devices);
-        _dataServices.OnDeviceListChanged += (sender, devices) => { Devices = new ObservableCollection<Device>(devices); };
+        _dataServices.OnDeviceListChanged += (sender, devices) =>
+        {
+            Devices = new ObservableCollection<Device>(devices);
+        };
     }
 
     /// <summary>

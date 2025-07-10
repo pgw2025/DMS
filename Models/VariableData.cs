@@ -101,6 +101,12 @@ public partial class VariableData : ObservableObject
     private PollLevelType pollLevelType = PollLevelType.ThirtySeconds;
 
     /// <summary>
+    /// OPC UA更新类型，例如轮询或订阅。
+    /// </summary>
+    [ObservableProperty]
+    private OpcUaUpdateType opcUaUpdateType = OpcUaUpdateType.OpcUaPoll;
+
+    /// <summary>
     /// 最后一次轮询时间。
     /// </summary>
     public DateTime LastPollTime { get; set; } = DateTime.MinValue;
