@@ -16,6 +16,7 @@
              d:DesignHeight="600"
              d:DesignWidth="800">
     <UserControl.Resources>
+        <ex:BindingProxy x:Key="proxy" Data="{Binding}" />
         <ex:EnumBindingSource x:Key="signalType"
                               EnumType="{x:Type en:SignalType}" />
         <ex:EnumBindingSource x:Key="protocolType"
@@ -258,9 +259,17 @@
                                     Binding="{Binding Name}" />
                 <DataGridTextColumn Header="描述"
                                     Binding="{Binding Description}" />
+                <!-- <DataGridTextColumn IsReadOnly="True" -->
+                <!--                     Header="节点ID" -->
+                <!--                     Binding="{Binding NodeId}" /> -->
                 <DataGridTextColumn IsReadOnly="True"
-                                    Header="节点ID"
-                                    Binding="{Binding NodeId}" />
+                Header="S7地址"
+                Visibility="{Binding Source={StaticResource proxy}, Path=Data.IsS7ProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Binding="{Binding S7Address}" />
+                <DataGridTextColumn IsReadOnly="True"
+                                    Header="OPCUA节点ID"
+                                    Visibility="{Binding Source={StaticResource proxy}, Path=Data.IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Binding="{Binding OpcUaNodeId}" />
                 <!-- <DataGridTextColumn IsReadOnly="True" -->
                 <!--                     Header="协议类型" -->
                 <!--                     Binding="{Binding ProtocolType}" /> -->
@@ -288,6 +297,7 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="轮询频率"
+                                        
                                         SortMemberPath="PollLevelType">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -308,9 +318,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn IsReadOnly="True"
-                                    Header="S7地址"
-                                    Binding="{Binding S7Address}" />
+                
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="当前值"
                                     Binding="{Binding DataValue}" />
