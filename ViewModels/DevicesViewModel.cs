@@ -76,6 +76,9 @@ public partial class DevicesViewModel : ViewModelBase
                 return;
             }
 
+            if (device.ProtocolType == ProtocolType.OpcUA)
+                device.OpcUaEndpointUrl = $"opc.tcp://{device.Ip}:{device.Prot}";
+
             await _deviceRepository.Add(device);
         }
         catch (Exception e)
