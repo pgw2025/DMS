@@ -140,7 +140,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                     await LoadMqtts();
                     break;
                 case LoadTypes.Devices: // 仅加载设备数据
-                    await LoadDevices();
+                    // await LoadDevices();
                     break;
                 case LoadTypes.Menu: // 仅加载菜单数据
                     await LoadMenus();

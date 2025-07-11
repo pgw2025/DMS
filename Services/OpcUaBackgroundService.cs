@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,13 +70,15 @@ namespace PMSWPF.Services
         private readonly Dictionary<string, Subscription> _opcUaSubscriptions;
 
         // 存储活动的 OPC UA 变量，键为变量的唯一 ID。
-        private readonly Dictionary<int, VariableData> _opcUaVariables; // Key: VariableData.Id
+        private readonly Dictionary<int, VariableData>  _opcUaVariables; // Key: VariableData.Id
 
-        private readonly Dictionary<int, CancellationTokenSource>
-            _opcUaPollingTasks; // Key: VariableData.Id, Value: CancellationTokenSource for polling task
+        // private readonly Dictionary<int, CancellationTokenSource>
+        //     _opcUaPollingTasks; // Key: VariableData.Id, Value: CancellationTokenSource for polling task
 
         private List<Device> _opcUaDevices;
         private List<VariableData> _opcUaAllVariableDatas;
+        private  List<VariableData> _OpcUaPollVarDataList;
+        private List<VariableData> _OpcUaSubscriptionVarDataList;
 
         /// <summary>
         /// OpcUaBackgroundService 的构造函数。
@@ -86,8 +89,8 @@ namespace PMSWPF.Services
             _dataServices = dataServices;
             _opcUaSessions = new Dictionary<string, Session>();
             _opcUaSubscriptions = new Dictionary<string, Subscription>();
-            _opcUaVariables = new Dictionary<int, VariableData>();
-            _opcUaPollingTasks = new Dictionary<int, CancellationTokenSource>();
+            _opcUaVariables = new ();
+            // _opcUaPollingTasks = new Dictionary<int, CancellationTokenSource>();
             _opcUaAllVariableDatas = new List<VariableData>();
         }
 
@@ -155,27 +158,24 @@ namespace PMSWPF.Services
                                          .ToList();
             if (_opcUaDevices.Count == 0)
                 return;
-
-            foreach (Device device in _opcUaDevices)
+            foreach (var opcUaDevice in _opcUaDevices)
             {
-                var deviceVarData = device.VariableTables
-                                          .Where(vt => vt.IsActive == true && vt.ProtocolType == ProtocolType.OpcUA)
-                                          .SelectMany(vt => vt.DataVariables)
-                                          .Where(vd => vd.IsActive == true)
-                                          .ToList();
-                _opcUaAllVariableDatas.AddRange(deviceVarData);
+                opcUaDevice.VariableTables.SelectMany(vt => vt.DataVariables).Where(vd => vd.IsActive == true && vd.ProtocolType == ProtocolType.OpcUA && vd.OpcUaUpdateType==OpcUaUpdateType.OpcUaPoll).ToList();
             }
-
-            // var opcUaVariables = _dataServices
-            //                      .VariableDatas.Where(v => v.ProtocolType == ProtocolType.OpcUA && v.IsActive)
-            //                      .ToList();
+          _OpcUaPollVarDataList=  _opcUaDevices.SelectMany(o => o.VariableTables)
+                         .SelectMany(v => v.DataVariables)
+                         .Where(vd => vd.IsActive == true && vd.ProtocolType == ProtocolType.OpcUA && vd.OpcUaUpdateType==OpcUaUpdateType.OpcUaPoll).ToList();
+          _OpcUaSubscriptionVarDataList=  _opcUaDevices.SelectMany(o => o.VariableTables)
+                         .SelectMany(v => v.DataVariables)
+                         .Where(vd => vd.IsActive == true && vd.ProtocolType == ProtocolType.OpcUA && vd.OpcUaUpdateType==OpcUaUpdateType.OpcUaPoll).ToList();
+            
 
             if (_opcUaAllVariableDatas == null || _opcUaAllVariableDatas.Count == 0)
                 return;
 
             // 清理不再活跃或已删除的变量。
-            await RemoveInactiveOpcUaVariables(_opcUaAllVariableDatas);
-
+            // await RemoveInactiveOpcUaVariables(_opcUaAllVariableDatas);
+            
             // 处理新增或更新的变量。
             await ProcessActiveOpcUaVariables(_opcUaAllVariableDatas);
         }
@@ -194,6 +194,8 @@ namespace PMSWPF.Services
                 return;
             }
 
+            variable.DisplayValue = "4";
+        
             Session session = null;
             // 检查是否已存在到该终结点的活动会话。
             if (_opcUaSessions.TryGetValue(device.OpcUaEndpointUrl, out session) && session.Connected)
@@ -202,11 +204,11 @@ namespace PMSWPF.Services
             }
             else
             {
-                session = await CreateOpcUaSessionAsync(device.OpcUaEndpointUrl);
+                session = await OpcUaServiceHelper.CreateOpcUaSessionAsync(device.OpcUaEndpointUrl);
                 if (session == null)
-                {
                     return; // 连接失败，直接返回
-                }
+                
+                _opcUaSessions[device.OpcUaEndpointUrl] = session;
             }
 
             if (variable.OpcUaUpdateType == OpcUaUpdateType.OpcUaSubscription)
@@ -215,6 +217,7 @@ namespace PMSWPF.Services
             }
             else if (variable.OpcUaUpdateType == OpcUaUpdateType.OpcUaPoll)
             {
+                variable.DisplayValue = "5";
                 StartOpcUaPolling(session, variable, device);
             }
         }
@@ -222,6 +225,7 @@ namespace PMSWPF.Services
         private async Task PollOpcUaVariable(Session session, VariableData variable, Device device,
                                              CancellationToken cancellationToken)
         {
+            variable.DisplayValue = "7";
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -253,7 +257,7 @@ namespace PMSWPF.Services
                                 // 更新变量数据
                                 variable.DataValue = value.Value.ToString();
                                 variable.DisplayValue = value.Value.ToString(); // 或者根据需要进行格式化
-                                // await _dataServices.UpdateVariableDataAsync(variable);
+                                await _dataServices.UpdateVariableDataAsync(variable);
                             }
                             else
                             {
@@ -333,28 +337,28 @@ namespace PMSWPF.Services
                 }
 
                 // 取消与此会话相关的轮询任务
-                var variablesToCancelPolling = _opcUaVariables.Where(kv => kv.Value.VariableTable != null &&
-                                                                           kv.Value.VariableTable.DeviceId.HasValue &&
-                                                                           _dataServices
-                                                                               .GetDeviceByIdAsync(
-                                                                                   kv.Value.VariableTable.DeviceId
-                                                                                       .Value)
-                                                                               .Result?.OpcUaEndpointUrl ==
-                                                                           endpointUrl &&
-                                                                           kv.Value.OpcUaUpdateType ==
-                                                                           OpcUaUpdateType.OpcUaPoll)
-                                                              .ToList();
-                foreach (var entry in variablesToCancelPolling)
-                {
-                    if (_opcUaPollingTasks.ContainsKey(entry.Key))
-                    {
-                        var cts = _opcUaPollingTasks[entry.Key];
-                        _opcUaPollingTasks.Remove(entry.Key);
-                        cts.Cancel();
-                        cts.Dispose();
-                        NlogHelper.Info($"Cancelled polling for variable: {entry.Value.Name} (ID: {entry.Key})");
-                    }
-                }
+                // var variablesToCancelPolling = _opcUaVariables.Where(kv => kv.Value.VariableTable != null &&
+                //                                                            kv.Value.VariableTable.DeviceId.HasValue &&
+                //                                                            _dataServices
+                //                                                                .GetDeviceByIdAsync(
+                //                                                                    kv.Value.VariableTable.DeviceId
+                //                                                                        .Value)
+                //                                                                .Result?.OpcUaEndpointUrl ==
+                //                                                            endpointUrl &&
+                //                                                            kv.Value.OpcUaUpdateType ==
+                //                                                            OpcUaUpdateType.OpcUaPoll)
+                //                                               .ToList();
+                // foreach (var entry in variablesToCancelPolling)
+                // {
+                //     if (_opcUaPollingTasks.ContainsKey(entry.Key))
+                //     {
+                //         var cts = _opcUaPollingTasks[entry.Key];
+                //         _opcUaPollingTasks.Remove(entry.Key);
+                //         cts.Cancel();
+                //         cts.Dispose();
+                //         NlogHelper.Info($"Cancelled polling for variable: {entry.Value.Name} (ID: {entry.Key})");
+                //     }
+                // }
 
                 // 关闭会话。
                 session.Close();
@@ -388,97 +392,7 @@ namespace PMSWPF.Services
             await LoadOpcUaVariables();
         }
 
-        /// <summary>
-        /// 创建并配置 OPC UA 会话。
-        /// </summary>
-        /// <param name="endpointUrl">OPC UA 服务器的终结点 URL。</param>
-        /// <returns>创建的 Session 对象，如果失败则返回 null。</returns>
-        private async Task<Session> CreateOpcUaSessionAsync(string endpointUrl)
-        {
-            try
-            {
-                // 1. 创建应用程序配置
-                var application = new ApplicationInstance
-                                  {
-                                      ApplicationName = "OpcUADemoClient",
-                                      ApplicationType = ApplicationType.Client,
-                                      ConfigSectionName = "Opc.Ua.Client"
-                                  };
-
-                var config = new ApplicationConfiguration()
-                             {
-                                 ApplicationName = application.ApplicationName,
-                                 ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:OpcUADemoClient",
-                                 ApplicationType = application.ApplicationType,
-                                 SecurityConfiguration = new SecurityConfiguration
-                                                         {
-                                                             ApplicationCertificate = new CertificateIdentifier
-                                                                 {
-                                                                     StoreType = "Directory",
-                                                                     StorePath
-                                                                         = "%CommonApplicationData%/OPC Foundation/CertificateStores/MachineDefault",
-                                                                     SubjectName = application.ApplicationName
-                                                                 },
-                                                             TrustedIssuerCertificates = new CertificateTrustList
-                                                                 {
-                                                                     StoreType = "Directory",
-                                                                     StorePath
-                                                                         = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Certificate Authorities"
-                                                                 },
-                                                             TrustedPeerCertificates = new CertificateTrustList
-                                                                 {
-                                                                     StoreType = "Directory",
-                                                                     StorePath
-                                                                         = "%CommonApplicationData%/OPC Foundation/CertificateStores/UA Applications"
-                                                                 },
-                                                             RejectedCertificateStore = new CertificateTrustList
-                                                                 {
-                                                                     StoreType = "Directory",
-                                                                     StorePath
-                                                                         = "%CommonApplicationData%/OPC Foundation/CertificateStores/RejectedCertificates"
-                                                                 },
-                                                             AutoAcceptUntrustedCertificates
-                                                                 = true // 自动接受不受信任的证书 (仅用于测试)
-                                                         },
-                                 TransportQuotas = new TransportQuotas { OperationTimeout = 15000 },
-                                 ClientConfiguration = new ClientConfiguration { DefaultSessionTimeout = 60000 },
-                                 TraceConfiguration = new TraceConfiguration
-                                                      {
-                                                          OutputFilePath = "./Logs/OpcUaClient.log",
-                                                          DeleteOnLoad = true,
-                                                          TraceMasks = Utils.TraceMasks.Error |
-                                                                       Utils.TraceMasks.Security
-                                                      }
-                             };
-                application.ApplicationConfiguration = config;
-
-                // 验证并检查证书
-                await config.Validate(ApplicationType.Client);
-                await application.CheckApplicationInstanceCertificate(false, 0);
-
-                // 2. 查找并选择端点 (将 useSecurity 设置为 false 以进行诊断)
-                var selectedEndpoint = CoreClientUtils.SelectEndpoint(endpointUrl, false);
-
-                var session = await Session.Create(
-                    config,
-                    new ConfiguredEndpoint(null, selectedEndpoint, EndpointConfiguration.Create(config)),
-                    false,
-                    "PMSWPF OPC UA Session",
-                    60000,
-                    new UserIdentity(new AnonymousIdentityToken()),
-                    null);
-
-                _opcUaSessions[endpointUrl] = session;
-                NotificationHelper.ShowSuccess($"已连接到 OPC UA 服务器: {endpointUrl}");
-                return session;
-            }
-            catch (Exception ex)
-            {
-                NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {endpointUrl} - {ex.Message}", ex);
-                return null;
-            }
-        }
-
+        
         /// <summary>
         /// 设置 OPC UA 订阅并添加监控项。
         /// </summary>
@@ -525,12 +439,15 @@ namespace PMSWPF.Services
         /// <param name="device">变量所属的设备信息。</param>
         private void StartOpcUaPolling(Session session, VariableData variable, Device device)
         {
-            if (!_opcUaPollingTasks.ContainsKey(variable.Id))
-            {
-                _opcUaPollingTasks.Add(variable.Id, _cancellationTokenSource);
+            variable.DisplayValue = "5.5";
+            var id = variable.Id;
+            // if (!_opcUaPollingTasks.ContainsKey(id))
+            // {
+                variable.DisplayValue = "6";
+                // _opcUaPollingTasks.Add(variable.Id, _cancellationTokenSource);
                 _ = Task.Run(() => PollOpcUaVariable(session, variable, device,_cancellationTokenSource.Token), _cancellationTokenSource.Token);
                 NlogHelper.Info($"Started polling for OPC UA variable: {variable.Name} ({variable.OpcUaNodeId})");
-            }
+            // }
         }
 
         /// <summary>
@@ -543,9 +460,9 @@ namespace PMSWPF.Services
                                                               .ToHashSet();
             var variablesToRemove = _opcUaVariables.Keys.Except(currentOpcUaVariableIds)
                                                    .ToList();
-
+            
             NlogHelper.Info($"发现 {variablesToRemove.Count} 个要移除的 OPC UA 变量。");
-
+            
             foreach (var id in variablesToRemove)
             {
                 if (_opcUaVariables.TryGetValue(id, out var variable))
@@ -562,15 +479,15 @@ namespace PMSWPF.Services
                     }
                     else if (variable.OpcUaUpdateType == OpcUaUpdateType.OpcUaPoll)
                     {
-                        if (_opcUaPollingTasks.ContainsKey(variable.Id))
-                        {
-                            var cts = _opcUaPollingTasks[variable.Id];
-                            _opcUaPollingTasks.Remove(variable.Id);
-                            cts.Cancel();
-                            cts.Dispose();
-                        }
+                        // if (_opcUaPollingTasks.ContainsKey(variable.Id))
+                        // {
+                        //     var cts = _opcUaPollingTasks[variable.Id];
+                        //     _opcUaPollingTasks.Remove(variable.Id);
+                        //     cts.Cancel();
+                        //     cts.Dispose();
+                        // }
                     }
-
+            
                     _opcUaVariables.Remove(id);
                 }
             }
@@ -584,6 +501,7 @@ namespace PMSWPF.Services
         {
             foreach (var variable in opcUaVariables)
             {
+                
                 // 获取关联的设备信息
                 var device = await _dataServices.GetDeviceByIdAsync(variable.VariableTable.DeviceId ?? 0);
                 if (device == null)
@@ -591,16 +509,21 @@ namespace PMSWPF.Services
                     NlogHelper.Warn($"变量 '{variable.Name}' (ID: {variable.Id}) 关联的设备不存在。");
                     continue;
                 }
-
+                
+                
+                variable.DisplayValue = "2";
                 if (!_opcUaVariables.ContainsKey(variable.Id))
                 {
+                    variable.DisplayValue = "3";
                     // 如果是新变量，则添加到字典并建立连接和订阅。
-                    _opcUaVariables.Add(variable.Id, variable);
+                    _opcUaVariables.Add( variable.Id,variable);
+                    //
                     await ConnectAndSubscribeOpcUa(variable, device);
                 }
                 else
                 {
-                    // 如果变量已存在，则更新其信息。
+                    Console.WriteLine($"_opcUaVariables已经包含对象：{variable.Name}");
+                    // // 如果变量已存在，则更新其信息。
                     _opcUaVariables[variable.Id] = variable;
                     // 如果终结点 URL 对应的会话已断开，则尝试重新连接。
                     if (_opcUaSessions.ContainsKey(device.OpcUaEndpointUrl) &&
