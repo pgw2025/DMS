@@ -30,7 +30,7 @@
         <Style TargetType="TextBlock"
                x:Key="VarTableLabelStyle">
             <Setter Property="Foreground"
-                    Value="#555" />
+                    Value="{DynamicResource SecondaryTextBrush}" />
             <Setter Property="FontSize"
                     Value="16" />
             <Setter Property="VerticalAlignment"
@@ -165,7 +165,8 @@
                   CanUserSortColumns="True"
                   SelectionMode="Extended"
                   SelectedItem="{Binding SelectedVariableData}"
-                  ItemsSource="{Binding VariableDataView}">
+                  ItemsSource="{Binding VariableDataView}"
+                  Style="{StaticResource DataGridBaseStyle}">
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="添加变量"
@@ -230,9 +231,9 @@
                         <DataTrigger Binding="{Binding IsModified}"
                                      Value="True">
                             <Setter Property="Background"
-                                    Value="Pink" />
+                                    Value="{DynamicResource SecondaryRegionBrush}" />
                             <Setter Property="Foreground"
-                                    Value="#000" />
+                                    Value="{DynamicResource PrimaryTextBrush}" />
                             <Setter Property="FontWeight"
                                     Value="Bold" />
                         </DataTrigger>
@@ -240,14 +241,14 @@
                         <Trigger Property="IsMouseOver"
                                  Value="True">
                             <Setter Property="Background"
-                                    Value="LightBlue" />
+                                    Value="{DynamicResource HoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsSelected"
                                  Value="True">
                             <Setter Property="Background"
-                                    Value="DodgerBlue" />
+                                    Value="{DynamicResource PrimaryBrush}" />
                             <Setter Property="Foreground"
-                                    Value="White" />
+                                    Value="{DynamicResource TextIconBrush}" />
                         </Trigger>
                     </Style.Triggers>
                 </Style>

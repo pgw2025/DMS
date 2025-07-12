@@ -12,6 +12,7 @@ namespace PMSWPF.Config
         public string UserId { get; set; } = "root";
         public string Password { get; set; } = "Pgw15221236646";
         public string Database { get; set; } = "pmswpf";
+        public string Theme { get; set; } = "跟随系统";
         public bool EnableS7Service { get; set; } = true;
         public bool EnableMqttService { get; set; } = true;
         public bool EnableOpcUaService { get; set; } = true;

@@ -15,6 +15,12 @@
                 <ui:FontIcon Glyph="&#xE713;" />
             </ui:SettingsExpander.HeaderIcon>
             <ui:SettingsExpander.Items>
+                <ui:SettingsCard Header="主题切换"
+                                 Description="切换应用程序的主题">
+                    <ComboBox Width="120"
+                              ItemsSource="{Binding Themes}"
+                              SelectedItem="{Binding SelectedTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
                 <ui:SettingsCard Header="点击关闭按钮时最小化到通知栏"
                                  Description="开启后，点击主窗口的关闭按钮会将程序最小化到系统通知栏，而不是直接退出。"
                                  IsClickEnabled="True">

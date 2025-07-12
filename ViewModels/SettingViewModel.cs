@@ -25,6 +25,24 @@ public partial class SettingViewModel : ViewModelBase
         _s7BackgroundService = s7BackgroundService;
         _mqttBackgroundService = mqttBackgroundService;
         _opcUaBackgroundService = opcUaBackgroundService;
+        Themes = new List<string> { "浅色", "深色", "跟随系统" };
+    }
+
+    public List<string> Themes { get; }
+
+    public string SelectedTheme
+    {
+        get => _connectionSettings.Theme;
+        set
+        {
+            if (_connectionSettings.Theme != value)
+            { 
+                _connectionSettings.Theme = value;
+                OnPropertyChanged();
+                _connectionSettings.Save();
+                ThemeHelper.ApplyTheme(value);
+            }
+        }
     }
 
     public List<string> AvailableDbTypes { get; set; }

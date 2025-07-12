@@ -49,6 +49,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        ThemeHelper.InitializeTheme();
         await Host.StartAsync();
 
         try

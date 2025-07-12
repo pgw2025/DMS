@@ -13,7 +13,6 @@
                   CloseButtonText="取消"
                   DefaultButton="Primary"
                   PrimaryButtonText="{Binding PrimaryButContent}"
-                  Background="#fff"
                   d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
                   mc:Ignorable="d">
     <ui:ContentDialog.Resources>
