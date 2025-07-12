@@ -179,7 +179,7 @@ public class VarDataRepository
     /// </summary>
     /// <param name="variableData">VariableData实体</param>
     /// <returns></returns>
-    public async Task<bool> UpdateAsync(List<VariableData> variableDatas)
+    public async Task<int> UpdateAsync(List<VariableData> variableDatas)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -198,14 +198,13 @@ public class VarDataRepository
     /// </summary>
     /// <param name="variableData">VariableData实体</param>
     /// <returns></returns>
-    public async Task<bool> UpdateAsync(List<VariableData> variableDatas, SqlSugarClient db)
+    public async Task<int> UpdateAsync(List<VariableData> variableDatas, SqlSugarClient db)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
         var dbVarDatas = variableDatas.Select(vd => vd.CopyTo<DbVariableData>());
-        var result = await db.UpdateNav(dbVarDatas.ToList())
-                             .Include(d => d.Mqtts)
+        var result = await db.Updateable<DbVariableData>(dbVarDatas.ToList())
                              .ExecuteCommandAsync();
 
         stopwatch.Stop();
