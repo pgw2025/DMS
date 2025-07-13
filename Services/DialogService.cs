@@ -188,4 +188,16 @@ public class DialogService :IDialogService
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary ? vm.GetSelectedVariables().ToList() : null;
     }
+
+    public async Task<OpcUaUpdateType?> ShowOpcUaUpdateTypeDialog()
+    {
+        var vm = new OpcUaUpdateTypeDialogViewModel();
+        var dialog = new OpcUaUpdateTypeDialog(vm);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return vm.SelectedUpdateType;
+        }
+        return null;
+    }
 }

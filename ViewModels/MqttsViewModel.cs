@@ -70,7 +70,7 @@ public partial class MqttsViewModel : ViewModelBase
         }
 
         
-        _dataServices.OnMqttListChanged += (sender, mqtts) =>
+        _dataServices.OnMqttListChanged += ( mqtts) =>
         {
             Mqtts = new ObservableCollection<Mqtt>(mqtts);
         };

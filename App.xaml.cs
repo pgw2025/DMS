@@ -89,7 +89,7 @@ public partial class App : Application
         // 停止服务
         Host.Services.GetRequiredService<S7BackgroundService>().StopService();
         Host.Services.GetRequiredService<MqttBackgroundService>().StopService();
-        await Host.Services.GetRequiredService<OpcUaBackgroundService>().StopService();
+        Host.Services.GetRequiredService<OpcUaBackgroundService>().StopService();
 
         await Host.StopAsync();
         Host.Dispose();

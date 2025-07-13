@@ -51,48 +51,14 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     private readonly VarDataRepository _varDataRepository;
 
     // 设备列表变更事件，当设备列表数据更新时触发。
-    public event EventHandler<List<Device>> OnDeviceListChanged;
+    public event Action<List<Device>> OnDeviceListChanged;
 
     // 菜单树列表变更事件，当菜单树数据更新时触发。
-    public event EventHandler<List<MenuBean>> OnMenuTreeListChanged;
+    public event Action<List<MenuBean>> OnMenuTreeListChanged;
 
     // MQTT列表变更事件，当MQTT配置数据更新时触发。
-    public event EventHandler<List<Mqtt>> OnMqttListChanged;
+    public event Action<List<Mqtt>> OnMqttListChanged;
 
-    // 变量数据变更事件，当变量数据更新时触发。
-    public event Action<List<VariableData>> OnVariableDataChanged;
-
-    /// <summary>
-    /// 当_devices属性值改变时触发的局部方法，用于调用OnDeviceListChanged事件。
-    /// </summary>
-    /// <param name="devices">新的设备列表。</param>
-    partial void OnDevicesChanged(List<Device> devices)
-    {
-        OnDeviceListChanged?.Invoke(this, devices);
-        
-        
-        VariableDatas.Clear();
-        foreach (Device device in devices)
-        {
-            foreach (VariableTable variableTable in device.VariableTables)
-            {
-                foreach (VariableData variableData in variableTable.DataVariables)
-                {
-                    VariableDatas.Add(variableData);
-                }
-            }
-        }
-        OnVariableDataChanged?.Invoke(VariableDatas);
-    }
-
-    /// <summary>
-    /// 当menuTrees属性值改变时触发的局部方法，用于调用OnMenuTreeListChanged事件。
-    /// </summary>
-    /// <param name="MenuTrees">新的菜单树列表。</param>
-    partial void OnMenuTreesChanged(List<MenuBean> MenuTrees)
-    {
-        OnMenuTreeListChanged?.Invoke(this, MenuTrees);
-    }
 
     /// <summary>
     /// 当_mqtts属性值改变时触发的局部方法，用于调用OnMqttListChanged事件。
@@ -100,7 +66,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <param name="mqtts">新的MQTT配置列表。</param>
     partial void OnMqttsChanged(List<Mqtt> mqtts)
     {
-        OnMqttListChanged?.Invoke(this, mqtts);
+        OnMqttListChanged?.Invoke(mqtts);
     }
 
     // 注释掉的代码块，可能用于变量数据变更事件的触发，但目前未启用。
@@ -164,6 +130,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     private async Task LoadDevices()
     {
         Devices = await _deviceRepository.GetAll();
+        OnDeviceListChanged?.Invoke(Devices);
     }
 
     /// <summary>
@@ -178,6 +145,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             MenuHelper.MenuAddParent(menu); // 为菜单添加父级引用
             DataServicesHelper.SortMenus(menu); // 排序菜单
         }
+
+        OnMenuTreeListChanged?.Invoke(MenuTrees);
     }
 
     /// <summary>
@@ -186,7 +155,9 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <returns>包含所有MQTT配置的列表。</returns>
     public async Task<List<Mqtt>> GetMqttsAsync()
     {
-        return await _mqttRepository.GetAll();
+        var mqtts = await _mqttRepository.GetAll();
+        OnMqttListChanged?.Invoke(mqtts);
+        return mqtts;
     }
 
     /// <summary>

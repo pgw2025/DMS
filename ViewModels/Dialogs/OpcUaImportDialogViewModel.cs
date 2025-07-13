@@ -58,7 +58,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
             OpcUaNodes.Clear();
             SelectedNodeVariables.Clear();
 
-            _session = await OpcUaServiceHelper.CreateOpcUaSessionAsync(EndpointUrl);
+            _session = await ServiceHelper.CreateOpcUaSessionAsync(EndpointUrl);
 
             NotificationHelper.ShowSuccess($"已连接到 OPC UA 服务器: {EndpointUrl}");
             IsConnected = true;

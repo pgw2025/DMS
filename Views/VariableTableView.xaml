@@ -210,13 +210,23 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="修改轮询频率"
-                              Click="ChangePollLevel_Click">
+                              Command="{Binding ChangePollLevelCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="修改OPC UA更新方式"
+                              Visibility="{Binding IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
+                              Command="{Binding ModifyOpcUaUpdateTypeCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="添加MQTT服务器"
-                              Click="AddMqttServerToVariables_Click">
+                              Command="{Binding AddMqttServerToVariablesCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                         </MenuItem.Icon>
@@ -271,9 +281,6 @@
                                     Header="OPCUA节点ID"
                                     Visibility="{Binding Source={StaticResource proxy}, Path=Data.IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Binding="{Binding OpcUaNodeId}" />
-                <!-- <DataGridTextColumn IsReadOnly="True" -->
-                <!--                     Header="协议类型" -->
-                <!--                     Binding="{Binding ProtocolType}" /> -->
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="数据类型"
                                     Binding="{Binding DataType}" />

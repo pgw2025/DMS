@@ -181,16 +181,8 @@ public class VarDataRepository
     /// <returns></returns>
     public async Task<int> UpdateAsync(List<VariableData> variableDatas)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        using (var _db = DbContext.GetInstance())
-        {
-            var result = await UpdateAsync(variableDatas, _db);
-
-            stopwatch.Stop();
-            NlogHelper.Info($"更新VariableData  {variableDatas.Count()}个 耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result;
-        }
+        using var _db = DbContext.GetInstance();
+        return  await UpdateAsync(variableDatas, _db);
     }
 
     /// <summary>

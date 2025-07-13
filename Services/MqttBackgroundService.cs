@@ -55,7 +55,7 @@ namespace PMSWPF.Services
 
             // 订阅MQTT列表和变量数据变化的事件，以便在数据更新时重新加载配置和数据。
             _dataServices.OnMqttListChanged += HandleMqttListChanged;
-            _dataServices.OnVariableDataChanged += HandleVariableDataChanged;
+            _dataServices.OnDeviceListChanged += HandleDeviceListChanged;
 
             // 初始加载MQTT配置和变量数据。
             await LoadMqttConfigurations();
@@ -66,6 +66,13 @@ namespace PMSWPF.Services
 
             // 使服务保持运行，直到收到停止请求。
             // await Task.Delay(Timeout.Infinite, stoppingToken);
+        }
+
+        private async void HandleDeviceListChanged( List<Device> devices)
+        {
+            NlogHelper.Info("Variable data changed. Reloading variable associations."); // 记录变量数据变化信息
+            // 重新加载变量数据。
+            await LoadVariableData();
         }
 
         /// <summary>
@@ -80,7 +87,7 @@ namespace PMSWPF.Services
 
             // 取消订阅事件。
             _dataServices.OnMqttListChanged -= HandleMqttListChanged;
-            _dataServices.OnVariableDataChanged -= HandleVariableDataChanged;
+            _dataServices.OnDeviceListChanged -= HandleDeviceListChanged;
 
             // 断开所有已连接的MQTT客户端。
             foreach (var client in _mqttClients.Values)
@@ -286,7 +293,7 @@ namespace PMSWPF.Services
         /// </summary>
         /// <param name="sender">事件发送者。</param>
         /// <param name="mqtts">更新后的MQTT配置列表。</param>
-        private async void HandleMqttListChanged(object sender, List<Mqtt> mqtts)
+        private async void HandleMqttListChanged( List<Mqtt> mqtts)
         {
             NlogHelper.Info("MQTT list changed. Reloading configurations."); // 记录MQTT列表变化信息
             // 重新加载MQTT配置和变量数据。
@@ -294,16 +301,5 @@ namespace PMSWPF.Services
             await LoadVariableData(); // 重新加载变量数据，以防关联发生变化
         }
 
-        /// <summary>
-        /// 处理变量数据变化事件的回调方法。
-        /// </summary>
-        /// <param name="sender">事件发送者。</param>
-        /// <param name="variableDatas">更新后的变量数据列表。</param>
-        private async void HandleVariableDataChanged( List<VariableData> variableDatas)
-        {
-            NlogHelper.Info("Variable data changed. Reloading variable associations."); // 记录变量数据变化信息
-            // 重新加载变量数据。
-            await LoadVariableData();
-        }
     }
 }

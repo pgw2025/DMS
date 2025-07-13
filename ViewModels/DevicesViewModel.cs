@@ -52,11 +52,18 @@ public partial class DevicesViewModel : ViewModelBase
         _dialogService = dialogService;
         _dataServices = dataServices;
 
-        MessageHelper.SendLoadMessage(LoadTypes.Devices);
-        _dataServices.OnDeviceListChanged += (sender, devices) =>
+        _dataServices.OnDeviceListChanged += (devices) =>
         {
             Devices = new ObservableCollection<Device>(devices);
         };
+    }
+
+    public override void OnLoaded()
+    {
+        if (_dataServices.Devices!=null && _dataServices.Devices.Count>0)
+        {
+            Devices=new ObservableCollection<Device>(_dataServices.Devices);
+        }
     }
 
     /// <summary>

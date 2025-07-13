@@ -120,46 +120,4 @@ public partial class VariableTableView : UserControl
             NotificationHelper.ShowInfo("请选择要删除的变量");
         }
     }
-
-    private async void ChangePollLevel_Click(object sender, RoutedEventArgs args)
-    {
-        try
-        {
-            _viewModel = (VariableTableViewModel)this.DataContext;
-            var selectedVariables = BasicGridView.SelectedItems.Cast<VariableData>().ToList();
-            if (selectedVariables.Any())
-            {
-                await _viewModel.ChangePollLevel(selectedVariables);
-            }
-            else
-            {
-                NotificationHelper.ShowInfo("请选择要修改轮询频率的变量");
-            }
-        }
-        catch (Exception e)
-        {
-            NotificationHelper.ShowError("修改轮询频率的过程中发生了错误：" + e.Message, e);
-        }
-    }
-
-    private async void AddMqttServerToVariables_Click(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            _viewModel = (VariableTableViewModel)this.DataContext;
-            var selectedVariables = BasicGridView.SelectedItems.Cast<VariableData>().ToList();
-            if (selectedVariables.Any())
-            {
-                await _viewModel.AddMqttServerToVariables(selectedVariables);
-            }
-            else
-            {
-                NotificationHelper.ShowInfo("请选择要添加MQTT服务器的变量");
-            }
-        }
-        catch (Exception ex)
-        {
-            NotificationHelper.ShowError("给变量添加MQTT服务器的过程中发生了错误：" + ex.Message, ex);
-        }
-    }
 }

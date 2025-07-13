@@ -1,9 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows; // Add this using directive
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input; // Add this using directive
+using CommunityToolkit.Mvvm.Input;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Data;
@@ -12,6 +11,9 @@ using PMSWPF.Enums;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 using PMSWPF.Services;
+using PMSWPF.Views;
+// Add this using directive
+// Add this using directive
 
 namespace PMSWPF.ViewModels;
 
@@ -63,7 +65,7 @@ public partial class MainViewModel : ViewModelBase
         // 发送消息加载数据
         MessageHelper.SendLoadMessage(LoadTypes.All);
         // 当菜单加载成功后，在前台显示菜单
-        dataServices.OnMenuTreeListChanged += (sender, menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
+        dataServices.OnMenuTreeListChanged += ( menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
     }
 
     /// <summary>
@@ -72,7 +74,7 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void ShowWindow()
     {
-        if (Application.Current.MainWindow is Views.MainView mainWindow)
+        if (Application.Current.MainWindow is MainView mainWindow)
         {
             mainWindow.ShowApplication();
         }

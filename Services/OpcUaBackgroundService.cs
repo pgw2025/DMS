@@ -14,97 +14,42 @@ using PMSWPF.Models;
 
 namespace PMSWPF.Services
 {
-    /// <summary>
-    /// OPC UA 后台服务，负责处理所有与 OPC UA 相关的操作，包括连接服务器、订阅变量和接收数据更新。
-    /// </summary>
-    /// <remarks>
-    /// ## 调用逻辑
-    /// 1.  **实例化与启动**:
-    ///     - 在 `App.xaml.cs` 的 `ConfigureServices` 方法中，通过 `services.AddSingleton<OpcUaBackgroundService>()` 将该服务注册为单例。
-    ///     - 在 `OnStartup` 方法中，通过 `Host.Services.GetRequiredService<OpcUaBackgroundService>().StartAsync()` 启动服务。
-    ///
-    /// 2.  **核心执行流程 (`ExecuteAsync`)**:
-    ///     - 服务启动后，`ExecuteAsync` 方法被调用。
-    ///     - 订阅 `DataServices.OnVariableDataChanged` 事件，以便在变量配置发生变化时动态更新 OPC UA 的连接和订阅。
-    ///     - 调用 `LoadOpcUaVariables()` 方法，初始化加载所有协议类型为 `OpcUA` 且状态为激活的变量。
-    ///     - 进入主循环，等待应用程序关闭信号。
-    ///
-    /// 3.  **变量加载与管理 (`LoadOpcUaVariables`)**:
-    ///     - 从 `DataServices` 获取所有变量数据。
-    ///     - 清理本地缓存中已不存在或不再活跃的变量，并断开相应的 OPC UA 连接。
-    ///     - 遍历所有活动的 OPC UA 变量，为新增的变量调用 `ConnectOpcUaService` 方法建立连接和订阅。
-    ///     - 如果变量已存在但会话断开，则尝试重新连接。
-    ///
-    /// 4.  **连接与订阅 (`ConnectOpcUaService`)**:
-    ///     - 检查变量是否包含有效的终结点 URL 和节点 ID。
-    ///     - 如果到目标终结点的会话已存在且已连接，则复用该会话。
-    ///     - 否则，创建一个新的 OPC UA `Session`，并将其缓存到 `_opcUaSessions` 字典中。
-    ///     - 创建一个 `Subscription`，并将其缓存到 `_opcUaSubscriptions` 字典中。
-    ///     - 创建一个 `MonitoredItem` 来监控指定变量节点的值变化，并将其添加到订阅中。
-    ///     - 注册 `OnSubNotification` 事件回调，用于处理接收到的数据更新。
-    ///
-    /// 5.  **数据接收 (`OnSubNotification`)**:
-    ///     - 当订阅的变量值发生变化时，OPC UA 服务器会发送通知。
-    ///     - `OnSubNotification` 方法被触发，处理接收到的数据。
-    ///
-    /// 6.  **动态更新 (`HandleVariableDataChanged`)**:
-    ///     - 当 `DataServices` 中的变量数据发生增、删、改时，会触发 `OnVariableDataChanged` 事件。
-    ///     - `HandleVariableDataChanged` 方法被调用，重新执行 `LoadOpcUaVariables()` 以应用最新的变量配置。
-    ///
-    /// 7.  **服务停止 (`ExecuteAsync` 退出循环)**:
-    ///     - 当应用程序关闭时，`stoppingToken` 被触发。
-    ///     - 取消对 `OnVariableDataChanged` 事件的订阅。
-    ///     - 调用 `DisconnectAllOpcUaSessions()` 方法，关闭所有活动的 OPC UA 会话和订阅。
-    /// </remarks>
     public class OpcUaBackgroundService
     {
-        private CancellationTokenSource _cancellationTokenSource;
-        private Task _executingTask;
-
         private readonly DataServices _dataServices;
 
+        // 存储 OPC UA 设备，键为设备Id，值为会话对象。
+        private readonly Dictionary<int, Device> _deviceDic;
+
         // 存储 OPC UA 会话，键为终结点 URL，值为会话对象。
-        private readonly Dictionary<string, Session> _opcUaSessions;
+        private readonly Dictionary<string, Session> _sessionsDic;
 
         // 存储 OPC UA 订阅，键为终结点 URL，值为订阅对象。
-        private readonly Dictionary<string, Subscription> _opcUaSubscriptions;
+        private readonly Dictionary<string, Subscription> _subscriptionsDic;
 
         // 存储活动的 OPC UA 变量，键为变量的OpcNodeId
         private readonly Dictionary<string, VariableData> _opcUaNodeIdVariableDic; // Key: VariableData.Id
 
         // 储存所有要轮询更新的变量，键是Device.Id,值是这个设备所有要轮询的变量
-        private readonly Dictionary<int, List<VariableData>> _opcUaPollVariableDic; // Key: VariableData.Id
+        private readonly Dictionary<int, List<VariableData>> _pollVariableDic; // Key: VariableData.Id
 
         // 储存所有要订阅更新的变量，键是Device.Id,值是这个设备所有要轮询的变量
-        private readonly Dictionary<int, List<VariableData>> _opcUaSubVariableDic;
+        private readonly Dictionary<int, List<VariableData>> _subVariableDic;
 
-        // private readonly Dictionary<int, CancellationTokenSource>
-        //     _opcUaPollingTasks; // Key: VariableData.Id, Value: CancellationTokenSource for polling task
 
-        private List<Device> _opcUaDevices;
+       
+        // 后台服务的主线程，负责连接服务器，加载变量，订阅变量
+        private Thread _serviceMainThread;
 
-        // 定义不同轮询级别的间隔时间。
-        private readonly Dictionary<PollLevelType, TimeSpan> _pollingIntervals = new Dictionary<PollLevelType, TimeSpan>
-            {
-                { PollLevelType.TenMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenMilliseconds) },
-                {
-                    PollLevelType.HundredMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.HundredMilliseconds)
-                },
-                {
-                    PollLevelType.FiveHundredMilliseconds,
-                    TimeSpan.FromMilliseconds((int)PollLevelType.FiveHundredMilliseconds)
-                },
-                { PollLevelType.OneSecond, TimeSpan.FromMilliseconds((int)PollLevelType.OneSecond) },
-                { PollLevelType.FiveSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.FiveSeconds) },
-                { PollLevelType.TenSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenSeconds) },
-                { PollLevelType.TwentySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TwentySeconds) },
-                { PollLevelType.ThirtySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtySeconds) },
-                { PollLevelType.OneMinute, TimeSpan.FromMilliseconds((int)PollLevelType.OneMinute) },
-                { PollLevelType.ThreeMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThreeMinutes) },
-                { PollLevelType.FiveMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.FiveMinutes) },
-                { PollLevelType.TenMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.TenMinutes) },
-                { PollLevelType.ThirtyMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtyMinutes) }
-            };
+        // 轮询线程
+        private Thread _pollThread;
+
+        // 重新加载事件
+        private readonly ManualResetEvent _reloadEvent = new ManualResetEvent(false);
+
+        // 停止事件,触发后会停止整个Opc后台服务
+        private readonly ManualResetEvent _stopdEvent = new ManualResetEvent(false);
+
 
         /// <summary>
         /// OpcUaBackgroundService 的构造函数。
@@ -113,11 +58,12 @@ namespace PMSWPF.Services
         public OpcUaBackgroundService(DataServices dataServices)
         {
             _dataServices = dataServices;
-            _opcUaSessions = new Dictionary<string, Session>();
-            _opcUaSubscriptions = new Dictionary<string, Subscription>();
+            _sessionsDic = new Dictionary<string, Session>();
+            _subscriptionsDic = new Dictionary<string, Subscription>();
             _opcUaNodeIdVariableDic = new();
-            _opcUaPollVariableDic = new();
-            _opcUaSubVariableDic = new();
+            _pollVariableDic = new();
+            _subVariableDic = new();
+            _deviceDic = new();
         }
 
         /// <summary>
@@ -128,37 +74,60 @@ namespace PMSWPF.Services
         public void StartService()
         {
             NlogHelper.Info("OPC UA 服务正在启动...");
-            _cancellationTokenSource = new CancellationTokenSource();
-            _executingTask = ExecuteAsync(_cancellationTokenSource.Token);
+            _reloadEvent.Set();
+            _serviceMainThread = new Thread(Execute);
+            _serviceMainThread.IsBackground = true;
+            _serviceMainThread.Name = "OpcUaServiceThread";
+            _serviceMainThread.Start();
         }
 
-        public async Task StopService()
+        public void StopService()
         {
             NlogHelper.Info("OPC UA 服务正在停止...");
-            if (_executingTask == null)
-            {
-                return;
-            }
+            _stopdEvent.Set();
+            DisconnectAllOpcUaSessions();
 
-            try
-            {
-                _cancellationTokenSource.Cancel();
-            }
-            finally
-            {
-                await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite, CancellationToken.None));
-            }
+            _reloadEvent.Close();
+            _stopdEvent.Close();
+            NlogHelper.Info("OPC UA 服务已经停止。");
         }
 
-        protected async Task ExecuteAsync(CancellationToken stoppingToken)
+        private void Execute()
         {
-            NlogHelper.Info("OpcUa后台服务已启动。");
-
             // 订阅变量数据变化事件，以便在变量配置发生变化时重新加载。
-            _dataServices.OnVariableDataChanged += HandleVariableDataChanged;
+            _dataServices.OnDeviceListChanged += HandleDeviceListChanged;
 
-            // 初始化时加载所有活动的 OPC UA 变量。
-            await LoadOpcUaVariables();
+            while (!_stopdEvent.WaitOne(0))
+            {
+                _reloadEvent.WaitOne();
+
+                if (_dataServices.Devices == null || _dataServices.Devices.Count == 0)
+                {
+                    _reloadEvent.Reset();
+                    continue;
+                }
+
+                NlogHelper.Info("OpcUa后台服务开始加载变量...");
+                // 初始化时加载所有活动的 OPC UA 变量。
+                LoadOpcUaVariables();
+
+                //连接服务器
+                ConnectOpcUaService();
+                // // 添加订阅变量
+                SetupOpcUaSubscription();
+
+                if (_pollThread == null)
+                {
+                    _pollThread = new Thread(PollOpcUaVariable);
+                    _pollThread.IsBackground = true;
+                    _pollThread.Name = "OpcUaPollThread";
+                    _pollThread.Start();
+                }
+
+                NlogHelper.Info("OpcUa后台服务已启动。");
+                _reloadEvent.Reset();
+            }
+
 
             // 循环运行，直到接收到停止信号。
             // while (!stoppingToken.IsCancellationRequested)
@@ -168,116 +137,121 @@ namespace PMSWPF.Services
             // }
             NlogHelper.Info("OpcUa后台服务正在停止。");
             // 服务停止时，取消订阅事件并断开所有 OPC UA 连接。
-            _dataServices.OnVariableDataChanged -= HandleVariableDataChanged;
-            await DisconnectAllOpcUaSessions();
+            _dataServices.OnDeviceListChanged -= HandleDeviceListChanged;
+        }
+
+        private void HandleDeviceListChanged(List<Device> devices)
+        {
+            NlogHelper.Info("变量数据已更改。正在重新加载 OPC UA 变量。");
+            _reloadEvent.Set();
         }
 
         /// <summary>
         /// 从数据库加载所有活动的 OPC UA 变量，并进行相应的连接和订阅管理。
         /// </summary>
-        private async Task LoadOpcUaVariables()
+        private void LoadOpcUaVariables()
         {
-            Console.WriteLine("正在加载 OPC UA 变量...");
-            // var allVariables = await _dataServices.GetAllVariableDataAsync();
-            _opcUaDevices = _dataServices.Devices.Where(d => d.ProtocolType == ProtocolType.OpcUA && d.IsActive == true)
-                                         .ToList();
-            if (_opcUaDevices.Count == 0)
-                return;
-            // 是否是初次加载
-
-
-            _opcUaPollVariableDic.Clear();
-            _opcUaSubVariableDic.Clear();
-            _opcUaNodeIdVariableDic.Clear();
-            foreach (var opcUaDevice in _opcUaDevices)
+            try
             {
-                //查找设备中所有要轮询的变量
-                var dPollList = opcUaDevice?.VariableTables?.SelectMany(vt => vt.DataVariables)
-                                           .Where(vd => vd.IsActive == true &&
-                                                        vd.ProtocolType == ProtocolType.OpcUA &&
-                                                        vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaPoll)
-                                           .ToList();
-                // 将变量保存到字典中，方便Read后还原
-                foreach (var variableData in dPollList)
+                var _opcUaDevices = _dataServices
+                                    .Devices.Where(d => d.ProtocolType == ProtocolType.OpcUA && d.IsActive == true)
+                                    .ToList();
+
+                if (_opcUaDevices.Count == 0)
+                    return;
+                _deviceDic.Clear();
+                _pollVariableDic.Clear();
+                _subVariableDic.Clear();
+                _opcUaNodeIdVariableDic.Clear();
+                foreach (var opcUaDevice in _opcUaDevices)
                 {
-                    _opcUaNodeIdVariableDic.Add(variableData.OpcUaNodeId, variableData);
+                    // 将设备保存到字典中，方便之后查找
+                    _deviceDic.Add(opcUaDevice.Id, opcUaDevice);
+                    //查找设备中所有要轮询的变量
+                    var dPollList = opcUaDevice.VariableTables?.SelectMany(vt => vt.DataVariables)
+                                               .Where(vd => vd.IsActive == true &&
+                                                            vd.ProtocolType == ProtocolType.OpcUA &&
+                                                            vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaPoll)
+                                               .ToList();
+                    // 将变量保存到字典中，方便Read后还原
+                    foreach (var variableData in dPollList)
+                    {
+                        _opcUaNodeIdVariableDic.Add(variableData.OpcUaNodeId, variableData);
+                    }
+
+                    NlogHelper.Info($"加载OpcUa轮询变量：{dPollList.Count}个");
+                    _pollVariableDic.Add(opcUaDevice.Id, dPollList);
+                    //查找设备中所有要订阅的变量
+                    var dSubList = opcUaDevice.VariableTables?.SelectMany(vt => vt.DataVariables)
+                                              .Where(vd => vd.IsActive == true &&
+                                                           vd.ProtocolType == ProtocolType.OpcUA &&
+                                                           vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaSubscription)
+                                              .ToList();
+                    _subVariableDic.Add(opcUaDevice.Id, dSubList);
+                    NlogHelper.Info($"加载OpcUa订阅变量：{dSubList.Count}个");
                 }
-
-                _opcUaPollVariableDic.Add(opcUaDevice.Id, dPollList);
-                Console.WriteLine("已更新OPC UA轮询变量字典");
-                //查找设备中所有要订阅的变量
-                var dSubList = opcUaDevice?.VariableTables?.SelectMany(vt => vt.DataVariables)
-                                          .Where(vd => vd.IsActive == true &&
-                                                       vd.ProtocolType == ProtocolType.OpcUA &&
-                                                       vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaSubscription)
-                                          .ToList();
-                _opcUaSubVariableDic.Add(opcUaDevice.Id, dSubList);
             }
-
-
-            //连接服务器
-            await ConnectOpcUaService();
-            // // 添加订阅变量
-            SetupOpcUaSubscription();
-
-            await PollOpcUaVariable();
+            catch (Exception e)
+            {
+                NotificationHelper.ShowError($"加载OpcUa变量的过程中发生了错误：{e.Message}");
+            }
         }
 
         /// <summary>
         /// 连接到 OPC UA 服务器并订阅或轮询指定的变量。
         /// </summary>
-        /// <param name="variable">要订阅或轮询的变量信息。</param>
-        /// <param name="device">变量所属的设备信息。</param>
-        private async Task ConnectOpcUaService()
+        private void ConnectOpcUaService()
         {
-            foreach (Device device in _opcUaDevices)
+            foreach (Device device in _deviceDic.Values)
             {
                 Session session = null;
                 // 检查是否已存在到该终结点的活动会话。
-                if (_opcUaSessions.TryGetValue(device.OpcUaEndpointUrl, out session) && session.Connected)
+                if (_sessionsDic.TryGetValue(device.OpcUaEndpointUrl, out session) && session.Connected)
                 {
-                    NlogHelper.Info($"已连接到 OPC UA 终结点: {device.OpcUaEndpointUrl}");
+                    NlogHelper.Info($"已连接到 OPC UA 服务器: {device.OpcUaEndpointUrl}");
+                    continue;
                 }
-                else
-                {
-                    session = await OpcUaServiceHelper.CreateOpcUaSessionAsync(device.OpcUaEndpointUrl);
-                    if (session == null)
-                        return; // 连接失败，直接返回
 
-                    _opcUaSessions[device.OpcUaEndpointUrl] = session;
-                }
+                session = ServiceHelper.CreateOpcUaSession(device.OpcUaEndpointUrl);
+                if (session == null)
+                    return; // 连接失败，直接返回
+
+                _sessionsDic[device.OpcUaEndpointUrl] = session;
             }
         }
 
-        private async Task PollOpcUaVariable()
+        private void PollOpcUaVariable()
         {
-            while (!_cancellationTokenSource.Token.IsCancellationRequested)
+            NlogHelper.Info("OpcUa轮询变量线程已启动，开始轮询变量....");
+            while (!_stopdEvent.WaitOne(0))
             {
                 try
                 {
-                    foreach (var deviceId in _opcUaPollVariableDic.Keys.ToList())
+                    foreach (var deviceId in _pollVariableDic.Keys.ToList())
                     {
-                        await Task.Delay(100,_cancellationTokenSource.Token);
-                        var device = _dataServices.Devices.FirstOrDefault(d => d.Id == deviceId);
-                        if (device == null || device.OpcUaEndpointUrl == String.Empty)
+                        Thread.Sleep(100);
+                        if (!_deviceDic.TryGetValue(deviceId, out var device) || device.OpcUaEndpointUrl == null)
                         {
                             NlogHelper.Warn(
-                                $"OpcUa轮询变量时，在DataService中未找到ID为 {deviceId} 的设备，或其服务器地址为空，请检查！");
+                                $"OpcUa轮询变量时，在deviceDic中未找到ID为 {deviceId} 的设备，或其服务器地址为空，请检查！");
                             continue;
                         }
 
-                        _opcUaSessions.TryGetValue(device.OpcUaEndpointUrl, out Session session);
+                        _sessionsDic.TryGetValue(device.OpcUaEndpointUrl, out Session session);
                         if (session == null || !session.Connected)
                         {
-                            NlogHelper.Warn(
-                                $"用于 {device.OpcUaEndpointUrl} 的 OPC UA 会话未连接。正在尝试重新连接...");
-                            // 尝试重新连接会话
-                            await ConnectOpcUaService();
-                            continue;
+                            if (!_stopdEvent.WaitOne(0))
+                            {
+                                NlogHelper.Warn(
+                                    $"用于 {device.OpcUaEndpointUrl} 的 OPC UA 会话未连接。正在尝试重新连接...");
+                                // 尝试重新连接会话
+                                ConnectOpcUaService();
+                                continue;
+                            }
                         }
 
                         var nodesToRead = new ReadValueIdCollection();
-                        if (!_opcUaPollVariableDic.TryGetValue(deviceId, out var variableList))
+                        if (!_pollVariableDic.TryGetValue(deviceId, out var variableList))
                         {
                             continue;
                         }
@@ -285,7 +259,7 @@ namespace PMSWPF.Services
                         foreach (var variable in variableList)
                         {
                             // 获取变量的轮询间隔。
-                            if (!_pollingIntervals.TryGetValue(variable.PollLevelType, out var interval))
+                            if (!ServiceHelper.PollingIntervals.TryGetValue(variable.PollLevelType, out var interval))
                             {
                                 NlogHelper.Info($"未知的轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
                                 continue;
@@ -316,8 +290,7 @@ namespace PMSWPF.Services
                             out DiagnosticInfoCollection diagnosticInfos);
 
                         if (results == null || results.Count == 0)
-                            return;
-                        Console.WriteLine($"结果循环数量----------------------：{results.Count}");
+                            continue;
                         for (int i = 0; i < results.Count; i++)
                         {
                             var value = results[i];
@@ -337,11 +310,12 @@ namespace PMSWPF.Services
                                 continue;
                             }
 
-                            Console.WriteLine($"轮询变量：{variable.Name}");
+
                             // 更新变量数据
                             variable.DataValue = value.Value.ToString();
                             variable.DisplayValue = value.Value.ToString(); // 或者根据需要进行格式化
                             variable.UpdateTime = DateTime.Now;
+                            NlogHelper.Info($"轮询变量：{variable.Name},值：{variable.DataValue}");
                             // Console.WriteLine($"结果变量跟更新时间:{variable.UpdateTime}");
                             // await _dataServices.UpdateVariableDataAsync(variable);
                         }
@@ -349,11 +323,11 @@ namespace PMSWPF.Services
                 }
                 catch (Exception ex)
                 {
-                    NlogHelper.Error($"OPC UA 轮询期间发生错误: {ex.Message}", ex);
+                    NotificationHelper.ShowError($"OPC UA 轮询期间发生错误: {ex.Message}", ex);
                 }
             }
 
-            NlogHelper.Info($"OPC UA 变量轮询已停止。");
+            NlogHelper.Info("OpcUa轮询变量线程已停止。");
         }
 
         /// <summary>
@@ -372,74 +346,32 @@ namespace PMSWPF.Services
             }
         }
 
-        /// <summary>
-        /// 根据 PollLevelType 获取轮询间隔。
-        /// </summary>
-        /// <param name="pollLevelType">轮询级别类型。</param>
-        /// <returns>时间间隔。</returns>
-        private TimeSpan GetPollInterval(PollLevelType pollLevelType)
-        {
-            return pollLevelType switch
-                   {
-                       PollLevelType.OneSecond => TimeSpan.FromSeconds(1),
-                       PollLevelType.FiveSeconds => TimeSpan.FromSeconds(5),
-                       PollLevelType.TenSeconds => TimeSpan.FromSeconds(10),
-                       PollLevelType.ThirtySeconds => TimeSpan.FromSeconds(30),
-                       PollLevelType.OneMinute => TimeSpan.FromMinutes(1),
-                       PollLevelType.FiveMinutes => TimeSpan.FromMinutes(5),
-                       PollLevelType.TenMinutes => TimeSpan.FromMinutes(10),
-                       PollLevelType.ThirtyMinutes => TimeSpan.FromMinutes(30),
-                       PollLevelType.OneHour => TimeSpan.FromHours(1),
-                       _ => TimeSpan.FromSeconds(1), // 默认1秒
-                   };
-        }
-
-        /// <summary>
-        /// 断开与指定 OPC UA 服务器的连接。
-        /// </summary>
-        /// <param name="endpointUrl">OPC UA 服务器的终结点 URL。</param>
-        private async Task DisconnectOpcUaSession(string endpointUrl)
-        {
-            NlogHelper.Info($"正在断开 OPC UA 会话: {endpointUrl}");
-            if (_opcUaSessions.TryGetValue(endpointUrl, out var session))
-            {
-                if (_opcUaSubscriptions.TryGetValue(endpointUrl, out var subscription))
-                {
-                    // 删除订阅。
-                    subscription.Delete(true);
-                    _opcUaSubscriptions.Remove(endpointUrl);
-                }
-
-
-                // 关闭会话。
-                session.Close();
-                _opcUaSessions.Remove(endpointUrl);
-                NotificationHelper.ShowInfo($"已从 OPC UA 服务器断开连接: {endpointUrl}");
-            }
-        }
 
         /// <summary>
         /// 断开所有 OPC UA 会话。
         /// </summary>
-        private async Task DisconnectAllOpcUaSessions()
+        private void DisconnectAllOpcUaSessions()
         {
             NlogHelper.Info("正在断开所有 OPC UA 会话...");
-            foreach (var endpointUrl in _opcUaSessions.Keys.ToList())
+            foreach (var endpointUrl in _sessionsDic.Keys.ToList())
             {
-                await DisconnectOpcUaSession(endpointUrl);
-            }
-        }
+                NlogHelper.Info($"正在断开 OPC UA 会话: {endpointUrl}");
+                if (_sessionsDic.TryGetValue(endpointUrl, out var session))
+                {
+                    if (_subscriptionsDic.TryGetValue(endpointUrl, out var subscription))
+                    {
+                        // 删除订阅。
+                        subscription.Delete(true);
+                        _subscriptionsDic.Remove(endpointUrl);
+                    }
 
-        /// <summary>
-        /// 处理变量数据变化的事件。
-        /// 当数据库中的变量信息发生变化时，此方法被调用以重新加载和配置 OPC UA 变量。
-        /// </summary>
-        /// <param name="sender">事件发送者。</param>
-        /// <param name="variableDatas">变化的变量数据列表。</param>
-        private async void HandleVariableDataChanged(List<VariableData> variableDatas)
-        {
-            NlogHelper.Info("变量数据已更改。正在重新加载 OPC UA 变量。");
-            await LoadOpcUaVariables();
+
+                    // 关闭会话。
+                    session.Close();
+                    _sessionsDic.Remove(endpointUrl);
+                    NotificationHelper.ShowInfo($"已从 OPC UA 服务器断开连接: {endpointUrl}");
+                }
+            }
         }
 
 
@@ -451,15 +383,19 @@ namespace PMSWPF.Services
         /// <param name="endpointUrl">OPC UA 服务器的终结点 URL。</param>
         private void SetupOpcUaSubscription()
         {
-            foreach (var deviceId in _opcUaSubVariableDic.Keys)
+            foreach (var deviceId in _subVariableDic.Keys)
             {
                 var device = _dataServices.Devices.FirstOrDefault(d => d.Id == deviceId);
                 Subscription subscription = null;
                 // 得到session
-                _opcUaSessions.TryGetValue(device.OpcUaEndpointUrl, out var session);
+                if (!_sessionsDic.TryGetValue(device.OpcUaEndpointUrl, out var session))
+                {
+                    NlogHelper.Info($"从OpcUa会话字典中获取会话失败： {device.OpcUaEndpointUrl} ");
+                    continue;
+                }
 
                 // 判断设备是否已经添加了订阅
-                if (_opcUaSubscriptions.TryGetValue(device.OpcUaEndpointUrl, out subscription))
+                if (_subscriptionsDic.TryGetValue(device.OpcUaEndpointUrl, out subscription))
                 {
                     NlogHelper.Info($"OPC UA 终结点 {device.OpcUaEndpointUrl} 已存在订阅。");
                 }
@@ -469,11 +405,11 @@ namespace PMSWPF.Services
                     subscription.PublishingInterval = 1000; // 发布间隔（毫秒）
                     session.AddSubscription(subscription);
                     subscription.Create();
-                    _opcUaSubscriptions[device.OpcUaEndpointUrl] = subscription;
+                    _subscriptionsDic[device.OpcUaEndpointUrl] = subscription;
                 }
 
                 // 将变量添加到订阅
-                foreach (VariableData variable in _opcUaSubVariableDic[deviceId])
+                foreach (VariableData variable in _subVariableDic[deviceId])
                 {
                     // 7. 创建监控项并添加到订阅中。
                     MonitoredItem monitoredItem = new MonitoredItem(subscription.DefaultItem);
@@ -490,7 +426,7 @@ namespace PMSWPF.Services
                     subscription.ApplyChanges(); // 应用更改
                 }
 
-                NlogHelper.Info($"设备: {device.Name}, 添加了 {(_opcUaSubVariableDic[deviceId]?.Count ?? 0)} 个订阅变量。");
+                NlogHelper.Info($"设备: {device.Name}, 添加了 {(_subVariableDic[deviceId]?.Count ?? 0)} 个订阅变量。");
             }
         }
     }

@@ -344,6 +344,7 @@ partial class VariableTableViewModel : ViewModelBase
             foreach (var variableData in importVarDataList)
             {
                 variableData.CreateTime = DateTime.Now;
+                variableData.IsActive = true;
                 variableData.VariableTableId = VariableTable.Id;
             }
 
@@ -538,31 +539,66 @@ partial class VariableTableViewModel : ViewModelBase
     /// </summary>
     /// <param name="variablesToChange">要修改轮询频率的变量数据列表。</param>
     [RelayCommand]
-    public async Task ChangePollLevel(List<VariableData> variablesToChange)
+    public async Task ChangePollLevel(IList<object> variablesToChange)
     {
+        var validVariables = variablesToChange?.OfType<VariableData>().ToList();
+
         // 检查是否有变量被选中
-        if (variablesToChange == null || !variablesToChange.Any())
+        if (validVariables == null || !validVariables.Any())
         {
             NotificationHelper.ShowInfo("请选择要修改轮询频率的变量");
             return;
         }
 
         // 显示轮询频率选择对话框，并传入第一个变量的当前轮询频率作为默认值
-        var newPollLevelType = await _dialogService.ShowPollLevelDialog(variablesToChange.First()
+        var newPollLevelType = await _dialogService.ShowPollLevelDialog(validVariables.First()
                                                                             .PollLevelType);
         if (newPollLevelType.HasValue)
         {
             // 更新所有选定变量的轮询频率和修改状态
-            foreach (var variable in variablesToChange)
+            foreach (var variable in validVariables)
             {
                 variable.PollLevelType = newPollLevelType.Value;
                 variable.IsModified = false; // 标记为未修改，因为已保存到数据库
             }
 
             // 批量更新数据库中的变量数据
-            await _varDataRepository.UpdateAsync(variablesToChange);
+            await _varDataRepository.UpdateAsync(validVariables);
             // 显示成功通知
-            NotificationHelper.ShowSuccess($"已成功更新 {variablesToChange.Count} 个变量的轮询频率");
+            NotificationHelper.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询频率");
+        }
+    }
+
+    /// <summary>
+    /// 修改选定变量的OPC UA更新方式（轮询或订阅）。
+    /// </summary>
+    /// <param name="variablesToChange">要修改更新方式的变量数据列表。</param>
+    [RelayCommand]
+    public async Task ModifyOpcUaUpdateType(IList<object> variablesToChange)
+    {
+        // 过滤出有效的VariableData对象
+        var validVariables = variablesToChange?.OfType<VariableData>().ToList();
+
+        if (validVariables == null || !validVariables.Any())
+        {
+            NotificationHelper.ShowInfo("请选择要修改更新方式的OPC UA变量");
+            return;
+        }
+
+
+        // 显示更新方式选择对话框
+        var newUpdateType = await _dialogService.ShowOpcUaUpdateTypeDialog();
+        if (newUpdateType.HasValue)
+        {
+            // 更新所有选定变量的更新方式
+            foreach (var variable in validVariables)
+            {
+                variable.OpcUaUpdateType = newUpdateType.Value;
+            }
+
+            // 批量更新数据库
+            await _varDataRepository.UpdateAsync(validVariables);
+            NotificationHelper.ShowSuccess($"已成功为 {validVariables.Count} 个变量更新OPC UA更新方式。");
         }
     }
 
@@ -572,10 +608,12 @@ partial class VariableTableViewModel : ViewModelBase
     /// </summary>
     /// <param name="variablesToAddMqtt">要添加MQTT服务器的变量数据列表。</param>
     [RelayCommand]
-    public async Task AddMqttServerToVariables(IList<VariableData> variablesToAddMqtt)
+    public async Task AddMqttServerToVariables(IList<object> variablesToAddMqtt)
     {
+        var validVariables = variablesToAddMqtt?.OfType<VariableData>().ToList();
+
         // 检查是否有变量被选中
-        if (variablesToAddMqtt == null || !variablesToAddMqtt.Any())
+        if (validVariables == null || !validVariables.Any())
         {
             NotificationHelper.ShowInfo("请选择要添加MQTT服务器的变量");
             return;
@@ -591,7 +629,7 @@ partial class VariableTableViewModel : ViewModelBase
             }
 
             // 遍历所有选定的变量，并为其添加选定的MQTT服务器
-            foreach (VariableData variable in variablesToAddMqtt)
+            foreach (VariableData variable in validVariables)
             {
                 // 如果变量的Mqtts集合为空，则初始化它
                 if (variable.Mqtts == null)
@@ -608,9 +646,9 @@ partial class VariableTableViewModel : ViewModelBase
             }
 
             // 批量更新数据库中的变量数据
-            await _varDataRepository.UpdateAsync(variablesToAddMqtt.ToList());
+            await _varDataRepository.UpdateAsync(validVariables.ToList());
             // 显示成功通知
-            NotificationHelper.ShowSuccess($"已成功为 {variablesToAddMqtt.Count} 个变量添加MQTT服务器: {selectedMqtt.Name}");
+            NotificationHelper.ShowSuccess($"已成功为 {validVariables.Count} 个变量添加MQTT服务器: {selectedMqtt.Name}");
         }
         catch (Exception ex)
         {
