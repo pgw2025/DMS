@@ -49,6 +49,7 @@ public class DbMqtt
     /// <summary>
     /// MQTT客户端登录密码。
     /// </summary>
+    [SugarColumn(IsIgnore = true)]
     public string PassWord { get; set; } = String.Empty;
 
     /// <summary>
@@ -65,21 +66,25 @@ public class DbMqtt
     /// <summary>
     /// MQTT发布主题。
     /// </summary>
+    [SugarColumn(IsIgnore = true)]
     public string PublishTopic { get; set; } = String.Empty;
 
     /// <summary>
     /// MQTT备注。
     /// </summary>
+    [SugarColumn(IsIgnore = true)]
     public string Remark { get; set; } = String.Empty;
 
     /// <summary>
     /// MQTT订阅主题。
     /// </summary>
+    [SugarColumn(IsIgnore = true)]
     public string SubTopics { get; set; } = String.Empty;
 
     /// <summary>
     /// MQTT客户端登录用户名。
     /// </summary>
+    [SugarColumn(IsIgnore = true)]
     public string UserName { get; set; } = String.Empty;
 
     /// <summary>

@@ -153,12 +153,26 @@ namespace PMSWPF.Services
                                   .WithCredentials(mqtt.UserName, mqtt.PassWord)
                                   .WithCleanSession() // 清理会话，每次连接都是新会话
                                   .Build();
-
+                    
                     // 设置连接成功事件处理程序。
-                    client.UseConnectedHandler(e =>
+                    client.UseConnectedHandler(async e =>
                     {
                         NotificationHelper.ShowSuccess($"已连接到MQTT服务器: {mqtt.Name}");
                         mqtt.IsConnected = true;
+                        
+                        // 订阅主题
+                        await client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("test").Build());
+                        NlogHelper.Info($"MQTT客户端 {mqtt.Name} 已订阅主题: {mqtt.SubTopics}");
+                    });
+
+                    // 设置接收消息处理程序
+                    client.UseApplicationMessageReceivedHandler(e =>
+                    {
+                        var topic = e.ApplicationMessage.Topic;
+                        var payload = System.Text.Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+                        NlogHelper.Info($"MQTT客户端 {mqtt.Name} 收到消息: 主题={topic}, 消息={payload}");
+
+                        // 在这里添加处理消息的逻辑
                     });
 
                     // 设置断开连接事件处理程序。
