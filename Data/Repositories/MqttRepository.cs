@@ -158,7 +158,11 @@ public class MqttRepository
                                      .ExecuteCommandAsync();
                 // Delete menu entry
                 var menu = await _menuRepository.GetMenuByDataId(mqtt.Id, MenuType.MqttMenu);
-                await _menuRepository.DeleteMenu(menu, db);
+                if (menu!=null )
+                {
+                    await _menuRepository.DeleteMenu(menu, db);
+                }
+                
                 await db.CommitTranAsync();
                 stopwatch.Stop();
                 NlogHelper.Info($"删除Mqtt配置ID '{mqtt.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");

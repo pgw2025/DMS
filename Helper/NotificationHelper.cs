@@ -154,4 +154,19 @@ public static class NotificationHelper
     {
         SendNotificationInternal(msg, NotificationType.Info, throttle, null, callerFilePath, callerMember, callerLineNumber);
     }
+    /// <summary>
+    /// 显示一个信息通知消息，并记录信息日志。支持节流。
+    /// </summary>
+    /// <param name="msg">信息消息内容。</param>
+    /// <param name="throttle">是否启用通知和日志节流。</param>
+    /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
+    /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
+    /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
+    public static void ShowWarn(string msg, bool throttle = true,
+                                [CallerFilePath] string callerFilePath = "",
+                                [CallerMemberName] string callerMember = "",
+                                [CallerLineNumber] int callerLineNumber = 0)
+    {
+        SendNotificationInternal(msg, NotificationType.Warning, throttle, null, callerFilePath, callerMember, callerLineNumber);
+    }
 }

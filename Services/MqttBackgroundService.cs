@@ -26,13 +26,15 @@ namespace PMSWPF.Services
         private readonly Dictionary<int, IMqttClient> _mqttClients;
 
         // 存储MQTT配置的字典，键为MQTT配置ID，值为Mqtt模型对象。
-        private readonly Dictionary<int, Mqtt> _mqttConfigurations;
+        private readonly Dictionary<int, Mqtt> _mqttConfigDic;
 
-        // 存储与MQTT配置关联的变量数据的字典，键为MQTT配置ID，值为VariableData列表。
-        private readonly Dictionary<int, List<VariableData>> _mqttVariableData;
 
         // 定时器，用于周期性地执行数据发布任务。
         private Timer _timer;
+        private Thread _serviceMainThread;
+
+        private ManualResetEvent _reloadEvent = new ManualResetEvent(false);
+        private ManualResetEvent _stopEvent = new ManualResetEvent(false);
 
         /// <summary>
         /// 构造函数，注入DataServices。
@@ -42,8 +44,7 @@ namespace PMSWPF.Services
         {
             _dataServices = dataServices;
             _mqttClients = new Dictionary<int, IMqttClient>();
-            _mqttConfigurations = new Dictionary<int, Mqtt>();
-            _mqttVariableData = new Dictionary<int, List<VariableData>>();
+            _mqttConfigDic = new Dictionary<int, Mqtt>();
         }
 
         /// <summary>
@@ -51,151 +52,83 @@ namespace PMSWPF.Services
         /// </summary>
         public async void StartService()
         {
-            NlogHelper.Info("MqttBackgroundService started."); // 记录服务启动信息
-
             // 订阅MQTT列表和变量数据变化的事件，以便在数据更新时重新加载配置和数据。
             _dataServices.OnMqttListChanged += HandleMqttListChanged;
-            _dataServices.OnDeviceListChanged += HandleDeviceListChanged;
-
-            // 初始加载MQTT配置和变量数据。
-            await LoadMqttConfigurations();
-            await LoadVariableData();
-
-            // 初始化定时器，每5秒执行一次DoWork方法，用于周期性地发布数据。
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(5)); // 每5秒轮询一次
-
-            // 使服务保持运行，直到收到停止请求。
-            // await Task.Delay(Timeout.Infinite, stoppingToken);
+            NlogHelper.Info("Mqtt后台服务启动"); // 记录服务启动信息
+            _reloadEvent.Set();
+            _stopEvent.Reset();
+            _serviceMainThread = new Thread(Execute);
+            _serviceMainThread.IsBackground = true;
+            _serviceMainThread.Name = "MqttServiceMainThread";
+            _serviceMainThread.Start();
+            
         }
 
-        private async void HandleDeviceListChanged( List<Device> devices)
+        private void Execute()
         {
-            NlogHelper.Info("Variable data changed. Reloading variable associations."); // 记录变量数据变化信息
-            // 重新加载变量数据。
-            await LoadVariableData();
+            while (!_stopEvent.WaitOne(0))
+            {
+                if (_dataServices.Mqtts==null || _dataServices.Mqtts.Count==0)
+                {
+                    _reloadEvent.Reset();
+                    continue;
+                }
+                
+                _reloadEvent.WaitOne();
+                // 初始加载MQTT配置和变量数据。
+                LoadMqttConfigurations();
+                ConnectMqttClient();
+                
+                _reloadEvent.Reset();
+            }
         }
+
 
         /// <summary>
         /// 停止MQTT后台服务。
         /// </summary>
-        public async void StopService()
+        public  void StopService()
         {
-            NlogHelper.Info("MqttBackgroundService stopping."); // 记录服务停止信息
+            NlogHelper.Info("Mqtt后台服务开始停止...."); // 记录服务停止信息
 
-            // 停止定时器。
-            _timer?.Change(Timeout.Infinite, 0);
-
+            _stopEvent.Set();
             // 取消订阅事件。
             _dataServices.OnMqttListChanged -= HandleMqttListChanged;
-            _dataServices.OnDeviceListChanged -= HandleDeviceListChanged;
 
             // 断开所有已连接的MQTT客户端。
-            foreach (var client in _mqttClients.Values)
+            foreach (var mqttId in _mqttClients.Keys.ToList())
             {
+                var client=_mqttClients[mqttId];
+                var mqtt=_mqttConfigDic[mqttId];
+                mqtt.IsConnected = false;
                 if (client.IsConnected)
                 {
-                    await client.DisconnectAsync();
+                    client.DisconnectAsync().GetAwaiter().GetResult();
                 }
             }
 
             // 清空所有字典。
             _mqttClients.Clear();
-            _mqttConfigurations.Clear();
-            _mqttVariableData.Clear();
+            _mqttConfigDic.Clear();
+            NlogHelper.Info("Mqtt后台服务已停止。"); // 记录服务停止信息
         }
 
-        /// <summary>
-        /// 定时器回调方法，用于周期性地检查并发布已修改的变量数据。
-        /// </summary>
-        /// <param name="state">定时器状态对象（此处未使用）。</param>
-        private async void DoWork(object state)
-        {
-            // 遍历所有MQTT配置关联的变量数据。
-            foreach (var mqttConfigId in _mqttVariableData.Keys)
-            {
-                // 检查MQTT客户端是否连接。
-                if (_mqttClients.TryGetValue(mqttConfigId, out var client) && client.IsConnected)
-                {
-                    var variables = _mqttVariableData[mqttConfigId];
-                    // 遍历与当前MQTT配置关联的变量。
-                    foreach (var variable in variables)
-                    {
-                        // 如果变量已被修改（IsModified标志为true）。
-                        if (variable.IsModified)
-                        {
-                            // 获取发布主题。
-                            var topic = _mqttConfigurations[mqttConfigId].PublishTopic;
-                            if (!string.IsNullOrEmpty(topic))
-                            {
-                                // 构建MQTT消息。
-                                var message = new MqttApplicationMessageBuilder()
-                                              .WithTopic($"{topic}/{variable.Name}") // 主题格式：PublishTopic/VariableName
-                                              .WithPayload(variable.DataValue) // 消息载荷为变量的值
-                                              .Build();
-
-                                // 发布MQTT消息。
-                                await client.PublishAsync(message);
-                                NlogHelper.Info(
-                                    $"Published {variable.Name} = {variable.DataValue} to {topic}/{variable.Name}",
-                                    throttle: true); // 记录发布信息
-                                variable.IsModified = false; // 发布后重置修改标志。
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// 加载并连接MQTT配置。
         /// </summary>
         /// <returns>表示异步操作的任务。</returns>
-        private async Task LoadMqttConfigurations()
+        private void LoadMqttConfigurations()
         {
+            NlogHelper.Info("开始加载Mqtt配置文件...");
             // 从数据服务获取所有MQTT配置。
-            var allMqtts = await _dataServices.GetMqttsAsync();
-            var activeMqtts = allMqtts.Where(m => m.IsActive)
-                                      .ToList();
-            var activeMqttIds = activeMqtts.Select(m => m.Id)
-                                           .ToHashSet();
-
-            // 断开并移除不再活跃或已删除的MQTT客户端。
-            var clientsToDisconnect = _mqttClients.Keys.Except(activeMqttIds)
-                                                  .ToList();
-            foreach (var id in clientsToDisconnect)
+            var _mqttConfigList = _dataServices.Mqtts.Where(m => m.IsActive)
+                                               .ToList();
+            foreach (var mqtt in _mqttConfigList)
             {
-                if (_mqttClients.TryGetValue(id, out var client))
-                {
-                    if (client.IsConnected)
-                    {
-                        await client.DisconnectAsync();
-                        // 更新模型中的连接状态
-                        if (_mqttConfigurations.TryGetValue(id, out var mqttConfig))
-                        {
-                            mqttConfig.IsConnected = false;
-                        }
-                    }
-
-                    _mqttClients.Remove(id);
-                    NlogHelper.Info(
-                        $"Disconnected and removed MQTT client for ID: {id} (no longer active or removed).");
-                }
-
-                _mqttConfigurations.Remove(id);
-                _mqttVariableData.Remove(id);
+                _mqttConfigDic[mqtt.Id] = mqtt;
             }
-
-            // 连接或更新活跃的客户端。
-            foreach (var mqtt in activeMqtts)
-            {
-                if (!_mqttClients.ContainsKey(mqtt.Id))
-                {
-                    await ConnectMqttClient(mqtt);
-                }
-
-                // 始终更新或添加MQTT配置到字典。
-                _mqttConfigurations[mqtt.Id] = mqtt;
-            }
+            NlogHelper.Info($"Mqtt配置文件加载成功，开启的Mqtt客户端：{_mqttConfigList.Count}个。");
         }
 
         /// <summary>
@@ -203,103 +136,78 @@ namespace PMSWPF.Services
         /// </summary>
         /// <param name="mqtt">MQTT配置对象。</param>
         /// <returns>表示异步操作的任务。</returns>
-        private async Task ConnectMqttClient(Mqtt mqtt)
+        private void ConnectMqttClient()
         {
-            try
+            foreach (Mqtt mqtt in _mqttConfigDic.Values.ToList())
             {
-                // 创建MQTT客户端工厂和客户端实例。
-                var factory = new MqttFactory();
-                var client = factory.CreateMqttClient();
-                // 构建MQTT客户端连接选项。
-                var options = new MqttClientOptionsBuilder()
-                              .WithClientId(mqtt.ClientID)
-                              .WithTcpServer(mqtt.Host, mqtt.Port)
-                              .WithCredentials(mqtt.UserName, mqtt.PassWord)
-                              .WithCleanSession() // 清理会话，每次连接都是新会话
-                              .Build();
-
-                // 设置连接成功事件处理程序。
-                client.UseConnectedHandler(e =>
+                try
                 {
-                    NlogHelper.Info($"Connected to MQTT broker: {mqtt.Name}");
-                    NotificationHelper.ShowSuccess($"已连接到MQTT服务器: {mqtt.Name}");
-                    mqtt.IsConnected = true;
-                });
+                    NlogHelper.Info($"开始连接：{mqtt.Name}的服务器...");
+                    // 创建MQTT客户端工厂和客户端实例。
+                    var factory = new MqttFactory();
+                    var client = factory.CreateMqttClient();
+                    // 构建MQTT客户端连接选项。
+                    var options = new MqttClientOptionsBuilder()
+                                  .WithClientId(mqtt.ClientID)
+                                  .WithTcpServer(mqtt.Host, mqtt.Port)
+                                  .WithCredentials(mqtt.UserName, mqtt.PassWord)
+                                  .WithCleanSession() // 清理会话，每次连接都是新会话
+                                  .Build();
 
-                // 设置断开连接事件处理程序。
-                client.UseDisconnectedHandler(async e =>
-                {
-                    NlogHelper.Warn($"Disconnected from MQTT broker: {mqtt.Name}. Reason: {e.Reason}");
-                    NotificationHelper.ShowInfo($"与MQTT服务器断开连接: {mqtt.Name}");
-                    mqtt.IsConnected = false;
-                    // 尝试重新连接。
-                    await Task.Delay(TimeSpan.FromSeconds(5)); // 等待5秒后重连
-                    try
+                    // 设置连接成功事件处理程序。
+                    client.UseConnectedHandler(e =>
                     {
-                        await client.ConnectAsync(options, CancellationToken.None);
-                    }
-                    catch (Exception ex)
+                        NotificationHelper.ShowSuccess($"已连接到MQTT服务器: {mqtt.Name}");
+                        mqtt.IsConnected = true;
+                    });
+
+                    // 设置断开连接事件处理程序。
+                    client.UseDisconnectedHandler(async e =>
                     {
-                        NlogHelper.Error($"Failed to reconnect to MQTT broker: {mqtt.Name}", ex);
-                    }
-                });
-
-                // 尝试连接到MQTT代理。
-                await client.ConnectAsync(options, CancellationToken.None);
-                // 将连接成功的客户端添加到字典。
-                _mqttClients[mqtt.Id] = client;
-            }
-            catch (Exception ex)
-            {
-                NotificationHelper.ShowError($"连接MQTT服务器失败: {mqtt.Name} - {ex.Message}", ex);
-            }
-        }
-
-        /// <summary>
-        /// 加载所有变量数据并按MQTT配置ID进行分组。
-        /// </summary>
-        /// <returns>表示异步操作的任务。</returns>
-        private async Task LoadVariableData()
-        {
-            // 从数据服务获取所有变量数据。
-            var allVariables = _dataServices.VariableDatas;
-            if (!allVariables.Any())
-                return;
-            _mqttVariableData.Clear(); // 清空现有数据
-
-            // 遍历所有变量，并根据其关联的MQTT配置进行分组。
-            foreach (var variable in allVariables)
-            {
-                if (variable.Mqtts != null)
-                {
-                    foreach (var mqtt in variable.Mqtts)
-                    {
-                        // 如果字典中没有该MQTT配置的条目，则创建一个新的列表。
-                        if (!_mqttVariableData.ContainsKey(mqtt.Id))
+                        NotificationHelper.ShowWarn($"与MQTT服务器断开连接: {mqtt.Name}");
+                        mqtt.IsConnected = false;
+                        // 服务停止
+                        if (_stopEvent.WaitOne(0))
+                            return;
+                        
+                        NlogHelper.Info($"5秒后重新连接Mqtt服务器：{mqtt.Name}");
+                        // 尝试重新连接。
+                        await Task.Delay(TimeSpan.FromSeconds(5)); // 等待5秒后重连
+                        try
                         {
-                            _mqttVariableData[mqtt.Id] = new List<VariableData>();
+                            await client.ConnectAsync(options, CancellationToken.None);
                         }
+                        catch (Exception ex)
+                        {
+                            NlogHelper.Error($"重新与Mqtt服务器连接失败: {mqtt.Name}", ex);
+                        }
+                    });
 
-                        // 将变量添加到对应MQTT配置的列表中。
-                        _mqttVariableData[mqtt.Id]
-                            .Add(variable);
-                    }
+                    // 尝试连接到MQTT代理。
+                    client.ConnectAsync(options, CancellationToken.None)
+                          .GetAwaiter()
+                          .GetResult();
+                    // 将连接成功的客户端添加到字典。
+                    _mqttClients[mqtt.Id] = client;
+                }
+                catch (Exception ex)
+                {
+                    NotificationHelper.ShowError($"连接MQTT服务器失败: {mqtt.Name} - {ex.Message}", ex);
                 }
             }
         }
+
 
         /// <summary>
         /// 处理MQTT列表变化事件的回调方法。
         /// </summary>
         /// <param name="sender">事件发送者。</param>
         /// <param name="mqtts">更新后的MQTT配置列表。</param>
-        private async void HandleMqttListChanged( List<Mqtt> mqtts)
+        private async void HandleMqttListChanged(List<Mqtt> mqtts)
         {
-            NlogHelper.Info("MQTT list changed. Reloading configurations."); // 记录MQTT列表变化信息
+            NlogHelper.Info("Mqtt列表发生了变化，正在重新加载数据..."); // 记录MQTT列表变化信息
             // 重新加载MQTT配置和变量数据。
-            await LoadMqttConfigurations();
-            await LoadVariableData(); // 重新加载变量数据，以防关联发生变化
+            _reloadEvent.Set();
         }
-
     }
 }

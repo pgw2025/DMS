@@ -30,6 +30,7 @@ public class MenuRepository
 
     public async Task<int> DeleteMenu(MenuBean menu, SqlSugarClient db)
     {
+        
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         var childList = await db.Queryable<DbMenu>()

@@ -24,6 +24,18 @@
                                       Opacity="0.1"
                                       BlurRadius="5" />
                 </Border.Effect>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsRuning}" Value="True">
+                                <Setter Property="Background" Value="Aquamarine"></Setter>
+                            </DataTrigger>
+                          
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                
+               
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -35,7 +47,7 @@
                     <DockPanel Grid.Row="0"
                                Margin="0,0,0,10">
                         <ui:ToggleSwitch DockPanel.Dock="Right"
-                                         IsOn="{Binding IsRuning}"
+                                         IsOn="{Binding IsActive}"
                                          OffContent="停止"
                                          OnContent="启动" />
                         <TextBlock Text="{Binding Name}"

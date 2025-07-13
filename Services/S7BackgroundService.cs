@@ -11,6 +11,7 @@ using PMSWPF.Models;
 using PMSWPF.Enums;
 using PMSWPF.Helper;
 using S7.Net.Types;
+using SqlSugar;
 using DateTime = System.DateTime;
 
 namespace PMSWPF.Services
@@ -280,6 +281,7 @@ namespace PMSWPF.Services
                 int varCount = 0;
                 foreach (var device in _s7Devices)
                 {
+                    device.IsRuning = true;
                     _deviceDic.Add(device.Id, device);
                     // 过滤出当前设备和S7协议相关的变量。
                     var s7Variables = device.VariableTables
@@ -324,7 +326,12 @@ namespace PMSWPF.Services
             _pollingThread.Interrupt();
             _serviceMainThread.Interrupt();
             DisconnectAllPlc();
-
+            
+            foreach (Device device in _deviceDic.Values.ToList())
+            {
+                device.IsRuning = false;
+            }
+            // 关闭事件
             _reloadEvent.Close();
             _stopEvent.Reset();
             _stopEvent.Close();
