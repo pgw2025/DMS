@@ -68,7 +68,7 @@
             <TextBlock Text="订阅主题"
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
-            <TextBox Text="{Binding Mqtt.SubTopics, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Text="{Binding Mqtt.SubTopic, UpdateSourceTrigger=PropertyChanged}" />
             <CheckBox FontSize="16"
                       Content="是否设为默认"
                       Margin="0 30 0 0"

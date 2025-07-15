@@ -72,7 +72,7 @@ public partial class Mqtt : ObservableObject
     /// <summary>
     /// MQTT订阅主题。
     /// </summary>
-    public string SubTopics { get; set; }
+    public string SubTopic { get; set; }
 
     /// <summary>
     /// MQTT客户端登录用户名。

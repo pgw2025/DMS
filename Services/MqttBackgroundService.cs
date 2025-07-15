@@ -161,8 +161,8 @@ namespace PMSWPF.Services
                         mqtt.IsConnected = true;
                         
                         // 订阅主题
-                        await client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("test").Build());
-                        NlogHelper.Info($"MQTT客户端 {mqtt.Name} 已订阅主题: {mqtt.SubTopics}");
+                        await client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(mqtt.SubTopic).Build());
+                        NlogHelper.Info($"MQTT客户端 {mqtt.Name} 已订阅主题: {mqtt.SubTopic}");
                     });
 
                     // 设置接收消息处理程序
@@ -182,6 +182,8 @@ namespace PMSWPF.Services
                         mqtt.IsConnected = false;
                         // 服务停止
                         if (_stopEvent.WaitOne(0))
+                            return;
+                        if (!mqtt.IsActive)
                             return;
                         
                         NlogHelper.Info($"5秒后重新连接Mqtt服务器：{mqtt.Name}");

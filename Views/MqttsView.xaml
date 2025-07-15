@@ -126,7 +126,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding SubTopics}" />
+                            <TextBlock Text="{Binding SubTopic}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
