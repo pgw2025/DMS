@@ -16,9 +16,9 @@ public partial class MqttSelectionDialogViewModel : ObservableObject
     [ObservableProperty]
     private Mqtt? selectedMqtt;
 
-    public MqttSelectionDialogViewModel()
+    public MqttSelectionDialogViewModel(MqttRepository mqttRepository)
     {
-        _mqttRepository = new MqttRepository();
+        _mqttRepository = mqttRepository;
         LoadMqtts();
     }
 

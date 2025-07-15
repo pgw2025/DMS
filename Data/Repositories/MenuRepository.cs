@@ -6,6 +6,7 @@ using PMSWPF.Extensions;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 using SqlSugar;
+using AutoMapper;
 
 using PMSWPF.Helper;
 
@@ -13,9 +14,11 @@ namespace PMSWPF.Data.Repositories;
 
 public class MenuRepository
 {
+    private readonly IMapper _mapper;
 
-    public MenuRepository()
+    public MenuRepository(IMapper mapper)
     {
+        _mapper = mapper;
     }
 
     public async Task<int> DeleteMenu(MenuBean menu)
@@ -53,7 +56,7 @@ public class MenuRepository
                                      .ToTreeAsync(dm => dm.Items, dm => dm.ParentId, 0);
 
             foreach (var dbMenu in dbMenuTree)
-                menuTree.Add(dbMenu.CopyTo<MenuBean>());
+                menuTree.Add(_mapper.Map<MenuBean>(dbMenu));
             stopwatch.Stop();
             NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
             return menuTree;
@@ -83,7 +86,7 @@ public class MenuRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
+        var result = await db.Insertable<DbMenu>(_mapper.Map<DbMenu>(menu))
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         NlogHelper.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -136,7 +139,7 @@ public class MenuRepository
                             Icon = SegoeFluentIcons.Devices4.Glyph,
                         };
         menu.ParentId = deviceMainMenu.Id;
-        var addDeviceMenuId = await db.Insertable<DbMenu>(menu.CopyTo<DbMenu>())
+        var addDeviceMenuId = await db.Insertable<DbMenu>(_mapper.Map<DbMenu>(menu))
                                       .ExecuteReturnIdentityAsync();
         stopwatch.Stop();
         NlogHelper.Info($"添加设备菜单 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -170,7 +173,7 @@ public class MenuRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await db.Updateable<DbMenu>(menu.CopyTo<DbMenu>())
+        var result = await db.Updateable<DbMenu>(_mapper.Map<DbMenu>(menu))
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         NlogHelper.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -187,7 +190,7 @@ public class MenuRepository
                                  .FirstAsync(m => m.DataId == dataId && m.Type == menuType);
             stopwatch.Stop();
             NlogHelper.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result?.CopyTo<MenuBean>();
+            return _mapper.Map<MenuBean>(result);
         }
     }
 
@@ -195,6 +198,6 @@ public class MenuRepository
     {
         using var db = DbContext.GetInstance();
        var dbMenu= await db.Queryable<DbMenu>().FirstAsync(m => m.Name == name  && m.Type == MenuType.MainMenu);
-       return dbMenu.CopyTo<MenuBean>();
+       return _mapper.Map<MenuBean>(dbMenu);
     }
 }

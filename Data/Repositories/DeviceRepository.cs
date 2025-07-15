@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using AutoMapper;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
@@ -11,13 +12,15 @@ namespace PMSWPF.Data.Repositories;
 
 public class DeviceRepository
 {
+    private readonly IMapper _mapper;
     private readonly MenuRepository _menuRepository;
     private readonly VarTableRepository _varTableRepository;
 
-    public DeviceRepository()
+    public DeviceRepository(IMapper mapper,MenuRepository menuRepository,VarTableRepository varTableRepository)
     {
-        _menuRepository = new MenuRepository();
-        _varTableRepository = new VarTableRepository();
+        _mapper = mapper;
+        _menuRepository = menuRepository;
+        _varTableRepository = varTableRepository;
     }
 
 
@@ -48,7 +51,8 @@ public class DeviceRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await db.Updateable<DbDevice>(device.CopyTo<DbDevice>())
+        
+        var result = await db.Updateable<DbDevice>(_mapper.Map<DbDevice>(device))
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         NlogHelper.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -70,16 +74,11 @@ public class DeviceRepository
                                 .Includes(d => d.VariableTables, dv => dv.Device)
                                 .Includes(d => d.VariableTables, dvd => dvd.DataVariables, data => data.VariableTable)
                                 .ToListAsync();
-            var devices = new List<Device>();
-            foreach (var dbDevice in dlist)
-            {
-                var device = dbDevice.CopyTo<Device>();
-                devices.Add(device);
-            }
+           
 
             stopwatch.Stop();
             NlogHelper.Info($"加载设备列表总耗时：{stopwatch.ElapsedMilliseconds}ms");
-
+            var devices= _mapper.Map<List<Device>>(dlist);
             return devices;
         }
     }
@@ -99,7 +98,7 @@ public class DeviceRepository
                                  .FirstAsync(p => p.Id == id);
             stopwatch.Stop();
             NlogHelper.Info($"根据ID '{id}' 获取设备耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.CopyTo<Device>();
+            return _mapper.Map<Device>(result);
         }
     }
 
@@ -219,7 +218,7 @@ public class DeviceRepository
     {
         ;
         // 添加设备
-        var addDevice = await db.Insertable<DbDevice>(device.CopyTo<DbDevice>())
+        var addDevice = await db.Insertable<DbDevice>(_mapper.Map<DbDevice>(device))
                                 .ExecuteReturnEntityAsync();
 
         // 4. 为新设备添加菜单
@@ -250,7 +249,7 @@ public class DeviceRepository
         }
 
         await _menuRepository.AddVarTableMenu(addDevice, addDeviceMenuId, db);
-        return addDevice.CopyTo<Device>();
+        return _mapper.Map<Device>(addDevice);
     }
 
  

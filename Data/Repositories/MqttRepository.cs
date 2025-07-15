@@ -1,13 +1,10 @@
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using PMSWPF.Data.Entities;
-using PMSWPF.Models;
-using PMSWPF.Extensions;
-using SqlSugar;
-using PMSWPF.Helper;
+using AutoMapper;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using PMSWPF.Data.Entities;
 using PMSWPF.Enums;
+using PMSWPF.Helper;
+using PMSWPF.Models;
 
 namespace PMSWPF.Data.Repositories;
 
@@ -17,10 +14,12 @@ namespace PMSWPF.Data.Repositories;
 public class MqttRepository
 {
     private readonly MenuRepository _menuRepository;
+    private readonly IMapper _mapper;
 
-    public MqttRepository()
+    public MqttRepository(MenuRepository menuRepository, IMapper mapper)
     {
-        _menuRepository = new MenuRepository();
+        _menuRepository = menuRepository;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -39,7 +38,7 @@ public class MqttRepository
                                   .SingleAsync();
             stopwatch.Stop();
             NlogHelper.Info($"根据ID '{id}' 获取Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.CopyTo<Mqtt>();
+            return _mapper.Map<Mqtt>(result);
         }
     }
 
@@ -57,7 +56,7 @@ public class MqttRepository
                                   .ToListAsync();
             stopwatch.Stop();
             NlogHelper.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.Select(m => m.CopyTo<Mqtt>())
+            return result.Select(m => _mapper.Map<Mqtt>(m))
                          .ToList();
         }
     }
@@ -75,7 +74,7 @@ public class MqttRepository
         await db.BeginTranAsync();
         try
         {
-            var result = await db.Insertable(mqtt.CopyTo<DbMqtt>())
+            var result = await db.Insertable(_mapper.Map<DbMqtt>(mqtt))
                                  .ExecuteReturnIdentityAsync();
             var mqttMenu = await _menuRepository.GetMainMenuByName("Mqtt服务器");
             // Add menu entry
@@ -115,7 +114,7 @@ public class MqttRepository
             await db.BeginTranAsync();
             try
             {
-                var result = await db.Updateable(mqtt.CopyTo<DbMqtt>())
+                var result = await db.Updateable(_mapper.Map<DbMqtt>(mqtt))
                                      .ExecuteCommandAsync();
                 // Update menu entry
                 var menu = await _menuRepository.GetMenuByDataId(mqtt.Id, MenuType.MqttMenu);

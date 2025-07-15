@@ -42,12 +42,12 @@ public partial class DevicesViewModel : ViewModelBase
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="dataServices">数据服务。</param>
     public DevicesViewModel(
-        IDialogService dialogService, DataServices dataServices
+        IDialogService dialogService, DataServices dataServices,DeviceRepository deviceRepository,VarTableRepository varTableRepository,MenuRepository menuRepository
     )
     {
-        _deviceRepository = new DeviceRepository();
-        _varTableRepository = new VarTableRepository();
-        _menuRepository = new MenuRepository();
+        _deviceRepository = deviceRepository;
+        _varTableRepository = varTableRepository;
+        _menuRepository = menuRepository;
         
         _dialogService = dialogService;
         _dataServices = dataServices;

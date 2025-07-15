@@ -6,11 +6,18 @@ using PMSWPF.Helper;
 using PMSWPF.Models;
 using SqlSugar;
 using System.Diagnostics;
+using AutoMapper;
 
 namespace PMSWPF.Data.Repositories;
 
 public class VarTableRepository
 {
+    private readonly IMapper _mapper;
+
+    public VarTableRepository(IMapper mapper)
+    {
+        _mapper = mapper;
+    }
 
     /// <summary>
     /// 添加变量表
@@ -43,11 +50,11 @@ public class VarTableRepository
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var addVarTabel = await db.Insertable<DbVariableTable>(variableTable.CopyTo<DbVariableTable>())
+        var addVarTabel = await db.Insertable<DbVariableTable>(_mapper.Map<DbVariableTable>(variableTable))
                                   .ExecuteReturnEntityAsync();
         stopwatch.Stop();
         NlogHelper.Info($"添加设备 '{addVarTabel.Name}' 的默认变量表耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return addVarTabel.CopyTo<VariableTable>();
+        return _mapper.Map<VariableTable>(addVarTabel);
     }
 
     /// <summary>
@@ -77,7 +84,7 @@ public class VarTableRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await db.Updateable<DbVariableTable>(variableTable.CopyTo<DbVariableTable>())
+        var result = await db.Updateable<DbVariableTable>(_mapper.Map<DbVariableTable>(variableTable))
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         NlogHelper.Info($"编辑变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -114,7 +121,7 @@ public class VarTableRepository
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         // 转换对象
-       var res= await db.Deleteable<DbVariableTable>(varTable.CopyTo<DbVariableTable>())
+       var res= await db.Deleteable<DbVariableTable>(_mapper.Map<DbVariableTable>(varTable))
                 .ExecuteCommandAsync();
        stopwatch.Stop();
        NlogHelper.Info($"删除变量表 '{varTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -131,7 +138,7 @@ public class VarTableRepository
         if (deviceVariableTables == null || deviceVariableTables.Count == 0)
             return;
         // 转换对象
-        var dbList = deviceVariableTables.Select(v => v.CopyTo<DbVariableTable>())
+        var dbList = deviceVariableTables.Select(v => _mapper.Map<DbVariableTable>(v))
                                          .ToList();
         await db.Deleteable<DbVariableTable>(dbList)
                 .ExecuteCommandAsync();

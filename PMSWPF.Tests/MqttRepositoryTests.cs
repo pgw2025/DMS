@@ -37,7 +37,7 @@ namespace PMSWPF.Tests
             // For now, we'll assume DbContext.GetInstance() can be configured for testing.
             // In a real scenario, you'd typically inject ISqlSugarClient into MqttRepository.
             // For this example, we'll directly use the _db instance for setup and verification.
-            _mqttRepository = new MqttRepository(); // This will still use the static DbContext.GetInstance()
+            // _mqttRepository = new MqttRepository(); // This will still use the static DbContext.GetInstance()
 
             // To properly test, DbContext.GetInstance() needs to be mockable or configurable.
             // For demonstration, we'll simulate the DbContext behavior directly here.

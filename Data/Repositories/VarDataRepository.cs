@@ -6,6 +6,7 @@ using PMSWPF.Extensions;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 using SqlSugar;
+using AutoMapper;
 
 namespace PMSWPF.Data.Repositories;
 
@@ -14,6 +15,12 @@ namespace PMSWPF.Data.Repositories;
 /// </summary>
 public class VarDataRepository
 {
+    private readonly IMapper _mapper;
+
+    public VarDataRepository(IMapper mapper)
+    {
+        _mapper = mapper;
+    }
 
     /// <summary>
     /// 根据ID获取VariableData
@@ -51,7 +58,7 @@ public class VarDataRepository
                                   .ToListAsync();
             stopwatch.Stop();
             NlogHelper.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.Select(d => d.CopyTo<VariableData>())
+            return result.Select(d => _mapper.Map<VariableData>(d))
                          .ToList();
         }
     }
@@ -71,7 +78,7 @@ public class VarDataRepository
                                   .ToListAsync();
             stopwatch.Stop();
             NlogHelper.Info($"获取变量表的所有变量{result.Count()}个耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.Select(d=>d.CopyTo<VariableData>()).ToList();
+            return result.Select(d=>_mapper.Map<VariableData>(d)).ToList();
         }
     }
 
@@ -103,11 +110,11 @@ public class VarDataRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var dbVarData = await db.Insertable(variableData.CopyTo<DbVariableData>())
+        var dbVarData = await db.Insertable(_mapper.Map<DbVariableData>(variableData))
                                 .ExecuteReturnEntityAsync();
         stopwatch.Stop();
         NlogHelper.Info($"新增VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return dbVarData.CopyTo<VariableData>();
+        return _mapper.Map<VariableData>(dbVarData);
     }
 
     /// <summary>
@@ -140,7 +147,7 @@ public class VarDataRepository
         stopwatch.Start();
         Stopwatch stopwatch2 = new Stopwatch();
         stopwatch2.Start();
-        var dbList = variableDatas.Select(vb => vb.CopyTo<DbVariableData>())
+        var dbList = variableDatas.Select(vb => _mapper.Map<DbVariableData>(vb))
                                   .ToList();
         stopwatch2.Stop();
         NlogHelper.Info($"复制 VariableData'{variableDatas.Count()}'个， 耗时：{stopwatch2.ElapsedMilliseconds}ms");
@@ -165,7 +172,7 @@ public class VarDataRepository
         stopwatch.Start();
         using (var _db = DbContext.GetInstance())
         {
-            var result = await _db.UpdateNav(variableData.CopyTo<DbVariableData>())
+            var result = await _db.UpdateNav(_mapper.Map<DbVariableData>(variableData))
                                   .Include(d => d.Mqtts)
                                   .ExecuteCommandAsync();
             stopwatch.Stop();
@@ -195,7 +202,7 @@ public class VarDataRepository
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var dbVarDatas = variableDatas.Select(vd => vd.CopyTo<DbVariableData>());
+        var dbVarDatas = variableDatas.Select(vd => _mapper.Map<DbVariableData>(vd));
         var result = await db.Updateable<DbVariableData>(dbVarDatas.ToList())
                              .ExecuteCommandAsync();
 
@@ -268,7 +275,7 @@ public class VarDataRepository
         stopwatch.Start();
         using var _db = DbContext.GetInstance();
 
-        var dbList = variableDatas.Select(vd => vd.CopyTo<DbVariableData>())
+        var dbList = variableDatas.Select(vd => _mapper.Map<DbVariableData>(vd))
                                   .ToList();
         var result = await _db.Deleteable<DbVariableData>(dbList)
                               .ExecuteCommandAsync();

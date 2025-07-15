@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Input;
+using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -49,6 +50,8 @@ namespace PMSWPF.ViewModels;
 /// </summary>
 partial class VariableTableViewModel : ViewModelBase
 {
+    private readonly IMapper _mapper;
+
     /// <summary>
     /// 对话服务接口，用于显示各种对话框（如确认、编辑、导入等）。
     /// </summary>
@@ -127,12 +130,13 @@ partial class VariableTableViewModel : ViewModelBase
     /// 初始化服务、数据仓库和变量数据集合视图。
     /// </summary>
     /// <param name="dialogService">对话服务接口的实例。</param>
-    public VariableTableViewModel(IDialogService dialogService)
+    public VariableTableViewModel(IMapper mapper,IDialogService dialogService,VarTableRepository varTableRepository,VarDataRepository varDataRepository)
     {
+        _mapper = mapper;
         _dialogService = dialogService;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
-        _varTableRepository = new VarTableRepository();
-        _varDataRepository = new VarDataRepository();
+        _varTableRepository = varTableRepository;
+        _varDataRepository = varDataRepository;
         _dataVariables = new ObservableCollection<VariableData>(); // 初始化集合
         VariableDataView = CollectionViewSource.GetDefaultView(_dataVariables); // 获取集合视图
         VariableDataView.Filter = FilterVariables; // 设置过滤方法
@@ -246,7 +250,8 @@ partial class VariableTableViewModel : ViewModelBase
             foreach (var modifiedData in modifiedDatas)
             {
                 var oldData = _originalDataVariables.First(od => od.Id == modifiedData.Id);
-                oldData.CopyTo(modifiedData); // 将原始数据复制回当前数据
+                // 将原始数据复制回当前数据
+                _mapper.Map(oldData, modifiedData);
                 modifiedData.IsModified = false; // 重置修改状态
             }
 

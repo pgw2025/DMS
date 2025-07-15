@@ -13,4 +13,11 @@ public class DbUser
     /// </summary>
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)] //数据库是自增才配自增 
     public int Id { get; set; }
+    
+    public string Name { get; set; }
+    
+    public string Password { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Address { get; set; }
 }

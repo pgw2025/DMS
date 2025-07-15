@@ -14,7 +14,8 @@ using PMSWPF.ViewModels;
 using PMSWPF.Views;
 using Microsoft.Extensions.Hosting;
 using PMSWPF.Config;
-using PMSWPF.ViewModels.Dialogs;
+using PMSWPF.Data.Repositories;
+using PMSWPF.Services.Processors;
 using SqlSugar;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -59,6 +60,10 @@ public partial class App : Application
                 .Await((e) => { NotificationHelper.ShowError($"初始化主菜单失败：{e.Message}", e); },
                        () => { MessageHelper.SendLoadMessage(LoadTypes.Menu); });
             Host.Services.GetRequiredService<GrowlNotificationService>();
+            
+            // 初始化数据处理链
+            var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingDataProcessor>());
         }
         catch (Exception exception)
         {
@@ -106,23 +111,41 @@ public partial class App : Application
         services.AddSingleton<S7BackgroundService>();
         services.AddSingleton<MqttBackgroundService>();
         services.AddSingleton<OpcUaBackgroundService>();
+        
+        // 注册 AutoMapper
+        services.AddAutoMapper(typeof(App).Assembly);
+
+        // 注册数据处理服务和处理器
+        services.AddSingleton<IDataProcessingService, DataProcessingService>();
+        services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
+        services.AddSingleton<LoggingDataProcessor>();
+        
+        // 注册数据仓库
+        services.AddSingleton<DeviceRepository>();
+        services.AddSingleton<MenuRepository>();
+        services.AddSingleton<MqttRepository>();
+        services.AddSingleton<UserRepository>();
+        services.AddSingleton<VarDataRepository>();
+        services.AddSingleton<VarTableRepository>();
+        // 注册视图模型
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<DevicesViewModel>();
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<SettingViewModel>();
+        services.AddSingleton<DataTransformViewModel>();
+        services.AddTransient<VariableTableViewModel>();
+        services.AddScoped<MqttServerDetailViewModel>();
+        services.AddScoped<DeviceDetailViewModel>();
+        services.AddScoped<MqttsViewModel>();
+        //注册View视图
         services.AddSingleton<SettingView>();
         services.AddSingleton<MainView>();
         services.AddSingleton<HomeView>();
         services.AddSingleton<DevicesView>();
-        services.AddSingleton<DataTransformViewModel>();
-        services.AddTransient<VariableTableViewModel>();
         services.AddSingleton<VariableTableView>();
-        services.AddScoped<DeviceDetailViewModel>();
         services.AddScoped<DeviceDetailView>();
-        services.AddScoped<MqttsViewModel>();
         services.AddScoped<MqttsView>();
-        services.AddScoped<MqttServerDetailViewModel>();
     }
 
     private void ConfigureLogging(ILoggingBuilder loggingBuilder)

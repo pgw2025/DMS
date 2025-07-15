@@ -51,10 +51,10 @@ public partial class MqttsViewModel : ViewModelBase
     private Mqtt _selectedMqtt;
 
     public MqttsViewModel(
-        ILogger<MqttsViewModel> logger, IDialogService dialogService, DataServices dataServices, NavgatorServices navgatorServices
+        ILogger<MqttsViewModel> logger, IDialogService dialogService, DataServices dataServices, NavgatorServices navgatorServices,MqttRepository mqttRepository
     )
     {
-        _mqttRepository = new MqttRepository();
+        _mqttRepository = mqttRepository;
         _logger = logger;
         _dialogService = dialogService;
         _dataServices = dataServices;

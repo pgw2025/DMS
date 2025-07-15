@@ -49,14 +49,14 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="logger">日志记录器。</param>
     public MainViewModel(NavgatorServices navgatorServices, DataServices dataServices, IDialogService dialogService,
-        ILogger<MainViewModel> logger)
+        ILogger<MainViewModel> logger,VarTableRepository varTableRepository,MenuRepository menuRepository)
     {
         _navgatorServices = navgatorServices;
         _dataServices = dataServices;
         _dialogService = dialogService;
         _logger = logger;
-        _varTableRepository = new VarTableRepository();
-        _menuRepository = new MenuRepository();
+        _varTableRepository = varTableRepository;
+        _menuRepository = menuRepository;
 
         _navgatorServices.OnViewModelChanged += () => { CurrentViewModel = _navgatorServices.CurrentViewModel; };
 

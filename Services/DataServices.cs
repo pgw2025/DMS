@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AutoMapper;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ namespace PMSWPF.Services;
 /// </summary>
 public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 {
+    private readonly IMapper _mapper;
     // 设备列表，使用ObservableProperty特性，当值改变时会自动触发属性变更通知。
     [ObservableProperty]
     private List<Device> _devices;
@@ -78,14 +80,16 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// DataServices类的构造函数。
     /// 注入ILogger<DataServices>，并初始化各个数据仓库。
     /// </summary>
-    /// <param name="logger">日志记录器实例。</param>
-    public DataServices()
+    /// <param name="mapper">AutoMapper 实例。</param>
+    /// <param name="varDataRepository"></param>
+    public DataServices(IMapper mapper,DeviceRepository deviceRepository,MenuRepository menuRepository,MqttRepository mqttRepository,VarDataRepository varDataRepository)
     {
+        _mapper = mapper;
         IsActive = true; // 激活消息接收器
-        _deviceRepository = new DeviceRepository();
-        _menuRepository = new MenuRepository();
-        _mqttRepository = new MqttRepository();
-        _varDataRepository = new VarDataRepository();
+        _deviceRepository = deviceRepository;
+        _menuRepository = menuRepository;
+        _mqttRepository = mqttRepository;
+        _varDataRepository = varDataRepository;
         _variableDatas = new List<VariableData>();
     }
 
@@ -198,4 +202,5 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     {
         await _varDataRepository.UpdateAsync(variableData);
     }
+
 }

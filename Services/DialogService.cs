@@ -1,6 +1,7 @@
 ﻿using HandyControl.Tools.Extension;
 using iNKORE.UI.WPF.Modern.Controls;
 using NPOI.SS.Formula.Functions;
+using PMSWPF.Data.Repositories;
 using PMSWPF.Enums;
 using PMSWPF.Models;
 using PMSWPF.ViewModels.Dialogs;
@@ -10,9 +11,11 @@ namespace PMSWPF.Services;
 
 public class DialogService :IDialogService
 {
-    public DialogService()
-    {
+    private readonly MqttRepository _mqttRepository;
 
+    public DialogService(MqttRepository mqttRepository)
+    {
+        _mqttRepository = mqttRepository;
     }
 
     public async Task<Device> ShowAddDeviceDialog()
@@ -174,7 +177,7 @@ public class DialogService :IDialogService
 
     public async Task<Mqtt?> ShowMqttSelectionDialog()
     {
-        var vm = new MqttSelectionDialogViewModel();
+        var vm = new MqttSelectionDialogViewModel(_mqttRepository);
         var dialog = new MqttSelectionDialog(vm);
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary ? vm.SelectedMqtt : null;
