@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+using System.Text;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
-using PMSWPF.Models;
-using PMSWPF.Services;
 using PMSWPF.Helper;
-using PMSWPF.Enums;
+using PMSWPF.Models;
 
 namespace PMSWPF.Services
 {
@@ -69,7 +62,7 @@ namespace PMSWPF.Services
             _serviceMainThread.Start();
         }
 
-        private void Execute()
+        private async void Execute()
         {
             while (!_stopEvent.WaitOne(0))
             {
@@ -81,11 +74,23 @@ namespace PMSWPF.Services
 
                 _reloadEvent.WaitOne();
 
-                // 初始加载MQTT配置和变量数据。
-                LoadMqttConfigurations();
-                ConnectMqttList();
-
-                _reloadEvent.Reset();
+                try
+                {
+                    // 初始加载MQTT配置和变量数据。
+                    var isLoaded = LoadMqttConfigurations();
+                    if (isLoaded)
+                    {
+                        await ConnectMqttList();
+                    }
+                }
+                catch (Exception e)
+                {
+                    NotificationHelper.ShowError($"Mqt后台服务主程序在加载变量和连接服务器过程中出现了错误：{e.Message} ", e);
+                }
+                finally
+                {
+                    _reloadEvent.Reset();
+                }
             }
         }
 
@@ -93,7 +98,7 @@ namespace PMSWPF.Services
         /// <summary>
         /// 停止MQTT后台服务。
         /// </summary>
-        public void StopService()
+        public async Task StopService()
         {
             NlogHelper.Info("Mqtt后台服务开始停止...."); // 记录服务停止信息
 
@@ -101,7 +106,7 @@ namespace PMSWPF.Services
             // 取消订阅事件。
             _dataServices.OnMqttListChanged -= HandleMqttListChanged;
 
-            DisconnecetAll();
+            await DisconnecetAll();
 
             // 清空所有字典。
             _mqttClients.Clear();
@@ -110,19 +115,24 @@ namespace PMSWPF.Services
             NlogHelper.Info("Mqtt后台服务已停止。"); // 记录服务停止信息
         }
 
-        private void DisconnecetAll()
+        private async Task DisconnecetAll()
         {
             // 断开所有已连接的MQTT客户端。
             foreach (var mqttId in _mqttClients.Keys.ToList())
             {
-                var client = _mqttClients[mqttId];
-                var mqtt = _mqttConfigDic[mqttId];
-                mqtt.IsConnected = false;
-                if (client.IsConnected)
+                try
                 {
-                    client.DisconnectAsync()
-                          .GetAwaiter()
-                          .GetResult();
+                    var client = _mqttClients[mqttId];
+                    var mqtt = _mqttConfigDic[mqttId];
+                    mqtt.IsConnected = false;
+                    if (client.IsConnected)
+                    {
+                        await client.DisconnectAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    NlogHelper.Error($"MqttID:{mqttId},断开连接的过程中发生了错误:{e.Message}",e);
                 }
             }
         }
@@ -132,21 +142,30 @@ namespace PMSWPF.Services
         /// 加载并连接MQTT配置。
         /// </summary>
         /// <returns>表示异步操作的任务。</returns>
-        private void LoadMqttConfigurations()
+        private bool LoadMqttConfigurations()
         {
-            NlogHelper.Info("开始加载Mqtt配置文件...");
-            _mqttConfigDic.Clear();
-            // 从数据服务获取所有MQTT配置。
-            var _mqttConfigList = _dataServices.Mqtts.Where(m => m.IsActive)
-                                               .ToList();
-            foreach (var mqtt in _mqttConfigList)
+            try
             {
-                mqtt.OnMqttIsActiveChanged += OnMqttIsActiveChangedHandler;
-                _mqttConfigDic[mqtt.Id] = mqtt;
-                mqtt.ConnectMessage = "配置加载成功.";
-            }
+                NlogHelper.Info("开始加载Mqtt配置文件...");
+                _mqttConfigDic.Clear();
+                // 从数据服务获取所有MQTT配置。
+                var _mqttConfigList = _dataServices.Mqtts.Where(m => m.IsActive)
+                                                   .ToList();
+                foreach (var mqtt in _mqttConfigList)
+                {
+                    mqtt.OnMqttIsActiveChanged += OnMqttIsActiveChangedHandler;
+                    _mqttConfigDic[mqtt.Id] = mqtt;
+                    mqtt.ConnectMessage = "配置加载成功.";
+                }
 
-            NlogHelper.Info($"Mqtt配置文件加载成功，开启的Mqtt客户端：{_mqttConfigList.Count}个。");
+                NlogHelper.Info($"Mqtt配置文件加载成功，开启的Mqtt客户端：{_mqttConfigList.Count}个。");
+                return true;
+            }
+            catch (Exception e)
+            {
+                NotificationHelper.ShowError($"Mqtt后台服务在加载变量的过程中发生了错误:{e.Message}");
+                return false;
+            }
         }
 
         private async void OnMqttIsActiveChangedHandler(Mqtt mqtt)
@@ -159,7 +178,7 @@ namespace PMSWPF.Services
                 }
                 else
                 {
-                    if (!_mqttClients.TryGetValue(mqtt.Id,out var client))
+                    if (!_mqttClients.TryGetValue(mqtt.Id, out var client))
                     {
                         NlogHelper.Warn($"没有在Mqtt连接字典中找到名字为：{mqtt.Name}的连接。");
                         return;
@@ -167,7 +186,7 @@ namespace PMSWPF.Services
 
                     if (client.IsConnected)
                     {
-                        await  client.DisconnectAsync();
+                        await client.DisconnectAsync();
                     }
 
                     mqtt.IsConnected = false;
@@ -175,14 +194,12 @@ namespace PMSWPF.Services
 
                     _mqttClients.Remove(mqtt.Id);
                     NlogHelper.Info($"{mqtt.Name}的客户端，与服务器断开连接.");
-
                 }
             }
             catch (Exception e)
             {
-                NotificationHelper.ShowError($"{mqtt.Name}客户端，开启或关闭的过程中发生了错误:{e.Message}",e);
+                NotificationHelper.ShowError($"{mqtt.Name}客户端，开启或关闭的过程中发生了错误:{e.Message}", e);
             }
-            
         }
 
         /// <summary>
@@ -204,7 +221,7 @@ namespace PMSWPF.Services
                         continue;
                     }
 
-                    await  ConnectMqtt(mqtt);
+                    await ConnectMqtt(mqtt);
                 }
                 catch (Exception ex)
                 {
@@ -235,11 +252,11 @@ namespace PMSWPF.Services
             client.UseApplicationMessageReceivedHandler(e => { HandleMessageReceived(e, mqtt); });
 
             // 设置断开连接事件处理程序。
-            client.UseDisconnectedHandler(async (e) => await HandleDisconnected(e,options, client, mqtt));
+            client.UseDisconnectedHandler(async (e) => await HandleDisconnected(e, options, client, mqtt));
 
             // 尝试连接到MQTT代理。
-           await  client.ConnectAsync(options, CancellationToken.None);
-           
+            await client.ConnectAsync(options, CancellationToken.None);
+
             // 将连接成功的客户端添加到字典。
             _mqttClients[mqtt.Id] = client;
         }
@@ -247,7 +264,7 @@ namespace PMSWPF.Services
         private static void HandleMessageReceived(MqttApplicationMessageReceivedEventArgs e, Mqtt mqtt)
         {
             var topic = e.ApplicationMessage.Topic;
-            var payload = System.Text.Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+            var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             NlogHelper.Info($"MQTT客户端 {mqtt.Name} 收到消息: 主题={topic}, 消息={payload}");
 
             // 在这里添加处理消息的逻辑

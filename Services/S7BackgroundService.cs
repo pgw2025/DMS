@@ -1,17 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using S7.Net;
-using PMSWPF.Models;
 using PMSWPF.Enums;
 using PMSWPF.Helper;
+using PMSWPF.Models;
+using S7.Net;
 using S7.Net.Types;
-using SqlSugar;
 using DateTime = System.DateTime;
 
 namespace PMSWPF.Services
@@ -39,6 +30,8 @@ namespace PMSWPF.Services
         private readonly int S7PollOnceReadMultipleVars = 9;
         //  S7轮询一遍后的等待时间
         private readonly int S7PollOnceSleepTimeMs = 100;
+        
+        Dictionary<int, DataItem> _readVariableDic;
 
         // 轮询数据的线程。
         private Thread _pollingThread;
@@ -62,6 +55,7 @@ namespace PMSWPF.Services
             _pollVariableDic = new();
             _s7PlcClientDic = new();
             _variableDic = new();
+            _readVariableDic = new();
             // 订阅设备列表变更事件，以便在设备配置更新时重新加载。
             _dataServices.OnDeviceListChanged += HandleDeviceListChanged;
         }
@@ -116,6 +110,11 @@ namespace PMSWPF.Services
                     _reloadEvent.Reset();
                 }
             }
+            catch (ThreadInterruptedException tie)
+            {
+                NlogHelper.Error($"S7后台服务主线程关闭。");
+                DisconnectAllPlc();
+            }
             catch (Exception e)
             {
                 NlogHelper.Error($"S7后台服务主线程运行中发生了错误:{e.Message}",e);
@@ -134,7 +133,6 @@ namespace PMSWPF.Services
                     try
                     {
                         // Stopwatch sw = Stopwatch.StartNew();
-                        int varCount = 0;
                         // 遍历并读取每个S7变量。
                         foreach (var deviceId in _pollVariableDic.Keys.ToList())
                         {
@@ -163,7 +161,7 @@ namespace PMSWPF.Services
                                 continue;
                             }
 
-                            Dictionary<int, DataItem> readVarDic = new Dictionary<int, DataItem>();
+                            
 
                             foreach (var variable in variableList)
                             {
@@ -178,38 +176,7 @@ namespace PMSWPF.Services
                                 if ((DateTime.Now - variable.UpdateTime) < interval)
                                     continue; // 未到轮询时间，跳过。
 
-                                try
-                                {
-                                    readVarDic.Add(variable.Id, DataItem.FromAddress(variable.S7Address));
-                                    varCount++;
-                                    if (readVarDic.Count == S7PollOnceReadMultipleVars)
-                                    {
-                                        // 批量读取
-                                        plcClient.ReadMultipleVars(readVarDic.Values.ToList());
-                                        // 批量读取后还原结果
-                                        foreach (var varId in readVarDic.Keys.ToList())
-                                        {
-                                            DataItem dataItem = readVarDic[varId];
-                                            if (!_variableDic.TryGetValue(varId, out var variableData))
-                                            {
-                                                NlogHelper.Warn($"S7后台服务批量读取变量后，还原值，在_variableDic中找不到ID为{varId}的变量");
-                                                continue;
-                                            }
-
-                                            // 更新变量的原始数据值和显示值。
-                                            variableData.DataValue = dataItem.Value.ToString();
-                                            variableData.UpdateTime = DateTime.Now;
-                                            Console.WriteLine($"S7轮询变量:{variableData.Name},值：{variableData.DataValue}");
-                                        }
-
-                                        readVarDic.Clear();
-                                    }
-
-                                }
-                                catch (Exception ex)
-                                {
-                                    NlogHelper.Warn($"从设备 {device.Name} 读取变量 {variable.Name} 失败:{ex.Message}");
-                                }
+                                ReadVariableData(variable, plcClient, device);
                             }
                         }
 
@@ -225,11 +192,58 @@ namespace PMSWPF.Services
 
                 NlogHelper.Info("S7后台服务轮询变量结束。");
             }
+            catch (ThreadInterruptedException tie)
+            {
+                NlogHelper.Error($"S7后台服务轮询变量线程关闭。");
+                DisconnectAllPlc();
+            }
             catch (Exception e)
             {
                 NlogHelper.Error($"S7后台服务轮询变量线程运行中发生了错误:{e.Message}",e);
                 DisconnectAllPlc();
             }
+        }
+
+        /// <summary>
+        /// 读取变量数据
+        /// </summary>
+        /// <param name="variable"></param>
+        /// <param name="plcClient"></param>
+        /// <param name="device"></param>
+        private void ReadVariableData(VariableData variable, 
+                                     Plc plcClient, Device device)
+        {
+            try
+            {
+                _readVariableDic.Add(variable.Id, DataItem.FromAddress(variable.S7Address));
+                if (_readVariableDic.Count == S7PollOnceReadMultipleVars)
+                {
+                    // 批量读取
+                    plcClient.ReadMultipleVars(_readVariableDic.Values.ToList());
+                    // 批量读取后还原结果
+                    foreach (var varId in _readVariableDic.Keys.ToList())
+                    {
+                        DataItem dataItem = _readVariableDic[varId];
+                        if (!_variableDic.TryGetValue(varId, out var variableData))
+                        {
+                            NlogHelper.Warn($"S7后台服务批量读取变量后，还原值，在_variableDic中找不到ID为{varId}的变量");
+                            continue;
+                        }
+                        // 更新变量的原始数据值和显示值。
+                        variableData.DataValue = dataItem.Value.ToString();
+                        variableData.UpdateTime = DateTime.Now;
+                        Console.WriteLine($"S7轮询变量:{variableData.Name},值：{variableData.DataValue}");
+                    }
+
+                    _readVariableDic.Clear();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                NlogHelper.Warn($"从设备 {device.Name} 读取变量 {variable.Name} 失败:{ex.Message}");
+            }
+
         }
 
         private void ConnectS7Service()
@@ -249,14 +263,7 @@ namespace PMSWPF.Services
                     var plcClient = new Plc(device.CpuType, device.Ip, (short)device.Prot, device.Rack, device.Slot);
                     plcClient.Open(); // 尝试打开连接。
                     // 将新创建的客户端添加到字典。
-                    if (_s7PlcClientDic.ContainsKey(device.Ip))
-                    {
-                        _s7PlcClientDic[device.Ip] = plcClient;
-                    }
-                    else
-                    {
-                        _s7PlcClientDic.Add(device.Ip, plcClient);
-                    }
+                    _s7PlcClientDic[device.Ip] = plcClient;
 
                     NotificationHelper.ShowSuccess($"已连接到S7 PLC: {device.Name} ({device.Ip})");
                 }
@@ -267,6 +274,9 @@ namespace PMSWPF.Services
             }
         }
 
+        /// <summary>
+        /// 加载变量
+        /// </summary>
         private void LoadVariables()
         {
             try
@@ -291,17 +301,9 @@ namespace PMSWPF.Services
                                             .ToList();
                     // 将变量存储到字典中，方便以后通过ID快速查找
                     foreach (var s7Variable in s7Variables)
-                    {
-                        if (_variableDic.ContainsKey(s7Variable.Id))
-                        {
-                            _variableDic[s7Variable.Id] = s7Variable;
-                        }
-                        else
-                        {
-                            _variableDic.Add(s7Variable.Id, s7Variable);
-                        }
-                    }
+                        _variableDic[s7Variable.Id] = s7Variable;
 
+                    
                     varCount += s7Variables.Count();
                     _pollVariableDic.Add(device.Id, s7Variables);
                 }
@@ -320,28 +322,38 @@ namespace PMSWPF.Services
         /// </summary>
         public void StopService()
         {
-            NlogHelper.Info("S7后台服务正在关闭....");
-            _stopEvent.Set();
-            
-            _pollingThread.Interrupt();
-            _serviceMainThread.Interrupt();
-            DisconnectAllPlc();
-            
-            foreach (Device device in _deviceDic.Values.ToList())
+            try
             {
-                device.IsRuning = false;
+                NlogHelper.Info("S7后台服务正在关闭....");
+                _stopEvent.Set();
+            
+                _pollingThread.Interrupt();
+                _serviceMainThread.Interrupt();
+                DisconnectAllPlc();
+            
+                foreach (Device device in _deviceDic.Values.ToList())
+                {
+                    device.IsRuning = false;
+                }
+                // 关闭事件
+                _reloadEvent.Close();
+                _stopEvent.Reset();
+                _stopEvent.Close();
+                // 清空所有字典。
+                _deviceDic.Clear();
+                _s7PlcClientDic.Clear();
+                _pollVariableDic.Clear();
+                NlogHelper.Info("S7后台服务已关闭");
             }
-            // 关闭事件
-            _reloadEvent.Close();
-            _stopEvent.Reset();
-            _stopEvent.Close();
-            // 清空所有字典。
-            _deviceDic.Clear();
-            _s7PlcClientDic.Clear();
-            _pollVariableDic.Clear();
-            NlogHelper.Info("S7后台服务已关闭");
+            catch (Exception e)
+            {
+                NlogHelper.Error($"S7后台服务关闭时发生了错误：{e.Message}",e);
+            }
         }
 
+        /// <summary>
+        /// 关闭所有PLC的连接
+        /// </summary>
         private void DisconnectAllPlc()
         {
             if (_s7PlcClientDic==null || _s7PlcClientDic.Count == 0)
@@ -349,10 +361,17 @@ namespace PMSWPF.Services
             // 关闭所有活跃的PLC连接。
             foreach (var plcClient in _s7PlcClientDic.Values.ToList())
             {
-                if (plcClient.IsConnected)
+                try
                 {
-                    plcClient.Close();
-                    NlogHelper.Info($"关闭S7连接: {plcClient.IP}");
+                    if (plcClient.IsConnected)
+                    {
+                        plcClient.Close();
+                        NlogHelper.Info($"关闭S7连接: {plcClient.IP}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    NlogHelper.Error($"S7后台服务关闭{plcClient.IP},后台连接时发生错误：{e.Message}",e);
                 }
             }
         }
