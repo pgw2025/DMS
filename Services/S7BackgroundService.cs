@@ -14,6 +14,8 @@ namespace PMSWPF.Services
     {
         // 数据服务实例，用于访问和操作应用程序数据，如设备配置。
         private readonly DataServices _dataServices;
+        // 数据处理服务实例，用于将读取到的数据推入处理队列。
+        private readonly IDataProcessingService _dataProcessingService;
 
         // 存储 S7设备，键为设备Id，值为会话对象。
         private readonly Dictionary<int, Device> _deviceDic;
@@ -44,13 +46,14 @@ namespace PMSWPF.Services
         private Thread _serviceMainThread;
 
         /// <summary>
-        /// 构造函数，注入ILogger和DataServices。
+        /// 构造函数，注入数据服务和数据处理服务。
         /// </summary>
-        /// <param name="logger">日志记录器实例。</param>
         /// <param name="dataServices">数据服务实例。</param>
-        public S7BackgroundService(DataServices dataServices)
+        /// <param name="dataProcessingService">数据处理服务实例。</param>
+        public S7BackgroundService(DataServices dataServices, IDataProcessingService dataProcessingService)
         {
             _dataServices = dataServices;
+            _dataProcessingService = dataProcessingService;
             _deviceDic = new();
             _pollVariableDic = new();
             _s7PlcClientDic = new();
@@ -205,17 +208,17 @@ namespace PMSWPF.Services
         }
 
         /// <summary>
-        /// 读取变量数据
+        /// 从 PLC 读取变量数据，并将其推送到数据处理队列。
         /// </summary>
-        /// <param name="variable"></param>
-        /// <param name="plcClient"></param>
-        /// <param name="device"></param>
-        private void ReadVariableData(VariableData variable, 
+        /// <param name="variable">要读取的变量。</param>
+        /// <param name="plcClient">S7 PLC 客户端实例。</param>
+        /// <param name="device">关联的设备。</param>
+        private async void ReadVariableData(VariableData variable, 
                                      Plc plcClient, Device device)
         {
             try
             {
-                _readVariableDic.Add(variable.Id, DataItem.FromAddress(variable.S7Address));
+                _readVariableDic[variable.Id]=DataItem.FromAddress(variable.S7Address);
                 if (_readVariableDic.Count == S7PollOnceReadMultipleVars)
                 {
                     // 批量读取
@@ -232,7 +235,8 @@ namespace PMSWPF.Services
                         // 更新变量的原始数据值和显示值。
                         variableData.DataValue = dataItem.Value.ToString();
                         variableData.UpdateTime = DateTime.Now;
-                        Console.WriteLine($"S7轮询变量:{variableData.Name},值：{variableData.DataValue}");
+                        // 将更新后的数据推入处理队列，而不是直接在控制台输出。
+                        await _dataProcessingService.EnqueueAsync(variableData);
                     }
 
                     _readVariableDic.Clear();
@@ -241,7 +245,7 @@ namespace PMSWPF.Services
             }
             catch (Exception ex)
             {
-                NlogHelper.Warn($"从设备 {device.Name} 读取变量 {variable.Name} 失败:{ex.Message}");
+                NlogHelper.Error($"从设备 {device.Name} 读取变量 {variable.Name} 失败:{ex.Message}",ex);
             }
 
         }
