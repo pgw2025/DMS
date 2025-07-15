@@ -138,6 +138,14 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"
+                                         FontSize="14" />
+                            <TextBlock Text="{Binding ConnectMessage}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2">
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FavoriteStar}"
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"

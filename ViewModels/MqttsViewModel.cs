@@ -19,33 +19,33 @@ public partial class MqttsViewModel : ViewModelBase
     private readonly MqttRepository _mqttRepository;
     private readonly ILogger<MqttsViewModel> _logger;
     private readonly NavgatorServices _navgatorServices;
-
+    [ObservableProperty]
     private ObservableCollection<Mqtt> _mqtts;
 
-    public ObservableCollection<Mqtt> Mqtts
-    {
-        get => _mqtts;
-        set
-        {
-            if (_mqtts != null)
-            {
-                foreach (var mqtt in _mqtts)
-                {
-                    mqtt.PropertyChanged -= Mqtt_PropertyChanged;
-                }
-            }
-
-            SetProperty(ref _mqtts, value);
-
-            if (_mqtts != null)
-            {
-                foreach (var mqtt in _mqtts)
-                {
-                    mqtt.PropertyChanged += Mqtt_PropertyChanged;
-                }
-            }
-        }
-    }
+    // public ObservableCollection<Mqtt> Mqtts
+    // {
+    //     get => _mqtts;
+    //     set
+    //     {
+    //         if (_mqtts != null)
+    //         {
+    //             foreach (var mqtt in _mqtts)
+    //             {
+    //                 mqtt.PropertyChanged -= Mqtt_PropertyChanged;
+    //             }
+    //         }
+    //
+    //         SetProperty(ref _mqtts, value);
+    //
+    //         if (_mqtts != null)
+    //         {
+    //             foreach (var mqtt in _mqtts)
+    //             {
+    //                 mqtt.PropertyChanged += Mqtt_PropertyChanged;
+    //             }
+    //         }
+    //     }
+    // }
 
     [ObservableProperty]
     private Mqtt _selectedMqtt;

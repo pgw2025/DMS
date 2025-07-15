@@ -8,6 +8,8 @@ namespace PMSWPF.Models;
 /// </summary>
 public partial class Mqtt : ObservableObject
 {
+    public event Action<Mqtt> OnMqttIsActiveChanged; 
+    
     /// <summary>
     /// MQTT客户端ID。
     /// </summary>
@@ -33,6 +35,17 @@ public partial class Mqtt : ObservableObject
     /// </summary>
     [ObservableProperty]
     private bool _isActive;
+
+    partial void OnIsActiveChanged(bool value)
+    {
+        OnMqttIsActiveChanged?.Invoke(this);
+    }
+
+    /// <summary>
+    /// 显示连接的消息：
+    /// </summary>
+    [ObservableProperty]
+    private string connectMessage;
 
     /// <summary>
     /// 是否设置为默认MQTT客户端。
