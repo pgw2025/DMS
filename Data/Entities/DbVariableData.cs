@@ -163,4 +163,10 @@ public class DbVariableData
     /// </summary>
     [Navigate(typeof(DbVariableDataMqtt), "VariableDataId", "MqttId")]
     public List<DbMqtt>? Mqtts { get; set; }
+
+    /// <summary>
+    /// 关联的历史记录列表。
+    /// </summary>
+    [Navigate(NavigateType.OneToMany, nameof(DbVariableDataHistory.VariableDataId))]
+    public List<DbVariableDataHistory>? HistoryRecords { get; set; }
 }

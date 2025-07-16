@@ -66,6 +66,7 @@ public partial class App : Application
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingDataProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryDataProcessor>());
         }
         catch (Exception exception)
         {
@@ -116,6 +117,7 @@ public partial class App : Application
         services.AddSingleton<CheckValueChangedProcessor>();
         services.AddSingleton<LoggingDataProcessor>();
         services.AddSingleton<UpdateDbVariableProcessor>();
+        services.AddSingleton<HistoryDataProcessor>();
         
         // 注册数据仓库
         services.AddSingleton<DeviceRepository>();
@@ -245,6 +247,7 @@ public partial class App : Application
         _db.CodeFirst.InitTables<DbDevice>();
         _db.CodeFirst.InitTables<DbVariableTable>();
         _db.CodeFirst.InitTables<DbVariableData>();
+        _db.CodeFirst.InitTables<DbVariableDataHistory>();
         _db.CodeFirst.InitTables<DbVariableS7Data>();
         _db.CodeFirst.InitTables<DbUser>();
         _db.CodeFirst.InitTables<DbMqtt>();
