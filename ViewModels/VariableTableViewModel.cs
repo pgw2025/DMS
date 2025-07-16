@@ -442,15 +442,15 @@ partial class VariableTableViewModel : ViewModelBase
     /// </summary>
     private async Task RefreshDataView()
     {
-        // 更新界面显示的数据：重新从数据库加载所有变量数据
-        VariableTable.DataVariables = await _varDataRepository.GetByVariableTableId(VariableTable.Id);
-        DataVariables.Clear();
-        foreach (var item in VariableTable.DataVariables)
-        {
-            DataVariables.Add(item);
-        }
-
-        VariableDataView.Refresh();
+        // // 更新界面显示的数据：重新从数据库加载所有变量数据
+        // VariableTable.DataVariables = await _varDataRepository.GetByVariableTableId(VariableTable.Id);
+        // DataVariables.Clear();
+        // foreach (var item in VariableTable.DataVariables)
+        // {
+        //     DataVariables.Add(item);
+        // }
+        //
+        // VariableDataView.Refresh();
     }
 
     /// <summary>
@@ -723,7 +723,7 @@ partial class VariableTableViewModel : ViewModelBase
     public async Task OnIsActiveChanged(bool active)
     {
         // 更新数据库中变量表的激活状态
-        var res = await _varTableRepository.Edit(VariableTable);
+        var res = await _varTableRepository.UpdateAsync(VariableTable);
         if (res > 0)
         {
             // 根据激活状态显示成功通知

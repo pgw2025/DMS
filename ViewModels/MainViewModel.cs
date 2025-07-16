@@ -12,6 +12,7 @@ using PMSWPF.Helper;
 using PMSWPF.Models;
 using PMSWPF.Services;
 using PMSWPF.Views;
+
 // Add this using directive
 // Add this using directive
 
@@ -49,7 +50,8 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="logger">日志记录器。</param>
     public MainViewModel(NavgatorServices navgatorServices, DataServices dataServices, IDialogService dialogService,
-        ILogger<MainViewModel> logger,VarTableRepository varTableRepository,MenuRepository menuRepository)
+                         ILogger<MainViewModel> logger, VarTableRepository varTableRepository,
+                         MenuRepository menuRepository)
     {
         _navgatorServices = navgatorServices;
         _dataServices = dataServices;
@@ -65,7 +67,7 @@ public partial class MainViewModel : ViewModelBase
         // 发送消息加载数据
         MessageHelper.SendLoadMessage(LoadTypes.All);
         // 当菜单加载成功后，在前台显示菜单
-        dataServices.OnMenuTreeListChanged += ( menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
+        dataServices.OnMenuTreeListChanged += (menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
     }
 
     /// <summary>
@@ -124,22 +126,22 @@ public partial class MainViewModel : ViewModelBase
             // 假设 _varTableRepository.AddAsync 返回一个布尔值表示成功，或者一个表示 ID 的整数
             // 这里为了演示，我们假设它返回新添加的ID，如果失败则返回0
             await db.BeginTranAsync();
-            var addVarTable = await _varTableRepository.Add(varTable,db);
+            var addVarTable = await _varTableRepository.Add(varTable, db);
 
             // 5. 添加变量表菜单
             MenuBean newMenu = new MenuBean
-            {
-                Icon = SegoeFluentIcons.Tablet.Glyph,
-                Name = varTable.Name,
-                DataId = addVarTable.Id, // 使用实际添加的ID
-                Type = MenuType.VariableTableMenu,
-                ParentId = menu.Parent.Id
-            };
+                               {
+                                   Icon = SegoeFluentIcons.Tablet.Glyph,
+                                   Name = varTable.Name,
+                                   DataId = addVarTable.Id, // 使用实际添加的ID
+                                   Type = MenuType.VariableTableMenu,
+                                   ParentId = menu.Parent.Id
+                               };
 
-            var addMenuRes = await _menuRepository.Add(newMenu,db);
+            var addMenuRes = await _menuRepository.Add(newMenu, db);
             if (addMenuRes > 0)
             {
-               await db.CommitTranAsync();
+                await db.CommitTranAsync();
                 // 变量表和菜单都添加成功
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);
@@ -153,7 +155,7 @@ public partial class MainViewModel : ViewModelBase
                 NotificationHelper.ShowError($"变量表:{varTable.Name},添加菜单失败");
                 _logger.LogError($"变量表:{varTable.Name},添加菜单失败");
                 // 考虑：如果菜单添加失败，是否需要删除之前添加的变量表？
-                // 例如：await _varTableRepository.Delete(addVarTableId);
+                // 例如：await _varTableRepository.DeleteAsync(addVarTableId);
             }
         }
         catch (Exception e)
@@ -179,8 +181,11 @@ public partial class MainViewModel : ViewModelBase
                     break;
                 // 导航到设备下面的菜单
                 case MenuType.DeviceMenu:
-                    menu.ViewModel = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
-                    menu.Data = _dataServices.Devices.FirstOrDefault(d => d.Id == menu.DataId);
+                    var deviceDetailVm = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
+                    var currentDevice = _dataServices.Devices.FirstOrDefault(d => d.Id == menu.DataId);
+                    deviceDetailVm.CurrentDevice = currentDevice;
+                    menu.ViewModel = deviceDetailVm;
+                    menu.Data = currentDevice;
                     break;
                 // 导航到变量表菜单
                 case MenuType.VariableTableMenu:
@@ -201,10 +206,9 @@ public partial class MainViewModel : ViewModelBase
                 // 导航到Mqtt服务器
                 case MenuType.MqttMenu:
                     var mqttVM = App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
-                    mqttVM.CurrentMqtt=_dataServices.Mqtts.FirstOrDefault(d=>d.Id == menu.DataId);
+                    mqttVM.CurrentMqtt = _dataServices.Mqtts.FirstOrDefault(d => d.Id == menu.DataId);
                     menu.ViewModel = mqttVM;
                     break;
-                
             }
 
 

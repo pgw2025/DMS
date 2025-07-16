@@ -104,6 +104,21 @@ public class DialogService :IDialogService
         }
         return null;
     }
+
+    public async Task<VariableTable> ShowEditVarTableDialog(VariableTable variableTable)
+    {
+        VarTableDialogViewModel vm = new();
+        vm.Title = "编辑变量表";
+        vm.PrimaryButtonText = "编辑变量表";
+        vm.VariableTable = variableTable;
+        var dialog = new VarTableDialog(vm);
+        var res = await dialog.ShowAsync();
+        if (res == ContentDialogResult.Primary)
+        {
+            return vm.VariableTable;
+        }
+        return null;
+    }
     
     public async Task<VariableData> ShowAddVarDataDialog()
     {

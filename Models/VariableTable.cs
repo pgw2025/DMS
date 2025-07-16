@@ -30,7 +30,7 @@ public partial class VariableTable : ObservableObject
     /// 变量表中包含的数据变量列表。
     /// </summary>
     [ObservableProperty]
-    public List<VariableData> dataVariables;
+    public ObservableCollection<VariableData> dataVariables;
     // [ObservableProperty]
     // public ObservableCollection<VariableData> varDataList;
     //

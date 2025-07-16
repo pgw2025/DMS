@@ -100,7 +100,7 @@
                         </DataTemplate>
                         <!-- 设备详情页 -->
                         <DataTemplate DataType="{x:Type vm:DeviceDetailViewModel}">
-                            <local:DeviceDetailView />
+                            <local:DeviceDetailView  />
                         </DataTemplate>
                         <!-- 设备变量页 -->
                         <DataTemplate DataType="{x:Type vm:VariableTableViewModel}">

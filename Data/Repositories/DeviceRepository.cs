@@ -150,7 +150,7 @@ public class DeviceRepository
         var result = await db.Deleteable<DbDevice>(new DbDevice { Id = device.Id })
                              .ExecuteCommandAsync();
         // 删除变量表
-        await _varTableRepository.Delete(device.VariableTables, db);
+        await _varTableRepository.DeleteAsync(device.VariableTables, db);
 
         // 删除菜单
         var menu = DataServicesHelper.FindMenusForDevice(device, menus);
@@ -228,7 +228,7 @@ public class DeviceRepository
         {
             // 添加默认变量表
             var varTable = new VariableTable();
-            device.VariableTables = new List<VariableTable>();
+            device.VariableTables = new ();
             varTable.IsActive = true;
             varTable.DeviceId = addDevice.Id;
             varTable.Name = "默认变量表";

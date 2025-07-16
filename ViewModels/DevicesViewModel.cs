@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSWPF.Data;
 using PMSWPF.Data.Repositories;
@@ -159,5 +160,14 @@ public partial class DevicesViewModel : ViewModelBase
         {
             NotificationHelper.ShowError($"编辑设备的过程中发生错误：{e.Message}", e);
         }
+    }
+    
+    [RelayCommand]
+    public void NavigateToDetail()
+    {
+        if (SelectedDevice == null) return;
+        var deviceDetailVm = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
+        deviceDetailVm.CurrentDevice = SelectedDevice;
+        MessageHelper.SendNavgatorMessage(deviceDetailVm);
     }
 }

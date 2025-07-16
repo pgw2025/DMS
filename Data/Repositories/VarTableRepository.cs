@@ -62,17 +62,15 @@ public class VarTableRepository
     /// </summary>
     /// <param name="variableTable"></param>
     /// <returns></returns>
-    public async Task<int> Edit(VariableTable variableTable)
+    public async Task<int> UpdateAsync(VariableTable variableTable)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var db = DbContext.GetInstance())
-        {
-            var result = await Edit(variableTable, db);
-            stopwatch.Stop();
-            NlogHelper.Info($"编辑变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result;
-        }
+        using var db = DbContext.GetInstance();
+        var result = await UpdateAsync(variableTable, db);
+        stopwatch.Stop();
+        NlogHelper.Info($"编辑变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
     }
 
     /// <summary>
@@ -80,7 +78,7 @@ public class VarTableRepository
     /// </summary>
     /// <param name="variableTable"></param>
     /// <returns></returns>
-    public async Task<int> Edit(VariableTable variableTable, SqlSugarClient db)
+    public async Task<int> UpdateAsync(VariableTable variableTable, SqlSugarClient db)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -96,13 +94,13 @@ public class VarTableRepository
     /// </summary>
     /// <param name="variableTable"></param>
     /// <returns></returns>
-    public async Task<int> Delete(VariableTable variableTable)
+    public async Task<int> DeleteAsync(VariableTable variableTable)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            var result = await Delete(variableTable, db);
+            var result = await DeleteAsync(variableTable, db);
             stopwatch.Stop();
             NlogHelper.Info($"删除变量表 '{variableTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
@@ -114,7 +112,7 @@ public class VarTableRepository
     /// </summary>
     /// <param name="deviceVariableTables"></param>
     /// <param name="db"></param>
-    public async Task<int> Delete(VariableTable varTable, SqlSugarClient db)
+    public async Task<int> DeleteAsync(VariableTable varTable, SqlSugarClient db)
     {
         if (varTable == null )
             return 0;
@@ -133,9 +131,9 @@ public class VarTableRepository
     /// </summary>
     /// <param name="deviceVariableTables"></param>
     /// <param name="db"></param>
-    public async Task Delete(List<VariableTable> deviceVariableTables, SqlSugarClient db)
+    public async Task DeleteAsync(IEnumerable<VariableTable> deviceVariableTables, SqlSugarClient db)
     {
-        if (deviceVariableTables == null || deviceVariableTables.Count == 0)
+        if (deviceVariableTables == null || deviceVariableTables.Count() == 0)
             return;
         // 转换对象
         var dbList = deviceVariableTables.Select(v => _mapper.Map<DbVariableTable>(v))
@@ -143,4 +141,13 @@ public class VarTableRepository
         await db.Deleteable<DbVariableTable>(dbList)
                 .ExecuteCommandAsync();
     }
+
+    public async Task<VariableTable> AddAsync(VariableTable varTable)
+    {
+        using var db = DbContext.GetInstance();
+        return await Add(varTable);
+    }
+
+
+
 }

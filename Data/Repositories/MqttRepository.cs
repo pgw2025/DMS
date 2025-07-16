@@ -155,7 +155,7 @@ public class MqttRepository
                 var result = await db.Deleteable<DbMqtt>()
                                      .In(mqtt.Id)
                                      .ExecuteCommandAsync();
-                // Delete menu entry
+                // DeleteAsync menu entry
                 var menu = await _menuRepository.GetMenuByDataId(mqtt.Id, MenuType.MqttMenu);
                 if (menu!=null )
                 {

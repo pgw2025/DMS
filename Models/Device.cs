@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PMSWPF.Enums;
 using SqlSugar;
@@ -97,5 +98,5 @@ public partial class Device : ObservableObject
     /// <summary>
     /// 设备关联的变量表列表。
     /// </summary>
-    public List<VariableTable>? VariableTables { get; set; }
+    public ObservableCollection<VariableTable>? VariableTables { get; set; }
 }

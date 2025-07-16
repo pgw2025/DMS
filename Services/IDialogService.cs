@@ -13,6 +13,7 @@ public interface IDialogService
     Task<bool> ShowConfrimeDialog(string title, string message,string buttonText="确认");
     
     Task<VariableTable> ShowAddVarTableDialog();
+    Task<VariableTable> ShowEditVarTableDialog(VariableTable variableTable);
     
     Task<VariableData> ShowAddVarDataDialog();
 

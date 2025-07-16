@@ -417,7 +417,7 @@ namespace PMSWPF.Services
                 variable.DataValue = value.ToString();
                 variable.DisplayValue = value.ToString(); // 或者根据需要进行格式化
                 variable.UpdateTime = DateTime.Now;
-                Console.WriteLine($"OpcUa后台服务轮询变量：{variable.Name},值：{variable.DataValue}");
+                // Console.WriteLine($"OpcUa后台服务轮询变量：{variable.Name},值：{variable.DataValue}");
                 // 将更新后的数据推入处理队列。
                 await _dataProcessingService.EnqueueAsync(variable);
             }
