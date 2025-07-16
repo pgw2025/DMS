@@ -5,6 +5,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PMSWPF.Helper;
 using PMSWPF.Models;
 
 namespace PMSWPF.Services;
@@ -15,9 +16,9 @@ namespace PMSWPF.Services;
 /// </summary>
 public class DataProcessingService : BackgroundService, IDataProcessingService
 {
-    private readonly ILogger<DataProcessingService> _logger;
     // 使用 Channel 作为高性能的生产者/消费者队列
-    private readonly Channel<VariableData> _queue;
+    private readonly Channel<VariableDataContext> _queue;
+
     // 存储数据处理器的链表
     private readonly List<IVariableDataProcessor> _processors;
 
@@ -25,11 +26,10 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     /// 构造函数，注入日志记录器。
     /// </summary>
     /// <param name="logger">日志记录器实例。</param>
-    public DataProcessingService(ILogger<DataProcessingService> logger)
+    public DataProcessingService()
     {
-        _logger = logger;
         // 创建一个无边界的 Channel，允许生产者快速写入而不会被阻塞。
-        _queue = Channel.CreateUnbounded<VariableData>();
+        _queue = Channel.CreateUnbounded<VariableDataContext>();
         _processors = new List<IVariableDataProcessor>();
     }
 
@@ -54,8 +54,9 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
             return;
         }
 
+        var context = new VariableDataContext(data);
         // 将数据项写入 Channel，供后台服务处理。
-        await _queue.Writer.WriteAsync(data);
+        await _queue.Writer.WriteAsync(context);
     }
 
     /// <summary>
@@ -65,7 +66,7 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     /// <param name="stoppingToken">用于通知服务停止的取消令牌。</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("数据处理服务已启动。");
+        NlogHelper.Info("数据处理服务已启动。");
 
         // 当服务未被请求停止时，持续循环
         while (!stoppingToken.IsCancellationRequested)
@@ -73,12 +74,18 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
             try
             {
                 // 从队列中异步读取一个数据项，如果队列为空，则等待。
-                var data = await _queue.Reader.ReadAsync(stoppingToken);
+                var context = await _queue.Reader.ReadAsync(stoppingToken);
 
                 // 依次调用处理链中的每一个处理器
                 foreach (var processor in _processors)
                 {
-                    await processor.ProcessAsync(data);
+                    if (context.IsHandled)
+                    {
+                        // NlogHelper.Info($"{context.Data.Name}的数据处理已短路，跳过后续处理器。");
+                        break; // 短路，跳过后续处理器
+                    }
+
+                    await processor.ProcessAsync(context);
                 }
             }
             catch (OperationCanceledException)
@@ -87,10 +94,10 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "处理变量数据时发生错误。");
+                NlogHelper.Error($"处理变量数据时发生错误:{ex.Message}", ex);
             }
         }
 
-        _logger.LogInformation("数据处理服务已停止。");
+        NlogHelper.Info("数据处理服务已停止。");
     }
 }

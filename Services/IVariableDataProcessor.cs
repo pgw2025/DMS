@@ -14,5 +14,5 @@ public interface IVariableDataProcessor
     /// </summary>
     /// <param name="data">要处理的变量数据。</param>
     /// <returns>一个表示异步操作的任务。</returns>
-    Task ProcessAsync(VariableData data);
+    Task ProcessAsync(VariableDataContext context);
 }

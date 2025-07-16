@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Collections.Concurrent;
+using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,9 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     // MQTT配置列表。
     [ObservableProperty]
     private List<Mqtt> _mqtts;
+
+
+    public ConcurrentDictionary<int, VariableData> AllVariables;
 
     // 设备数据仓库，用于设备数据的CRUD操作。
     private readonly DeviceRepository _deviceRepository;
@@ -94,6 +98,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         _mqttRepository = mqttRepository;
         _varDataRepository = varDataRepository;
         _variableDatas = new List<VariableData>();
+        AllVariables = new ConcurrentDictionary<int, VariableData>();
     }
 
     /// <summary>
@@ -154,6 +159,13 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             {
                 device.PropertyChanged += Device_PropertyChanged;
             }
+
+            var allVar = await _varDataRepository.GetAllAsync();
+           foreach (var variableData in allVar)
+           {
+               AllVariables.AddOrUpdate(variableData.Id, variableData, (key, old) => variableData);
+           }
+
         }
 
         OnDeviceListChanged?.Invoke(Devices);

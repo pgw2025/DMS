@@ -63,7 +63,9 @@ public partial class App : Application
             
             // 初始化数据处理链
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingDataProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
         }
         catch (Exception exception)
         {
@@ -111,7 +113,9 @@ public partial class App : Application
         // 注册数据处理服务和处理器
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
         services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
+        services.AddSingleton<CheckValueChangedProcessor>();
         services.AddSingleton<LoggingDataProcessor>();
+        services.AddSingleton<UpdateDbVariableProcessor>();
         
         // 注册数据仓库
         services.AddSingleton<DeviceRepository>();

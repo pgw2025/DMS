@@ -166,14 +166,13 @@ public class VarDataRepository
     /// </summary>
     /// <param name="variableData">VariableData实体</param>
     /// <returns></returns>
-    public async Task<bool> UpdateAsync(VariableData variableData)
+    public async Task<int> UpdateAsync(VariableData variableData)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         using (var _db = DbContext.GetInstance())
         {
-            var result = await _db.UpdateNav(_mapper.Map<DbVariableData>(variableData))
-                                  .Include(d => d.Mqtts)
+            var result = await _db.Updateable<DbVariableData>(_mapper.Map<DbVariableData>(variableData))
                                   .ExecuteCommandAsync();
             stopwatch.Stop();
             NlogHelper.Info($"更新VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");

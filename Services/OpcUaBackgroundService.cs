@@ -297,124 +297,10 @@ namespace PMSWPF.Services
         {
             try
             {
-                // 获取当前需要轮询的设备ID列表的快照
                 var deviceIdsToPoll = _opcUaPollVariablesByDeviceId.Keys.ToList();
 
-                // 为每个设备创建并发轮询任务
-                var pollingTasks = deviceIdsToPoll.Select(async deviceId =>
-                                                  {
-                                                      if (stoppingToken.IsCancellationRequested)
-                                                      {
-                                                          return; // 任务被取消，退出循环
-                                                      }
+                var pollingTasks = deviceIdsToPoll.Select(deviceId => PollSingleDeviceVariablesAsync(deviceId, stoppingToken)).ToList();
 
-                                                      if (!_opcUaDevices.TryGetValue(deviceId, out var device) ||
-                                                          device.OpcUaEndpointUrl == null)
-                                                      {
-                                                          NlogHelper.Warn(
-                                                              $"OpcUa轮询变量时，在deviceDic中未找到ID为 {deviceId} 的设备，或其服务器地址为空，请检查！");
-                                                          return; // 跳过此设备
-                                                      }
-
-                                                      if (!device.IsActive)
-                                                      {
-                                                          return;
-                                                      }
-
-                                                      if (!_opcUaSessions.TryGetValue(
-                                                              device.OpcUaEndpointUrl, out Session session) ||
-                                                          !session.Connected)
-                                                      {
-                                                        
-                                                          if (device.IsActive)
-                                                          {
-                                                              // 尝试重新连接会话
-                                                              NlogHelper.Warn(
-                                                                  $"用于 {device.OpcUaEndpointUrl} 的 OPC UA 会话未连接。正在尝试重新连接...");
-                                                              await ConnectSingleOpcUaDeviceAsync(
-                                                                  device, stoppingToken);
-                                                          }
-
-                                                          return; // 跳过本次轮询
-                                                      }
-
-                                                      var nodesToRead = new ReadValueIdCollection();
-                                                      if (!_opcUaPollVariablesByDeviceId.TryGetValue(deviceId, out var variableList))
-                                                      {
-                                                          return; // 跳过此设备
-                                                      }
-
-                                                      foreach (var variable in variableList)
-                                                      {
-                                                          if (stoppingToken.IsCancellationRequested)
-                                                          {
-                                                              return; // 任务被取消，退出循环
-                                                          }
-
-                                                          // 获取变量的轮询间隔。
-                                                          if (!ServiceHelper.PollingIntervals.TryGetValue(
-                                                                  variable.PollLevelType, out var interval))
-                                                          {
-                                                              NlogHelper.Info(
-                                                                  $"未知的轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
-                                                              continue;
-                                                          }
-
-                                                          // 检查是否达到轮询时间。
-                                                          if ((DateTime.Now - variable.UpdateTime) < interval)
-                                                              continue; // 未到轮询时间，跳过。
-
-                                                          nodesToRead.Add(new ReadValueId
-                                                                          {
-                                                                              NodeId = new NodeId(variable.OpcUaNodeId),
-                                                                              AttributeId = Attributes.Value
-                                                                          });
-                                                      }
-
-                                                      // 如果没有要读取的变量则跳过
-                                                      if (nodesToRead.Count == 0)
-                                                          return; // 跳过此设备
-
-                                                      var readResponse = await session.ReadAsync(
-                                                          null,
-                                                          0,
-                                                          TimestampsToReturn.Both,
-                                                          nodesToRead,
-                                                          stoppingToken);
-
-                                                      var results = readResponse.Results;
-                                                      var diagnosticInfos = readResponse.DiagnosticInfos;
-
-                                                      if (results == null || results.Count == 0)
-                                                          return; // 没有读取到结果
-
-                                                      for (int i = 0; i < results.Count; i++)
-                                                      {
-                                                          var value = results[i];
-                                                          var nodeId = nodesToRead[i]
-                                                                       .NodeId.ToString();
-                                                          if (!_opcUaPollVariablesByNodeId.TryGetValue(
-                                                                  nodeId, out var variable))
-                                                          {
-                                                              NlogHelper.Warn(
-                                                                  $"在字典中未找到OpcUaNodeId为 {nodeId} 的变量对象！");
-                                                              continue;
-                                                          }
-
-                                                          if (!StatusCode.IsGood(value.StatusCode))
-                                                          {
-                                                              NlogHelper.Warn(
-                                                                  $"读取 OPC UA 变量 {variable.Name} ({variable.OpcUaNodeId}) 失败: {value.StatusCode}");
-                                                              continue;
-                                                          }
-
-                                                          // 更新变量数据并入队
-                                                          await UpdateAndEnqueueVariableData(variable, value.Value);
-                                                      }
-                                                  })
-                                                  .ToList();
-
-                // 等待所有设备的轮询任务完成
                 await Task.WhenAll(pollingTasks);
             }
             catch (OperationCanceledException)
@@ -424,6 +310,97 @@ namespace PMSWPF.Services
             catch (Exception ex)
             {
                 NotificationHelper.ShowError($"OPC UA 后台服务在轮询变量过程中发生错误：{ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 轮询单个设备的所有 OPC UA 变量。
+        /// </summary>
+        /// <param name="deviceId">设备的 ID。</param>
+        /// <param name="stoppingToken">取消令牌。</param>
+        private async Task PollSingleDeviceVariablesAsync(int deviceId, CancellationToken stoppingToken)
+        {
+            if (stoppingToken.IsCancellationRequested) return;
+
+            if (!_opcUaDevices.TryGetValue(deviceId, out var device) || device.OpcUaEndpointUrl == null)
+            {
+                NlogHelper.Warn($"OpcUa轮询变量时，在deviceDic中未找到ID为 {deviceId} 的设备，或其服务器地址为空，请检查！");
+                return;
+            }
+
+            if (!device.IsActive) return;
+
+            if (!_opcUaSessions.TryGetValue(device.OpcUaEndpointUrl, out var session) || !session.Connected)
+            {
+                if (device.IsActive)
+                {
+                    NlogHelper.Warn($"用于 {device.OpcUaEndpointUrl} 的 OPC UA 会话未连接。正在尝试重新连接...");
+                    await ConnectSingleOpcUaDeviceAsync(device, stoppingToken);
+                }
+                return;
+            }
+
+            if (!_opcUaPollVariablesByDeviceId.TryGetValue(deviceId, out var variableList) || variableList.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var variable in variableList)
+            {
+                if (stoppingToken.IsCancellationRequested) return;
+
+                if (!ServiceHelper.PollingIntervals.TryGetValue(variable.PollLevelType, out var interval) || (DateTime.Now - variable.UpdateTime) < interval)
+                {
+                    continue;
+                }
+
+                await ReadAndProcessOpcUaVariableAsync(session, variable, stoppingToken);
+            }
+        }
+
+        /// <summary>
+        /// 读取单个 OPC UA 变量并处理其数据。
+        /// </summary>
+        /// <param name="session">OPC UA 会话。</param>
+        /// <param name="variable">要读取的变量。</param>
+        /// <param name="stoppingToken">取消令牌。</param>
+        private async Task ReadAndProcessOpcUaVariableAsync(Session session, VariableData variable, CancellationToken stoppingToken)
+        {
+            var nodesToRead = new ReadValueIdCollection
+            {
+                new ReadValueId
+                {
+                    NodeId = new NodeId(variable.OpcUaNodeId),
+                    AttributeId = Attributes.Value
+                }
+            };
+
+            try
+            {
+                var readResponse = await session.ReadAsync(null, 0, TimestampsToReturn.Both, nodesToRead, stoppingToken);
+                var result = readResponse.Results?.FirstOrDefault();
+                if (result == null) return;
+
+                if (!StatusCode.IsGood(result.StatusCode))
+                {
+                    NlogHelper.Warn($"读取 OPC UA 变量 {variable.Name} ({variable.OpcUaNodeId}) 失败: {result.StatusCode}");
+                    return;
+                }
+
+                await UpdateAndEnqueueVariableData(variable, result.Value);
+            }
+            catch (ServiceResultException ex) when (ex.StatusCode == StatusCodes.BadSessionIdInvalid)
+            {
+                NlogHelper.Error($"OPC UA会话ID无效，变量: {variable.Name} ({variable.OpcUaNodeId})。正在尝试重新连接...", ex);
+                // Assuming device can be retrieved from variable or passed as parameter if needed for ConnectSingleOpcUaDeviceAsync
+                // For now, I'll just log and let the outer loop handle reconnection if the session is truly invalid for the device.
+                // If a full device object is needed here, it would need to be passed down from PollSingleDeviceVariablesAsync.
+                // For simplicity, I'll remove the direct reconnection attempt here and rely on the outer loop.
+                await ConnectSingleOpcUaDeviceAsync(variable.VariableTable.Device, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                NlogHelper.Error($"轮询OPC UA变量 {variable.Name} ({variable.OpcUaNodeId}) 时发生未知错误: {ex.Message}", ex);
             }
         }
 
@@ -440,7 +417,7 @@ namespace PMSWPF.Services
                 variable.DataValue = value.ToString();
                 variable.DisplayValue = value.ToString(); // 或者根据需要进行格式化
                 variable.UpdateTime = DateTime.Now;
-                NlogHelper.Info($"轮询变量：{variable.Name},值：{variable.DataValue}");
+                Console.WriteLine($"OpcUa后台服务轮询变量：{variable.Name},值：{variable.DataValue}");
                 // 将更新后的数据推入处理队列。
                 await _dataProcessingService.EnqueueAsync(variable);
             }

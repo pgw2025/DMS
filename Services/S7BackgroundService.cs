@@ -283,7 +283,9 @@ namespace PMSWPF.Services
             {
                 // 更新变量的原始数据值和显示值。
                 variable.DataValue = dataItem.Value.ToString();
+                variable.DisplayValue = dataItem.Value.ToString();
                 variable.UpdateTime = DateTime.Now;
+                Console.WriteLine($"S7后台服务轮询变量：{variable.Name}，值：{variable.DataValue}");
                 // 将更新后的数据推入处理队列。
                 await _dataProcessingService.EnqueueAsync(variable);
             }
