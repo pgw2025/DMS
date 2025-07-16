@@ -138,8 +138,11 @@ namespace PMSWPF.Services
         /// <param name="isActive">设备新的IsActive状态。</param>
         private async void HandleDeviceIsActiveChanged(Device device, bool isActive)
         {
+            if (device.ProtocolType != ProtocolType.S7)
+                return;
+            
+            
             NlogHelper.Info($"设备 {device.Name} (ID: {device.Id}) 的IsActive状态改变为 {isActive}。");
-
             if (!isActive)
             {
                 // 设备变为非活动状态，断开连接
@@ -150,7 +153,7 @@ namespace PMSWPF.Services
                         if (plcClient.IsConnected)
                         {
                             plcClient.Close();
-                            NlogHelper.Info($"已断开设备 {device.Name} ({device.Ip}) 的连接。");
+                            NotificationHelper.ShowSuccess($"已断开设备 {device.Name} ({device.Ip}) 的连接。");
                         }
                     }
                     catch (Exception ex)

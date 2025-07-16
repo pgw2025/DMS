@@ -78,28 +78,14 @@ public static class ServiceHelper
                                                                                      (int)PollLevelType.ThirtyMinutes)
                                                                              }
                                                                          };
-
     /// <summary>
     /// 创建并配置 OPC UA 会话。
     /// </summary>
     /// <param name="endpointUrl">OPC UA 服务器的终结点 URL。</param>
+    /// <param name="stoppingToken"></param>
     /// <returns>创建的 Session 对象，如果失败则返回 null。</returns>
-    public static Session CreateOpcUaSession(string endpointUrl)
+    public static async Task<Session> CreateOpcUaSessionAsync(string endpointUrl, CancellationToken stoppingToken = default)
     {
-        return CreateOpcUaSessionAsync(endpointUrl)
-               .GetAwaiter()
-               .GetResult();
-    }
-
-    /// <summary>
-    /// 创建并配置 OPC UA 会话。
-    /// </summary>
-    /// <param name="endpointUrl">OPC UA 服务器的终结点 URL。</param>
-    /// <returns>创建的 Session 对象，如果失败则返回 null。</returns>
-    public static async Task<Session> CreateOpcUaSessionAsync(string endpointUrl)
-    {
-        try
-        {
             // 1. 创建应用程序配置
             var application = new ApplicationInstance
                               {
@@ -157,10 +143,10 @@ public static class ServiceHelper
 
             // 验证并检查证书
             await config.Validate(ApplicationType.Client);
-            await application.CheckApplicationInstanceCertificate(false, 0);
+            
 
             // 2. 查找并选择端点 (将 useSecurity 设置为 false 以进行诊断)
-            var selectedEndpoint = CoreClientUtils.SelectEndpoint(endpointUrl, false);
+            var selectedEndpoint = CoreClientUtils.SelectEndpoint(config, endpointUrl, false);
 
             var session = await Session.Create(
                 config,
@@ -169,16 +155,7 @@ public static class ServiceHelper
                 "PMSWPF OPC UA Session",
                 60000,
                 new UserIdentity(new AnonymousIdentityToken()),
-                null);
-
-
-            NotificationHelper.ShowSuccess($"已连接到 OPC UA 服务器: {endpointUrl}");
+                null,stoppingToken);
             return session;
-        }
-        catch (Exception ex)
-        {
-            NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {endpointUrl} - {ex.Message}", ex);
-            return null;
-        }
     }
 }

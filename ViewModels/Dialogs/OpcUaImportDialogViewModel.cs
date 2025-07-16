@@ -38,7 +38,8 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
         OpcUaNodes = new ObservableCollection<OpcUaNode>();
         SelectedNodeVariables = new ObservableCollection<VariableData>();
         // Automatically connect when the ViewModel is created
-        _ = Connect().ConfigureAwait(false);
+        ConnectCommand.Execute(null);
+        
     }
 
     [RelayCommand]
@@ -49,7 +50,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
             // 断开现有连接
             if (_session != null && _session.Connected)
             {
-                _session.Close();
+                await _session.CloseAsync();
                 _session.Dispose();
                 _session = null;
             }
@@ -69,7 +70,6 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
         catch (Exception ex)
         {
             IsConnected = false;
-            NlogHelper.Error($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
             NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
         }
     }

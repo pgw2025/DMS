@@ -185,14 +185,14 @@ public partial class SettingViewModel : ViewModelBase
                 _connectionSettings.EnableOpcUaService = value;
                 OnPropertyChanged();
                 _connectionSettings.Save();
-                if (value)
-                {
-                    _opcUaBackgroundService.StartService();
-                }
-                else
-                {
-                    _opcUaBackgroundService.StopService();
-                }
+                // if (value)
+                // {
+                //     _opcUaBackgroundService.StartService();
+                // }
+                // else
+                // {
+                //     _opcUaBackgroundService.StopService();
+                // }
             }
         }
     }
