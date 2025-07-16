@@ -21,16 +21,16 @@ namespace PMSWPF.Services
         private readonly IDataProcessingService _dataProcessingService;
 
         // 存储 S7设备，键为设备Id，值为会话对象。
-        private readonly ConcurrentDictionary<int, Device> _deviceDic;
+        private readonly ConcurrentDictionary<int, Device> _s7Devices;
 
         // 储存所有要轮询更新的变量，键是Device.Id,值是这个设备所有要轮询的变量
-        private readonly ConcurrentDictionary<int, List<VariableData>> _pollVariableDic; // Key: VariableData.Id
+        private readonly ConcurrentDictionary<int, List<VariableData>> _s7PollVariablesByDeviceId; // Key: VariableData.Id
 
         // 存储S7 PLC客户端实例的字典，键为设备ID，值为Plc对象。
-        private readonly ConcurrentDictionary<string, Plc> _s7PlcClientDic;
+        private readonly ConcurrentDictionary<string, Plc> _s7PlcClientsByIp;
 
         // 储存所有变量的字典，方便通过id获取变量对象
-        private readonly Dictionary<int, VariableData> _variableDic;
+        private readonly Dictionary<int, VariableData> _s7VariablesById;
 
         //  S7轮询一次读取的变量数，不得大于15
         private readonly int _s7PollOnceReadMultipleVars = 9;
@@ -52,10 +52,10 @@ namespace PMSWPF.Services
         {
             _dataServices = dataServices;
             _dataProcessingService = dataProcessingService;
-            _deviceDic = new ConcurrentDictionary<int, Device>();
-            _pollVariableDic = new ConcurrentDictionary<int, List<VariableData>>();
-            _s7PlcClientDic = new ConcurrentDictionary<string, Plc>();
-            _variableDic = new();
+            _s7Devices = new ConcurrentDictionary<int, Device>();
+            _s7PollVariablesByDeviceId = new ConcurrentDictionary<int, List<VariableData>>();
+            _s7PlcClientsByIp = new ConcurrentDictionary<string, Plc>();
+            _s7VariablesById = new();
             
             // 订阅设备列表变更事件，以便在设备配置更新时重新加载。
             _dataServices.OnDeviceListChanged += HandleDeviceListChanged;
@@ -146,7 +146,7 @@ namespace PMSWPF.Services
             if (!isActive)
             {
                 // 设备变为非活动状态，断开连接
-                if (_s7PlcClientDic.TryRemove(device.Ip, out var plcClient))
+                if (_s7PlcClientsByIp.TryRemove(device.Ip, out var plcClient))
                 {
                     try
                     {
@@ -173,18 +173,18 @@ namespace PMSWPF.Services
             try
             {
                 // 获取当前需要轮询的设备ID列表的快照
-                var deviceIdsToPoll = _pollVariableDic.Keys.ToList();
+                var deviceIdsToPoll = _s7PollVariablesByDeviceId.Keys.ToList();
 
                 // 为每个设备创建并发轮询任务
                 var pollingTasks = deviceIdsToPoll.Select(async deviceId =>
                 {
-                    if (!_deviceDic.TryGetValue(deviceId, out var device))
+                    if (!_s7Devices.TryGetValue(deviceId, out var device))
                     {
                         NlogHelper.Warn($"S7服务轮询时在deviceDic中没有找到Id为：{deviceId}的设备");
                         return; // 跳过此设备
                     }
 
-                    if (!_s7PlcClientDic.TryGetValue(device.Ip, out var plcClient))
+                    if (!_s7PlcClientsByIp.TryGetValue(device.Ip, out var plcClient))
                     {
                         NlogHelper.Warn($"S7服务轮询时没有找到设备I：{deviceId}的初始化好的Plc客户端对象！");
                         return; // 跳过此设备
@@ -196,7 +196,7 @@ namespace PMSWPF.Services
                         return; // 跳过此设备，等待ConnectS7Service重新连接
                     }
 
-                    if (!_pollVariableDic.TryGetValue(deviceId, out var variableList))
+                    if (!_s7PollVariablesByDeviceId.TryGetValue(deviceId, out var variableList))
                     {
                         NlogHelper.Warn($"S7服务轮询时没有找到设备I：{deviceId},要轮询的变量列表！");
                         return; // 跳过此设备
@@ -302,8 +302,8 @@ namespace PMSWPF.Services
 
             var connectTasks = new List<Task>();
 
-            // 遍历_deviceDic中的所有设备，尝试连接
-            foreach (var device in _deviceDic.Values.ToList())
+            // 遍历_s7Devices中的所有设备，尝试连接
+            foreach (var device in _s7Devices.Values.ToList())
             {
                 connectTasks.Add(ConnectSingleDeviceAsync(device, stoppingToken));
             }
@@ -324,7 +324,7 @@ namespace PMSWPF.Services
             }
 
             // Check if already connected
-            if (_s7PlcClientDic.TryGetValue(device.Ip, out var existingPlc))
+            if (_s7PlcClientsByIp.TryGetValue(device.Ip, out var existingPlc))
             {
                 if (existingPlc.IsConnected)
                 {
@@ -334,7 +334,7 @@ namespace PMSWPF.Services
                 else
                 {
                     // Remove disconnected PLC from dictionary to attempt reconnection
-                    _s7PlcClientDic.TryRemove(device.Ip, out _);
+                    _s7PlcClientsByIp.TryRemove(device.Ip, out _);
                 }
             }
 
@@ -344,7 +344,7 @@ namespace PMSWPF.Services
                 var plcClient = new Plc(device.CpuType, device.Ip, (short)device.Prot, device.Rack, device.Slot);
                 await plcClient.OpenAsync(stoppingToken); // 尝试打开连接。
 
-                _s7PlcClientDic.AddOrUpdate(device.Ip, plcClient, (key, oldValue) => plcClient);
+                _s7PlcClientsByIp.AddOrUpdate(device.Ip, plcClient, (key, oldValue) => plcClient);
 
                 NotificationHelper.ShowSuccess($"已连接到S7 PLC: {device.Name} ({device.Ip})");
             }
@@ -361,9 +361,9 @@ namespace PMSWPF.Services
         {
             try
             {
-                _deviceDic.Clear();
-                _pollVariableDic.Clear();
-                _variableDic.Clear(); // 确保在重新加载变量时清空此字典
+                _s7Devices.Clear();
+                _s7PollVariablesByDeviceId.Clear();
+                _s7VariablesById.Clear(); // 确保在重新加载变量时清空此字典
 
                 NlogHelper.Info("开始加载S7变量....");
                 var s7Devices = _dataServices
@@ -374,7 +374,7 @@ namespace PMSWPF.Services
                 foreach (var device in s7Devices)
                 {
                     device.IsRuning = true;
-                    _deviceDic.AddOrUpdate(device.Id, device, (key, oldValue) => device);
+                    _s7Devices.AddOrUpdate(device.Id, device, (key, oldValue) => device);
 
                     // 过滤出当前设备和S7协议相关的变量。
                     var deviceS7Variables = device.VariableTables
@@ -385,10 +385,10 @@ namespace PMSWPF.Services
 
                     // 将变量存储到字典中，方便以后通过ID快速查找
                     foreach (var s7Variable in deviceS7Variables)
-                        _variableDic[s7Variable.Id] = s7Variable;
+                        _s7VariablesById[s7Variable.Id] = s7Variable;
 
                     totalVariableCount += deviceS7Variables.Count; // 使用 Count 属性
-                    _pollVariableDic.AddOrUpdate(device.Id, deviceS7Variables, (key, oldValue) => deviceS7Variables);
+                    _s7PollVariablesByDeviceId.AddOrUpdate(device.Id, deviceS7Variables, (key, oldValue) => deviceS7Variables);
                 }
 
                 NlogHelper.Info($"S7变量加载成功，共加载S7设备：{s7Devices.Count}个，变量数：{totalVariableCount}");
@@ -407,14 +407,14 @@ namespace PMSWPF.Services
         /// </summary>
         private async Task DisconnectAllPlc()
         {
-            if (_s7PlcClientDic.IsEmpty)
+            if (_s7PlcClientsByIp.IsEmpty)
                 return;
 
             // 创建一个任务列表，用于并发关闭所有PLC连接
             var closeTasks = new List<Task>();
 
             // 关闭所有活跃的PLC连接。
-            foreach (var plcClient in _s7PlcClientDic.Values)
+            foreach (var plcClient in _s7PlcClientsByIp.Values)
             {
                 if (plcClient.IsConnected)
                 {
@@ -435,7 +435,7 @@ namespace PMSWPF.Services
 
             // 等待所有关闭任务完成
             await Task.WhenAll(closeTasks);
-            _s7PlcClientDic.Clear(); // Clear the dictionary after all connections are attempted to be closed
+            _s7PlcClientsByIp.Clear(); // Clear the dictionary after all connections are attempted to be closed
         }
     }
 }
