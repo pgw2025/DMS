@@ -6,6 +6,7 @@
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:vm="clr-namespace:PMSWPF.ViewModels"
+             xmlns:hc="https://handyorg.github.io/handycontrol"
              d:DataContext="{d:DesignInstance vm:DeviceDetailViewModel}"
              mc:Ignorable="d"
              d:DesignHeight="600"
@@ -132,6 +133,12 @@
                          SelectedItem="{Binding SelectedVariableTable}"
                          ItemsSource="{Binding CurrentDevice.VariableTables}"
                          ItemTemplate="{StaticResource VariableTableItemTemplate}"
-                         SelectionMode="Single" />
+                         SelectionMode="Single">
+            <hc:Interaction.Triggers>
+                <hc:EventTrigger EventName="MouseDoubleClick">
+                    <hc:InvokeCommandAction Command="{Binding NavigateToVariableTableCommand}" />
+                </hc:EventTrigger>
+            </hc:Interaction.Triggers>
+        </ui:GridView>
     </ikw:SimpleStackPanel>
 </UserControl>

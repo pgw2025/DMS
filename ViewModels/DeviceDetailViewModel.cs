@@ -1,7 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
+using PMSWPF.Data;
 using PMSWPF.Data.Repositories;
+using PMSWPF.Enums;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 using PMSWPF.Services;
@@ -12,6 +15,8 @@ public partial class DeviceDetailViewModel : ViewModelBase
 {
     private readonly IDialogService _dialogService;
     private readonly VarTableRepository _varTableRepository;
+    private readonly MenuRepository _menuRepository;
+    private readonly DataServices _dataServices;
 
     [ObservableProperty]
     private Device _currentDevice;
@@ -19,10 +24,12 @@ public partial class DeviceDetailViewModel : ViewModelBase
     [ObservableProperty]
     private VariableTable _selectedVariableTable;
 
-    public DeviceDetailViewModel(IDialogService dialogService, VarTableRepository varTableRepository)
+    public DeviceDetailViewModel(IDialogService dialogService, VarTableRepository varTableRepository, MenuRepository menuRepository, DataServices dataServices)
     {
         _dialogService = dialogService;
         _varTableRepository = varTableRepository;
+        _menuRepository = menuRepository;
+        _dataServices = dataServices;
     }
 
     public override void OnLoaded()
@@ -42,25 +49,55 @@ public partial class DeviceDetailViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddVariableTable()
     {
+
+        using  var db = DbContext.GetInstance();
         try
         {
+            // 1. Show dialog to get new variable table details
             var newVarTable = await _dialogService.ShowAddVarTableDialog();
-            if (newVarTable == null) return;
+            if (newVarTable == null) return; // User cancelled
 
+            // 2. Set properties for the new variable table
             newVarTable.DeviceId = CurrentDevice.Id;
-            newVarTable = await _varTableRepository.AddAsync(newVarTable);
-            if (newVarTable != null)
+            newVarTable.ProtocolType = CurrentDevice.ProtocolType;
+            newVarTable.IsActive = true;
+
+            // 3. Find the parent menu for the current device
+            var parentMenu = DataServicesHelper.FindMenusForDevice(CurrentDevice, _dataServices.MenuTrees);
+            if (parentMenu == null)
             {
-                CurrentDevice.VariableTables.Add(newVarTable);
-                NotificationHelper.ShowSuccess($"变量表 {newVarTable.Name} 添加成功。");
+                NotificationHelper.ShowError("无法找到当前设备的父级菜单，无法添加变量表菜单。");
+                return;
             }
-            else
+
+            // 4. Start database transaction
+            await db.BeginTranAsync();
+
+            // 5. AddAsync variable table to the database
+            var addedVarTable = await _varTableRepository.AddAsync(newVarTable, db);
+
+            // 6. Create and add the corresponding menu item
+            var newMenu = new MenuBean
             {
-                NotificationHelper.ShowError($"变量表 {newVarTable.Name} 添加失败。");
-            }
+                Name = addedVarTable.Name,
+                DataId = addedVarTable.Id,
+                Type = MenuType.VariableTableMenu,
+                ParentId = parentMenu.Id,
+                Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Tablet.Glyph
+            };
+            await _menuRepository.AddAsync(newMenu, db);
+
+            // 7. Commit transaction
+            await db.CommitTranAsync();
+
+            // 8. Update UI
+            CurrentDevice.VariableTables.Add(addedVarTable);
+            MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
+            NotificationHelper.ShowSuccess($"变量表 {addedVarTable.Name} 添加成功。");
         }
         catch (Exception ex)
         {
+            await db.RollbackTranAsync();
             NotificationHelper.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
         }
     }
@@ -147,5 +184,15 @@ public partial class DeviceDetailViewModel : ViewModelBase
         // Implement device deletion logic
         NotificationHelper.ShowInfo("删除设备功能待实现。");
         await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private void NavigateToVariableTable()
+    {
+        if (SelectedVariableTable == null) return;
+
+        var variableTableVm = App.Current.Services.GetRequiredService<VariableTableViewModel>();
+        variableTableVm.VariableTable = SelectedVariableTable;
+        MessageHelper.SendNavgatorMessage(variableTableVm);
     }
 }

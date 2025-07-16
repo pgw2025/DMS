@@ -4,6 +4,7 @@ using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
+using PMSWPF.Data.Repositories;
 using PMSWPF.Helper;
 using PMSWPF.Models;
 
@@ -16,6 +17,7 @@ namespace PMSWPF.Services
     {
         // 数据服务实例，用于访问和操作应用程序数据，如MQTT配置和变量数据。
         private readonly DataServices _dataServices;
+        private readonly MqttRepository _mqttRepository;
 
         // 存储MQTT客户端实例的字典，键为MQTT配置ID，值为IMqttClient对象。
         private readonly Dictionary<int, IMqttClient> _mqttClients;
@@ -38,9 +40,10 @@ namespace PMSWPF.Services
         /// 构造函数，注入DataServices。
         /// </summary>
         /// <param name="dataServices">数据服务实例。</param>
-        public MqttBackgroundService(DataServices dataServices)
+        public MqttBackgroundService(DataServices dataServices, MqttRepository mqttRepository)
         {
             _dataServices = dataServices;
+            _mqttRepository = mqttRepository;
             _mqttClients = new Dictionary<int, IMqttClient>();
             _mqttConfigDic = new Dictionary<int, Mqtt>();
             _reconnectAttempts = new Dictionary<int, int>();
@@ -132,7 +135,7 @@ namespace PMSWPF.Services
                 }
                 catch (Exception e)
                 {
-                    NlogHelper.Error($"MqttID:{mqttId},断开连接的过程中发生了错误:{e.Message}",e);
+                    NlogHelper.Error($"MqttID:{mqttId},断开连接的过程中发生了错误:{e.Message}", e);
                 }
             }
         }
@@ -195,6 +198,9 @@ namespace PMSWPF.Services
                     _mqttClients.Remove(mqtt.Id);
                     NlogHelper.Info($"{mqtt.Name}的客户端，与服务器断开连接.");
                 }
+
+                await _mqttRepository.UpdateAsync(mqtt);
+                NotificationHelper.ShowSuccess($"Mqtt客户端：{mqtt.Name},激活状态修改成功。");
             }
             catch (Exception e)
             {

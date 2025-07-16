@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using PMSWPF.Enums;
 using SqlSugar;
 using SqlSugar.DbConvert;
-using S7.Net; // Add this using directive
+using S7.Net; // AddAsync this using directive
 
 namespace PMSWPF.Models;
 
@@ -41,6 +41,12 @@ public partial class Device : ObservableObject
     /// </summary>
     [ObservableProperty]
     private bool isActive = true;
+
+    public event Action<Device,bool> OnDeviceIsActiveChanged ;
+    
+    partial void OnIsActiveChanged(bool isActive){
+        OnDeviceIsActiveChanged?.Invoke(this,isActive);
+    }
 
     /// <summary>
     /// 表示是否添加默认变量表。

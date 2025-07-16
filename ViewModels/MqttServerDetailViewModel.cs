@@ -132,7 +132,7 @@ namespace PMSWPF.ViewModels
             // 例如：var selectedVariables = await _dialogService.ShowVariableSelectionDialogAsync();
             // 这里只是一个占位符，实际需要一个UI来选择变量
             NotificationHelper.ShowInfo("添加变量功能待实现，需要一个变量选择对话框。");
-            _logger.LogInformation("Add variables to MQTT server initiated.");
+            _logger.LogInformation("AddAsync variables to MQTT server initiated.");
 
             // 假设我们已经通过对话框获取到了一些要添加的变量
             // List<VariableData> newVariables = ...; 
@@ -141,9 +141,9 @@ namespace PMSWPF.ViewModels
             //     if (variable.Mqtts == null) variable.Mqtts = new List<Mqtt>();
             //     if (!variable.Mqtts.Any(m => m.Id == CurrentMqtt.Id))
             //     {
-            //         variable.Mqtts.Add(CurrentMqtt);
+            //         variable.Mqtts.AddAsync(CurrentMqtt);
             //         variable.IsModified = true; // 标记为已修改
-            //         AssociatedVariables.Add(variable);
+            //         AssociatedVariables.AddAsync(variable);
             //     }
             // }
             // NotificationHelper.ShowMessage("变量添加成功，请记得保存更改。", NotificationType.Success);

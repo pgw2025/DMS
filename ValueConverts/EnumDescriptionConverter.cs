@@ -22,7 +22,7 @@ public class EnumDescriptionConverter : IValueConverter
 
     private string GetEnumDescription(object enumObj)
     {
-        if (enumObj == null) return null; // Add null check here
+        if (enumObj == null) return null; // AddAsync null check here
 
         var fi = enumObj.GetType().GetField(enumObj.ToString());
 

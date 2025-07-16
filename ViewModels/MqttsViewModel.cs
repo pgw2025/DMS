@@ -84,7 +84,7 @@ public partial class MqttsViewModel : ViewModelBase
             {
                 try
                 {
-                    await _mqttRepository.Edit(mqtt);
+                    await _mqttRepository.UpdateAsync(mqtt);
                     NotificationHelper.ShowSuccess($"MQTT: {mqtt.Name} 的启用状态已更新。");
                     MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
                 }
@@ -108,7 +108,7 @@ public partial class MqttsViewModel : ViewModelBase
                 return;
             }
 
-            await _mqttRepository.Add(mqtt);
+            await _mqttRepository.AddAsync(mqtt);
             MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
             MessageHelper.SendLoadMessage(LoadTypes.Menu);
         }
@@ -133,7 +133,7 @@ public partial class MqttsViewModel : ViewModelBase
             var isDel = await _dialogService.ShowConfrimeDialog("删除MQTT", msg, "删除MQTT");
             if (isDel)
             {
-                await _mqttRepository.Delete(SelectedMqtt);
+                await _mqttRepository.DeleteAsync(SelectedMqtt);
                 MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 NotificationHelper.ShowSuccess($"删除MQTT成功,MQTT名：{SelectedMqtt.Name}");
@@ -159,7 +159,7 @@ public partial class MqttsViewModel : ViewModelBase
             var editMqtt = await _dialogService.ShowEditMqttDialog(SelectedMqtt);
             if (editMqtt != null)
             {
-                var res = await _mqttRepository.Edit(editMqtt);
+                var res = await _mqttRepository.UpdateAsync(editMqtt);
                 MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
             }
         }

@@ -30,6 +30,7 @@ public partial class DevicesViewModel : ViewModelBase
     [ObservableProperty]
     private ObservableCollection<Device> _devices;
 
+    
     /// <summary>
     /// 当前选中的设备。
     /// </summary>
@@ -64,6 +65,37 @@ public partial class DevicesViewModel : ViewModelBase
         if (_dataServices.Devices!=null && _dataServices.Devices.Count>0)
         {
             Devices=new ObservableCollection<Device>(_dataServices.Devices);
+            foreach (var device in Devices)
+            {
+                device.OnDeviceIsActiveChanged += HandleDeviceIsActiveChanged;
+                
+            }
+        }
+    }
+
+    public override Task<bool> OnExitAsync()
+    {
+        if (_dataServices.Devices!=null && _dataServices.Devices.Count>0)
+        {
+            foreach (var device in Devices)
+            {
+                device.OnDeviceIsActiveChanged -= HandleDeviceIsActiveChanged;
+            }
+        }
+
+        return Task.FromResult(true);
+    }
+
+    private async void HandleDeviceIsActiveChanged(Device device, bool isActive)
+    {
+        try
+        {
+            await _deviceRepository.UpdateAsync(device);
+            NotificationHelper.ShowSuccess($"设备 {device.Name} 的激活状态已更新。");
+        }
+        catch (Exception ex)
+        {
+            NotificationHelper.ShowError($"更新设备 {device.Name} 激活状态失败: {ex.Message}", ex);
         }
     }
 
@@ -87,7 +119,7 @@ public partial class DevicesViewModel : ViewModelBase
             if (device.ProtocolType == ProtocolType.OpcUA)
                 device.OpcUaEndpointUrl = $"opc.tcp://{device.Ip}:{device.Prot}";
 
-            await _deviceRepository.Add(device);
+            await _deviceRepository.AddAsync(device);
         }
         catch (Exception e)
         {
@@ -116,7 +148,7 @@ public partial class DevicesViewModel : ViewModelBase
             {
                 
                 // 删除设备
-                await _deviceRepository.Delete(SelectedDevice ,_dataServices.MenuTrees);
+                await _deviceRepository.DeleteAsync(SelectedDevice ,_dataServices.MenuTrees);
 
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);
@@ -147,10 +179,10 @@ public partial class DevicesViewModel : ViewModelBase
             if (editDievce != null)
             {
                 // 更新菜单
-                var res = await _deviceRepository.Edit(editDievce);
+                var res = await _deviceRepository.UpdateAsync(editDievce);
                 var menu = DataServicesHelper.FindMenusForDevice(editDievce, _dataServices.MenuTrees);
                 if (menu != null)
-                    await _menuRepository.Edit(menu);
+                    await _menuRepository.UpdateAsync(menu);
 
                 MessageHelper.SendLoadMessage(LoadTypes.Menu);
                 MessageHelper.SendLoadMessage(LoadTypes.Devices);

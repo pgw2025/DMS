@@ -13,8 +13,8 @@ using PMSWPF.Models;
 using PMSWPF.Services;
 using PMSWPF.Views;
 
-// Add this using directive
-// Add this using directive
+// AddAsync this using directive
+// AddAsync this using directive
 
 namespace PMSWPF.ViewModels;
 
@@ -126,7 +126,7 @@ public partial class MainViewModel : ViewModelBase
             // 假设 _varTableRepository.AddAsync 返回一个布尔值表示成功，或者一个表示 ID 的整数
             // 这里为了演示，我们假设它返回新添加的ID，如果失败则返回0
             await db.BeginTranAsync();
-            var addVarTable = await _varTableRepository.Add(varTable, db);
+            var addVarTable = await _varTableRepository.AddAsync(varTable, db);
 
             // 5. 添加变量表菜单
             MenuBean newMenu = new MenuBean
@@ -138,7 +138,7 @@ public partial class MainViewModel : ViewModelBase
                                    ParentId = menu.Parent.Id
                                };
 
-            var addMenuRes = await _menuRepository.Add(newMenu, db);
+            var addMenuRes = await _menuRepository.AddAsync(newMenu, db);
             if (addMenuRes > 0)
             {
                 await db.CommitTranAsync();

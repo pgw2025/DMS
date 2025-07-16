@@ -443,11 +443,11 @@ partial class VariableTableViewModel : ViewModelBase
     private async Task RefreshDataView()
     {
         // // 更新界面显示的数据：重新从数据库加载所有变量数据
-        // VariableTable.DataVariables = await _varDataRepository.GetByVariableTableId(VariableTable.Id);
+        // VariableTable.DataVariables = await _varDataRepository.GetByVariableTableIdAsync(VariableTable.Id);
         // DataVariables.Clear();
         // foreach (var item in VariableTable.DataVariables)
         // {
-        //     DataVariables.Add(item);
+        //     DataVariables.AddAsync(item);
         // }
         //
         // VariableDataView.Refresh();

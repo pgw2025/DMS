@@ -26,7 +26,7 @@ public partial class MqttSelectionDialogViewModel : ObservableObject
     {
         try
         {
-            var allMqtts = await _mqttRepository.GetAll();
+            var allMqtts = await _mqttRepository.GetAllAsync();
             Mqtts = new ObservableCollection<Mqtt>(allMqtts);
         }
         catch (Exception ex)

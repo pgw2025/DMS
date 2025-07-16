@@ -150,7 +150,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             }
         }
 
-        Devices = await _deviceRepository.GetAll();
+        Devices = await _deviceRepository.GetAllAsync();
 
         // 订阅新设备的属性变更事件
         if (Devices != null)
@@ -189,7 +189,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <returns>表示异步操作的任务。</returns>
     private async Task LoadMenus()
     {
-        MenuTrees = await _menuRepository.GetMenuTrees();
+        MenuTrees = await _menuRepository.GetMenuTreesAsync();
         foreach (MenuBean menu in MenuTrees)
         {
             MenuHelper.MenuAddParent(menu); // 为菜单添加父级引用
@@ -205,7 +205,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <returns>包含所有MQTT配置的列表。</returns>
     public async Task<List<Mqtt>> GetMqttsAsync()
     {
-        var mqtts = await _mqttRepository.GetAll();
+        var mqtts = await _mqttRepository.GetAllAsync();
         OnMqttListChanged?.Invoke(mqtts);
         return mqtts;
     }
@@ -216,7 +216,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <returns>表示异步操作的任务。</returns>
     private async Task LoadMqtts()
     {
-        Mqtts = await _mqttRepository.GetAll();
+        Mqtts = await _mqttRepository.GetAllAsync();
     }
 
 
@@ -227,7 +227,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <returns>设备对象，如果不存在则为null。</returns>
     public async Task<Device> GetDeviceByIdAsync(int id)
     {
-        return await _deviceRepository.GetById(id);
+        return await _deviceRepository.GetByIdAsync(id);
     }
 
     /// <summary>

@@ -66,7 +66,7 @@ public static class ThemeHelper
             ? "pack://application:,,,/HandyControl;component/Themes/SkinDark.xaml"
             : "pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml";
 
-        // Add the new skin dictionary
+        // AddAsync the new skin dictionary
         dictionaries.Add(new ResourceDictionary { Source = new Uri(skinUri, UriKind.Absolute) });
         
         // To force refresh of dynamic resources, remove and re-add the main theme dictionary

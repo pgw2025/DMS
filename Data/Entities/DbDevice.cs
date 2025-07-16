@@ -2,7 +2,7 @@ using PMSWPF.Enums;
 using SqlSugar;
 using SqlSugar.DbConvert;
 using ProtocolType = PMSWPF.Enums.ProtocolType;
-using S7.Net; // Add this using directive
+using S7.Net; // AddAsync this using directive
 
 namespace PMSWPF.Data.Entities;
 

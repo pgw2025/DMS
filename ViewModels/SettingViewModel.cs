@@ -14,17 +14,11 @@ namespace PMSWPF.ViewModels;
 public partial class SettingViewModel : ViewModelBase
 {
     private ConnectionSettings _connectionSettings;
-    private readonly S7BackgroundService _s7BackgroundService;
-    private readonly MqttBackgroundService _mqttBackgroundService;
-    private readonly OpcUaBackgroundService _opcUaBackgroundService;
 
-    public SettingViewModel(S7BackgroundService s7BackgroundService, MqttBackgroundService mqttBackgroundService, OpcUaBackgroundService opcUaBackgroundService)
+    public SettingViewModel()
     {
         _connectionSettings = ConnectionSettings.Load();
         AvailableDbTypes = Enum.GetNames(typeof(SqlSugar.DbType)).ToList();
-        _s7BackgroundService = s7BackgroundService;
-        _mqttBackgroundService = mqttBackgroundService;
-        _opcUaBackgroundService = opcUaBackgroundService;
         Themes = new List<string> { "浅色", "深色", "跟随系统" };
     }
 
@@ -127,72 +121,6 @@ public partial class SettingViewModel : ViewModelBase
                 _connectionSettings.Database = value;
                 OnPropertyChanged();
                 _connectionSettings.Save();
-            }
-        }
-    }
-
-    public bool EnableS7Service
-    {
-        get => _connectionSettings.EnableS7Service;
-        set
-        {
-            if (_connectionSettings.EnableS7Service != value)
-            {
-                _connectionSettings.EnableS7Service = value;
-                OnPropertyChanged();
-                _connectionSettings.Save();
-                if (value)
-                {
-                    // _s7BackgroundService.StartService();
-                }
-                else
-                {
-                    // _s7BackgroundService.StopService();
-                }
-            }
-        }
-    }
-
-    public bool EnableMqttService
-    {
-        get => _connectionSettings.EnableMqttService;
-        set
-        {
-            if (_connectionSettings.EnableMqttService != value)
-            {
-                _connectionSettings.EnableMqttService = value;
-                OnPropertyChanged();
-                _connectionSettings.Save();
-                if (value)
-                {
-                    _mqttBackgroundService.StartService();
-                }
-                else
-                {
-                    _mqttBackgroundService.StopService();
-                }
-            }
-        }
-    }
-
-    public bool EnableOpcUaService
-    {
-        get => _connectionSettings.EnableOpcUaService;
-        set
-        {
-            if (_connectionSettings.EnableOpcUaService != value)
-            {
-                _connectionSettings.EnableOpcUaService = value;
-                OnPropertyChanged();
-                _connectionSettings.Save();
-                // if (value)
-                // {
-                //     _opcUaBackgroundService.StartService();
-                // }
-                // else
-                // {
-                //     _opcUaBackgroundService.StopService();
-                // }
             }
         }
     }
