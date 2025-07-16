@@ -24,13 +24,13 @@ public class VarTableRepository
     /// </summary>
     /// <param name="varTable"></param>
     /// <returns>变量表的ID</returns>
-    public async Task<VariableTable> Add(VariableTable varTable)
+    public async Task<VariableTable> AddAsync(VariableTable varTable)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            var addVarTable = await Add(varTable, db);
+            var addVarTable = await AddAsync(varTable, db);
 
             stopwatch.Stop();
             NlogHelper.Info($"添加变量表 '{varTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -45,7 +45,7 @@ public class VarTableRepository
     /// <param name="db"></param>
     /// <param name="dbDevice"></param>
     /// <returns></returns>
-    public async Task<VariableTable> Add(VariableTable variableTable, SqlSugarClient db)
+    public async Task<VariableTable> AddAsync(VariableTable variableTable, SqlSugarClient db)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -140,12 +140,6 @@ public class VarTableRepository
                                          .ToList();
         await db.Deleteable<DbVariableTable>(dbList)
                 .ExecuteCommandAsync();
-    }
-
-    public async Task<VariableTable> AddAsync(VariableTable varTable)
-    {
-        using var db = DbContext.GetInstance();
-        return await Add(varTable);
     }
 
 

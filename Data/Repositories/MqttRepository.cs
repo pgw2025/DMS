@@ -27,7 +27,7 @@ public class MqttRepository
     /// </summary>
     /// <param name="id">主键ID</param>
     /// <returns></returns>
-    public async Task<Mqtt> GetById(int id)
+    public async Task<Mqtt> GetByIdAsync(int id)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -46,7 +46,7 @@ public class MqttRepository
     /// 获取所有Mqtt配置
     /// </summary>
     /// <returns></returns>
-    public async Task<List<Mqtt>> GetAll()
+    public async Task<List<Mqtt>> GetAllAsync()
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -66,7 +66,7 @@ public class MqttRepository
     /// </summary>
     /// <param name="mqtt">Mqtt实体</param>
     /// <returns></returns>
-    public async Task<int> Add(Mqtt mqtt)
+    public async Task<int> AddAsync(Mqtt mqtt)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -76,8 +76,8 @@ public class MqttRepository
         {
             var result = await db.Insertable(_mapper.Map<DbMqtt>(mqtt))
                                  .ExecuteReturnIdentityAsync();
-            var mqttMenu = await _menuRepository.GetMainMenuByName("Mqtt服务器");
-            // Add menu entry
+            var mqttMenu = await _menuRepository.GetMainMenuByNameAsync("Mqtt服务器");
+            // AddAsync menu entry
             var menu = new MenuBean()
                        {
                            Name = mqtt.Name,
@@ -86,7 +86,7 @@ public class MqttRepository
                            DataId = result,
                            ParentId = mqttMenu.Id,
                        };
-            await _menuRepository.Add(menu, db);
+            await _menuRepository.AddAsync(menu, db);
             await db.CommitTranAsync();
             stopwatch.Stop();
             NlogHelper.Info($"新增Mqtt配置 '{mqtt.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -105,7 +105,7 @@ public class MqttRepository
     /// </summary>
     /// <param name="mqtt">Mqtt实体</param>
     /// <returns></returns>
-    public async Task<int> Edit(Mqtt mqtt)
+    public async Task<int> UpdateAsync(Mqtt mqtt)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -117,11 +117,11 @@ public class MqttRepository
                 var result = await db.Updateable(_mapper.Map<DbMqtt>(mqtt))
                                      .ExecuteCommandAsync();
                 // Update menu entry
-                var menu = await _menuRepository.GetMenuByDataId(mqtt.Id, MenuType.MqttMenu);
+                var menu = await _menuRepository.GetMenuByDataIdAsync(mqtt.Id, MenuType.MqttMenu);
                 if (menu != null)
                 {
                     menu.Name = mqtt.Name;
-                    await _menuRepository.Edit(menu, db);
+                    await _menuRepository.UpdateAsync(menu, db);
                 }
 
                 await db.CommitTranAsync();
@@ -143,7 +143,7 @@ public class MqttRepository
     /// </summary>
     /// <param name="mqtt">Mqtt实体</param>
     /// <returns></returns>
-    public async Task<int> Delete(Mqtt mqtt)
+    public async Task<int> DeleteAsync(Mqtt mqtt)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -156,10 +156,10 @@ public class MqttRepository
                                      .In(mqtt.Id)
                                      .ExecuteCommandAsync();
                 // DeleteAsync menu entry
-                var menu = await _menuRepository.GetMenuByDataId(mqtt.Id, MenuType.MqttMenu);
+                var menu = await _menuRepository.GetMenuByDataIdAsync(mqtt.Id, MenuType.MqttMenu);
                 if (menu!=null )
                 {
-                    await _menuRepository.DeleteMenu(menu, db);
+                    await _menuRepository.DeleteAsync(menu, db);
                 }
                 
                 await db.CommitTranAsync();

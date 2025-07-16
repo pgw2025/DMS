@@ -29,13 +29,13 @@ public class DeviceRepository
     /// </summary>
     /// <param name="device">要编辑的设备对象。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> Edit(Device device)
+    public async Task<int> UpdateAsync(Device device)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         using (var db = DbContext.GetInstance())
         {
-            var result = await Edit(device, db);
+            var result = await UpdateAsync(device, db);
             stopwatch.Stop();
             NlogHelper.Info($"编辑设备 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
@@ -47,7 +47,7 @@ public class DeviceRepository
     /// </summary>
     /// <param name="device">要编辑的设备对象。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> Edit(Device device, SqlSugarClient db)
+    public async Task<int> UpdateAsync(Device device, SqlSugarClient db)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -64,7 +64,7 @@ public class DeviceRepository
     /// 获取设备列表
     /// </summary>
     /// <returns></returns>
-    public async Task<List<Device>> GetAll()
+    public async Task<List<Device>> GetAllAsync()
     {
         using (var db = DbContext.GetInstance())
         {
@@ -88,7 +88,7 @@ public class DeviceRepository
     /// </summary>
     /// <param name="id">设备ID。</param>
     /// <returns>对应的DbDevice对象。</returns>
-    public async Task<Device> GetById(int id)
+    public async Task<Device> GetByIdAsync(int id)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -108,7 +108,7 @@ public class DeviceRepository
     /// </summary>
     /// <param name="id">要删除的设备ID。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> Delete(Device device, List<MenuBean> menus)
+    public async Task<int> DeleteAsync(Device device, List<MenuBean> menus)
     {
         using (var db = DbContext.GetInstance())
         {
@@ -117,7 +117,7 @@ public class DeviceRepository
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                var res = await Delete(device, menus, db);
+                var res = await DeleteAsync(device, menus, db);
 
                 stopwatch.Stop();
                 NlogHelper.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -143,7 +143,7 @@ public class DeviceRepository
     /// <param name="db"></param>
     /// <param name="id">要删除的设备ID。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> Delete(Device device, List<MenuBean> menus, SqlSugarClient db)
+    public async Task<int> DeleteAsync(Device device, List<MenuBean> menus, SqlSugarClient db)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -156,7 +156,7 @@ public class DeviceRepository
         var menu = DataServicesHelper.FindMenusForDevice(device, menus);
         if (menu == null)
             throw new NullReferenceException($"没有找到设备:{device.Name},的菜单对象。");
-        await _menuRepository.DeleteMenu(menu, db);
+        await _menuRepository.DeleteAsync(menu, db);
         stopwatch.Stop();
         NlogHelper.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
@@ -167,7 +167,7 @@ public class DeviceRepository
     /// 添加设备
     /// </summary>
     /// <param name="device"></param>
-    public async Task Add(Device device)
+    public async Task AddAsync(Device device)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -185,7 +185,7 @@ public class DeviceRepository
                 throw new InvalidOperationException("设备名称已经存在。");
 
             // 2. 将设备添加到数据库
-            var addDevice = await Add(device, db);
+            var addDevice = await AddAsync(device, db);
 
 
             await db.CommitTranAsync();
@@ -214,7 +214,7 @@ public class DeviceRepository
     /// <param name="db"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    private async Task<Device> Add(Device device, SqlSugarClient db)
+    private async Task<Device> AddAsync(Device device, SqlSugarClient db)
     {
         ;
         // 添加设备
@@ -222,7 +222,7 @@ public class DeviceRepository
                                 .ExecuteReturnEntityAsync();
 
         // 4. 为新设备添加菜单
-        var addDeviceMenuId = await _menuRepository.Add(addDevice, db);
+        var addDeviceMenuId = await _menuRepository.AddAsync(addDevice, db);
         
         if (device.IsAddDefVarTable)
         {
@@ -235,7 +235,7 @@ public class DeviceRepository
             varTable.Description = "默认变量表";
             varTable.ProtocolType = device.ProtocolType;
             device.VariableTables.Add(varTable);
-            var addVarTable = await _varTableRepository.Add(varTable, db);
+            var addVarTable = await _varTableRepository.AddAsync(varTable, db);
             // 添加添加变量表的菜单
             var varTableMenu = new MenuBean()
                                {
@@ -245,10 +245,10 @@ public class DeviceRepository
                                    ParentId = addDeviceMenuId,
                                    DataId = addVarTable.Id
                                };
-            await _menuRepository.Add(varTableMenu, db);
+            await _menuRepository.AddAsync(varTableMenu, db);
         }
 
-        await _menuRepository.AddVarTableMenu(addDevice, addDeviceMenuId, db);
+        await _menuRepository.AddVarTableMenuAsync(addDevice, addDeviceMenuId, db);
         return _mapper.Map<Device>(addDevice);
     }
 

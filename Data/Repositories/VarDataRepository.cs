@@ -67,7 +67,7 @@ public class VarDataRepository
     /// 获取所有VariableData
     /// </summary>
     /// <returns></returns>
-    public async Task<List<VariableData>> GetByVariableTableId(int varTableId)
+    public async Task<List<VariableData>> GetByVariableTableIdAsync(int varTableId)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
