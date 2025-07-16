@@ -24,7 +24,8 @@ public partial class DeviceDetailViewModel : ViewModelBase
     [ObservableProperty]
     private VariableTable _selectedVariableTable;
 
-    public DeviceDetailViewModel(IDialogService dialogService, VarTableRepository varTableRepository, MenuRepository menuRepository, DataServices dataServices)
+    public DeviceDetailViewModel(IDialogService dialogService, VarTableRepository varTableRepository,
+                                 MenuRepository menuRepository, DataServices dataServices)
     {
         _dialogService = dialogService;
         _varTableRepository = varTableRepository;
@@ -49,8 +50,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
     [RelayCommand]
     private async Task AddVariableTable()
     {
-
-        using  var db = DbContext.GetInstance();
+        using var db = DbContext.GetInstance();
         try
         {
             // 1. Show dialog to get new variable table details
@@ -78,20 +78,20 @@ public partial class DeviceDetailViewModel : ViewModelBase
 
             // 6. Create and add the corresponding menu item
             var newMenu = new MenuBean
-            {
-                Name = addedVarTable.Name,
-                DataId = addedVarTable.Id,
-                Type = MenuType.VariableTableMenu,
-                ParentId = parentMenu.Id,
-                Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Tablet.Glyph
-            };
+                          {
+                              Name = addedVarTable.Name,
+                              DataId = addedVarTable.Id,
+                              Type = MenuType.VariableTableMenu,
+                              ParentId = parentMenu.Id,
+                              Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Tablet.Glyph
+                          };
             await _menuRepository.AddAsync(newMenu, db);
 
             // 7. Commit transaction
             await db.CommitTranAsync();
 
             // 8. Update UI
-            CurrentDevice.VariableTables.Add(addedVarTable);
+            CurrentDevice?.VariableTables?.Add(addedVarTable);
             MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
             NotificationHelper.ShowSuccess($"变量表 {addedVarTable.Name} 添加成功。");
         }
@@ -111,25 +111,44 @@ public partial class DeviceDetailViewModel : ViewModelBase
             return;
         }
 
+        using var db = DbContext.GetInstance();
         try
         {
+            var originalName = SelectedVariableTable.Name; // Store original name for comparison
             var editedVarTable = await _dialogService.ShowEditVarTableDialog(SelectedVariableTable);
             if (editedVarTable == null) return;
 
-            // The dialog already updated the SelectedVariableTable if it returned a non-null value
-            // So we just need to save it to the database
-            var result = await _varTableRepository.UpdateAsync(SelectedVariableTable);
+            await db.BeginTranAsync();
+
+            // Update variable table in DB
+            var result = await _varTableRepository.UpdateAsync(SelectedVariableTable, db);
+
             if (result > 0)
             {
+                // Update corresponding menu item if name changed
+                if (originalName != SelectedVariableTable.Name)
+                {
+                    var menu = DataServicesHelper.FindVarTableMenu(SelectedVariableTable.Id, _dataServices.MenuTrees);
+                    if (menu != null)
+                    {
+                        menu.Name = SelectedVariableTable.Name;
+                        await _menuRepository.UpdateAsync(menu, db);
+                    }
+                }
+
+                await db.CommitTranAsync();
                 NotificationHelper.ShowSuccess($"变量表 {SelectedVariableTable.Name} 编辑成功。");
+                MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
             }
             else
             {
+                await db.RollbackTranAsync();
                 NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 编辑失败。");
             }
         }
         catch (Exception ex)
         {
+            await db.RollbackTranAsync();
             NotificationHelper.ShowError($"编辑变量表时发生错误: {ex.Message}", ex);
         }
     }
@@ -150,21 +169,44 @@ public partial class DeviceDetailViewModel : ViewModelBase
 
         if (!confirm) return;
 
+        using var db = DbContext.GetInstance();
         try
         {
-            var result = await _varTableRepository.DeleteAsync(SelectedVariableTable);
+            await db.BeginTranAsync();
+
+            // Find the corresponding menu item
+            MenuBean menuToDelete = null;
+            if (_dataServices.MenuTrees != null)
+            {
+                menuToDelete = DataServicesHelper.FindVarTableMenu( SelectedVariableTable.Id,_dataServices.MenuTrees);
+            }
+
+            // Delete variable table from DB
+            var result = await _varTableRepository.DeleteAsync(SelectedVariableTable, db);
+
             if (result > 0)
             {
-                CurrentDevice.VariableTables.Remove(SelectedVariableTable);
-                NotificationHelper.ShowSuccess($"变量表 {SelectedVariableTable.Name} 删除成功。");
+                // Delete corresponding menu item
+                if (menuToDelete != null)
+                {
+                    await _menuRepository.DeleteAsync(menuToDelete, db);
+                }
+
+                await db.CommitTranAsync();
+                var delVarTableName = SelectedVariableTable.Name;
+                CurrentDevice?.VariableTables?.Remove(SelectedVariableTable);
+                NotificationHelper.ShowSuccess($"变量表 {delVarTableName} 删除成功。");
+                MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
             }
             else
             {
+                await db.RollbackTranAsync();
                 NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 删除失败。");
             }
         }
         catch (Exception ex)
         {
+            await db.RollbackTranAsync();
             NotificationHelper.ShowError($"删除变量表时发生错误: {ex.Message}", ex);
         }
     }

@@ -96,4 +96,30 @@ public class DataServicesHelper
 
         return navgateVM;
     }
+
+    public static MenuBean FindVarTableMenu(int varTableId, List<MenuBean> menus)
+    {
+        if (menus == null)
+        {
+            return null;
+        }
+
+        foreach (var menu in menus)
+        {
+            // 检查当前菜单项是否匹配
+            if (menu.Type==MenuType.VariableTableMenu && menu.DataId ==varTableId)
+            {
+                return menu;
+            }
+
+            // 递归搜索子菜单
+            var foundInSubMenu = FindVarTableMenu(varTableId, menu.Items);
+            if (foundInSubMenu != null)
+            {
+                return foundInSubMenu;
+            }
+        }
+
+        return null;
+    }
 }
