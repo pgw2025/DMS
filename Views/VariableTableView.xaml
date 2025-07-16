@@ -224,6 +224,13 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    <MenuItem Header="修改启用状态"
+                              Command="{Binding ModifyIsActiveCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="添加MQTT服务器"
                               Command="{Binding AddMqttServerToVariablesCommand}"
                               CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}">

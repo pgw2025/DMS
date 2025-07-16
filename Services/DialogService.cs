@@ -203,4 +203,16 @@ public class DialogService :IDialogService
         }
         return null;
     }
+
+    public async Task<bool?> ShowIsActiveDialog(bool currentIsActive)
+    {
+        var vm = new IsActiveDialogViewModel(currentIsActive);
+        var dialog = new IsActiveDialog(vm);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return vm.SelectedIsActive;
+        }
+        return null;
+    }
 }

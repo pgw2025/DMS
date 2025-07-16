@@ -5,6 +5,7 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                         xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
                         xmlns:vm="clr-namespace:PMSWPF.ViewModels.Dialogs"
+                        xmlns:vc="clr-namespace:PMSWPF.ValueConverts"
                         mc:Ignorable="d"
                         d:DataContext="{d:DesignInstance vm:IsActiveDialogViewModel}"
                         Title="修改激活状态"
@@ -12,11 +13,16 @@
                         SecondaryButtonText="取消"
                         PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
                         SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <controls:ContentDialog.Resources>
+        <vc:NullableBooleanConverter x:Key="NullableBooleanConverter" />
+    </controls:ContentDialog.Resources>
     <Grid>
         <StackPanel Orientation="Vertical" Margin="10">
-            <TextBlock Text="请选择新的激活状态:" Margin="0,0,0,10" FontWeight="Bold"/>
-            <RadioButton Content="启用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=True}" Command="{Binding SelectIsActiveCommand}" CommandParameter="True" Margin="0,0,0,5"/>
-            <RadioButton Content="停用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=False}" Command="{Binding SelectIsActiveCommand}" CommandParameter="False"/>
+            <StackPanel Orientation="Horizontal">
+                <RadioButton FontSize="16" Content="启用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=True}" Command="{Binding SelectIsActiveCommand}" CommandParameter="True" Margin="10 5"/>
+                <RadioButton FontSize="16" Content="停用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=False}" Command="{Binding SelectIsActiveCommand}" CommandParameter="False" Margin="10 5"/>
+            </StackPanel>
+           
         </StackPanel>
     </Grid>
 </controls:ContentDialog>

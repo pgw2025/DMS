@@ -15,9 +15,12 @@ public partial class IsActiveDialogViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SelectIsActive(bool isActive)
+    private void SelectIsActive(string isActiveString)
     {
-        SelectedIsActive = isActive;
+        if (bool.TryParse(isActiveString, out bool isActive))
+        {
+            SelectedIsActive = isActive;
+        }
     }
 
     [RelayCommand]

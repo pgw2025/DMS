@@ -24,4 +24,5 @@ public interface IDialogService
     Task<Mqtt?> ShowMqttSelectionDialog();
     Task<List<VariableData>> ShowOpcUaImportDialog(string endpointUrl);
     Task<OpcUaUpdateType?> ShowOpcUaUpdateTypeDialog();
+    Task<bool?> ShowIsActiveDialog(bool currentIsActive);
 }

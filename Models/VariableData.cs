@@ -76,7 +76,8 @@ public partial class VariableData : ObservableObject
     /// <summary>
     /// 指示变量是否处于激活状态。
     /// </summary>
-    public bool IsActive { get; set; }
+    [ObservableProperty]
+    public bool isActive;
 
     /// <summary>
     /// 指示变量是否被选中

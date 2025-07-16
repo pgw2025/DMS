@@ -130,7 +130,8 @@ partial class VariableTableViewModel : ViewModelBase
     /// 初始化服务、数据仓库和变量数据集合视图。
     /// </summary>
     /// <param name="dialogService">对话服务接口的实例。</param>
-    public VariableTableViewModel(IMapper mapper,IDialogService dialogService,VarTableRepository varTableRepository,VarDataRepository varDataRepository)
+    public VariableTableViewModel(IMapper mapper, IDialogService dialogService, VarTableRepository varTableRepository,
+                                  VarDataRepository varDataRepository)
     {
         _mapper = mapper;
         _dialogService = dialogService;
@@ -546,7 +547,8 @@ partial class VariableTableViewModel : ViewModelBase
     [RelayCommand]
     public async Task ChangePollLevel(IList<object> variablesToChange)
     {
-        var validVariables = variablesToChange?.OfType<VariableData>().ToList();
+        var validVariables = variablesToChange?.OfType<VariableData>()
+                                              .ToList();
 
         // 检查是否有变量被选中
         if (validVariables == null || !validVariables.Any())
@@ -582,7 +584,8 @@ partial class VariableTableViewModel : ViewModelBase
     public async Task ModifyOpcUaUpdateType(IList<object> variablesToChange)
     {
         // 过滤出有效的VariableData对象
-        var validVariables = variablesToChange?.OfType<VariableData>().ToList();
+        var validVariables = variablesToChange?.OfType<VariableData>()
+                                              .ToList();
 
         if (validVariables == null || !validVariables.Any())
         {
@@ -615,7 +618,8 @@ partial class VariableTableViewModel : ViewModelBase
     [RelayCommand]
     public async Task AddMqttServerToVariables(IList<object> variablesToAddMqtt)
     {
-        var validVariables = variablesToAddMqtt?.OfType<VariableData>().ToList();
+        var validVariables = variablesToAddMqtt?.OfType<VariableData>()
+                                               .ToList();
 
         // 检查是否有变量被选中
         if (validVariables == null || !validVariables.Any())
@@ -659,6 +663,55 @@ partial class VariableTableViewModel : ViewModelBase
         {
             // 捕获并显示错误通知
             NotificationHelper.ShowError($"添加MQTT服务器失败: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// 修改选定变量的启用状态。
+    /// </summary>
+    /// <param name="variablesToChange">要修改启用状态的变量数据列表。</param>
+    [RelayCommand]
+    public async Task ModifyIsActive(IList<object> variablesToChange)
+    {
+        var validVariables = variablesToChange?.OfType<VariableData>()
+                                              .ToList();
+
+        if (validVariables == null || !validVariables.Any())
+        {
+            NotificationHelper.ShowInfo("请选择要修改启用状态的变量");
+            return;
+        }
+
+        // 假设所有选中的变量都应该被设置为相同的状态，取第一个变量的当前状态的反值
+        var currentIsActive = validVariables.First()
+                                            .IsActive;
+        var newIsActive = !currentIsActive;
+
+        var confirm = await _dialogService.ShowIsActiveDialog(newIsActive);
+
+        if (confirm.HasValue && confirm.Value == newIsActive)
+        {
+            foreach (var variable in validVariables)
+            {
+                variable.IsActive = newIsActive;
+            }
+
+            await _varDataRepository.UpdateAsync(validVariables);
+            
+            // 更新界面
+            foreach (var variable in validVariables)
+            {
+                var displayVar = DataVariables.FirstOrDefault(v => v.Id == variable.Id);
+                if (displayVar != null)
+                    displayVar.IsActive = newIsActive;
+            }
+
+
+            NotificationHelper.ShowSuccess($"已成功将 {validVariables.Count} 个变量的启用状态修改为 {newIsActive}");
+        }
+        else
+        {
+            NotificationHelper.ShowInfo("操作已取消或状态未改变。");
         }
     }
 
