@@ -143,11 +143,11 @@ public partial class SettingViewModel : ViewModelBase
                 _connectionSettings.Save();
                 if (value)
                 {
-                    _s7BackgroundService.StartService();
+                    // _s7BackgroundService.StartService();
                 }
                 else
                 {
-                    _s7BackgroundService.StopService();
+                    // _s7BackgroundService.StopService();
                 }
             }
         }

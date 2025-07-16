@@ -75,10 +75,6 @@ public partial class App : Application
 
         // 根据配置启动服务
         var connectionSettings = PMSWPF.Config.ConnectionSettings.Load();
-        if (connectionSettings.EnableS7Service)
-        {
-            Host.Services.GetRequiredService<S7BackgroundService>().StartService();
-        }
         if (connectionSettings.EnableMqttService)
         {
             Host.Services.GetRequiredService<MqttBackgroundService>().StartService();
@@ -92,10 +88,6 @@ public partial class App : Application
     protected override async void OnExit(ExitEventArgs e)
     {
         // 停止服务
-        Host.Services.GetRequiredService<S7BackgroundService>().StopService();
-        Host.Services.GetRequiredService<MqttBackgroundService>().StopService();
-        Host.Services.GetRequiredService<OpcUaBackgroundService>().StopService();
-
         await Host.StopAsync();
         Host.Dispose();
         LogManager.Shutdown();
@@ -108,7 +100,7 @@ public partial class App : Application
         services.AddSingleton<NavgatorServices>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<GrowlNotificationService>();
-        services.AddSingleton<S7BackgroundService>();
+        services.AddHostedService<S7BackgroundService>();
         services.AddSingleton<MqttBackgroundService>();
         services.AddSingleton<OpcUaBackgroundService>();
         

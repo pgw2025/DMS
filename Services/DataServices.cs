@@ -61,6 +61,9 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     // MQTT列表变更事件，当MQTT配置数据更新时触发。
     public event Action<List<Mqtt>> OnMqttListChanged;
 
+    // 设备IsActive状态变更事件，当单个设备的IsActive状态改变时触发。
+    public event Action<Device, bool> OnDeviceIsActiveChanged;
+
 
     /// <summary>
     /// 当_mqtts属性值改变时触发的局部方法，用于调用OnMqttListChanged事件。
@@ -133,8 +136,39 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <returns>表示异步操作的任务。</returns>
     private async Task LoadDevices()
     {
+        // 取消订阅旧设备的属性变更事件，防止内存泄漏
+        if (Devices != null)
+        {
+            foreach (var device in Devices)
+            {
+                device.PropertyChanged -= Device_PropertyChanged;
+            }
+        }
+
         Devices = await _deviceRepository.GetAll();
+
+        // 订阅新设备的属性变更事件
+        if (Devices != null)
+        {
+            foreach (var device in Devices)
+            {
+                device.PropertyChanged += Device_PropertyChanged;
+            }
+        }
+
         OnDeviceListChanged?.Invoke(Devices);
+    }
+
+    private void Device_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Device.IsActive))
+        {
+            if (sender is Device device)
+            {
+                NlogHelper.Info($"设备 {device.Name} 的IsActive状态改变为 {device.IsActive}，触发设备IsActive状态变更事件。");
+                OnDeviceIsActiveChanged?.Invoke(device, device.IsActive);
+            }
+        }
     }
 
     /// <summary>
