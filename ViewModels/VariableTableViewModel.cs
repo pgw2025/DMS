@@ -358,16 +358,13 @@ partial class VariableTableViewModel : ViewModelBase
             foreach (var variableData in importVarDataList)
             {
                 // 判断是否存在重复变量
-                bool isDuplicate = _dataServices.AllVariables.Values.Any(existingVar =>
-                                                                             (existingVar.Name == variableData.Name) ||
-                                                                             (!string.IsNullOrEmpty(
-                                                                                  variableData.NodeId) &&
-                                                                              existingVar.NodeId ==
-                                                                              variableData.NodeId) ||
-                                                                             (!string.IsNullOrEmpty(
-                                                                                  variableData.S7Address) &&
-                                                                              existingVar.S7Address ==
-                                                                              variableData.S7Address)
+                // 判断是否存在重复变量，仅在当前 VariableTable 的 DataVariables 中查找
+                bool isDuplicate = DataVariables.Any(existingVar =>
+                                                         (existingVar.Name == variableData.Name) ||
+                                                         (!string.IsNullOrEmpty(variableData.NodeId) &&
+                                                          existingVar.NodeId == variableData.NodeId) ||
+                                                         (!string.IsNullOrEmpty(variableData.S7Address) &&
+                                                          existingVar.S7Address == variableData.S7Address)
                 );
 
                 if (isDuplicate)
@@ -438,25 +435,53 @@ partial class VariableTableViewModel : ViewModelBase
             // 显示处理中的对话框
             processingDialog = _dialogService.ShowProcessingDialog("正在处理...", "正在导入OPC UA变量,请稍等片刻....");
 
-            // 为导入的每个变量设置创建时间、所属变量表ID和协议类型
+            // 在进行重复检查之前，先刷新 DataVariables 集合，确保其包含所有最新数据
+            await RefreshDataView();
+
+            List<VariableData> newVariables = new List<VariableData>();
+            List<string> importedVariableNames = new List<string>();
+            List<string> existingVariableNames = new List<string>();
+
             foreach (var variableData in importedVariables)
             {
-                variableData.CreateTime = DateTime.Now;
-                variableData.VariableTableId = VariableTable.Id;
-                variableData.ProtocolType = ProtocolType.OpcUA; // 确保协议类型正确
-                variableData.IsModified = false;
+                // 判断是否存在重复变量，仅在当前 VariableTable 的 DataVariables 中查找
+                bool isDuplicate = DataVariables.Any(existingVar =>
+                                                         (existingVar.Name == variableData.Name) ||
+                                                         (!string.IsNullOrEmpty(variableData.NodeId) &&
+                                                          existingVar.NodeId == variableData.NodeId) ||
+                                                         (!string.IsNullOrEmpty(variableData.OpcUaNodeId) &&
+                                                          existingVar.OpcUaNodeId == variableData.OpcUaNodeId)
+                );
+
+                if (isDuplicate)
+                {
+                    existingVariableNames.Add(variableData.Name);
+                }
+                else
+                {
+                    variableData.CreateTime = DateTime.Now;
+                    variableData.VariableTableId = VariableTable.Id;
+                    variableData.ProtocolType = ProtocolType.OpcUA; // 确保协议类型正确
+                    variableData.IsModified = false;
+                    newVariables.Add(variableData);
+                    importedVariableNames.Add(variableData.Name);
+                }
             }
 
-            // 批量插入变量数据到数据库
-            var resVarDataCount = await _varDataRepository.AddAsync(importedVariables);
+            if (newVariables.Any())
+            {
+                // 批量插入新变量数据到数据库
+                var resVarDataCount = await _varDataRepository.AddAsync(newVariables);
+                NlogHelper.Info($"成功导入OPC UA变量：{resVarDataCount}个。");
+            }
 
+            // 再次刷新 DataVariables 集合，以反映新添加的数据
             await RefreshDataView();
 
             processingDialog?.Hide(); // 隐藏处理中的对话框
 
-            // 显示成功通知并记录日志
-            string msgSuccess = $"成功导入OPC UA变量：{resVarDataCount}个。";
-            NotificationHelper.ShowSuccess(msgSuccess);
+            // 显示导入结果对话框
+            await _dialogService.ShowImportResultDialog(importedVariableNames, existingVariableNames);
         }
         catch (Exception e)
         {
@@ -469,60 +494,55 @@ partial class VariableTableViewModel : ViewModelBase
         }
     }
 
-    // /// <summary>
-    // /// 刷新数据列表
-    // /// </summary>
+    /// <summary>
+    /// 刷新数据列表，高效地同步UI显示数据与数据库最新数据。
+    /// </summary>
     private async Task RefreshDataView()
     {
-        // 更新界面显示的数据：重新从数据库加载所有变量数据
+        // 从数据库加载最新的变量数据
+        var latestVariables = await _varDataRepository.GetByVariableTableIdAsync(VariableTable.Id);
 
-        var varList = await _varDataRepository.GetByVariableTableIdAsync(VariableTable.Id);
-        // 处理删除
-        if (varList.Count < DataVariables.Count)
+        // 将最新数据转换为字典，以便快速查找
+        var latestVariablesDict = latestVariables.ToDictionary(v => v.Id);
+
+        // 用于存储需要从 DataVariables 中移除的项
+        var itemsToRemove = new List<VariableData>();
+
+        // 遍历当前 DataVariables 集合，处理删除和更新
+        for (int i = DataVariables.Count - 1; i >= 0; i--)
         {
-            for (int i = DataVariables.Count-1; i >=0; i--)
+            var currentVariable = DataVariables[i];
+            if (latestVariablesDict.TryGetValue(currentVariable.Id, out var newVariable))
             {
-                bool isExist=false;
-                foreach (var variableData in varList)
+                // 如果存在于最新数据中，检查是否需要更新
+                if (!currentVariable.Equals(newVariable))
                 {
-                    if (variableData.Id==DataVariables[i].Id)
-                    {
-                        isExist=true;
-                    }
+                    // 使用 AutoMapper 更新现有对象的属性，保持对象引用不变
+                    _mapper.Map(newVariable, currentVariable);
                 }
-                if (!isExist)
-                {
-                    DataVariables.RemoveAt(i);
-                }
+                // 从字典中移除已处理的项，剩余的将是新增项
+                latestVariablesDict.Remove(currentVariable.Id);
+            }
+            else
+            {
+                // 如果不存在于最新数据中，则标记为删除
+                itemsToRemove.Add(currentVariable);
             }
         }
 
-        // 处理修改和 添加
-        foreach (var newVariable in varList)
+        // 移除已标记的项
+        foreach (var item in itemsToRemove)
         {
-            bool isExiset = false;
-            for (int i = 0; i < DataVariables.Count; i++)
-            {
-                var oldVariable = DataVariables[i];
-                // 判断是否存在
-                if (newVariable.Id == oldVariable.Id)
-                {
-                    isExiset = true;
-                    //判断是否相等
-                    if (!oldVariable.Equals(newVariable))
-                    {
-                        DataVariables[i] = newVariable;
-                    }
-                }
-            }
-
-            // 不存在则添加
-            if (!isExiset)
-            {
-                DataVariables.Add(newVariable);
-            }
+            DataVariables.Remove(item);
         }
 
+        // 添加所有剩余在 latestVariablesDict 中的项（这些是新增项）
+        foreach (var newVariable in latestVariablesDict.Values)
+        {
+            DataVariables.Add(newVariable);
+        }
+
+        // 刷新视图以应用所有更改
         VariableDataView.Refresh();
     }
 
@@ -546,6 +566,44 @@ partial class VariableTableViewModel : ViewModelBase
 
             // 设置新变量的所属变量表ID
             varData.VariableTableId = variableTable.Id;
+
+            // --- 重复性检查逻辑开始 ---
+            bool isDuplicate = false;
+            string duplicateReason = string.Empty;
+
+            // 检查名称是否重复
+            if (DataVariables.Any(v => v.Name == varData.Name))
+            {
+                isDuplicate = true;
+                duplicateReason = $"名称 '{varData.Name}' 已存在。";
+            }
+            else
+            {
+                // 根据协议类型检查S7地址或NodeId是否重复
+                if (variableTable.ProtocolType == ProtocolType.S7)
+                {
+                    if (!string.IsNullOrEmpty(varData.S7Address) && DataVariables.Any(v => v.S7Address == varData.S7Address))
+                    {
+                        isDuplicate = true;
+                        duplicateReason = $"S7地址 '{varData.S7Address}' 已存在。";
+                    }
+                }
+                else if (variableTable.ProtocolType == ProtocolType.OpcUA)
+                {
+                    if (!string.IsNullOrEmpty(varData.NodeId) && DataVariables.Any(v => v.NodeId == varData.NodeId))
+                    {
+                        isDuplicate = true;
+                        duplicateReason = $"OPC UA NodeId '{varData.NodeId}' 已存在。";
+                    }
+                }
+            }
+
+            if (isDuplicate)
+            {
+                NotificationHelper.ShowError($"添加变量失败：{duplicateReason}");
+                return;
+            }
+            // --- 重复性检查逻辑结束 ---
 
             // 添加变量数据到数据库
             var resVarData = await _varDataRepository.AddAsync(varData);

@@ -1,0 +1,55 @@
+<ui:ContentDialog
+    x:Class="PMSWPF.Views.Dialogs.ImportResultDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:viewmodels="clr-namespace:PMSWPF.ViewModels.Dialogs"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=viewmodels:ImportResultDialogViewModel}"
+    Title="导入结果"
+    PrimaryButtonText="确定"
+    PrimaryButtonCommand="{Binding CloseCommand}"
+    >
+
+    <Grid Margin="0,10,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Summary -->
+        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10" HorizontalAlignment="Center" FontSize="14" FontWeight="SemiBold">
+            <Run Text="总计导入: "/>
+            <Run Text="{Binding ImportedVariables.Count, Mode=OneWay}"/>
+            <Run Text="个, 跳过: "/>
+            <Run Text="{Binding ExistingVariables.Count, Mode=OneWay}"/>
+            <Run Text="个"/>
+        </TextBlock>
+
+        <!-- Imported Variables Section -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock Text="成功导入的变量:" FontWeight="Bold" Margin="0,0,0,5" FontSize="13"/>
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" CornerRadius="4" Padding="5">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ListBox ItemsSource="{Binding ImportedVariables}" Style="{DynamicResource ListBoxRevealStyle}" />
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+
+        <!-- Existing Variables Section -->
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
+            <TextBlock Text="已存在的变量 (未导入):" FontWeight="Bold" Margin="0,0,0,5" FontSize="13"/>
+            <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" BorderThickness="1" CornerRadius="4" Padding="5">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ListBox ItemsSource="{Binding ExistingVariables}" Style="{DynamicResource ListBoxRevealStyle}" />
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+    </Grid>
+</ui:ContentDialog>
