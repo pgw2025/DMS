@@ -90,6 +90,6 @@ public class DbMqtt
     /// <summary>
     /// 关联的变量数据列表。
     /// </summary>
-    [Navigate(typeof(DbVariableDataMqtt), "MqttId", "VariableDataId")]
-    public List<DbVariableData>? VariableDatas { get; set; }
+    [Navigate(NavigateType.OneToMany, nameof(DbVariableMqtt.MqttId))]
+    public List<DbVariableMqtt>? VariableMqtts { get; set; }
 }

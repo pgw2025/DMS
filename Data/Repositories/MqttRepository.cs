@@ -52,7 +52,9 @@ public class MqttRepository
         stopwatch.Start();
         using (var _db = DbContext.GetInstance())
         {
-            var result = await _db.Queryable<DbMqtt>().Includes(m=>m.VariableDatas)
+            var result = await _db.Queryable<DbMqtt>()
+                                  .Includes(m => m.VariableMqtts, vm => vm.VariableData)
+                                  .Includes(m => m.VariableMqtts, vm => vm.Mqtt)
                                   .ToListAsync();
             stopwatch.Stop();
             NlogHelper.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -95,7 +97,7 @@ public class MqttRepository
         catch (Exception ex)
         {
             await db.RollbackTranAsync();
-            NlogHelper.Error( $"添加MQTT配置 {{mqtt.Name}} 失败",ex);
+            NlogHelper.Error($"添加MQTT配置 {{mqtt.Name}} 失败", ex);
             throw;
         }
     }
@@ -157,11 +159,11 @@ public class MqttRepository
                                      .ExecuteCommandAsync();
                 // DeleteAsync menu entry
                 var menu = await _menuRepository.GetMenuByDataIdAsync(mqtt.Id, MenuType.MqttMenu);
-                if (menu!=null )
+                if (menu != null)
                 {
                     await _menuRepository.DeleteAsync(menu, db);
                 }
-                
+
                 await db.CommitTranAsync();
                 stopwatch.Stop();
                 NlogHelper.Info($"删除Mqtt配置ID '{mqtt.Id}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -170,7 +172,7 @@ public class MqttRepository
             catch (Exception ex)
             {
                 await db.RollbackTranAsync();
-                NlogHelper.Error( $"删除MQTT配置 {{mqtt.Name}} 失败",ex);
+                NlogHelper.Error($"删除MQTT配置 {{mqtt.Name}} 失败", ex);
                 throw;
             }
         }

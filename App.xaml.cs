@@ -126,6 +126,7 @@ public partial class App : Application
         services.AddSingleton<UserRepository>();
         services.AddSingleton<VarDataRepository>();
         services.AddSingleton<VarTableRepository>();
+        services.AddSingleton<VariableMqttAliasRepository>();
         // 注册视图模型
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
@@ -251,7 +252,8 @@ public partial class App : Application
         _db.CodeFirst.InitTables<DbVariableS7Data>();
         _db.CodeFirst.InitTables<DbUser>();
         _db.CodeFirst.InitTables<DbMqtt>();
-        _db.CodeFirst.InitTables<DbVariableDataMqtt>();
+        _db.CodeFirst.InitTables<DbVariableMqtt>();
+        // _db.CodeFirst.InitTables<DbVariableDataMqtt>();
         _db.CodeFirst.InitTables<DbMenu>();
     }
 }

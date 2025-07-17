@@ -31,15 +31,26 @@ public class VarDataRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var _db = DbContext.GetInstance())
+        using (var db = DbContext.GetInstance())
         {
-            var result = await _db.Queryable<DbVariableData>()
-                                  .In(id)
-                                  .SingleAsync();
+            var result = await GetByIdAsync(id, db);
             stopwatch.Stop();
             NlogHelper.Info($"根据ID '{id}' 获取VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
+    }
+
+    /// <summary>
+    /// 根据ID获取VariableData
+    /// </summary>
+    /// <param name="id">主键ID</param>
+    /// <param name="db">SqlSugarClient实例</param>
+    /// <returns></returns>
+    public async Task<DbVariableData> GetByIdAsync(int id, SqlSugarClient db)
+    {
+        return await db.Queryable<DbVariableData>()
+                       .In(id)
+                       .SingleAsync();
     }
 
     /// <summary>
@@ -50,17 +61,28 @@ public class VarDataRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var _db = DbContext.GetInstance())
+        using (var db = DbContext.GetInstance())
         {
-            var result = await _db.Queryable<DbVariableData>()
-                                  .Includes(d => d.VariableTable)
-                                  .Includes(d => d.VariableTable.Device)
-                                  .ToListAsync();
+            var result = await GetAllAsync(db);
             stopwatch.Stop();
             NlogHelper.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.Select(d => _mapper.Map<VariableData>(d))
-                         .ToList();
+            return result;
         }
+    }
+
+    /// <summary>
+    /// 获取所有VariableData
+    /// </summary>
+    /// <param name="db">SqlSugarClient实例</param>
+    /// <returns></returns>
+    public async Task<List<VariableData>> GetAllAsync(SqlSugarClient db)
+    {
+        var result = await db.Queryable<DbVariableData>()
+                             .Includes(d => d.VariableTable)
+                             .Includes(d => d.VariableTable.Device)
+                             .ToListAsync();
+        return result.Select(d => _mapper.Map<VariableData>(d))
+                     .ToList();
     }
 
     /// <summary>
@@ -71,15 +93,27 @@ public class VarDataRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var _db = DbContext.GetInstance())
+        using (var db = DbContext.GetInstance())
         {
-            var result = await _db.Queryable<DbVariableData>()
-                                  .Where(d => d.VariableTableId == varTableId)
-                                  .ToListAsync();
+            var result = await GetByVariableTableIdAsync(varTableId, db);
             stopwatch.Stop();
             NlogHelper.Info($"获取变量表的所有变量{result.Count()}个耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result.Select(d=>_mapper.Map<VariableData>(d)).ToList();
+            return result;
         }
+    }
+
+    /// <summary>
+    /// 获取所有VariableData
+    /// </summary>
+    /// <param name="db">SqlSugarClient实例</param>
+    /// <returns></returns>
+    public async Task<List<VariableData>> GetByVariableTableIdAsync(int varTableId, SqlSugarClient db)
+    {
+        var result = await db.Queryable<DbVariableData>()
+                             .Where(d => d.VariableTableId == varTableId)
+                             .ToListAsync();
+        return result.Select(d => _mapper.Map<VariableData>(d))
+                     .ToList();
     }
 
     /// <summary>
@@ -170,10 +204,9 @@ public class VarDataRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var _db = DbContext.GetInstance())
+        using (var db = DbContext.GetInstance())
         {
-            var result = await _db.Updateable<DbVariableData>(_mapper.Map<DbVariableData>(variableData))
-                                  .ExecuteCommandAsync();
+            var result = await UpdateAsync(variableData, db);
             stopwatch.Stop();
             NlogHelper.Info($"更新VariableData '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
@@ -184,11 +217,24 @@ public class VarDataRepository
     /// 更新VariableData
     /// </summary>
     /// <param name="variableData">VariableData实体</param>
+    /// <param name="db">SqlSugarClient实例</param>
+    /// <returns></returns>
+    public async Task<int> UpdateAsync(VariableData variableData, SqlSugarClient db)
+    {
+        var result = await db.Updateable<DbVariableData>(_mapper.Map<DbVariableData>(variableData))
+                             .ExecuteCommandAsync();
+        return result;
+    }
+
+    /// <summary>
+    /// 更新VariableData
+    /// </summary>
+    /// <param name="variableData">VariableData实体</param>
     /// <returns></returns>
     public async Task<int> UpdateAsync(List<VariableData> variableDatas)
     {
         using var _db = DbContext.GetInstance();
-        return  await UpdateAsync(variableDatas, _db);
+        return await UpdateAsync(variableDatas, _db);
     }
 
     /// <summary>
@@ -230,18 +276,13 @@ public class VarDataRepository
     /// 根据ID删除VariableData
     /// </summary>
     /// <param name="id">主键ID</param>
+    /// <param name="db">SqlSugarClient实例</param>
     /// <returns></returns>
     public async Task<int> DeleteAsync(VariableData variableData, SqlSugarClient db)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        using var _db = DbContext.GetInstance();
-
-        var result = await _db.Deleteable<DbVariableData>()
-                              .Where(d => d.Id == variableData.Id)
-                              .ExecuteCommandAsync();
-        stopwatch.Stop();
-        NlogHelper.Info($"删除VariableData: '{variableData.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        var result = await db.Deleteable<DbVariableData>()
+                             .Where(d => d.Id == variableData.Id)
+                             .ExecuteCommandAsync();
         return result;
     }
 
@@ -267,58 +308,78 @@ public class VarDataRepository
     /// 删除VariableData
     /// </summary>
     /// <param name="id">主键ID</param>
+    /// <param name="db">SqlSugarClient实例</param>
     /// <returns></returns>
     public async Task<int> DeleteAsync(IEnumerable<VariableData> variableDatas, SqlSugarClient db)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        using var _db = DbContext.GetInstance();
-
         var dbList = variableDatas.Select(vd => _mapper.Map<DbVariableData>(vd))
                                   .ToList();
-        var result = await _db.Deleteable<DbVariableData>(dbList)
-                              .ExecuteCommandAsync();
-        stopwatch.Stop();
-        NlogHelper.Info($"删除VariableData: '{variableDatas.Count()}'个 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        var result = await db.Deleteable<DbVariableData>(dbList)
+                             .ExecuteCommandAsync();
         return result;
     }
 
+    // public VarDataRepository(IMapper mapper)
+    // {
+    //     _mapper = mapper;
+    // }
+
     /// <summary>
-    /// 为变量添加MQTT服务器关联。
+    /// 为变量添加MQTT服务器关联，并指定别名。
     /// </summary>
+    /// <param name="variableMqttList"></param>
     /// <param name="variableDatas">要添加MQTT服务器的变量数据列表。</param>
-    /// <param name="mqtt">要关联的MQTT服务器。</param>
-    /// <returns>成功添加关联的数量。</returns>
-    public async Task<int> AddMqttToVariablesAsync(IEnumerable<VariableData> variableDatas, Mqtt mqtt)
+    /// <returns>成功添加或更新关联的数量。</returns>
+    public async Task<int> AddMqttToVariablesAsync(IEnumerable<VariableMqtt> variableMqttList)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        int addedCount = 0;
+        int affectedCount = 0;
+        using var db = DbContext.GetInstance();
+        //插入列表
+        List<DbVariableMqtt> insertDbVM = new List<DbVariableMqtt>();
 
-        using (var db = DbContext.GetInstance())
+        foreach (var variableMqtt in variableMqttList)
         {
-            foreach (var variableData in variableDatas)
+            var existingAlias = await db.Queryable<DbVariableMqtt>()
+                                        .Where(it => it.VariableDataId == variableMqtt.VariableData.Id && it.MqttId == variableMqtt.Mqtt.Id)
+                                        .FirstAsync();
+            if (existingAlias == null)
             {
-                // 检查是否已存在该关联
-                var existingAssociation = await db.Queryable<DbVariableDataMqtt>()
-                                                  .Where(x => x.VariableDataId == variableData.Id && x.MqttId == mqtt.Id)
-                                                  .FirstAsync();
-
-                if (existingAssociation == null)
-                {
-                    // 如果不存在，则添加新的关联
-                    await db.Insertable(new DbVariableDataMqtt
-                    {
-                        VariableDataId = variableData.Id,
-                        MqttId = mqtt.Id
-                    }).ExecuteCommandAsync();
-                    addedCount++;
-                }
+                // 如果不存在，则添加新的关联
+                insertDbVM.Add(new DbVariableMqtt
+                           {
+                               VariableDataId = variableMqtt.VariableData.Id,
+                               MqttId = variableMqtt.Mqtt.Id,
+                               MqttAlias = variableMqtt.MqttAlias,
+                               CreateTime = DateTime.Now,
+                               UpdateTime = DateTime.Now
+                           });
+                        
+                affectedCount++;
+            }
+            else if (existingAlias.MqttAlias !=variableMqtt.MqttAlias)
+            {
+                // 如果存在但别名不同，则更新别名
+                await db.Updateable<DbVariableMqtt>()
+                        .SetColumns(it => it.MqttAlias == variableMqtt.MqttAlias)
+                        .Where(it => it.VariableDataId == variableMqtt.VariableData.Id && it.MqttId == variableMqtt.Mqtt.Id)
+                        .ExecuteCommandAsync();
+                NlogHelper.Info(
+                    $"为 {variableMqtt.VariableData.Name} 变量更新MQTT服务器{variableMqtt.Mqtt.Name}关联.");
+                affectedCount++;
             }
         }
 
+        if (insertDbVM.Count > 0)
+        {
+            await db.Insertable<DbVariableMqtt>(insertDbVM).ExecuteCommandAsync();
+            NlogHelper.Info(
+                        $"为 {insertDbVM.Count} 个变量添加MQTT服务器  关联，成功影响 {affectedCount} 个，耗时：{stopwatch.ElapsedMilliseconds}ms");
+        }
+
         stopwatch.Stop();
-        NlogHelper.Info($"为 {variableDatas.Count()} 个变量添加MQTT服务器 '{mqtt.Name}' 关联，成功添加 {addedCount} 个，耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return addedCount;
+        
+        return affectedCount;
     }
 }

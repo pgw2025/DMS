@@ -237,4 +237,28 @@ public class DialogService :IDialogService
         var dialog = new ImportResultDialog(vm);
         await dialog.ShowAsync();
     }
+
+    public async Task<string?> ShowMqttAliasDialog(string variableName, string mqttServerName)
+    {
+        var vm = new MqttAliasDialogViewModel(variableName, mqttServerName);
+        var dialog = new MqttAliasDialog(vm);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return vm.MqttAlias;
+        }
+        return null;
+    }
+
+    public async Task<List<VariableMqtt>> ShowMqttAliasBatchEditDialog(List<VariableData> selectedVariables, Mqtt selectedMqtt)
+    {
+        var vm = new MqttAliasBatchEditDialogViewModel(selectedVariables, selectedMqtt);
+        var dialog = new MqttAliasBatchEditDialog(vm);
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            return vm.VariablesToEdit.ToList();
+        }
+        return null;
+    }
 }

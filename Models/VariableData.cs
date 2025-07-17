@@ -175,7 +175,7 @@ public partial class VariableData : ObservableObject, IEquatable<VariableData>
     /// <summary>
     /// 关联的MQTT配置列表。
     /// </summary>
-    public List<Mqtt> Mqtts { get; set; }
+    public List<VariableMqtt>? VariableMqtts { get; set; }
 
     partial void OnPollLevelTypeChanged(PollLevelType value)
     {

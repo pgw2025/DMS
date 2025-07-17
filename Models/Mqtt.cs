@@ -95,7 +95,7 @@ public partial class Mqtt : ObservableObject
     /// <summary>
     /// 关联的变量数据列表。
     /// </summary>
-    public List<VariableData>? VariableDatas { get; set; }
+    public List<VariableMqtt>? VariableMqtts { get; set; }
 
     /// <summary>
     /// 是否连接。

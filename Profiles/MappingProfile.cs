@@ -25,6 +25,7 @@ public class MappingProfile : Profile
         CreateMap<DbVariableData, VariableData>().ReverseMap();
         // --- MQTT 和 变量数据 映射 ---
         CreateMap<DbMqtt, Mqtt>().ReverseMap();
+        CreateMap<DbVariableMqtt, VariableMqtt>().ReverseMap();
         
         CreateMap<DbMenu, MenuBean>().ReverseMap();
         

@@ -27,4 +27,6 @@ public interface IDialogService
     Task<OpcUaUpdateType?> ShowOpcUaUpdateTypeDialog();
     Task<bool?> ShowIsActiveDialog(bool currentIsActive);
     Task ShowImportResultDialog(List<string> importedVariables, List<string> existingVariables);
+    Task<string?> ShowMqttAliasDialog(string variableName, string mqttServerName);
+    Task<List<VariableMqtt>> ShowMqttAliasBatchEditDialog(List<VariableData> selectedVariables, Mqtt selectedMqtt);
 }

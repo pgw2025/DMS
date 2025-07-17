@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using PMSWPF.Data.Repositories;
 
 namespace PMSWPF.ViewModels
 {
@@ -32,7 +33,9 @@ namespace PMSWPF.ViewModels
         /// 与当前MQTT服务器关联的变量数据集合。
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<VariableData> _associatedVariables;
+        private ObservableCollection<VariableMqtt> _associatedVariables;
+
+        private readonly VariableMqttAliasRepository _variableMqttAliasRepository;
 
         /// <summary>
         /// 构造函数。
@@ -41,19 +44,19 @@ namespace PMSWPF.ViewModels
         /// <param name="dataServices">数据服务。</param>
         /// <param name="dialogService">对话框服务。</param>
         public MqttServerDetailViewModel(ILogger<MqttServerDetailViewModel> logger, DataServices dataServices,
-                                         IDialogService dialogService)
+                                         IDialogService dialogService, VariableMqttAliasRepository variableMqttAliasRepository)
         {
             _logger = logger;
             _dataServices = dataServices;
             _dialogService = dialogService;
-            AssociatedVariables = new ObservableCollection<VariableData>();
+            _variableMqttAliasRepository = variableMqttAliasRepository;
         }
 
         public override void OnLoaded()
         {
-            if (CurrentMqtt.VariableDatas != null)
+            if (CurrentMqtt.VariableMqtts != null)
             {
-                AssociatedVariables = new ObservableCollection<VariableData>(CurrentMqtt.VariableDatas);
+                AssociatedVariables =new ObservableCollection<VariableMqtt>(CurrentMqtt.VariableMqtts) ;
             }
         }
 
@@ -108,11 +111,11 @@ namespace PMSWPF.ViewModels
             foreach (var variable in variablesList) // 使用ToList()避免在迭代时修改集合
             {
                 // 移除变量与当前MQTT服务器的关联
-                variable.Mqtts?.Remove(CurrentMqtt);
-                // 标记变量为已修改，以便保存时更新数据库
-                variable.IsModified = true;
-                AssociatedVariables.Remove(variable);
-                _logger.LogInformation($"Removed variable {variable.Name} from MQTT server {CurrentMqtt.Name}.");
+                // variable.Mqtts?.Remove(CurrentMqtt);
+                // // 标记变量为已修改，以便保存时更新数据库
+                // variable.IsModified = true;
+                // AssociatedVariables.Remove(variable);
+                // _logger.LogInformation($"Removed variable {variable.Name} from MQTT server {CurrentMqtt.Name}.");
             }
 
             // TODO: 这里需要调用DataServices来更新数据库中VariableData的Mqtt关联
