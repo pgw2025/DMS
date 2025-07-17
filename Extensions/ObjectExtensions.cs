@@ -94,9 +94,9 @@ public static class ObjectExtensions
                     // 特殊处理 Mqtts 列表的复制
                     if (sourceProperty.Name == "Mqtts")
                     {
-                        if (sourceType == typeof(VariableData) && targetType == typeof(DbVariableData))
+                        if (sourceType == typeof(Variable) && targetType == typeof(DbVariable))
                         {
-                            // 从 VariableData (List<Mqtt>) 转换为 DbVariableData (List<DbMqtt>)
+                            // 从 Variable (List<Mqtt>) 转换为 DbVariable (List<DbMqtt>)
                             var sourceMqtts = sourceValue as List<Mqtt>;
                             if (sourceMqtts != null)
                             {
@@ -108,9 +108,9 @@ public static class ObjectExtensions
                                 targetProperty.SetValue(ttarget, null);
                             }
                         }
-                        else if (sourceType == typeof(DbVariableData) && targetType == typeof(VariableData))
+                        else if (sourceType == typeof(DbVariable) && targetType == typeof(Variable))
                         {
-                            // 从 DbVariableData (List<DbMqtt>) 转换为 VariableData (List<Mqtt>)
+                            // 从 DbVariable (List<DbMqtt>) 转换为 Variable (List<Mqtt>)
                             var sourceDbMqtts = sourceValue as List<DbMqtt>;
                             if (sourceDbMqtts != null)
                             {

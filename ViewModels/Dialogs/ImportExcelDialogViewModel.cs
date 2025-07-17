@@ -11,7 +11,7 @@ public partial class ImportExcelDialogViewModel : ObservableObject
     private string? _filePath;
 
     [ObservableProperty]
-    private ObservableCollection<VariableData> _variableData = new();
+    private ObservableCollection<Variable> _variables = new();
 
     partial void OnFilePathChanged(string? value)
     {
@@ -23,7 +23,7 @@ public partial class ImportExcelDialogViewModel : ObservableObject
         try
         {
             var data = ExcelHelper.ImprotFromTiaVariableTable(value);
-            VariableData = new ObservableCollection<VariableData>(data);
+            Variables = new ObservableCollection<Variable>(data);
         }
         catch (System.Exception ex)
         {

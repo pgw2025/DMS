@@ -6,7 +6,7 @@ namespace PMSWPF.Models;
 /// <summary>
 /// 表示变量数据信息。
 /// </summary>
-public partial class VariableData : ObservableObject, IEquatable<VariableData>
+public partial class Variable : ObservableObject, IEquatable<Variable>
 {
     /// <summary>
     /// 变量唯一标识符。
@@ -184,10 +184,10 @@ public partial class VariableData : ObservableObject, IEquatable<VariableData>
 
     public override bool Equals(object? obj)
     {
-        return Equals(obj as VariableData);
+        return Equals(obj as Variable);
     }
 
-    public bool Equals(VariableData? other)
+    public bool Equals(Variable? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;

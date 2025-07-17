@@ -22,7 +22,7 @@
                   CanUserDeleteRows="False"
                   IsReadOnly="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="变量名称" Binding="{Binding VariableData.Name}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="变量名称" Binding="{Binding Variable.Name}" IsReadOnly="True" Width="*"/>
                 <DataGridTextColumn Header="标识符" Binding="{Binding Identifier}" IsReadOnly="True" Width="*"/>
                 <DataGridTemplateColumn Header="MQTT别名" Width="*">
                     <DataGridTemplateColumn.CellTemplate>

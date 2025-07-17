@@ -6,7 +6,7 @@ namespace PMSWPF.ViewModels.Dialogs;
 public partial class VarDataDialogViewModel : ObservableObject
 {
     [ObservableProperty]
-    private VariableData variableData;
+    private Variable _variable;
     [ObservableProperty]
     private string title;
     [ObservableProperty]

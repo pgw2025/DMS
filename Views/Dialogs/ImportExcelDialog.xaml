@@ -41,14 +41,14 @@
 
         <DataGrid Grid.Row="1"
                   Margin="0,10,0,0"
-                  ItemsSource="{Binding VariableData}"
+                  ItemsSource="{Binding Variables}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False">
             <DataGrid.Style>
                 <Style BasedOn="{StaticResource {x:Type DataGrid}}"
                        TargetType="DataGrid">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding VariableData.Count}"
+                        <DataTrigger Binding="{Binding Variables.Count}"
                                      Value="0">
                             <Setter Property="Visibility"
                                     Value="Collapsed" />

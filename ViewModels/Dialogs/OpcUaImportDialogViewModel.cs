@@ -21,9 +21,9 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
     private ObservableCollection<OpcUaNode> _opcUaNodes;
 
     [ObservableProperty]
-    private ObservableCollection<VariableData> _selectedNodeVariables;
+    private ObservableCollection<Variable> _selectedNodeVariables;
 
-    public List<VariableData> SelectedVariables { get; set; }=new List<VariableData>();
+    public List<Variable> SelectedVariables { get; set; }=new List<Variable>();
 
     [ObservableProperty]
     private bool _selectAllVariables;
@@ -36,7 +36,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
     public OpcUaImportDialogViewModel()
     {
         OpcUaNodes = new ObservableCollection<OpcUaNode>();
-        SelectedNodeVariables = new ObservableCollection<VariableData>();
+        SelectedNodeVariables = new ObservableCollection<Variable>();
         // Automatically connect when the ViewModel is created
         ConnectCommand.Execute(null);
         
@@ -141,7 +141,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
         {
             // 如果是变量节点，直接显示它
             SelectedNodeVariables.Clear();
-            SelectedNodeVariables.Add(new VariableData
+            SelectedNodeVariables.Add(new Variable
                                       {
                                           Name = node.DisplayName,
                                           NodeId = node.NodeId.ToString(),
@@ -230,7 +230,7 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
                         dataType = _session.NodeCache.GetDisplayText(dataTypeNodeId);
                     }
 
-                    SelectedNodeVariables.Add(new VariableData
+                    SelectedNodeVariables.Add(new Variable
                                               {
                                                   Name = opcUaNode.DisplayName,
                                                   OpcUaNodeId = opcUaNode.NodeId.ToString(),
@@ -254,8 +254,8 @@ public partial class OpcUaImportDialogViewModel : ObservableObject
         }
     }
 
-    public ObservableCollection<VariableData> GetSelectedVariables()
+    public ObservableCollection<Variable> GetSelectedVariables()
     {
-        return new ObservableCollection<VariableData>(SelectedVariables);
+        return new ObservableCollection<Variable>(SelectedVariables);
     }
 }

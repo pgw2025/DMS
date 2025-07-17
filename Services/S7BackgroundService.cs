@@ -24,13 +24,13 @@ namespace PMSWPF.Services
         private readonly ConcurrentDictionary<int, Device> _s7Devices;
 
         // 储存所有要轮询更新的变量，键是Device.Id,值是这个设备所有要轮询的变量
-        private readonly ConcurrentDictionary<int, List<VariableData>> _s7PollVariablesByDeviceId; // Key: VariableData.Id
+        private readonly ConcurrentDictionary<int, List<Variable>> _s7PollVariablesByDeviceId; // Key: Variable.Id
 
         // 存储S7 PLC客户端实例的字典，键为设备ID，值为Plc对象。
         private readonly ConcurrentDictionary<string, Plc> _s7PlcClientsByIp;
 
         // 储存所有变量的字典，方便通过id获取变量对象
-        private readonly Dictionary<int, VariableData> _s7VariablesById;
+        private readonly Dictionary<int, Variable> _s7VariablesById;
 
         //  S7轮询一次读取的变量数，不得大于15
         private readonly int _s7PollOnceReadMultipleVars = 9;
@@ -53,7 +53,7 @@ namespace PMSWPF.Services
             _dataServices = dataServices;
             _dataProcessingService = dataProcessingService;
             _s7Devices = new ConcurrentDictionary<int, Device>();
-            _s7PollVariablesByDeviceId = new ConcurrentDictionary<int, List<VariableData>>();
+            _s7PollVariablesByDeviceId = new ConcurrentDictionary<int, List<Variable>>();
             _s7PlcClientsByIp = new ConcurrentDictionary<string, Plc>();
             _s7VariablesById = new();
             
@@ -203,8 +203,8 @@ namespace PMSWPF.Services
                     }
 
                     // 轮询当前设备的所有变量
-                    var dataItemsToRead = new Dictionary<int, DataItem>(); // Key: VariableData.Id, Value: DataItem
-                    var variablesToProcess = new List<VariableData>(); // List of variables to process in this batch
+                    var dataItemsToRead = new Dictionary<int, DataItem>(); // Key: Variable.Id, Value: DataItem
+                    var variablesToProcess = new List<Variable>(); // List of variables to process in this batch
 
                     foreach (var variable in variableList)
                     {
@@ -242,7 +242,7 @@ namespace PMSWPF.Services
                                     if (dataItemsToRead.TryGetValue(varData.Id, out var dataItem))
                                     {
                                         // Now dataItem has the updated value from the PLC
-                                        await UpdateAndEnqueueVariableData(varData, dataItem);
+                                        await UpdateAndEnqueueVariable(varData, dataItem);
                                     }
                                 }
                             }
@@ -277,7 +277,7 @@ namespace PMSWPF.Services
         /// </summary>
         /// <param name="variable">要更新的变量。</param>
         /// <param name="dataItem">包含读取到的数据项。</param>
-        private async Task UpdateAndEnqueueVariableData(VariableData variable, DataItem dataItem)
+        private async Task UpdateAndEnqueueVariable(Variable variable, DataItem dataItem)
         {
             try
             {
@@ -380,8 +380,8 @@ namespace PMSWPF.Services
 
                     // 过滤出当前设备和S7协议相关的变量。
                     var deviceS7Variables = device.VariableTables
-                                            .Where(vt => vt.ProtocolType == ProtocolType.S7 && vt.IsActive)
-                                            .SelectMany(vt => vt.DataVariables)
+                                            .Where(vt => vt.ProtocolType == ProtocolType.S7 && vt.IsActive && vt.Variables != null)
+                                            .SelectMany(vt => vt.Variables)
                                             .Where(vd => vd.IsActive == true)
                                             .ToList(); // 转换为列表，避免多次枚举
 
@@ -391,6 +391,11 @@ namespace PMSWPF.Services
 
                     totalVariableCount += deviceS7Variables.Count; // 使用 Count 属性
                     _s7PollVariablesByDeviceId.AddOrUpdate(device.Id, deviceS7Variables, (key, oldValue) => deviceS7Variables);
+                }
+
+                if (totalVariableCount==0)
+                {
+                    return false;
                 }
 
                 NlogHelper.Info($"S7变量加载成功，共加载S7设备：{s7Devices.Count}个，变量数：{totalVariableCount}");

@@ -161,7 +161,7 @@ namespace PMSWPF.Helper
         /// <param name="excelFilePath"></param>
         /// <returns></returns>
         /// <exception cref="AggregateException"></exception>
-        public static List<VariableData> ImprotFromTiaVariableTable(string excelFilePath)
+        public static List<Variable> ImprotFromTiaVariableTable(string excelFilePath)
         {
             // Act
             // _testFilePath = "C:\\Users\\Administrator\\Desktop\\浓度变量.xlsx";
@@ -173,22 +173,22 @@ namespace PMSWPF.Helper
                     "Excel表格式不正确：第一列的名字是：Name,第三列的名字是：Data Type,Data Type,第四列的名字是：Logical Address,请检查");
             
             
-            List<VariableData> variableDatas = new List<VariableData>();
+            List<Variable> variableDatas = new List<Variable>();
             foreach (DataRow dataRow in dataTable.Rows)
             {
-                VariableData variableData = new VariableData();
-                variableData.Name=dataRow["Name"].ToString();
-                variableData.DataType=SiemensHelper.S7ToCSharpTypeString(dataRow["Data Type"].ToString()) ;
+                Variable variable = new Variable();
+                variable.Name=dataRow["Name"].ToString();
+                variable.DataType=SiemensHelper.S7ToCSharpTypeString(dataRow["Data Type"].ToString()) ;
                 var exS7Addr=dataRow["Logical Address"].ToString();
                 if (exS7Addr.StartsWith("%"))
                 {
-                    variableData.S7Address = exS7Addr.Substring(1);
+                    variable.S7Address = exS7Addr.Substring(1);
                 }
 
-                variableData.NodeId = "";
-                variableData.ProtocolType = ProtocolType.S7;
-                variableData.SignalType = SignalType.OtherASignal;
-                variableDatas.Add(variableData);
+                variable.NodeId = "";
+                variable.ProtocolType = ProtocolType.S7;
+                variable.SignalType = SignalType.OtherASignal;
+                variableDatas.Add(variable);
             }
 
             return variableDatas;

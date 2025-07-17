@@ -23,13 +23,13 @@ namespace PMSWPF.Services
         private readonly ConcurrentDictionary<string, Subscription> _opcUaSubscriptions;
 
         // 存储活动的 OPC UA 变量，键为变量的OpcNodeId
-        private readonly ConcurrentDictionary<string, VariableData> _opcUaPollVariablesByNodeId;
+        private readonly ConcurrentDictionary<string, Variable> _opcUaPollVariablesByNodeId;
 
         // 储存所有要轮询更新的变量，键是Device.Id,值是这个设备所有要轮询的变量
-        private readonly ConcurrentDictionary<int, List<VariableData>> _opcUaPollVariablesByDeviceId;
+        private readonly ConcurrentDictionary<int, List<Variable>> _opcUaPollVariablesByDeviceId;
 
         // 储存所有要订阅更新的变量，键是Device.Id,值是这个设备所有要轮询的变量
-        private readonly ConcurrentDictionary<int, List<VariableData>> _opcUaSubVariablesByDeviceId;
+        private readonly ConcurrentDictionary<int, List<Variable>> _opcUaSubVariablesByDeviceId;
 
         private readonly SemaphoreSlim _reloadSemaphore = new SemaphoreSlim(0);
 
@@ -49,9 +49,9 @@ namespace PMSWPF.Services
             _opcUaDevices = new ConcurrentDictionary<int, Device>();
             _opcUaSessions = new ConcurrentDictionary<string, Session>();
             _opcUaSubscriptions = new ConcurrentDictionary<string, Subscription>();
-            _opcUaPollVariablesByNodeId = new ConcurrentDictionary<string, VariableData>();
-            _opcUaPollVariablesByDeviceId = new ConcurrentDictionary<int, List<VariableData>>();
-            _opcUaSubVariablesByDeviceId = new ConcurrentDictionary<int, List<VariableData>>();
+            _opcUaPollVariablesByNodeId = new ConcurrentDictionary<string, Variable>();
+            _opcUaPollVariablesByDeviceId = new ConcurrentDictionary<int, List<Variable>>();
+            _opcUaSubVariablesByDeviceId = new ConcurrentDictionary<int, List<Variable>>();
 
             _dataServices.OnDeviceListChanged += HandleDeviceListChanged;
             _dataServices.OnDeviceIsActiveChanged += HandleDeviceIsActiveChanged;
@@ -189,23 +189,23 @@ namespace PMSWPF.Services
                     _opcUaDevices.AddOrUpdate(opcUaDevice.Id, opcUaDevice, (key, oldValue) => opcUaDevice);
 
                     //查找设备中所有要轮询的变量
-                    var dPollList = opcUaDevice.VariableTables?.SelectMany(vt => vt.DataVariables)
+                    var dPollList = opcUaDevice.VariableTables?.SelectMany(vt => vt.Variables)
                                                .Where(vd => vd.IsActive == true &&
                                                             vd.ProtocolType == ProtocolType.OpcUA &&
                                                             vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaPoll)
                                                .ToList();
                     // 将变量保存到字典中，方便Read后还原
-                    foreach (var variableData in dPollList)
+                    foreach (var variable in dPollList)
                     {
-                        _opcUaPollVariablesByNodeId.AddOrUpdate(variableData.OpcUaNodeId, variableData,
-                                                            (key, oldValue) => variableData);
+                        _opcUaPollVariablesByNodeId.AddOrUpdate(variable.OpcUaNodeId, variable,
+                                                            (key, oldValue) => variable);
                     }
 
                     totalPollVariableCount += dPollList.Count;
                     _opcUaPollVariablesByDeviceId.AddOrUpdate(opcUaDevice.Id, dPollList, (key, oldValue) => dPollList);
 
                     //查找设备中所有要订阅的变量
-                    var dSubList = opcUaDevice.VariableTables?.SelectMany(vt => vt.DataVariables)
+                    var dSubList = opcUaDevice.VariableTables?.SelectMany(vt => vt.Variables)
                                               .Where(vd => vd.IsActive == true &&
                                                            vd.ProtocolType == ProtocolType.OpcUA &&
                                                            vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaSubscription)
@@ -364,7 +364,7 @@ namespace PMSWPF.Services
         /// <param name="session">OPC UA 会话。</param>
         /// <param name="variable">要读取的变量。</param>
         /// <param name="stoppingToken">取消令牌。</param>
-        private async Task ReadAndProcessOpcUaVariableAsync(Session session, VariableData variable, CancellationToken stoppingToken)
+        private async Task ReadAndProcessOpcUaVariableAsync(Session session, Variable variable, CancellationToken stoppingToken)
         {
             var nodesToRead = new ReadValueIdCollection
             {
@@ -387,7 +387,7 @@ namespace PMSWPF.Services
                     return;
                 }
 
-                await UpdateAndEnqueueVariableData(variable, result.Value);
+                await UpdateAndEnqueueVariable(variable, result.Value);
             }
             catch (ServiceResultException ex) when (ex.StatusCode == StatusCodes.BadSessionIdInvalid)
             {
@@ -409,7 +409,7 @@ namespace PMSWPF.Services
         /// </summary>
         /// <param name="variable">要更新的变量。</param>
         /// <param name="value">读取到的数据值。</param>
-        private async Task UpdateAndEnqueueVariableData(VariableData variable, object value)
+        private async Task UpdateAndEnqueueVariable(Variable variable, object value)
         {
             try
             {
@@ -482,7 +482,7 @@ namespace PMSWPF.Services
                     // 将变量添加到订阅
                     if (_opcUaSubVariablesByDeviceId.TryGetValue(deviceId, out var variablesToSubscribe))
                     {
-                        foreach (VariableData variable in variablesToSubscribe)
+                        foreach (Variable variable in variablesToSubscribe)
                         {
                             // 7. 创建监控项并添加到订阅中。
                             MonitoredItem monitoredItem = new MonitoredItem(subscription.DefaultItem);
@@ -513,7 +513,7 @@ namespace PMSWPF.Services
         /// <param name="variable">发生变化的变量。</param>
         /// <param name="monitoredItem"></param>
         /// <param name="e"></param>
-        private async void OnSubNotification(VariableData variable, MonitoredItem monitoredItem,
+        private async void OnSubNotification(Variable variable, MonitoredItem monitoredItem,
                                              MonitoredItemNotificationEventArgs e)
         {
             
@@ -523,7 +523,7 @@ namespace PMSWPF.Services
                     $"[OPC UA 通知] {monitoredItem.DisplayName}: {value.Value} | 时间戳: {value.SourceTimestamp.ToLocalTime()} | 状态: {value.StatusCode}");
                 if (StatusCode.IsGood(value.StatusCode))
                 {
-                    await UpdateAndEnqueueVariableData(variable, value.Value);
+                    await UpdateAndEnqueueVariable(variable, value.Value);
                 }
             }
         }

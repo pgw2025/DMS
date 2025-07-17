@@ -57,7 +57,7 @@ public partial class VariableTableView : UserControl
         try
         {
             // 获取到改变后的值和绑定的属性名
-            VariableData varData = (VariableData)args.Row.Item;
+            Variable var = (Variable)args.Row.Item;
             var element = args.EditingElement;
             object newValue = null;
             string bindingPath = "";
@@ -91,13 +91,13 @@ public partial class VariableTableView : UserControl
             if (newValue == null || string.IsNullOrEmpty(bindingPath))
                 return;
             // 通过反射拿到值
-            var pathPropertyInfo = varData.GetType()
+            var pathPropertyInfo = var.GetType()
                                           .GetProperty(bindingPath);
-            var oldValue = pathPropertyInfo.GetValue(varData);
+            var oldValue = pathPropertyInfo.GetValue(var);
             // 判断值是否相等
             if (newValue.ToString() != oldValue?.ToString())
             {
-                varData.IsModified = true;
+                var.IsModified = true;
             }
 
         }
@@ -110,7 +110,7 @@ public partial class VariableTableView : UserControl
     private async void DeleteVarData_Click(object sender, RoutedEventArgs e)
     {
         _viewModel = (VariableTableViewModel)this.DataContext;
-        var selectedVariables = BasicGridView.SelectedItems.Cast<VariableData>().ToList();
+        var selectedVariables = BasicGridView.SelectedItems.Cast<Variable>().ToList();
         if (selectedVariables.Any())
         {
             await _viewModel.DeleteVarData(selectedVariables);

@@ -3,12 +3,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using PMSWPF.Models;
 using PMSWPF.Data.Repositories;
 using System.Threading.Tasks;
+using PMSWPF.Services;
 
 namespace PMSWPF.ViewModels.Dialogs;
 
 public partial class MqttSelectionDialogViewModel : ObservableObject
 {
-    private readonly MqttRepository _mqttRepository;
 
     [ObservableProperty]
     private ObservableCollection<Mqtt> mqtts;
@@ -16,26 +16,10 @@ public partial class MqttSelectionDialogViewModel : ObservableObject
     [ObservableProperty]
     private Mqtt? selectedMqtt;
 
-    public MqttSelectionDialogViewModel(MqttRepository mqttRepository)
+    public MqttSelectionDialogViewModel(DataServices dataServices)
     {
-        _mqttRepository = mqttRepository;
-        LoadMqtts();
+        Mqtts = new ObservableCollection<Mqtt>(dataServices.Mqtts);
     }
 
-    private async void LoadMqtts()
-    {
-        try
-        {
-            var allMqtts = await _mqttRepository.GetAllAsync();
-            Mqtts = new ObservableCollection<Mqtt>(allMqtts);
-        }
-        catch (Exception ex)
-        {
-            // 这里需要一个日志记录器，但由于ViewModel中没有直接注入ILogger，
-            // 暂时使用Console.WriteLine或NotificationHelper
-            // 更好的做法是注入ILogger或使用静态日志类
-            Console.WriteLine($"加载MQTT服务器列表失败: {ex.Message}");
-            // 或者使用NotificationHelper.ShowMessage("加载MQTT服务器列表失败", NotificationType.Error);
-        }
-    }
+
 }

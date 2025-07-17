@@ -3,7 +3,7 @@ using PMSWPF.Models;
 
 namespace PMSWPF.Services.Processors;
 
-public class CheckValueChangedProcessor : IVariableDataProcessor
+public class CheckValueChangedProcessor : IVariableProcessor
 {
     private readonly DataServices _dataServices;
 
@@ -11,10 +11,10 @@ public class CheckValueChangedProcessor : IVariableDataProcessor
     {
         _dataServices = dataServices;
     }
-    public Task ProcessAsync(VariableDataContext context)
+    public Task ProcessAsync(VariableContext context)
     {
-        VariableData newVariable = context.Data;
-        if (!_dataServices.AllVariables.TryGetValue(newVariable.Id, out VariableData oldVariable))
+        Variable newVariable = context.Data;
+        if (!_dataServices.AllVariables.TryGetValue(newVariable.Id, out Variable oldVariable))
         {
             NlogHelper.Warn($"检查变量值是否改变时在_dataServices.AllVariables中找不到Id:{newVariable.Id},Name:{newVariable.Name}的变量。");
             context.IsHandled = true;

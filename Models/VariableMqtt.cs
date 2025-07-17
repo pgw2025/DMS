@@ -14,11 +14,11 @@ public partial class VariableMqtt : ObservableObject
     {
     }
 
-    public VariableMqtt(VariableData? variableData, Mqtt? mqtt)
+    public VariableMqtt(Variable variable, Mqtt mqtt)
     {
-        VariableData = variableData;
+        Variable = variable;
         Mqtt = mqtt;
-        MqttAlias = MqttAlias != String.Empty ? MqttAlias : variableData.Name;
+        MqttAlias = MqttAlias != String.Empty ? MqttAlias : variable.Name;
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public partial class VariableMqtt : ObservableObject
     /// <summary>
     /// 关联的变量数据ID。
     /// </summary>
-    public int VariableDataId { get; set; }
+    public int VariableId { get; set; }
 
     /// <summary>
     /// 关联的MQTT服务器ID。
@@ -49,13 +49,13 @@ public partial class VariableMqtt : ObservableObject
     {
         get
         {
-            if (VariableData.ProtocolType == ProtocolType.S7)
+            if (Variable.ProtocolType == ProtocolType.S7)
             {
-                return VariableData.S7Address;
+                return Variable.S7Address;
             }
-            else if (VariableData.ProtocolType == ProtocolType.OpcUA)
+            else if (Variable.ProtocolType == ProtocolType.OpcUA)
             {
-                return VariableData.OpcUaNodeId;
+                return Variable.OpcUaNodeId;
             }
 
             return string.Empty;
@@ -75,10 +75,10 @@ public partial class VariableMqtt : ObservableObject
     /// <summary>
     /// 导航属性：关联的变量数据。
     /// </summary>
-    public VariableData? VariableData { get; set; }
+    public Variable Variable { get; set; }
 
     /// <summary>
     /// 导航属性：关联的MQTT服务器。
     /// </summary>
-    public Mqtt? Mqtt { get; set; }
+    public Mqtt Mqtt { get; set; }
 }

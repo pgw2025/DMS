@@ -31,7 +31,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
     // 变量数据列表。
     [ObservableProperty]
-    private List<VariableData> _variableDatas;
+    private List<Variable> _variables;
 
     // 菜单树列表。
     [ObservableProperty]
@@ -42,7 +42,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     private List<Mqtt> _mqtts;
 
 
-    public ConcurrentDictionary<int, VariableData> AllVariables;
+    public ConcurrentDictionary<int, Variable> AllVariables;
 
     // 设备数据仓库，用于设备数据的CRUD操作。
     private readonly DeviceRepository _deviceRepository;
@@ -97,8 +97,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         _menuRepository = menuRepository;
         _mqttRepository = mqttRepository;
         _varDataRepository = varDataRepository;
-        _variableDatas = new List<VariableData>();
-        AllVariables = new ConcurrentDictionary<int, VariableData>();
+        _variables = new List<Variable>();
+        AllVariables = new ConcurrentDictionary<int, Variable>();
     }
 
     /// <summary>
@@ -161,9 +161,9 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             }
 
             var allVar = await _varDataRepository.GetAllAsync();
-           foreach (var variableData in allVar)
+           foreach (var variable in allVar)
            {
-               AllVariables.AddOrUpdate(variableData.Id, variableData, (key, old) => variableData);
+               AllVariables.AddOrUpdate(variable.Id, variable, (key, old) => variable);
            }
 
         }
@@ -234,19 +234,19 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// 异步加载变量数据。
     /// </summary>
     /// <returns>表示异步操作的任务。</returns>
-    private async Task LoadVariableDatas()
+    private async Task LoadVariables()
     {
-        VariableDatas = await _varDataRepository.GetAllAsync();
+        Variables = await _varDataRepository.GetAllAsync();
     }
 
     /// <summary>
     /// 异步更新变量数据。
     /// </summary>
-    /// <param name="variableData">要更新的变量数据。</param>
+    /// <param name="variable">要更新的变量数据。</param>
     /// <returns>表示异步操作的任务。</returns>
-    public async Task UpdateVariableDataAsync(VariableData variableData)
+    public async Task UpdateVariableAsync(Variable variable)
     {
-        await _varDataRepository.UpdateAsync(variableData);
+        await _varDataRepository.UpdateAsync(variable);
     }
 
 }

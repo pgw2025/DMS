@@ -13,8 +13,8 @@ public class DbVariableTable
     /// <summary>
     /// 变量表中包含的数据变量列表。
     /// </summary>
-    [Navigate(NavigateType.OneToMany, nameof(DbVariableData.VariableTableId))]
-    public List<DbVariableData>? DataVariables { get; set; }
+    [Navigate(NavigateType.OneToMany, nameof(DbVariable.VariableTableId))]
+    public List<DbVariable>? Variables { get; set; }
 
     /// <summary>
     /// 变量表关联的设备。

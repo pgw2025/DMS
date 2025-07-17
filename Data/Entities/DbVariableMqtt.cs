@@ -18,7 +18,7 @@ public class DbVariableMqtt
     /// <summary>
     /// 关联的变量数据ID。
     /// </summary>
-    public int VariableDataId { get; set; }
+    public int VariableId { get; set; }
 
     /// <summary>
     /// 关联的MQTT服务器ID。
@@ -43,8 +43,8 @@ public class DbVariableMqtt
     /// <summary>
     /// 导航属性：关联的变量数据。
     /// </summary>
-    [Navigate(NavigateType.ManyToOne, nameof(VariableDataId))]
-    public DbVariableData? VariableData { get; set; }
+    [Navigate(NavigateType.ManyToOne, nameof(VariableId))]
+    public DbVariable? Variable { get; set; }
 
     /// <summary>
     /// 导航属性：关联的MQTT服务器。

@@ -72,7 +72,7 @@ public class DeviceRepository
             stopwatch.Start();
             var dlist = await db.Queryable<DbDevice>()
                                 .Includes(d => d.VariableTables, dv => dv.Device)
-                                .Includes(d => d.VariableTables, dvd => dvd.DataVariables, data => data.VariableTable)
+                                .Includes(d => d.VariableTables, dvd => dvd.Variables, data => data.VariableTable)
                                 .ToListAsync();
            
 

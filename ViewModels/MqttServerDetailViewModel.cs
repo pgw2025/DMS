@@ -81,7 +81,7 @@ namespace PMSWPF.ViewModels
             // 示例：假设变量数据也需要保存
             // foreach (var variable in AssociatedVariables.Where(v => v.IsModified))
             // {
-            //     await _dataServices.UpdateVariableDataAsync(variable);
+            //     await _dataServices.UpdateVariableAsync(variable);
             // }
 
             NotificationHelper.ShowInfo("MQTT服务器详情保存功能待实现。");
@@ -101,7 +101,7 @@ namespace PMSWPF.ViewModels
                 return;
             }
 
-            var variablesList = variablesToRemove.Cast<VariableData>()
+            var variablesList = variablesToRemove.Cast<Variable>()
                                                  .ToList();
 
             var result = await _dialogService.ShowConfrimeDialog(
@@ -138,7 +138,7 @@ namespace PMSWPF.ViewModels
             _logger.LogInformation("AddAsync variables to MQTT server initiated.");
 
             // 假设我们已经通过对话框获取到了一些要添加的变量
-            // List<VariableData> newVariables = ...; 
+            // List<Variable> newVariables = ...; 
             // foreach (var variable in newVariables)
             // {
             //     if (variable.Mqtts == null) variable.Mqtts = new List<Mqtt>();

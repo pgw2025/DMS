@@ -30,17 +30,8 @@ public partial class VariableTable : ObservableObject
     /// 变量表中包含的数据变量列表。
     /// </summary>
     [ObservableProperty]
-    public ObservableCollection<VariableData> dataVariables;
-    // [ObservableProperty]
-    // public ObservableCollection<VariableData> varDataList;
-    //
-    // // 列表改变了的事件
-    // // public event Action<List<VariableData>> OnDataVariableListChanged;
-    // partial void OnDataVariablesChanged(List<VariableData> variableDatas)
-    // {
-    //     VarDataList=new ObservableCollection<VariableData>(variableDatas);
-    // }
-
+    public ObservableCollection<Variable> variables;
+   
     /// <summary>
     /// 变量表的唯一标识符。
     /// </summary>

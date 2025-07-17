@@ -11,11 +11,11 @@ namespace PMSWPF.Services;
 
 public class DialogService :IDialogService
 {
-    private readonly MqttRepository _mqttRepository;
+    private readonly DataServices _dataServices;
 
-    public DialogService(MqttRepository mqttRepository)
+    public DialogService(DataServices dataServices)
     {
-        _mqttRepository = mqttRepository;
+        _dataServices = dataServices;
     }
 
     public async Task<Device> ShowAddDeviceDialog()
@@ -120,17 +120,17 @@ public class DialogService :IDialogService
         return null;
     }
     
-    public async Task<VariableData> ShowAddVarDataDialog()
+    public async Task<Variable> ShowAddVarDataDialog()
     {
         VarDataDialogViewModel vm = new();
         vm.Title = "添加变量";
         vm.PrimaryButtonText =  "添加变量";
-        vm.VariableData = new VariableData();
+        vm.Variable = new Variable();
         var dialog = new VarDataDialog(vm);
         var res = await dialog.ShowAsync();
         if (res == ContentDialogResult.Primary)
         {
-            return vm.VariableData;
+            return vm.Variable;
         }
         return null;
     }
@@ -141,17 +141,17 @@ public class DialogService :IDialogService
         MessageBox.Show(message);
     }
 
-    public async Task<VariableData> ShowEditVarDataDialog(VariableData variableData)
+    public async Task<Variable> ShowEditVarDataDialog(Variable variable)
     {
         VarDataDialogViewModel vm = new();
         vm.Title = "编辑变量";
         vm.PrimaryButtonText =  "编辑变量";
-        vm.VariableData = variableData;
+        vm.Variable = variable;
         var dialog = new VarDataDialog(vm);
         var res = await dialog.ShowAsync();
         if (res == ContentDialogResult.Primary)
         {
-            return vm.VariableData;
+            return vm.Variable;
         }
         return null;
     }
@@ -192,13 +192,13 @@ public class DialogService :IDialogService
 
     public async Task<Mqtt?> ShowMqttSelectionDialog()
     {
-        var vm = new MqttSelectionDialogViewModel(_mqttRepository);
+        var vm = new MqttSelectionDialogViewModel(_dataServices);
         var dialog = new MqttSelectionDialog(vm);
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary ? vm.SelectedMqtt : null;
     }
 
-    public async Task<List<VariableData>> ShowOpcUaImportDialog(string endpointUrl)
+    public async Task<List<Variable>> ShowOpcUaImportDialog(string endpointUrl)
     {
        var vm= new OpcUaImportDialogViewModel();
        vm.EndpointUrl = endpointUrl;
@@ -250,7 +250,7 @@ public class DialogService :IDialogService
         return null;
     }
 
-    public async Task<List<VariableMqtt>> ShowMqttAliasBatchEditDialog(List<VariableData> selectedVariables, Mqtt selectedMqtt)
+    public async Task<List<VariableMqtt>> ShowMqttAliasBatchEditDialog(List<Variable> selectedVariables, Mqtt selectedMqtt)
     {
         var vm = new MqttAliasBatchEditDialogViewModel(selectedVariables, selectedMqtt);
         var dialog = new MqttAliasBatchEditDialog(vm);

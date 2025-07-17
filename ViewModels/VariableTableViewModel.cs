@@ -26,12 +26,12 @@ namespace PMSWPF.ViewModels;
 ///     构造函数 <see cref="VariableTableViewModel(IDialogService)"/> 负责初始化必要的服务和数据仓库。
 /// 2.  **数据加载**: 
 ///     -   当视图加载完成时，框架会自动调用 <see cref="OnLoaded"/> 方法。
-///     -   此方法会根据传入的 <see cref="VariableTable"/> 对象初始化 <see cref="DataVariables"/> 集合，并设置协议类型相关的布尔属性。
-///     -   它还会创建 <see cref="_originalDataVariables"/> 的深拷贝，用于在用户取消保存时还原数据。
+///     -   此方法会根据传入的 <see cref="VariableTable"/> 对象初始化 <see cref="Variables"/> 集合，并设置协议类型相关的布尔属性。
+///     -   它还会创建 <see cref="_originalVariables"/> 的深拷贝，用于在用户取消保存时还原数据。
 /// 3.  **数据绑定与显示**: 
 ///     -   <see cref="VariableTable"/> 属性绑定到视图中显示的当前变量表信息。
-///     -   <see cref="DataVariables"/> 属性（ObservableCollection）绑定到视图中的数据网格或列表，用于显示变量数据。
-///     -   <see cref="VariableDataView"/> 是一个 ICollectionView，用于支持数据过滤（通过 <see cref="FilterVariables"/> 方法）和排序。
+///     -   <see cref="Variables"/> 属性（ObservableCollection）绑定到视图中的数据网格或列表，用于显示变量数据。
+///     -   <see cref="VariableView"/> 是一个 ICollectionView，用于支持数据过滤（通过 <see cref="FilterVariables"/> 方法）和排序。
 ///     -   <see cref="SearchText"/> 属性绑定到搜索框，当其值改变时，会自动触发 <see cref="OnSearchTextChanged(string)"/> 方法刷新视图。
 /// 4.  **用户交互与命令**: 
 ///     -   视图中的按钮和其他交互元素通过 `RelayCommand` 绑定到 ViewModel 中的命令方法。
@@ -67,17 +67,17 @@ partial class VariableTableViewModel : ViewModelBase
 
     /// <summary>
     /// 存储当前变量表中的所有变量数据的集合。
-    /// 通过 ObservableProperty 自动生成 DataVariables 属性和 OnDataVariablesChanged 方法。
+    /// 通过 ObservableProperty 自动生成 Variables 属性和 OnVariablesChanged 方法。
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<VariableData> _dataVariables;
+    private ObservableCollection<Variable> _variables;
 
     /// <summary>
     /// 当前选中的变量数据。
-    /// 通过 ObservableProperty 自动生成 SelectedVariableData 属性和 OnSelectedVariableDataChanged 方法。
+    /// 通过 ObservableProperty 自动生成 SelectedVariable 属性和 OnSelectedVariableDataChanged 方法。
     /// </summary>
     [ObservableProperty]
-    private VariableData _selectedVariableData;
+    private Variable _selectedVariable;
 
     /// <summary>
     /// 用于过滤变量数据的搜索文本。
@@ -90,7 +90,7 @@ partial class VariableTableViewModel : ViewModelBase
     /// 用于在UI中显示和过滤变量数据的视图集合。
     /// </summary>
     [ObservableProperty]
-    private ICollectionView variableDataView;
+    private ICollectionView variableView;
 
     /// <summary>
     /// 指示视图是否已完成首次加载。
@@ -111,7 +111,7 @@ partial class VariableTableViewModel : ViewModelBase
     /// <summary>
     /// 原始变量数据的深拷贝备份，用于在用户取消保存时还原数据。
     /// </summary>
-    private ObservableCollection<VariableData>? _originalDataVariables;
+    private ObservableCollection<Variable>? _originalVariables;
 
     /// <summary>
     /// 指示当前变量表是否使用S7协议。
@@ -143,13 +143,13 @@ partial class VariableTableViewModel : ViewModelBase
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
         _varTableRepository = varTableRepository;
         _varDataRepository = varDataRepository;
-        _dataVariables = new ObservableCollection<VariableData>(); // 初始化集合
-        VariableDataView = CollectionViewSource.GetDefaultView(DataVariables); // 获取集合视图
-        VariableDataView.Filter = FilterVariables; // 设置过滤方法
+        _variables = new ObservableCollection<Variable>(); // 初始化集合
+        VariableView = CollectionViewSource.GetDefaultView(Variables); // 获取集合视图
+        VariableView.Filter = FilterVariables; // 设置过滤方法
     }
 
     /// <summary>
-    /// 用于过滤 <see cref="VariableDataView"/> 中的变量数据。
+    /// 用于过滤 <see cref="VariableView"/> 中的变量数据。
     /// 根据 <see cref="SearchText"/> 属性的值进行模糊匹配。
     /// </summary>
     /// <param name="item">要过滤的集合中的单个项。</param>
@@ -162,8 +162,8 @@ partial class VariableTableViewModel : ViewModelBase
             return true;
         }
 
-        // 尝试将项转换为 VariableData 类型
-        if (item is VariableData variable)
+        // 尝试将项转换为 Variable 类型
+        if (item is Variable variable)
         {
             var searchTextLower = SearchText.ToLower();
             // 检查变量的名称、描述、NodeId、S7地址、数据值或显示值是否包含搜索文本
@@ -186,12 +186,12 @@ partial class VariableTableViewModel : ViewModelBase
 
     /// <summary>
     /// 当 <see cref="SearchText"/> 属性的值发生改变时自动调用。
-    /// 刷新 <see cref="VariableDataView"/> 以应用新的过滤条件。
+    /// 刷新 <see cref="VariableView"/> 以应用新的过滤条件。
     /// </summary>
     /// <param name="value">新的搜索文本值。</param>
     partial void OnSearchTextChanged(string value)
     {
-        VariableDataView?.Refresh();
+        VariableView?.Refresh();
     }
 
     /// <summary>
@@ -205,26 +205,30 @@ partial class VariableTableViewModel : ViewModelBase
         IsOpcUaProtocolSelected = VariableTable.ProtocolType == ProtocolType.OpcUA;
 
         // 如果变量表包含数据变量，则进行初始化
-        if (VariableTable.DataVariables != null)
+        if (VariableTable.Variables != null)
         {
             // // 将变量表中的数据变量复制到可观察集合中
-            DataVariables.Clear(); // 清空现有集合
-            foreach (var item in VariableTable.DataVariables)
+            Variables.Clear(); // 清空现有集合
+            foreach (var item in VariableTable.Variables)
             {
-                DataVariables.Add(item); // 添加新项
+                Variables.Add(item); // 添加新项
             }
 
 
-            VariableDataView.Refresh(); // 刷新视图以应用过滤和排序
+            VariableView.Refresh(); // 刷新视图以应用过滤和排序
 
             // 创建原始数据的深拷贝备份，用于在取消保存时还原
-            var serialized = JsonConvert.SerializeObject(DataVariables);
-            _originalDataVariables = JsonConvert.DeserializeObject<ObservableCollection<VariableData>>(serialized);
+            var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+            var serialized = JsonConvert.SerializeObject(Variables, settings);
+            _originalVariables = JsonConvert.DeserializeObject<ObservableCollection<Variable>>(serialized);
 
             // 在数据加载完成后，将所有变量的 IsModified 状态重置为 false
-            foreach (var variableData in DataVariables)
+            foreach (var variable in Variables)
             {
-                variableData.IsModified = false;
+                variable.IsModified = false;
             }
         }
 
@@ -240,7 +244,7 @@ partial class VariableTableViewModel : ViewModelBase
     public override async Task<bool> OnExitAsync()
     {
         // 查找所有已修改的变量数据
-        var modifiedDatas = DataVariables.Where(d => d.IsModified == true)
+        var modifiedDatas = Variables.Where(d => d.IsModified == true)
                                          .ToList();
         // 如果没有修改，则直接允许退出
         if (modifiedDatas.Count == 0)
@@ -256,7 +260,7 @@ partial class VariableTableViewModel : ViewModelBase
             // 遍历所有已修改的数据，从原始备份中还原
             foreach (var modifiedData in modifiedDatas)
             {
-                var oldData = _originalDataVariables.First(od => od.Id == modifiedData.Id);
+                var oldData = _originalVariables.First(od => od.Id == modifiedData.Id);
                 // 将原始数据复制回当前数据
                 _mapper.Map(oldData, modifiedData);
                 modifiedData.IsModified = false; // 重置修改状态
@@ -276,7 +280,7 @@ partial class VariableTableViewModel : ViewModelBase
     private async void SaveModifiedVarData()
     {
         // 查找所有已标记为修改的变量数据
-        var modifiedDatas = DataVariables.Where(d => d.IsModified == true)
+        var modifiedDatas = Variables.Where(d => d.IsModified == true)
                                          .ToList();
         // 更新数据库中的这些数据
         await _varDataRepository.UpdateAsync(modifiedDatas);
@@ -297,12 +301,12 @@ partial class VariableTableViewModel : ViewModelBase
     /// </summary>
     /// <param name="variableTable">当前操作的变量表，用于更新其内部的变量数据。</param>
     [RelayCommand]
-    private async void EditVarData(VariableTable variableTable)
+    private async void UpdateVariable(VariableTable variableTable)
     {
         try
         {
             // 显示编辑变量数据的对话框，并传入当前选中的变量数据
-            var varData = await _dialogService.ShowEditVarDataDialog(SelectedVariableData);
+            var varData = await _dialogService.ShowEditVarDataDialog(SelectedVariable);
 
             // 如果用户取消或对话框未返回数据，则直接返回
             if (varData == null)
@@ -315,9 +319,9 @@ partial class VariableTableViewModel : ViewModelBase
             await _varDataRepository.UpdateAsync(varData);
 
             // 更新当前页面显示的数据：找到原数据在集合中的索引并替换
-            var index = variableTable.DataVariables.IndexOf(SelectedVariableData);
-            if (index >= 0 && index < variableTable.DataVariables.Count)
-                variableTable.DataVariables[index] = varData; // 替换为编辑后的数据
+            var index = variableTable.Variables.IndexOf(SelectedVariable);
+            if (index >= 0 && index < variableTable.Variables.Count)
+                variableTable.Variables[index] = varData; // 替换为编辑后的数据
 
             // 显示成功通知
             NotificationHelper.ShowSuccess($"编辑变量成功:{varData?.Name}");
@@ -344,7 +348,7 @@ partial class VariableTableViewModel : ViewModelBase
             if (string.IsNullOrEmpty(filePath))
                 return; // 如果用户取消选择，则返回
 
-            // 读取Excel文件并将其内容转换为 VariableData 列表
+            // 读取Excel文件并将其内容转换为 Variable 列表
             var importVarDataList = ExcelHelper.ImprotFromTiaVariableTable(filePath);
             if (importVarDataList.Count == 0)
                 return; // 如果没有读取到数据，则返回
@@ -352,15 +356,15 @@ partial class VariableTableViewModel : ViewModelBase
             // 显示处理中的对话框
             processingDialog = _dialogService.ShowProcessingDialog("正在处理...", "正在导入变量,请稍等片刻....");
 
-            List<VariableData> newVariables = new List<VariableData>();
+            List<Variable> newVariables = new List<Variable>();
             List<string> importedVariableNames = new List<string>();
             List<string> existingVariableNames = new List<string>();
 
             foreach (var variableData in importVarDataList)
             {
                 // 判断是否存在重复变量
-                // 判断是否存在重复变量，仅在当前 VariableTable 的 DataVariables 中查找
-                bool isDuplicate = DataVariables.Any(existingVar =>
+                // 判断是否存在重复变量，仅在当前 VariableTable 的 Variables 中查找
+                bool isDuplicate = Variables.Any(existingVar =>
                                                          (existingVar.Name == variableData.Name) ||
                                                          (!string.IsNullOrEmpty(variableData.NodeId) &&
                                                           existingVar.NodeId == variableData.NodeId) ||
@@ -436,17 +440,17 @@ partial class VariableTableViewModel : ViewModelBase
             // 显示处理中的对话框
             processingDialog = _dialogService.ShowProcessingDialog("正在处理...", "正在导入OPC UA变量,请稍等片刻....");
 
-            // 在进行重复检查之前，先刷新 DataVariables 集合，确保其包含所有最新数据
+            // 在进行重复检查之前，先刷新 Variables 集合，确保其包含所有最新数据
             await RefreshDataView();
 
-            List<VariableData> newVariables = new List<VariableData>();
+            List<Variable> newVariables = new List<Variable>();
             List<string> importedVariableNames = new List<string>();
             List<string> existingVariableNames = new List<string>();
 
             foreach (var variableData in importedVariables)
             {
-                // 判断是否存在重复变量，仅在当前 VariableTable 的 DataVariables 中查找
-                bool isDuplicate = DataVariables.Any(existingVar =>
+                // 判断是否存在重复变量，仅在当前 VariableTable 的 Variables 中查找
+                bool isDuplicate = Variables.Any(existingVar =>
                                                          (existingVar.Name == variableData.Name) ||
                                                          (!string.IsNullOrEmpty(variableData.NodeId) &&
                                                           existingVar.NodeId == variableData.NodeId) ||
@@ -476,7 +480,7 @@ partial class VariableTableViewModel : ViewModelBase
                 NlogHelper.Info($"成功导入OPC UA变量：{resVarDataCount}个。");
             }
 
-            // 再次刷新 DataVariables 集合，以反映新添加的数据
+            // 再次刷新 Variables 集合，以反映新添加的数据
             await RefreshDataView();
 
             processingDialog?.Hide(); // 隐藏处理中的对话框
@@ -506,13 +510,13 @@ partial class VariableTableViewModel : ViewModelBase
         // 将最新数据转换为字典，以便快速查找
         var latestVariablesDict = latestVariables.ToDictionary(v => v.Id);
 
-        // 用于存储需要从 DataVariables 中移除的项
-        var itemsToRemove = new List<VariableData>();
+        // 用于存储需要从 Variables 中移除的项
+        var itemsToRemove = new List<Variable>();
 
-        // 遍历当前 DataVariables 集合，处理删除和更新
-        for (int i = DataVariables.Count - 1; i >= 0; i--)
+        // 遍历当前 Variables 集合，处理删除和更新
+        for (int i = Variables.Count - 1; i >= 0; i--)
         {
-            var currentVariable = DataVariables[i];
+            var currentVariable = Variables[i];
             if (latestVariablesDict.TryGetValue(currentVariable.Id, out var newVariable))
             {
                 // 如果存在于最新数据中，检查是否需要更新
@@ -535,17 +539,17 @@ partial class VariableTableViewModel : ViewModelBase
         // 移除已标记的项
         foreach (var item in itemsToRemove)
         {
-            DataVariables.Remove(item);
+            Variables.Remove(item);
         }
 
         // 添加所有剩余在 latestVariablesDict 中的项（这些是新增项）
         foreach (var newVariable in latestVariablesDict.Values)
         {
-            DataVariables.Add(newVariable);
+            Variables.Add(newVariable);
         }
 
         // 刷新视图以应用所有更改
-        VariableDataView.Refresh();
+        VariableView.Refresh();
     }
 
     //
@@ -574,7 +578,7 @@ partial class VariableTableViewModel : ViewModelBase
             string duplicateReason = string.Empty;
 
             // 检查名称是否重复
-            if (DataVariables.Any(v => v.Name == varData.Name))
+            if (Variables.Any(v => v.Name == varData.Name))
             {
                 isDuplicate = true;
                 duplicateReason = $"名称 '{varData.Name}' 已存在。";
@@ -585,7 +589,7 @@ partial class VariableTableViewModel : ViewModelBase
                 if (variableTable.ProtocolType == ProtocolType.S7)
                 {
                     if (!string.IsNullOrEmpty(varData.S7Address) &&
-                        DataVariables.Any(v => v.S7Address == varData.S7Address))
+                        Variables.Any(v => v.S7Address == varData.S7Address))
                     {
                         isDuplicate = true;
                         duplicateReason = $"S7地址 '{varData.S7Address}' 已存在。";
@@ -593,7 +597,7 @@ partial class VariableTableViewModel : ViewModelBase
                 }
                 else if (variableTable.ProtocolType == ProtocolType.OpcUA)
                 {
-                    if (!string.IsNullOrEmpty(varData.NodeId) && DataVariables.Any(v => v.NodeId == varData.NodeId))
+                    if (!string.IsNullOrEmpty(varData.NodeId) && Variables.Any(v => v.NodeId == varData.NodeId))
                     {
                         isDuplicate = true;
                         duplicateReason = $"OPC UA NodeId '{varData.NodeId}' 已存在。";
@@ -617,7 +621,7 @@ partial class VariableTableViewModel : ViewModelBase
             }
 
             // 更新当前页面显示的数据：将新变量添加到集合中
-            DataVariables.Add(resVarData);
+            Variables.Add(resVarData);
 
             // 显示成功通知
             NotificationHelper.ShowSuccess($"添加变量成功:{varData?.Name}");
@@ -635,7 +639,7 @@ partial class VariableTableViewModel : ViewModelBase
     /// </summary>
     /// <param name="variablesToDelete">要删除的变量数据列表。</param>
     [RelayCommand]
-    public async Task DeleteVarData(List<VariableData> variablesToDelete)
+    public async Task DeleteVarData(List<Variable> variablesToDelete)
     {
         // 检查是否有变量被选中
         if (variablesToDelete == null || !variablesToDelete.Any())
@@ -687,7 +691,7 @@ partial class VariableTableViewModel : ViewModelBase
     [RelayCommand]
     public async Task ChangePollLevel(IList<object> variablesToChange)
     {
-        var validVariables = variablesToChange?.OfType<VariableData>()
+        var validVariables = variablesToChange?.OfType<Variable>()
                                               .ToList();
 
         // 检查是否有变量被选中
@@ -711,6 +715,8 @@ partial class VariableTableViewModel : ViewModelBase
 
             // 批量更新数据库中的变量数据
             await _varDataRepository.UpdateAsync(validVariables);
+
+            await RefreshDataView();
             // 显示成功通知
             NotificationHelper.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询频率");
         }
@@ -724,7 +730,7 @@ partial class VariableTableViewModel : ViewModelBase
     public async Task ModifyOpcUaUpdateType(IList<object> variablesToChange)
     {
         // 过滤出有效的VariableData对象
-        var validVariables = variablesToChange?.OfType<VariableData>()
+        var validVariables = variablesToChange?.OfType<Variable>()
                                               .ToList();
 
         if (validVariables == null || !validVariables.Any())
@@ -758,7 +764,7 @@ partial class VariableTableViewModel : ViewModelBase
     [RelayCommand]
     public async Task AddMqttServerToVariables(IList<object> variablesToAddMqtt)
     {
-        var validVariables = variablesToAddMqtt?.OfType<VariableData>()
+        var validVariables = variablesToAddMqtt?.OfType<Variable>()
                                                .ToList();
 
         // 检查是否有变量被选中
@@ -789,19 +795,22 @@ partial class VariableTableViewModel : ViewModelBase
 
             int totalAffectedCount = 0;
             // 调用仓库方法来添加或更新MQTT服务器关联和别名
-            var affectedCount = await _varDataRepository.AddMqttToVariablesAsync(editedVariableMqtts);
-            totalAffectedCount += affectedCount;
-            if (affectedCount == 0)
-            {
-                NotificationHelper.ShowInfo("没有任何要添加或者更新的MQTT服务器.");
-                return;
-            }
+            var resCount = await _varDataRepository.AddMqttToVariablesAsync(editedVariableMqtts);
+            totalAffectedCount += resCount;
+            
 
+            //更新变量Variable的VariableMqtts列表
             foreach (var editedVariableMqtt in editedVariableMqtts)
             {
-                
-                    // 更新内存中的 VariableData 对象
-                    var originalVariable = editedVariableMqtt.VariableData;
+                    // 更新内存中的 Variable 对象
+                    var originalVariable = VariableTable.Variables.FirstOrDefault(v=>v.Id==editedVariableMqtt.Variable.Id);
+                    if (originalVariable == null)
+                    {
+                        NlogHelper.Warn($"没有在VariableTable.Variables中找到,ID:{editedVariableMqtt.Variable.Id},Name:{editedVariableMqtt.Variable.Name}的对象");
+                        continue;
+                    }
+                    
+                    
                     if (originalVariable.VariableMqtts == null)
                     {
                         originalVariable.VariableMqtts = new List<VariableMqtt>();
@@ -815,13 +824,16 @@ partial class VariableTableViewModel : ViewModelBase
                     if (existingVariableMqtt == null)
                     {
                         // 如果不存在，则添加新的关联
-                        originalVariable.VariableMqtts.Add(new VariableMqtt
-                                                           {
-                                                               VariableDataId = originalVariable.Id,
-                                                               MqttId = editedVariableMqtt.Mqtt.Id,
-                                                               MqttAlias = editedVariableMqtt.MqttAlias,
-                                                               Mqtt = editedVariableMqtt.Mqtt // 关联Mqtt对象，方便UI显示
-                                                           });
+                        var variableMqtt = new VariableMqtt(originalVariable,editedVariableMqtt.Mqtt)
+                                           {
+                                               VariableId = originalVariable.Id,
+                                               MqttId = editedVariableMqtt.Mqtt.Id,
+                                               MqttAlias = editedVariableMqtt.MqttAlias,
+                                               Mqtt = editedVariableMqtt.Mqtt // 关联Mqtt对象，方便UI显示
+                                           };
+                        originalVariable.VariableMqtts.Add(variableMqtt);
+                        //更新MQTT服务器对应的的VariableMqtts列表
+                        selectedMqtt.VariableMqtts.Add(variableMqtt);
                     }
                     else
                     {
@@ -856,7 +868,7 @@ partial class VariableTableViewModel : ViewModelBase
     [RelayCommand]
     public async Task ModifyIsActive(IList<object> variablesToChange)
     {
-        var validVariables = variablesToChange?.OfType<VariableData>()
+        var validVariables = variablesToChange?.OfType<Variable>()
                                               .ToList();
 
         if (validVariables == null || !validVariables.Any())

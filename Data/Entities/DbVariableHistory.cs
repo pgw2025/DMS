@@ -7,7 +7,7 @@ namespace PMSWPF.Data.Entities;
 /// 表示数据库中的变量数据历史实体。
 /// </summary>
 [SugarTable("VarDataHistory")]
-public class DbVariableDataHistory
+public class DbVariableHistory
 {
     /// <summary>
     /// 历史记录唯一标识符。
@@ -34,13 +34,13 @@ public class DbVariableDataHistory
     /// <summary>
     /// 关联的DbVariableData的ID。
     /// </summary>
-    public int VariableDataId { get; set; }
+    public int VariableId { get; set; }
 
     /// <summary>
     /// 关联的DbVariableData实体。
     /// </summary>
-    [Navigate(NavigateType.ManyToOne, nameof(VariableDataId))]
-    public DbVariableData? VariableData { get; set; }
+    [Navigate(NavigateType.ManyToOne, nameof(VariableId))]
+    public DbVariable? Variable { get; set; }
 
     /// <summary>
     /// 历史记录的时间戳。

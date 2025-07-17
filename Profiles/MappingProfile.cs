@@ -22,7 +22,7 @@ public class MappingProfile : Profile
         // --- 变量表映射 (List中的元素) ---
         CreateMap<DbVariableTable, VariableTable>().ReverseMap();
         
-        CreateMap<DbVariableData, VariableData>().ReverseMap();
+        CreateMap<DbVariable, Variable>().ReverseMap();
         // --- MQTT 和 变量数据 映射 ---
         CreateMap<DbMqtt, Mqtt>().ReverseMap();
         CreateMap<DbVariableMqtt, VariableMqtt>().ReverseMap();

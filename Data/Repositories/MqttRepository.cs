@@ -53,7 +53,7 @@ public class MqttRepository
         using (var _db = DbContext.GetInstance())
         {
             var result = await _db.Queryable<DbMqtt>()
-                                  .Includes(m => m.VariableMqtts, vm => vm.VariableData)
+                                  .Includes(m => m.VariableMqtts, vm => vm.Variable)
                                   .Includes(m => m.VariableMqtts, vm => vm.Mqtt)
                                   .ToListAsync();
             stopwatch.Stop();

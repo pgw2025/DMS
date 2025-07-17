@@ -64,9 +64,9 @@ public partial class App : Application
             // 初始化数据处理链
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
-            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingDataProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
-            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryDataProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
         }
         catch (Exception exception)
         {
@@ -115,9 +115,9 @@ public partial class App : Application
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
         services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
         services.AddSingleton<CheckValueChangedProcessor>();
-        services.AddSingleton<LoggingDataProcessor>();
+        services.AddSingleton<LoggingProcessor>();
         services.AddSingleton<UpdateDbVariableProcessor>();
-        services.AddSingleton<HistoryDataProcessor>();
+        services.AddSingleton<HistoryProcessor>();
         
         // 注册数据仓库
         services.AddSingleton<DeviceRepository>();
@@ -247,13 +247,11 @@ public partial class App : Application
         _db.CodeFirst.InitTables<DbNlog>();
         _db.CodeFirst.InitTables<DbDevice>();
         _db.CodeFirst.InitTables<DbVariableTable>();
-        _db.CodeFirst.InitTables<DbVariableData>();
-        _db.CodeFirst.InitTables<DbVariableDataHistory>();
-        _db.CodeFirst.InitTables<DbVariableS7Data>();
+        _db.CodeFirst.InitTables<DbVariable>();
+        _db.CodeFirst.InitTables<DbVariableHistory>();
         _db.CodeFirst.InitTables<DbUser>();
         _db.CodeFirst.InitTables<DbMqtt>();
         _db.CodeFirst.InitTables<DbVariableMqtt>();
-        // _db.CodeFirst.InitTables<DbVariableDataMqtt>();
         _db.CodeFirst.InitTables<DbMenu>();
     }
 }

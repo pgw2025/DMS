@@ -17,10 +17,10 @@ namespace PMSWPF.Services;
 public class DataProcessingService : BackgroundService, IDataProcessingService
 {
     // 使用 Channel 作为高性能的生产者/消费者队列
-    private readonly Channel<VariableDataContext> _queue;
+    private readonly Channel<VariableContext> _queue;
 
     // 存储数据处理器的链表
-    private readonly List<IVariableDataProcessor> _processors;
+    private readonly List<IVariableProcessor> _processors;
 
     /// <summary>
     /// 构造函数，注入日志记录器。
@@ -29,8 +29,8 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     public DataProcessingService()
     {
         // 创建一个无边界的 Channel，允许生产者快速写入而不会被阻塞。
-        _queue = Channel.CreateUnbounded<VariableDataContext>();
-        _processors = new List<IVariableDataProcessor>();
+        _queue = Channel.CreateUnbounded<VariableContext>();
+        _processors = new List<IVariableProcessor>();
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     /// 处理器将按照添加的顺序执行。
     /// </summary>
     /// <param name="processor">要添加的数据处理器实例。</param>
-    public void AddProcessor(IVariableDataProcessor processor)
+    public void AddProcessor(IVariableProcessor processor)
     {
         _processors.Add(processor);
     }
@@ -47,14 +47,14 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     /// 将一个变量数据项异步推入处理队列。
     /// </summary>
     /// <param name="data">要入队的变量数据。</param>
-    public async ValueTask EnqueueAsync(VariableData data)
+    public async ValueTask EnqueueAsync(Variable data)
     {
         if (data == null)
         {
             return;
         }
 
-        var context = new VariableDataContext(data);
+        var context = new VariableContext(data);
         // 将数据项写入 Channel，供后台服务处理。
         await _queue.Writer.WriteAsync(context);
     }

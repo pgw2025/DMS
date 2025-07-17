@@ -50,7 +50,7 @@ public partial class OpcUaImportDialog : ContentDialog
         {
             foreach (var item in args.AddedItems)
             {
-                ViewModel.SelectedVariables.Add((VariableData)item);
+                ViewModel.SelectedVariables.Add((Variable)item);
             }
             
         }

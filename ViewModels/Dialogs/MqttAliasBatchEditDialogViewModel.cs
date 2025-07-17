@@ -17,7 +17,7 @@ public partial class MqttAliasBatchEditDialogViewModel : ObservableObject
 
     public Mqtt SelectedMqtt { get; private set; }
 
-    public MqttAliasBatchEditDialogViewModel(List<VariableData> selectedVariables, Mqtt selectedMqtt)
+    public MqttAliasBatchEditDialogViewModel(List<Variable> selectedVariables, Mqtt selectedMqtt)
     {
         SelectedMqtt = selectedMqtt;
         Title=$"设置：{SelectedMqtt.Name}-MQTT服务器关联变量的别名";

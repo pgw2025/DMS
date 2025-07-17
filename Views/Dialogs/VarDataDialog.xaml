@@ -36,20 +36,20 @@
             <ikw:SimpleStackPanel Margin="10" Spacing="12">
                 <TextBlock Text="变量名称"
                            Style="{StaticResource TextBlockSubTitle}" />
-                <TextBox Text="{Binding VariableData.Name, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding Variable.Name, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Text="变量描述"
                            Style="{StaticResource TextBlockSubTitle}" />
                 <TextBox AcceptsReturn="True"
-                         Text="{Binding VariableData.Description, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding Variable.Description, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Text="节点ID"
                            Style="{StaticResource TextBlockSubTitle}" />
-                <TextBox Text="{Binding VariableData.NodeId, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding Variable.NodeId, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Text="协议类型"
                            Style="{StaticResource TextBlockSubTitle}" />
-                <ComboBox SelectedValue="{Binding VariableData.ProtocolType, UpdateSourceTrigger=PropertyChanged}"
+                <ComboBox SelectedValue="{Binding Variable.ProtocolType, UpdateSourceTrigger=PropertyChanged}"
                           SelectedValuePath="Tag"
                           ItemsSource="{ex:EnumBindingSource {x:Type en:ProtocolType}}">
                     <ComboBox.ItemTemplate>
@@ -61,11 +61,11 @@
 
                 <TextBlock Text="数据类型"
                            Style="{StaticResource TextBlockSubTitle}" />
-                <TextBox Text="{Binding VariableData.DataType, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding Variable.DataType, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Text="信号类型"
                            Style="{StaticResource TextBlockSubTitle}" />
-                <ComboBox SelectedValue="{Binding VariableData.SignalType, UpdateSourceTrigger=PropertyChanged}"
+                <ComboBox SelectedValue="{Binding Variable.SignalType, UpdateSourceTrigger=PropertyChanged}"
                           SelectedValuePath="Tag"
                           ItemsSource="{ex:EnumBindingSource {x:Type en:SignalType}}">
                     <ComboBox.ItemTemplate>
@@ -77,7 +77,7 @@
 
                 <TextBlock Text="轮询级别"
                            Style="{StaticResource TextBlockSubTitle}" />
-                <ComboBox SelectedValue="{Binding VariableData.PollLevelType, UpdateSourceTrigger=PropertyChanged}"
+                <ComboBox SelectedValue="{Binding Variable.PollLevelType, UpdateSourceTrigger=PropertyChanged}"
                           SelectedValuePath="Tag"
                           ItemsSource="{ex:EnumBindingSource {x:Type en:PollLevelType}}">
                     <ComboBox.ItemTemplate>
@@ -95,15 +95,15 @@
                 <ikw:SimpleStackPanel Spacing="12" Margin="10">
                     <TextBlock Text="保存范围"
                                Style="{StaticResource TextBlockSubTitle}" />
-                    <TextBox Text="{Binding VariableData.SaveRange, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding Variable.SaveRange, UpdateSourceTrigger=PropertyChanged}" />
                     <CheckBox Content="是否激活"
                               FontSize="16"
                               Margin="0 10 0 0 "
-                              IsChecked="{Binding VariableData.IsActive, UpdateSourceTrigger=PropertyChanged}" />
+                              IsChecked="{Binding Variable.IsActive, UpdateSourceTrigger=PropertyChanged}" />
                     <CheckBox Content="是否保存"
                               FontSize="16"
                               Margin="0 10 0 0 "
-                              IsChecked="{Binding VariableData.IsSave, UpdateSourceTrigger=PropertyChanged}" />
+                              IsChecked="{Binding Variable.IsSave, UpdateSourceTrigger=PropertyChanged}" />
               
                 </ikw:SimpleStackPanel>
             </GroupBox>
@@ -114,15 +114,15 @@
                
                     <TextBlock Text="报警最小值"
                                Style="{StaticResource TextBlockSubTitle}" />
-                    <TextBox Text="{Binding VariableData.AlarmMin, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding Variable.AlarmMin, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock Text="报警最大值"
                                Style="{StaticResource TextBlockSubTitle}" />
-                    <TextBox Text="{Binding VariableData.AlarmMax, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Text="{Binding Variable.AlarmMax, UpdateSourceTrigger=PropertyChanged}" />
                 
                     <CheckBox Content="是否报警"
                               FontSize="16"
                               Margin="0 5"
-                              IsChecked="{Binding VariableData.IsAlarm, UpdateSourceTrigger=PropertyChanged}" />
+                              IsChecked="{Binding Variable.IsAlarm, UpdateSourceTrigger=PropertyChanged}" />
                 </ikw:SimpleStackPanel>
             </GroupBox>
         </ikw:SimpleStackPanel>

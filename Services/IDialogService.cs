@@ -15,18 +15,18 @@ public interface IDialogService
     Task<VariableTable> ShowAddVarTableDialog();
     Task<VariableTable> ShowEditVarTableDialog(VariableTable variableTable);
     
-    Task<VariableData> ShowAddVarDataDialog();
+    Task<Variable> ShowAddVarDataDialog();
 
     void ShowMessageDialog(string title, string message);
-    Task<VariableData> ShowEditVarDataDialog(VariableData variableData);
+    Task<Variable> ShowEditVarDataDialog(Variable variable);
     Task<string> ShowImportExcelDialog();
     ContentDialog ShowProcessingDialog(string title, string message);
     Task<PollLevelType?> ShowPollLevelDialog(PollLevelType pollLevelType);
     Task<Mqtt?> ShowMqttSelectionDialog();
-    Task<List<VariableData>> ShowOpcUaImportDialog(string endpointUrl);
+    Task<List<Variable>> ShowOpcUaImportDialog(string endpointUrl);
     Task<OpcUaUpdateType?> ShowOpcUaUpdateTypeDialog();
     Task<bool?> ShowIsActiveDialog(bool currentIsActive);
     Task ShowImportResultDialog(List<string> importedVariables, List<string> existingVariables);
     Task<string?> ShowMqttAliasDialog(string variableName, string mqttServerName);
-    Task<List<VariableMqtt>> ShowMqttAliasBatchEditDialog(List<VariableData> selectedVariables, Mqtt selectedMqtt);
+    Task<List<VariableMqtt>> ShowMqttAliasBatchEditDialog(List<Variable> selectedVariables, Mqtt selectedMqtt);
 }

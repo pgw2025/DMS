@@ -13,22 +13,22 @@ using PMSWPF.Services;
 
 namespace PMSWPF.Services.Processors;
 
-public class HistoryDataProcessor : IVariableDataProcessor, IDisposable
+public class HistoryProcessor : IVariableProcessor, IDisposable
 {
     private const int BATCH_SIZE = 50; // 批量写入的阈值
     private const int TIMER_INTERVAL_MS = 30 * 1000; // 30秒
 
-    private readonly ConcurrentQueue<DbVariableDataHistory> _queue = new();
+    private readonly ConcurrentQueue<DbVariableHistory> _queue = new();
     private readonly Timer _timer;
 
-    public HistoryDataProcessor()
+    public HistoryProcessor()
     {
 
         _timer = new Timer(async _ => await FlushQueueToDatabase(), null, Timeout.Infinite, Timeout.Infinite);
         _timer.Change(TIMER_INTERVAL_MS, TIMER_INTERVAL_MS); // 启动定时器
     }
 
-    public async Task ProcessAsync(VariableDataContext context)
+    public async Task ProcessAsync(VariableContext context)
     {
         // 只有当数据发生变化时才记录历史
         if (!context.Data.IsSave) // 如果数据已经被其他处理器处理过或者不需要保存，则跳过
@@ -36,13 +36,13 @@ public class HistoryDataProcessor : IVariableDataProcessor, IDisposable
             return;
         }
 
-        // 将 VariableData 转换为 DbVariableDataHistory
-        var historyData = new DbVariableDataHistory
+        // 将 Variable 转换为 DbVariableHistory
+        var historyData = new DbVariableHistory
         {
             Name = context.Data.Name,
             NodeId = context.Data.NodeId,
             DataValue = context.Data.DataValue,
-            VariableDataId = context.Data.Id,
+            VariableId = context.Data.Id,
             Timestamp = DateTime.Now // 记录当前时间
         };
 
@@ -59,7 +59,7 @@ public class HistoryDataProcessor : IVariableDataProcessor, IDisposable
         // 停止定时器，防止在写入过程中再次触发
         _timer.Change(Timeout.Infinite, Timeout.Infinite);
 
-        var itemsToProcess = new List<DbVariableDataHistory>();
+        var itemsToProcess = new List<DbVariableHistory>();
         while (_queue.TryDequeue(out var item))
         {
             itemsToProcess.Add(item);

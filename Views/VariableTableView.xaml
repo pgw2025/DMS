@@ -164,8 +164,8 @@
                   AutoGenerateColumns="False"
                   CanUserSortColumns="True"
                   SelectionMode="Extended"
-                  SelectedItem="{Binding SelectedVariableData}"
-                  ItemsSource="{Binding VariableDataView}"
+                  SelectedItem="{Binding SelectedVariable}"
+                  ItemsSource="{Binding VariableView}"
                   Style="{StaticResource DataGridBaseStyle}">
             <DataGrid.ContextMenu>
                 <ContextMenu>
@@ -177,7 +177,7 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="编辑变量"
-                              Command="{Binding EditVarDataCommand}"
+                              Command="{Binding UpdateVariableCommand}"
                               CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext.VariableTable}">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />

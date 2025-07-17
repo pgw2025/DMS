@@ -8,7 +8,7 @@ namespace PMSWPF.Data.Entities;
 /// 表示数据库中的变量数据实体。
 /// </summary>
 [SugarTable("VarData")]
-public class DbVariableData
+public class DbVariable
 {
     /// <summary>
     /// 变量唯一标识符。
@@ -161,12 +161,12 @@ public class DbVariableData
     /// <summary>
     /// 关联的MQTT配置列表。
     /// </summary>
-    [Navigate(NavigateType.OneToMany, nameof(DbVariableMqtt.VariableDataId))]
+    [Navigate(NavigateType.OneToMany, nameof(DbVariableMqtt.VariableId))]
     public List<DbVariableMqtt>? VariableMqtts { get; set; }
 
     /// <summary>
     /// 关联的历史记录列表。
     /// </summary>
-    [Navigate(NavigateType.OneToMany, nameof(DbVariableDataHistory.VariableDataId))]
-    public List<DbVariableDataHistory>? HistoryRecords { get; set; }
+    [Navigate(NavigateType.OneToMany, nameof(DbVariableHistory.VariableId))]
+    public List<DbVariableHistory>? HistoryRecords { get; set; }
 }

@@ -34,7 +34,7 @@ public class VariableMqttAliasRepository
     public async Task<DbVariableMqtt?> GetAliasByVariableAndMqtt(int variableDataId, int mqttId, SqlSugarClient db)
     {
         return await db.Queryable<DbVariableMqtt>()
-                            .Where(it => it.VariableDataId == variableDataId && it.MqttId == mqttId)
+                            .Where(it => it.VariableId == variableDataId && it.MqttId == mqttId)
                             .FirstAsync();
     }
 
@@ -89,7 +89,7 @@ public class VariableMqttAliasRepository
     {
         return await db.Updateable<DbVariableMqtt>()
                             .SetColumns(it => it.MqttAlias == newAlias)
-                            .Where(it => it.VariableDataId == variableDataId && it.MqttId == mqttId)
+                            .Where(it => it.VariableId == variableDataId && it.MqttId == mqttId)
                             .ExecuteCommandAsync();
     }
 
@@ -117,7 +117,7 @@ public class VariableMqttAliasRepository
     public async Task<int> DeleteAsync(int variableDataId, int mqttId, SqlSugarClient db)
     {
         return await db.Deleteable<DbVariableMqtt>()
-                            .Where(it => it.VariableDataId == variableDataId && it.MqttId == mqttId)
+                            .Where(it => it.VariableId == variableDataId && it.MqttId == mqttId)
                             .ExecuteCommandAsync();
     }
 }

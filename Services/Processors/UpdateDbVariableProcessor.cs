@@ -4,7 +4,7 @@ using PMSWPF.Helper;
 
 namespace PMSWPF.Services.Processors
 {
-    public class UpdateDbVariableProcessor : IVariableDataProcessor
+    public class UpdateDbVariableProcessor : IVariableProcessor
     {
         private readonly DataServices _dataServices;
 
@@ -13,15 +13,15 @@ namespace PMSWPF.Services.Processors
             _dataServices = dataServices;
         }
 
-        public async Task ProcessAsync(VariableDataContext context)
+        public async Task ProcessAsync(VariableContext context)
         {
             try
             {
-                // 假设 DataServices 有一个方法来更新 VariableData
-                await _dataServices.UpdateVariableDataAsync(context.Data);
-                NlogHelper.Info($"数据库变量 {context.Data.Name} 更新成功，值为: {context.Data.DataValue}");
+                // 假设 DataServices 有一个方法来更新 Variable
+                await _dataServices.UpdateVariableAsync(context.Data);
+                // NlogHelper.Info($"数据库变量 {context.Data.Name} 更新成功，值为: {context.Data.DataValue}");
                 
-                if (!_dataServices.AllVariables.TryGetValue(context.Data.Id, out VariableData oldVariable))
+                if (!_dataServices.AllVariables.TryGetValue(context.Data.Id, out Variable oldVariable))
                 {
                     NlogHelper.Warn($"数据库更新完成修改变量值是否改变时在_dataServices.AllVariables中找不到Id:{context.Data.Id},Name:{context.Data.Name}的变量。");
                     context.IsHandled = true;
