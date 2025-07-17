@@ -77,11 +77,11 @@ public partial class App : Application
         MainWindow.Show();
 
         // 根据配置启动服务
-        var connectionSettings = PMSWPF.Config.ConnectionSettings.Load();
-        if (connectionSettings.EnableMqttService)
-        {
-            Host.Services.GetRequiredService<MqttBackgroundService>().StartService();
-        }
+        // var connectionSettings = PMSWPF.Config.ConnectionSettings.Load();
+        // if (connectionSettings.EnableMqttService)
+        // {
+        //     Host.Services.GetRequiredService<MqttBackgroundService>().StartService();
+        // }
         // if (connectionSettings.EnableOpcUaService)
         // {
         //     Host.Services.GetRequiredService<OpcUaBackgroundService>().StartService();
@@ -105,7 +105,7 @@ public partial class App : Application
         services.AddSingleton<GrowlNotificationService>();
         services.AddHostedService<S7BackgroundService>();
         services.AddHostedService<OpcUaBackgroundService>();
-        services.AddSingleton<MqttBackgroundService>();
+        services.AddHostedService<MqttBackgroundService>();
         services.AddSingleton<OpcUaBackgroundService>();
         
         // 注册 AutoMapper
