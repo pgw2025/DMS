@@ -1,0 +1,23 @@
+<ui:ContentDialog
+    x:Class="PMSWPF.Views.Dialogs.MqttAliasDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:vm="clr-namespace:PMSWPF.ViewModels.Dialogs"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance vm:MqttAliasDialogViewModel}"
+    Title="{Binding Title}"
+    PrimaryButtonText="确定"
+    CloseButtonText="取消">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="{Binding Message}" Margin="0,0,0,10" TextWrapping="Wrap"/>
+            <hc:TextBox Text="{Binding MqttAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        hc:InfoElement.Title="MQTT别名" 
+                        hc:InfoElement.Placeholder="请输入别名"/>
+        </StackPanel>
+    </Grid>
+</ui:ContentDialog>
