@@ -774,27 +774,53 @@ partial class VariableTableViewModel : ViewModelBase
                 return; // 用户取消选择
             }
 
-            // 遍历所有选定的变量，并为其添加选定的MQTT服务器
-            foreach (VariableData variable in validVariables)
+            // 调用新的仓库方法来添加MQTT服务器关联
+            var addedCount = await _varDataRepository.AddMqttToVariablesAsync(validVariables, selectedMqtt);
+
+            if (addedCount > 0)
             {
-                // 如果变量的Mqtts集合为空，则初始化它
-                if (variable.Mqtts == null)
+                //跟新已经加载的变量的Mqtt服务器
+                foreach (var variable in validVariables)
                 {
-                    variable.Mqtts = new List<Mqtt>();
+                    if (variable.Mqtts==null)
+                    {
+                        variable.Mqtts=new List<Mqtt>();
+                    }
+                    // 判断不存在再添加
+
+                    var ids = variable.Mqtts.Select(m => m.Id)
+                                      .ToList();
+                    if (!ids.Contains(selectedMqtt.Id))
+                    {
+                        variable.Mqtts.Add(selectedMqtt);
+                    }
+                    
+                }
+                
+                //将变量添加到Mqtt服务器的变量表中
+                if (selectedMqtt.VariableDatas==null)
+                {
+                    
+                    selectedMqtt.VariableDatas=new List<VariableData>();
                 }
 
-                // 避免重复添加相同的MQTT服务器
-                if (!variable.Mqtts.Any(m => m.Id == selectedMqtt.Id))
+                foreach (var variable in validVariables)
                 {
-                    variable.Mqtts.Add(selectedMqtt);
-                    // variable.IsModified = true; // 标记为已修改 (如果需要UI立即反映，但此处批量更新数据库，所以可以省略)
+                    var ids = selectedMqtt.VariableDatas.Select(v => v.Id)
+                                      .ToList();
+                    if (!ids.Contains(variable.Id))
+                    {
+                        variable.Mqtts.Add(selectedMqtt);
+                    }
                 }
+                // 刷新界面以反映更改
+                await RefreshDataView();
+                NotificationHelper.ShowSuccess($"已成功为 {addedCount} 个变量添加MQTT服务器: {selectedMqtt.Name}");
             }
-
-            // 批量更新数据库中的变量数据
-            await _varDataRepository.UpdateAsync(validVariables.ToList());
-            // 显示成功通知
-            NotificationHelper.ShowSuccess($"已成功为 {validVariables.Count} 个变量添加MQTT服务器: {selectedMqtt.Name}");
+            else
+            {
+                NotificationHelper.ShowInfo($"没有新的变量关联到MQTT服务器: {selectedMqtt.Name}，可能已存在。");
+            }
         }
         catch (Exception ex)
         {

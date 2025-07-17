@@ -264,7 +264,7 @@ public class VarDataRepository
     }
 
     /// <summary>
-    /// 根据ID删除VariableData
+    /// 删除VariableData
     /// </summary>
     /// <param name="id">主键ID</param>
     /// <returns></returns>
@@ -281,5 +281,44 @@ public class VarDataRepository
         stopwatch.Stop();
         NlogHelper.Info($"删除VariableData: '{variableDatas.Count()}'个 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
+    }
+
+    /// <summary>
+    /// 为变量添加MQTT服务器关联。
+    /// </summary>
+    /// <param name="variableDatas">要添加MQTT服务器的变量数据列表。</param>
+    /// <param name="mqtt">要关联的MQTT服务器。</param>
+    /// <returns>成功添加关联的数量。</returns>
+    public async Task<int> AddMqttToVariablesAsync(IEnumerable<VariableData> variableDatas, Mqtt mqtt)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        int addedCount = 0;
+
+        using (var db = DbContext.GetInstance())
+        {
+            foreach (var variableData in variableDatas)
+            {
+                // 检查是否已存在该关联
+                var existingAssociation = await db.Queryable<DbVariableDataMqtt>()
+                                                  .Where(x => x.VariableDataId == variableData.Id && x.MqttId == mqtt.Id)
+                                                  .FirstAsync();
+
+                if (existingAssociation == null)
+                {
+                    // 如果不存在，则添加新的关联
+                    await db.Insertable(new DbVariableDataMqtt
+                    {
+                        VariableDataId = variableData.Id,
+                        MqttId = mqtt.Id
+                    }).ExecuteCommandAsync();
+                    addedCount++;
+                }
+            }
+        }
+
+        stopwatch.Stop();
+        NlogHelper.Info($"为 {variableDatas.Count()} 个变量添加MQTT服务器 '{mqtt.Name}' 关联，成功添加 {addedCount} 个，耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return addedCount;
     }
 }
