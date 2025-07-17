@@ -779,38 +779,27 @@ partial class VariableTableViewModel : ViewModelBase
 
             if (addedCount > 0)
             {
-                //跟新已经加载的变量的Mqtt服务器
+                // 更新已经加载的变量的Mqtt服务器和Mqtt服务器的变量表
                 foreach (var variable in validVariables)
                 {
-                    if (variable.Mqtts==null)
+                    // 更新变量的 Mqtts 集合
+                    if (variable.Mqtts == null)
                     {
-                        variable.Mqtts=new List<Mqtt>();
+                        variable.Mqtts = new List<Mqtt>();
                     }
-                    // 判断不存在再添加
-
-                    var ids = variable.Mqtts.Select(m => m.Id)
-                                      .ToList();
-                    if (!ids.Contains(selectedMqtt.Id))
+                    if (!variable.Mqtts.Any(m => m.Id == selectedMqtt.Id))
                     {
                         variable.Mqtts.Add(selectedMqtt);
                     }
-                    
-                }
-                
-                //将变量添加到Mqtt服务器的变量表中
-                if (selectedMqtt.VariableDatas==null)
-                {
-                    
-                    selectedMqtt.VariableDatas=new List<VariableData>();
-                }
 
-                foreach (var variable in validVariables)
-                {
-                    var ids = selectedMqtt.VariableDatas.Select(v => v.Id)
-                                      .ToList();
-                    if (!ids.Contains(variable.Id))
+                    // 更新 Mqtt 服务器的 VariableDatas 集合
+                    if (selectedMqtt.VariableDatas == null)
                     {
-                        variable.Mqtts.Add(selectedMqtt);
+                        selectedMqtt.VariableDatas = new List<VariableData>();
+                    }
+                    if (!selectedMqtt.VariableDatas.Any(v => v.Id == variable.Id))
+                    {
+                        selectedMqtt.VariableDatas.Add(variable);
                     }
                 }
                 // 刷新界面以反映更改
