@@ -6,7 +6,7 @@ namespace PMSWPF.Models;
 /// <summary>
 /// 表示变量数据信息。
 /// </summary>
-public partial class VariableData : ObservableObject
+public partial class VariableData : ObservableObject, IEquatable<VariableData>
 {
     /// <summary>
     /// 变量唯一标识符。
@@ -180,5 +180,71 @@ public partial class VariableData : ObservableObject
     partial void OnPollLevelTypeChanged(PollLevelType value)
     {
         IsModified = true;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as VariableData);
+    }
+
+    public bool Equals(VariableData? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        // Compare all relevant properties for equality
+        return Name == other.Name &&
+               NodeId == other.NodeId &&
+               S7Address == other.S7Address &&
+               OpcUaEndpointUrl == other.OpcUaEndpointUrl &&
+               OpcUaNodeId == other.OpcUaNodeId &&
+               Description == other.Description &&
+               ProtocolType == other.ProtocolType &&
+               SignalType == other.SignalType &&
+               DataType == other.DataType &&
+               DataValue == other.DataValue &&
+               DisplayValue == other.DisplayValue &&
+               IsActive == other.IsActive &&
+               IsSave == other.IsSave &&
+               IsAlarm == other.IsAlarm &&
+               PollLevelType == other.PollLevelType &&
+               OpcUaUpdateType == other.OpcUaUpdateType &&
+               IsDeleted == other.IsDeleted &&
+               AlarmMax == other.AlarmMax &&
+               AlarmMin == other.AlarmMin &&
+               Converstion == other.Converstion &&
+               SaveRange == other.SaveRange &&
+               CreateTime == other.CreateTime &&
+               VariableTableId == other.VariableTableId;
+    }
+
+    public override int GetHashCode()
+    {
+        // Combine hash codes of all relevant properties
+        var hash = new HashCode();
+        hash.Add(Name);
+        hash.Add(NodeId);
+        hash.Add(S7Address);
+        hash.Add(OpcUaEndpointUrl);
+        hash.Add(OpcUaNodeId);
+        hash.Add(Description);
+        hash.Add(ProtocolType);
+        hash.Add(SignalType);
+        hash.Add(DataType);
+        hash.Add(DataValue);
+        hash.Add(DisplayValue);
+        hash.Add(IsActive);
+        hash.Add(IsSave);
+        hash.Add(IsAlarm);
+        hash.Add(PollLevelType);
+        hash.Add(OpcUaUpdateType);
+        hash.Add(IsDeleted);
+        hash.Add(AlarmMax);
+        hash.Add(AlarmMin);
+        hash.Add(Converstion);
+        hash.Add(SaveRange);
+        hash.Add(CreateTime);
+        hash.Add(VariableTableId);
+        return hash.ToHashCode();
     }
 }

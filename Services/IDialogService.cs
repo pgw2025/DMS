@@ -26,4 +26,5 @@ public interface IDialogService
     Task<List<VariableData>> ShowOpcUaImportDialog(string endpointUrl);
     Task<OpcUaUpdateType?> ShowOpcUaUpdateTypeDialog();
     Task<bool?> ShowIsActiveDialog(bool currentIsActive);
+    Task ShowImportResultDialog(List<string> importedVariables, List<string> existingVariables);
 }

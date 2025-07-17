@@ -88,7 +88,8 @@ partial class VariableTableViewModel : ViewModelBase
     /// <summary>
     /// 用于在UI中显示和过滤变量数据的视图集合。
     /// </summary>
-    public ICollectionView VariableDataView { get; private set; }
+    [ObservableProperty]
+    private ICollectionView variableDataView;
 
     /// <summary>
     /// 指示视图是否已完成首次加载。
@@ -130,16 +131,19 @@ partial class VariableTableViewModel : ViewModelBase
     /// 初始化服务、数据仓库和变量数据集合视图。
     /// </summary>
     /// <param name="dialogService">对话服务接口的实例。</param>
+    private readonly DataServices _dataServices;
+
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, VarTableRepository varTableRepository,
-                                  VarDataRepository varDataRepository)
+                                  VarDataRepository varDataRepository, DataServices dataServices)
     {
         _mapper = mapper;
         _dialogService = dialogService;
+        _dataServices = dataServices;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
         _varTableRepository = varTableRepository;
         _varDataRepository = varDataRepository;
         _dataVariables = new ObservableCollection<VariableData>(); // 初始化集合
-        VariableDataView = CollectionViewSource.GetDefaultView(_dataVariables); // 获取集合视图
+        VariableDataView = CollectionViewSource.GetDefaultView(DataVariables); // 获取集合视图
         VariableDataView.Filter = FilterVariables; // 设置过滤方法
     }
 
@@ -202,12 +206,13 @@ partial class VariableTableViewModel : ViewModelBase
         // 如果变量表包含数据变量，则进行初始化
         if (VariableTable.DataVariables != null)
         {
-            // 将变量表中的数据变量复制到可观察集合中
-            _dataVariables.Clear(); // 清空现有集合
+            // // 将变量表中的数据变量复制到可观察集合中
+            DataVariables.Clear(); // 清空现有集合
             foreach (var item in VariableTable.DataVariables)
             {
-                _dataVariables.Add(item); // 添加新项
+                DataVariables.Add(item); // 添加新项
             }
+
 
             VariableDataView.Refresh(); // 刷新视图以应用过滤和排序
 
@@ -346,26 +351,53 @@ partial class VariableTableViewModel : ViewModelBase
             // 显示处理中的对话框
             processingDialog = _dialogService.ShowProcessingDialog("正在处理...", "正在导入变量,请稍等片刻....");
 
-            // 为导入的每个变量设置创建时间和所属变量表ID
+            List<VariableData> newVariables = new List<VariableData>();
+            List<string> importedVariableNames = new List<string>();
+            List<string> existingVariableNames = new List<string>();
+
             foreach (var variableData in importVarDataList)
             {
-                variableData.CreateTime = DateTime.Now;
-                variableData.IsActive = true;
-                variableData.VariableTableId = VariableTable.Id;
+                // 判断是否存在重复变量
+                bool isDuplicate = _dataServices.AllVariables.Values.Any(existingVar =>
+                                                                             (existingVar.Name == variableData.Name) ||
+                                                                             (!string.IsNullOrEmpty(
+                                                                                  variableData.NodeId) &&
+                                                                              existingVar.NodeId ==
+                                                                              variableData.NodeId) ||
+                                                                             (!string.IsNullOrEmpty(
+                                                                                  variableData.S7Address) &&
+                                                                              existingVar.S7Address ==
+                                                                              variableData.S7Address)
+                );
+
+                if (isDuplicate)
+                {
+                    existingVariableNames.Add(variableData.Name);
+                }
+                else
+                {
+                    variableData.CreateTime = DateTime.Now;
+                    variableData.IsActive = true;
+                    variableData.VariableTableId = VariableTable.Id;
+                    newVariables.Add(variableData);
+                    importedVariableNames.Add(variableData.Name);
+                }
             }
 
-            // 批量插入变量数据到数据库
-            var resVarDataCount = await _varDataRepository.AddAsync(importVarDataList);
+            if (newVariables.Any())
+            {
+                // 批量插入新变量数据到数据库
+                var resVarDataCount = await _varDataRepository.AddAsync(newVariables);
+                NlogHelper.Info($"成功导入变量：{resVarDataCount}个。");
+            }
 
             // 更新界面显示的数据：重新从数据库加载所有变量数据
             await RefreshDataView();
 
             processingDialog?.Hide(); // 隐藏处理中的对话框
 
-            // 显示成功通知并记录日志
-            string msgSuccess = $"成功导入变量：{resVarDataCount}个。";
-            NlogHelper.Info(msgSuccess);
-            NotificationHelper.ShowSuccess(msgSuccess);
+            // 显示导入结果对话框
+            await _dialogService.ShowImportResultDialog(importedVariableNames, existingVariableNames);
         }
         catch (Exception e)
         {
@@ -437,22 +469,64 @@ partial class VariableTableViewModel : ViewModelBase
         }
     }
 
-    /// <summary>
-    /// 刷新数据列表
-    /// </summary>
+    // /// <summary>
+    // /// 刷新数据列表
+    // /// </summary>
     private async Task RefreshDataView()
     {
-        // // 更新界面显示的数据：重新从数据库加载所有变量数据
-        // VariableTable.DataVariables = await _varDataRepository.GetByVariableTableIdAsync(VariableTable.Id);
-        // DataVariables.Clear();
-        // foreach (var item in VariableTable.DataVariables)
-        // {
-        //     DataVariables.AddAsync(item);
-        // }
-        //
-        // VariableDataView.Refresh();
+        // 更新界面显示的数据：重新从数据库加载所有变量数据
+
+        var varList = await _varDataRepository.GetByVariableTableIdAsync(VariableTable.Id);
+        // 处理删除
+        if (varList.Count < DataVariables.Count)
+        {
+            for (int i = DataVariables.Count-1; i >=0; i--)
+            {
+                bool isExist=false;
+                foreach (var variableData in varList)
+                {
+                    if (variableData.Id==DataVariables[i].Id)
+                    {
+                        isExist=true;
+                    }
+                }
+                if (!isExist)
+                {
+                    DataVariables.RemoveAt(i);
+                }
+            }
+        }
+
+        // 处理修改和 添加
+        foreach (var newVariable in varList)
+        {
+            bool isExiset = false;
+            for (int i = 0; i < DataVariables.Count; i++)
+            {
+                var oldVariable = DataVariables[i];
+                // 判断是否存在
+                if (newVariable.Id == oldVariable.Id)
+                {
+                    isExiset = true;
+                    //判断是否相等
+                    if (!oldVariable.Equals(newVariable))
+                    {
+                        DataVariables[i] = newVariable;
+                    }
+                }
+            }
+
+            // 不存在则添加
+            if (!isExiset)
+            {
+                DataVariables.Add(newVariable);
+            }
+        }
+
+        VariableDataView.Refresh();
     }
 
+    //
     /// <summary>
     /// 添加新的变量数据。
     /// 此命令通常绑定到UI中的“添加”按钮。
@@ -474,10 +548,15 @@ partial class VariableTableViewModel : ViewModelBase
             varData.VariableTableId = variableTable.Id;
 
             // 添加变量数据到数据库
-            await _varDataRepository.AddAsync(varData);
+            var resVarData = await _varDataRepository.AddAsync(varData);
+            if (resVarData == null)
+            {
+                NotificationHelper.ShowError($"添加变量失败了:{varData?.Name}");
+                return;
+            }
 
             // 更新当前页面显示的数据：将新变量添加到集合中
-            DataVariables.Add(varData);
+            DataVariables.Add(resVarData);
 
             // 显示成功通知
             NotificationHelper.ShowSuccess($"添加变量成功:{varData?.Name}");
@@ -697,14 +776,9 @@ partial class VariableTableViewModel : ViewModelBase
             }
 
             await _varDataRepository.UpdateAsync(validVariables);
-            
+
             // 更新界面
-            foreach (var variable in validVariables)
-            {
-                var displayVar = DataVariables.FirstOrDefault(v => v.Id == variable.Id);
-                if (displayVar != null)
-                    displayVar.IsActive = newIsActive;
-            }
+            await RefreshDataView();
 
 
             NotificationHelper.ShowSuccess($"已成功将 {validVariables.Count} 个变量的启用状态修改为 {newIsActive}");

@@ -133,7 +133,7 @@ public partial class App : Application
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<SettingViewModel>();
         services.AddSingleton<DataTransformViewModel>();
-        services.AddTransient<VariableTableViewModel>();
+        services.AddSingleton<VariableTableViewModel>();
         services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddScoped<MqttsViewModel>();

@@ -230,4 +230,11 @@ public class DialogService :IDialogService
         }
         return null;
     }
+
+    public async Task ShowImportResultDialog(List<string> importedVariables, List<string> existingVariables)
+    {
+        var vm = new ImportResultDialogViewModel(importedVariables, existingVariables);
+        var dialog = new ImportResultDialog(vm);
+        await dialog.ShowAsync();
+    }
 }
