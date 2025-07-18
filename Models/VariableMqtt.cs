@@ -16,9 +16,13 @@ public partial class VariableMqtt : ObservableObject
 
     public VariableMqtt(Variable variable, Mqtt mqtt)
     {
-        Variable = variable;
-        Mqtt = mqtt;
-        MqttAlias = MqttAlias != String.Empty ? MqttAlias : variable.Name;
+        if (mqtt != null && variable != null)
+        {
+             Variable = variable;
+                    Mqtt = mqtt;
+                    MqttAlias = MqttAlias != String.Empty ? MqttAlias : variable.Name;
+        }
+       
     }
 
     /// <summary>
@@ -49,6 +53,10 @@ public partial class VariableMqtt : ObservableObject
     {
         get
         {
+            if (Variable!=null)
+            {
+                
+            
             if (Variable.ProtocolType == ProtocolType.S7)
             {
                 return Variable.S7Address;
@@ -57,7 +65,7 @@ public partial class VariableMqtt : ObservableObject
             {
                 return Variable.OpcUaNodeId;
             }
-
+            }
             return string.Empty;
         }
     }

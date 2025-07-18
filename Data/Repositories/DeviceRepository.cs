@@ -73,6 +73,7 @@ public class DeviceRepository
             var dlist = await db.Queryable<DbDevice>()
                                 .Includes(d => d.VariableTables, dv => dv.Device)
                                 .Includes(d => d.VariableTables, dvd => dvd.Variables, data => data.VariableTable)
+                                .Includes(d=>d.VariableTables,vt=>vt.Variables,v=>v.VariableMqtts )
                                 .ToListAsync();
            
 

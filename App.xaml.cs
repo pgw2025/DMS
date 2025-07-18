@@ -65,6 +65,7 @@ public partial class App : Application
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<MqttPublishProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
         }
@@ -105,7 +106,8 @@ public partial class App : Application
         services.AddSingleton<GrowlNotificationService>();
         services.AddHostedService<S7BackgroundService>();
         services.AddHostedService<OpcUaBackgroundService>();
-        services.AddHostedService<MqttBackgroundService>();
+        services.AddSingleton<MqttBackgroundService>();
+        services.AddHostedService(provider => provider.GetRequiredService<MqttBackgroundService>());
         services.AddSingleton<OpcUaBackgroundService>();
         
         // 注册 AutoMapper
@@ -118,6 +120,7 @@ public partial class App : Application
         services.AddSingleton<LoggingProcessor>();
         services.AddSingleton<UpdateDbVariableProcessor>();
         services.AddSingleton<HistoryProcessor>();
+        services.AddSingleton<MqttPublishProcessor>();
         
         // 注册数据仓库
         services.AddSingleton<DeviceRepository>();
