@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="MQTTnet" Version="3.0.16" />
+	  <PackageReference Include="SqlSugarCore" Version="5.1.4.197" />
+	  <PackageReference Include="SqlSugarCore.MySql" Version="5.1.4.178" />
+	  <PackageReference Include="SqlSugarCoreNoDrive" Version="5.1.4.193" />
+
+	  <PackageReference Include="NPOI" Version="2.7.4" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.376.235" />
+	  <PackageReference Include="S7netplus" Version="0.20.0" />
+	  <PackageReference Include="AutoMapper" Version="12.0.1" />
+	  <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+	  <PackageReference Include="MySql.Data" Version="9.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DMS\DMS.csproj" />
+  </ItemGroup>
+
+</Project>

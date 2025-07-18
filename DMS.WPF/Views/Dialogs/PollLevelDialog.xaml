@@ -1,0 +1,30 @@
+<ui:ContentDialog x:Class="DMS.Views.Dialogs.PollLevelDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:enums="clr-namespace:DMS.Core.Enums"
+             xmlns:extensions="clr-namespace:DMS.Extensions"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:vc="clr-namespace:DMS.ValueConverts"
+             mc:Ignorable="d"
+             Title="修改轮询频率"
+             PrimaryButtonText="确定"
+             CloseButtonText="取消"
+             d:DesignHeight="150" d:DesignWidth="300">
+    <ui:ContentDialog.Resources>
+        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+    </ui:ContentDialog.Resources>
+    <Grid>
+        <ComboBox 
+                  ItemsSource="{Binding PollLevelTypes}"
+                  SelectedItem="{Binding SelectedPollLevelType}"
+                  Margin="20">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+    </Grid>
+</ui:ContentDialog>
