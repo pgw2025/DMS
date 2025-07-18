@@ -1,0 +1,28 @@
+<controls:ContentDialog x:Class="DMS.Views.Dialogs.IsActiveDialog"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
+                        xmlns:vm="clr-namespace:DMS.ViewModels.Dialogs"
+                        xmlns:vc="clr-namespace:DMS.ValueConverts"
+                        mc:Ignorable="d"
+                        d:DataContext="{d:DesignInstance vm:IsActiveDialogViewModel}"
+                        Title="修改激活状态"
+                        PrimaryButtonText="确定"
+                        SecondaryButtonText="取消"
+                        PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+                        SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <controls:ContentDialog.Resources>
+        <vc:NullableBooleanConverter x:Key="NullableBooleanConverter" />
+    </controls:ContentDialog.Resources>
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="10">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton FontSize="16" Content="启用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=True}" Command="{Binding SelectIsActiveCommand}" CommandParameter="True" Margin="10 5"/>
+                <RadioButton FontSize="16" Content="停用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=False}" Command="{Binding SelectIsActiveCommand}" CommandParameter="False" Margin="10 5"/>
+            </StackPanel>
+           
+        </StackPanel>
+    </Grid>
+</controls:ContentDialog>

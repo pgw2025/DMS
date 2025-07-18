@@ -1,0 +1,21 @@
+<controls:ContentDialog x:Class="DMS.Views.Dialogs.MqttSelectionDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:vm="clr-namespace:DMS.ViewModels.Dialogs"
+               xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+               xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
+               mc:Ignorable="d"
+               d:DataContext="{d:DesignInstance vm:MqttSelectionDialogViewModel}"
+               Title="选择MQTT服务器"
+               PrimaryButtonText="确定"
+               SecondaryButtonText="取消"
+               PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+               SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <Grid>
+        <ListBox ItemsSource="{Binding Mqtts}"
+                 SelectedItem="{Binding SelectedMqtt}"
+                 DisplayMemberPath="Name" />
+    </Grid>
+</controls:ContentDialog>

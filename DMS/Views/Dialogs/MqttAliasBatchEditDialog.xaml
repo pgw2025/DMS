@@ -1,0 +1,38 @@
+<ui:ContentDialog
+    x:Class="DMS.Views.Dialogs.MqttAliasBatchEditDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:vm="clr-namespace:DMS.ViewModels.Dialogs"
+    xmlns:models="clr-namespace:DMS.Models"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance vm:MqttAliasBatchEditDialogViewModel}"
+    Title="{Binding Title}"
+    PrimaryButtonText="确定"
+    CloseButtonText="取消"
+    >
+    <StackPanel Margin="10">
+        <TextBlock TextWrapping="WrapWithOverflow" Margin="5 10" FontSize="13" Foreground="#666">设置的别名，当变量向MQTT服务器发送数据时就会按照设置设置好的别名发送，请在MQTT服务端，按照设置的名称接受。</TextBlock>
+        <DataGrid ItemsSource="{Binding VariablesToEdit}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="变量名称" Binding="{Binding Variable.Name}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="标识符" Binding="{Binding Identifier}" IsReadOnly="True" Width="*"/>
+                <DataGridTemplateColumn Header="MQTT别名" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <hc:TextBox Text="{Binding MqttAlias, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        hc:InfoElement.Placeholder="请输入别名"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </StackPanel>
+</ui:ContentDialog>
