@@ -1,7 +1,7 @@
 
 using DMS.Core.Enums;
-using DMS.Models;
-using DMS.ViewModels;
+using DMS.WPF.Models;
+using DMS.WPF.ViewModels;
 using DMS.WPF.Models;
 using DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;

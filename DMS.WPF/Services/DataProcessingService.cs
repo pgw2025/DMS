@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Core.Enums;
-using DMS.ViewModels;
+using DMS.WPF.ViewModels;
 
-namespace DMS.Models;
+namespace DMS.WPF.Models;
 
 /// <summary>
 /// 表示菜单项。

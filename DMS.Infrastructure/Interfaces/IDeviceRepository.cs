@@ -3,7 +3,7 @@ using DMS.Core.Enums;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DMS.Core.Interfaces
+namespace DMS.Infrastructure.Interfaces
 {
     public interface IDeviceRepository
     {

@@ -4,13 +4,13 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Data.Repositories;
 using DMS.Core.Enums;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 using DMS.Services;
 using Microsoft.Extensions.Logging;
 using DMS.Data;
-using DMS.Views;
+using DMS.WPF.Views;
 
-namespace DMS.ViewModels;
+namespace DMS.WPF.ViewModels;
 
 public partial class MqttsViewModel : ViewModelBase
 {

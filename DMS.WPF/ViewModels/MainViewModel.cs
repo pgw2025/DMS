@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 // AddAsync this using directive
 // AddAsync this using directive
 
-namespace DMS.ViewModels;
+namespace DMS.WPF.ViewModels;
 
 /// <summary>
 /// 主视图模型，负责应用程序的主导航和数据管理。

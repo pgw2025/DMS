@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using DMS.Data.Repositories;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 using DMS.Services;
 
 namespace DMS.ViewModels

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace DMS.Views;
+namespace DMS.WPF.Views;
 
 public partial class HomeView : UserControl
 {

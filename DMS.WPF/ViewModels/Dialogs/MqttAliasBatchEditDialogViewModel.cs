@@ -3,9 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
-using DMS.Models;
+using DMS.WPF.Models;
+using DMS.WPF.Models;
 
-namespace DMS.ViewModels.Dialogs;
+namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class MqttAliasBatchEditDialogViewModel : ObservableObject
 {

@@ -1,9 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
+using DMS.WPF.Models;
 
-namespace DMS.ViewModels.Dialogs;
+namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class ImportExcelDialogViewModel : ObservableObject
 {

@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Models;
+using DMS.WPF.Models;
 
-namespace DMS.ViewModels.Dialogs;
+namespace DMS.WPF.ViewModels.Dialogs;
 
 /// <summary>
 /// ImportResultDialogViewModel 是用于显示变量导入结果的视图模型。

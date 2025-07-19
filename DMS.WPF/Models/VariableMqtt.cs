@@ -1,9 +1,10 @@
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Core.Enums;
-using DMS.Data.Entities;
 
-namespace DMS.Models;
+using DMS.WPF.Models;
+
+namespace DMS.WPF.Models;
 
 /// <summary>
 /// 表示变量数据与MQTT服务器之间的关联模型，包含MQTT别名。

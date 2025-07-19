@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace DMS.Core.Interfaces
+namespace DMS.Infrastructure.Interfaces
 {
     public interface IDatabaseService
     {

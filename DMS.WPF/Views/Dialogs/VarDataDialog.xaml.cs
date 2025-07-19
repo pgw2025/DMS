@@ -1,5 +1,5 @@
 using System.Windows.Controls;
-using DMS.ViewModels.Dialogs;
+using DMS.WPF.ViewModels.Dialogs;
 
 namespace DMS.Views.Dialogs;
 

@@ -9,7 +9,7 @@ using DMS.Data;
 using DMS.Helper;
 using DMS.Services;
 
-namespace DMS.ViewModels;
+namespace DMS.WPF.ViewModels;
 
 public partial class SettingViewModel : ViewModelBase
 {

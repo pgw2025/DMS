@@ -1,4 +1,4 @@
-using DMS.Models;
+using DMS.WPF.Models;
 
 namespace DMS.Helper;
 

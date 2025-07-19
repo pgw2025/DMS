@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Enums;
 
-namespace DMS.ViewModels.Dialogs;
+namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class IsActiveDialogViewModel : ObservableObject
 {

@@ -1,12 +1,12 @@
 using DMS.Config;
-using DMS.Core.Interfaces;
+using DMS.Infrastructure.Interfaces;
 using SqlSugar;
 using System;
 using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Data;
 
-public class SqlSugarDbContext : IUnitOfWork
+public class SqlSugarDbContext : ITransaction
 {
     private readonly SqlSugarClient _db;
 
@@ -24,10 +24,6 @@ public class SqlSugarDbContext : IUnitOfWork
         });
     }
 
-    public SqlSugarClient GetSqlSugarClient()
-    {
-        return _db;
-    }
 
     public async Task BeginTranAsync()
     {
@@ -39,8 +35,15 @@ public class SqlSugarDbContext : IUnitOfWork
         await _db.CommitTranAsync();
     }
 
+  
+
     public async Task RollbackTranAsync()
     {
         await _db.RollbackTranAsync();
+    }
+
+    public SqlSugarClient GetInstance()
+    {
+        return _db;
     }
 }

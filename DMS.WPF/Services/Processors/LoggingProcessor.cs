@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using DMS.Models;
+using DMS.WPF.Models;
 using Microsoft.Extensions.Logging;
 using DMS.Helper;
 

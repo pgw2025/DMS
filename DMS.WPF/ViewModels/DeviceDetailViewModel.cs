@@ -7,10 +7,10 @@ using DMS.Core.Helper;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Repositories;
 
-namespace DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using DMS.Services;
 
-namespace DMS.ViewModels;
+namespace DMS.WPF.ViewModels;
 
 public partial class DeviceDetailViewModel : ViewModelBase
 {
@@ -67,7 +67,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
             var parentMenu = DataServicesHelper.FindMenusForDevice(CurrentDevice, _dataServices.MenuTrees);
             if (parentMenu == null)
             {
-                NotificationHelper.ShowError("无法找到当前设备的父级菜单，无法添加变量表菜单。");
+                //NotificationHelper.ShowError("无法找到当前设备的父级菜单，无法添加变量表菜单。");
                 return;
             }
 
@@ -94,12 +94,12 @@ public partial class DeviceDetailViewModel : ViewModelBase
             // 8. Update UI
             CurrentDevice?.VariableTables?.Add(addedVarTable);
             MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
-            NotificationHelper.ShowSuccess($"变量表 {addedVarTable.Name} 添加成功。");
+            //NotificationHelper.ShowSuccess($"变量表 {addedVarTable.Name} 添加成功。");
         }
         catch (Exception ex)
         {
             await db.RollbackTranAsync();
-            NotificationHelper.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
+            //NotificationHelper.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
         }
     }
 
@@ -108,7 +108,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
     {
         if (SelectedVariableTable == null)
         {
-            NotificationHelper.ShowInfo("请选择要编辑的变量表。");
+            //NotificationHelper.ShowInfo("请选择要编辑的变量表。");
             return;
         }
 
@@ -138,19 +138,19 @@ public partial class DeviceDetailViewModel : ViewModelBase
                 }
 
                 await db.CommitTranAsync();
-                NotificationHelper.ShowSuccess($"变量表 {SelectedVariableTable.Name} 编辑成功。");
+                //NotificationHelper.ShowSuccess($"变量表 {SelectedVariableTable.Name} 编辑成功。");
                 MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
             }
             else
             {
                 await db.RollbackTranAsync();
-                NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 编辑失败。");
+                //NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 编辑失败。");
             }
         }
         catch (Exception ex)
         {
             await db.RollbackTranAsync();
-            NotificationHelper.ShowError($"编辑变量表时发生错误: {ex.Message}", ex);
+            //NotificationHelper.ShowError($"编辑变量表时发生错误: {ex.Message}", ex);
         }
     }
 
@@ -159,7 +159,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
     {
         if (SelectedVariableTable == null)
         {
-            NotificationHelper.ShowInfo("请选择要删除的变量表。");
+            //NotificationHelper.ShowInfo("请选择要删除的变量表。");
             return;
         }
 
@@ -196,19 +196,19 @@ public partial class DeviceDetailViewModel : ViewModelBase
                 await db.CommitTranAsync();
                 var delVarTableName = SelectedVariableTable.Name;
                 CurrentDevice?.VariableTables?.Remove(SelectedVariableTable);
-                NotificationHelper.ShowSuccess($"变量表 {delVarTableName} 删除成功。");
+                //NotificationHelper.ShowSuccess($"变量表 {delVarTableName} 删除成功。");
                 MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
             }
             else
             {
                 await db.RollbackTranAsync();
-                NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 删除失败。");
+                //NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 删除失败。");
             }
         }
         catch (Exception ex)
         {
             await db.RollbackTranAsync();
-            NotificationHelper.ShowError($"删除变量表时发生错误: {ex.Message}", ex);
+            //NotificationHelper.ShowError($"删除变量表时发生错误: {ex.Message}", ex);
         }
     }
 
@@ -217,7 +217,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
     private async Task EditDevice()
     {
         // Implement device editing logic, similar to AddDeviceCommand but for existing device
-        NotificationHelper.ShowInfo("编辑设备功能待实现。");
+        //NotificationHelper.ShowInfo("编辑设备功能待实现。");
         await Task.CompletedTask;
     }
 
@@ -225,7 +225,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
     private async Task DeleteDevice()
     {
         // Implement device deletion logic
-        NotificationHelper.ShowInfo("删除设备功能待实现。");
+        //NotificationHelper.ShowInfo("删除设备功能待实现。");
         await Task.CompletedTask;
     }
 

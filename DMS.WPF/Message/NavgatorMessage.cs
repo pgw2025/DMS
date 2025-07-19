@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging.Messages;
-using DMS.ViewModels;
+using DMS.WPF.ViewModels;
 
 namespace DMS.Message;
 

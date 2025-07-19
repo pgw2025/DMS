@@ -1,6 +1,6 @@
-using DMS.ViewModels.Dialogs;
+using DMS.WPF.ViewModels.Dialogs;
 using iNKORE.UI.WPF.Modern.Controls;
-using DMS.Models;
+using DMS.WPF.Models;
 
 namespace DMS.Views.Dialogs;
 

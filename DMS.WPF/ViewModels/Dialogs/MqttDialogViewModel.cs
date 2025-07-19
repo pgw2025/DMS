@@ -1,8 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Models;
+using DMS.WPF.Models;
+using DMS.WPF.Models;
 
-namespace DMS.ViewModels.Dialogs;
+namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class MqttDialogViewModel : ObservableObject
 {

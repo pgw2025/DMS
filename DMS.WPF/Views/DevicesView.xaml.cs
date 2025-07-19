@@ -1,9 +1,9 @@
 ﻿using System.Windows.Controls;
-using DMS.ViewModels;
+using DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DMS.Views;
+namespace DMS.WPF.Views;
 
 public partial class DevicesView : UserControl
 {

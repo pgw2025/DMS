@@ -1,4 +1,4 @@
-﻿namespace DMS.Models;
+﻿namespace DMS.WPF.Models;
 
 public class User
 {

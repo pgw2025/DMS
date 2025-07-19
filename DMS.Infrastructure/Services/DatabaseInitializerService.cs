@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Services
 {
-    public class DatabaseInitializerService : DMS.Core.Interfaces.IDatabaseService
+    public class DatabaseInitializerService : DMS.Infrastructure.Interfaces.IDatabaseService
     {
         private readonly SqlSugarClient _db;
 
         public DatabaseInitializerService(SqlSugarDbContext dbContext)
         {
-            _db = dbContext.GetSqlSugarClient();
+            _db = dbContext.GetInstance();
         }
 
         public void InitializeDataBase()

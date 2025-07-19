@@ -1,5 +1,5 @@
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 
 namespace DMS.Services.Processors;
 

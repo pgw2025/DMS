@@ -6,22 +6,20 @@ using DMS.Core.Enums;
 using DMS.Core.Helper;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Interfaces;
 
 namespace DMS.Infrastructure.Repositories;
 
-public class MenuRepository : IMenuRepository
+public class MenuRepository : BaseRepository<DbMenu, MenuBean>
 {
-    private readonly IMapper _mapper;
-
-    public MenuRepository(IMapper mapper)
+    public MenuRepository(IMapper mapper, ITransaction transaction)
+        : base(mapper, transaction)
     {
-        _mapper = mapper;
     }
 
     public async Task<int> DeleteAsync(MenuBean menu)
     {
-        using var db = DbContext.GetInstance();
-        return await DeleteAsync(menu, db);
+        return await DeleteAsync(menu, Db);
     }
 
     public async Task<int> DeleteAsync(MenuBean menu, SqlSugarClient db)
@@ -42,18 +40,15 @@ public class MenuRepository : IMenuRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var db = DbContext.GetInstance())
-        {
-            List<MenuBean> menuTree = new();
-            var dbMenuTree = await db.Queryable<DbMenu>()
-                                     .ToTreeAsync(dm => dm.Items, dm => dm.ParentId, 0);
+        List<MenuBean> menuTree = new();
+        var dbMenuTree = await Db.Queryable<DbMenu>()
+                                 .ToTreeAsync(dm => dm.Items, dm => dm.ParentId, 0);
 
-            foreach (var dbMenu in dbMenuTree)
-                menuTree.Add(_mapper.Map<MenuBean>(dbMenu));
-            stopwatch.Stop();
-            NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return menuTree;
-        }
+        foreach (var dbMenu in dbMenuTree)
+            menuTree.Add(_mapper.Map<MenuBean>(dbMenu));
+        stopwatch.Stop();
+        NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return menuTree;
     }
 
 
@@ -61,8 +56,7 @@ public class MenuRepository : IMenuRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using var db = DbContext.GetInstance();
-        var result = await AddAsync(menu, db);
+        var result = await AddAsync(menu, Db);
         stopwatch.Stop();
         NlogHelper.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
@@ -148,13 +142,10 @@ public class MenuRepository : IMenuRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var db = DbContext.GetInstance())
-        {
-            var result = await UpdateAsync(menu, db);
-            stopwatch.Stop();
-            NlogHelper.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result;
-        }
+        var result = await UpdateAsync(menu, Db);
+        stopwatch.Stop();
+        NlogHelper.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
     }
 
     /// <summary>
@@ -177,20 +168,16 @@ public class MenuRepository : IMenuRepository
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        using (var db = DbContext.GetInstance())
-        {
-            var result = await db.Queryable<DbMenu>()
-                                 .FirstAsync(m => m.DataId == dataId && m.Type == menuType);
-            stopwatch.Stop();
-            NlogHelper.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return _mapper.Map<MenuBean>(result);
-        }
+        var result = await Db.Queryable<DbMenu>()
+                             .FirstAsync(m => m.DataId == dataId && m.Type == menuType);
+        stopwatch.Stop();
+        NlogHelper.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return _mapper.Map<MenuBean>(result);
     }
 
     public async Task<MenuBean> GetMainMenuByNameAsync(string name)
     {
-        using var db = DbContext.GetInstance();
-       var dbMenu= await db.Queryable<DbMenu>().FirstAsync(m => m.Name == name  && m.Type == MenuType.MainMenu);
+       var dbMenu= await Db.Queryable<DbMenu>().FirstAsync(m => m.Name == name  && m.Type == MenuType.MainMenu);
        return _mapper.Map<MenuBean>(dbMenu);
     }
 }

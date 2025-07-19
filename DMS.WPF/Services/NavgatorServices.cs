@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Helper;
 using DMS.Message;
-using DMS.ViewModels;
+using DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using DMS.Core.Enums;

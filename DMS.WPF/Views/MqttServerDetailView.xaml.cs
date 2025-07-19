@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using DMS.ViewModels;
+using DMS.WPF.ViewModels;
 
 namespace DMS.Views
 {

@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Opc.Ua;
 
-namespace DMS.Models;
+namespace DMS.WPF.Models;
 
 /// <summary>
 /// 表示OPC UA节点，用于构建节点树。

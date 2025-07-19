@@ -3,15 +3,15 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using DMS.Helper;
-using DMS.Models;
-using DMS.ViewModels;
+using DMS.WPF.Models;
+using DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using DMS.Core.Enums;
 
-namespace DMS.Views;
+namespace DMS.WPF.Views;
 
 public partial class VariableTableView : UserControl
 {

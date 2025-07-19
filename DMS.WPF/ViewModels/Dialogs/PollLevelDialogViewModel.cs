@@ -4,7 +4,7 @@ using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Core.Enums;
 
-namespace DMS.ViewModels.Dialogs
+namespace DMS.WPF.ViewModels.Dialogs
 {
     public partial class PollLevelDialogViewModel : ObservableObject
     {

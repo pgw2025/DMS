@@ -5,12 +5,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Enums;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
+using DMS.WPF.Models;
 using Opc.Ua;
 using Opc.Ua.Client;
 using Opc.Ua.Configuration;
 
-namespace DMS.ViewModels.Dialogs;
+namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class OpcUaImportDialogViewModel : ObservableObject
 {

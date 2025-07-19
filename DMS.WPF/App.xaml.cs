@@ -5,8 +5,8 @@ using DMS.Core.Enums;
 using DMS.Helper;
 using DMS.Services;
 using DMS.Services.Processors;
-using DMS.ViewModels;
-using DMS.Views;
+using DMS.WPF.ViewModels;
+using DMS.WPF.Views;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,7 +19,7 @@ using DMS.Infrastructure.Data;
 using DMS.WPF.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.Services.Processors;
-using DMS.WPF.ViewModels.DMS.ViewModels;
+using DMS.WPF.ViewModels.DMS.WPF.ViewModels;
 using SqlSugar;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -112,8 +112,8 @@ public partial class App : System.Windows.Application
         // SqlSugarDbContext now internally creates SqlSugarClient using ConnectionSettings
         services.AddScoped<DMS.Infrastructure.Data.SqlSugarDbContext>();
 
-        // Register IUnitOfWork (abstract interface for transaction management)
-        services.AddScoped<DMS.Core.Interfaces.IUnitOfWork, DMS.Infrastructure.Data.SqlSugarDbContext>();
+        // Register ITransaction (abstract interface for transaction management)
+        services.AddScoped<DMS.Core.Interfaces.ITransaction, DMS.Infrastructure.Data.SqlSugarDbContext>();
 
         // Register IDatabaseService (abstract interface for database initialization)
         services.AddSingleton<DMS.Core.Interfaces.IDatabaseService, DMS.Infrastructure.Services.DatabaseInitializerService>();

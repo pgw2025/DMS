@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using DMS.Core.Enums;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 using Microsoft.Extensions.Hosting;
 using Opc.Ua;
 using Opc.Ua.Client;

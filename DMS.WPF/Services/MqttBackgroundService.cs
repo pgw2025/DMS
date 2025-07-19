@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading.Channels;
 using DMS.Data.Repositories;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 using Microsoft.Extensions.Hosting;
 using MQTTnet;
 using MQTTnet.Client;

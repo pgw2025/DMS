@@ -4,13 +4,16 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Data.Repositories;
 using DMS.Core.Enums;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 using DMS.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using DMS.Data;
+using DMS.WPF.Services;
+using DMS.Infrastructure.Repositories;
+using DMS.WPF.Models;
 
-namespace DMS.ViewModels;
+namespace DMS.WPF.ViewModels;
 
 /// <summary>
 /// 设备管理视图模型，负责设备的增删改查操作。

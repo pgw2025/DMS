@@ -1,5 +1,5 @@
 ﻿using DMS.Core.Enums;
-using DMS.Models;
+using DMS.WPF.Models;
 using iNKORE.UI.WPF.Modern.Controls;
 
 namespace DMS.Services;

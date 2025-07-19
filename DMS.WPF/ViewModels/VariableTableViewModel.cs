@@ -8,14 +8,14 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Data.Repositories;
 using DMS.Core.Enums;
 using DMS.Helper;
-using DMS.Models;
+using DMS.WPF.Models;
 using DMS.Services;
 using iNKORE.UI.WPF.Modern.Controls;
 using Newtonsoft.Json;
 using DMS.Extensions;
 using SqlSugar;
 
-namespace DMS.ViewModels;
+namespace DMS.WPF.ViewModels;
 
 /// <summary>
 /// VariableTableViewModel 是用于管理和显示变量表数据的视图模型。
