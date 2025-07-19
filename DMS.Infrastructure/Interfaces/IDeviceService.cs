@@ -6,7 +6,7 @@ namespace DMS.Infrastructure.Interfaces
 {
     public interface IDeviceService
     {
-        Task<int> DeleteAsync(Device device, List<MenuBean> menus);
-        Task AddAsync(Device device);
+        Task<Device> AddAsync(Device device);
+        Task<List<Device>> GetAllAsync();
     }
 }

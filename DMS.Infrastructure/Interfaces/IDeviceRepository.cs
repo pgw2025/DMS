@@ -6,10 +6,10 @@ namespace DMS.Infrastructure.Interfaces
 {
     public interface IDeviceRepository
     {
-        Task<int> AddAsync(Device model);
-        Task<int> UpdateAsync(Device model);
-        Task<int> DeleteAsync(Device model);
-        Task<List<Device>> GetAllAsync();
-        Task<Device> GetByIdAsync(int id);
+        Task<DbDevice> AddAsync(DbDevice model);
+        Task<int> UpdateAsync(DbDevice model);
+        Task<int> DeleteAsync(DbDevice model);
+        Task<List<DbDevice>> GetAllAsync();
+        Task<DbDevice> GetByIdAsync(int id);
     }
 }

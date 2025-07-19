@@ -10,7 +10,7 @@ using DMS.Infrastructure.Interfaces;
 
 namespace DMS.Infrastructure.Repositories;
 
-public class DeviceRepository : BaseRepository<DbDevice>
+public class DeviceRepository : BaseRepository<DbDevice>,IDeviceRepository
 {
 
     public DeviceRepository(ITransaction transaction)
@@ -19,5 +19,4 @@ public class DeviceRepository : BaseRepository<DbDevice>
         
     }
 
-    
 }

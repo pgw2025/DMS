@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace DMS.Infrastructure.Services
 {
@@ -20,7 +21,8 @@ namespace DMS.Infrastructure.Services
         private readonly IMenuRepository _menuRepository;
         private readonly IVarTableRepository _varTableRepository;
         private readonly IMapper _mapper;
-        private readonly SqlSugarClient Db; // Assuming DbContext is accessible or passed
+
+        private ConcurrentDictionary<int, Device> _devicesDic;
 
         public DeviceService(DeviceRepository deviceRepository, IMenuRepository menuRepository, IVarTableRepository varTableRepository, IMapper mapper, SqlSugarDbContext dbContext)
         {
@@ -28,44 +30,72 @@ namespace DMS.Infrastructure.Services
             _menuRepository = menuRepository;
             _varTableRepository = varTableRepository;
             _mapper = mapper;
-            Db = dbContext.GetInstance();
+            _devicesDic = new ConcurrentDictionary<int, Device>();
         }
 
-        public async Task<int> DeleteAsync(Device device, List<MenuBean> menus)
+        public async Task<List<Device>> GetAllAsync()
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var result = await Db.Deleteable<DbDevice>(new DbDevice { Id = device.Id })
-                                 .ExecuteCommandAsync();
-            // 删除变量表
-            //await _varTableRepository.DeleteAsync(device.VariableTables);
+            var dbDevices = await _deviceRepository.GetAllAsync();
 
-            stopwatch.Stop();
-            NlogHelper.Info($"删除设备:{device.Name},耗时：{stopwatch.ElapsedMilliseconds}ms");
-            return result;
+            var deviceDic = _mapper.Map<List<Device>>(dbDevices).ToDictionary(d => d.Id);
+            _devicesDic = new ConcurrentDictionary<int, Device>(deviceDic);
+
+            return deviceDic.Values.ToList();
         }
 
-        public async Task AddAsync(Device device)
+
+        public async Task<Device> AddAsync(Device device)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Device resDevice = null;
+            try
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
 
-            //查询设备的名字是否存在
-            var exist = await Db.Queryable<DbDevice>()
-                                .Where(d => d.Name == device.Name)
-                                .FirstAsync();
-            if (exist != null)
-                throw new InvalidOperationException("设备名称已经存在。");
+                //查询设备的名字是否存在
+                if (_devicesDic.Values.Any(d => d.Name == device.Name || (d.Ip == device.Ip && d.Prot == device.Prot) || d.OpcUaEndpointUrl == device.OpcUaEndpointUrl))
+                {
+                    NlogHelper.Warn("设备的名称，Ip:端口，OpcUrl,不可以重复。");
+                    return resDevice;
+                }
+                await _deviceRepository.GetTransaction().BeginTranAsync();
+                // 2. 将设备添加到数据库
+                var addDevice = await _deviceRepository.AddAsync(_mapper.Map<DbDevice>(device));
 
-            // 2. 将设备添加到数据库
-            var addDevice = await Db.Insertable<DbDevice>(_mapper.Map<DbDevice>(device))
-                                    .ExecuteReturnEntityAsync();
+                //判断判断是否添加默认变量表
+                if (device.IsAddDefVarTable)
+                {
+                    DbVariableTable dbVariableTable = new DbVariableTable();
+                    dbVariableTable.Name = "默认变量表";
+                    dbVariableTable.Description = "默认变量表";
+                    dbVariableTable.DeviceId = addDevice.Id;
+                    dbVariableTable.ProtocolType = addDevice.ProtocolType;
+                   var dbAddVarTable= await _varTableRepository.AddAsync(dbVariableTable);
+                    if (addDevice.VariableTables==null)
+                    {
+                        addDevice.VariableTables= new List<DbVariableTable>(); 
+                    }
 
-            // 4. 为新设备添加菜单
-            //var addDeviceMenuId = await _menuRepository.AddAsync(addDevice);
+                    addDevice.VariableTables.Add(dbAddVarTable);
+                }
 
-            stopwatch.Stop();
-            NlogHelper.Info($"添加设备 '{device.Name}' 及相关菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
+                // 4. 为新设备添加菜单
+                //var addDeviceMenuId = await _menuRepository.AddAsync(addDevice);
+                resDevice = _mapper.Map<Device>(addDevice);
+
+                await _deviceRepository.GetTransaction().CommitTranAsync();
+
+                stopwatch.Stop();
+                NlogHelper.Info($"添加设备 '{device.Name}' 及相关菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
+                return resDevice;
+            }
+            catch (Exception e)
+            {
+                await _deviceRepository.GetTransaction().RollbackTranAsync();
+                throw;
+                
+            }
+
         }
     }
 }
