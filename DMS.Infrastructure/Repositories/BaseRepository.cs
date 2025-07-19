@@ -15,26 +15,21 @@ namespace DMS.Infrastructure.Repositories;
 public abstract class BaseRepository<TEntity>
     where TEntity : class, new()
 {
-    private readonly ITransaction _transaction;
+    private readonly SqlSugarDbContext _dbContext;
 
     /// <summary>
     /// 获取当前事务的 SqlSugarClient 实例，用于数据库操作。
     /// </summary>
-    protected SqlSugarClient Db => _transaction.GetInstance();
+    protected SqlSugarClient Db => _dbContext.GetInstance();
 
-    /// <summary>
-    /// 获取到当前的事务
-    /// </summary>
-    /// <returns></returns>
-    public ITransaction GetTransaction() => _transaction;
 
     /// <summary>
     /// 初始化 BaseRepository 的新实例。
     /// </summary>
-    /// <param name="transaction">事务管理对象，通过依赖注入提供。</param>
-    protected BaseRepository(ITransaction transaction)
+    /// <param name="dbContext">事务管理对象，通过依赖注入提供。</param>
+    protected BaseRepository(SqlSugarDbContext dbContext)
     {
-        this._transaction = transaction;
+        this._dbContext = dbContext;
     }
 
     /// <summary>
@@ -95,6 +90,7 @@ public abstract class BaseRepository<TEntity>
         NlogHelper.Info($"GetAll {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entities;
     }
+    
 
     /// <summary>
     /// 异步根据主键 ID 获取单个实体。
@@ -124,5 +120,37 @@ public abstract class BaseRepository<TEntity>
         stopwatch.Stop();
         NlogHelper.Info($"GetByCondition {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entity;
+    }
+
+    /// <summary>
+    /// 异步判断是否存在满足条件的实体。
+    /// </summary>
+    /// <param name="expression">查询条件的 Lambda 表达式。</param>
+    /// <returns>如果存在则返回 true，否则返回 false。</returns>
+    public virtual async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> expression)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Queryable<TEntity>().AnyAsync(expression);
+        stopwatch.Stop();
+        NlogHelper.Info($"Exists {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
+
+    public async Task BeginTranAsync()
+    {
+        await Db.BeginTranAsync();
+    }
+
+    public async Task CommitTranAsync()
+    {
+        await Db.CommitTranAsync();
+    }
+
+
+
+    public async Task RollbackTranAsync()
+    {
+        await Db.RollbackTranAsync();
     }
 }

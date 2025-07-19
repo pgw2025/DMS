@@ -22,6 +22,8 @@ using DMS.WPF.Services.Processors;
 using DMS.WPF.ViewModels.DMS.WPF.ViewModels;
 using SqlSugar;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using DMS.Infrastructure.Services;
+using DMS.Infrastructure.Interfaces;
 
 namespace DMS;
 
@@ -31,6 +33,8 @@ namespace DMS;
 public partial class App : System.Windows.Application
 {
     public IServiceProvider Services { get; }
+    public AppSettings Settings { get; private set; }
+
 
     public App()
     {
@@ -59,11 +63,10 @@ public partial class App : System.Windows.Application
 
         try
         {
-            var databaseInitializer = Host.Services.GetRequiredService<DMS.Infrastructure.Services.DatabaseInitializerService>();
+            var databaseInitializer = Host.Services.GetRequiredService<DatabaseInitializerService>();
             databaseInitializer.InitializeDataBase();
-            await databaseInitializer.InitializeMenu()
-                .Await((e) => { NotificationHelper.ShowError($"初始化主菜单失败：{e.Message}", e); },
-                       () => { MessageHelper.SendLoadMessage(LoadTypes.Menu); });
+            await databaseInitializer.InitializeMenu();
+            Settings = AppSettings.Load();
             Host.Services.GetRequiredService<GrowlNotificationService>();
             
             // 初始化数据处理链
@@ -83,7 +86,7 @@ public partial class App : System.Windows.Application
         MainWindow.Show();
 
         // 根据配置启动服务
-        // var connectionSettings = DMS.Config.ConnectionSettings.Load();
+        // var connectionSettings = DMS.Config.AppSettings.Load();
         // if (connectionSettings.EnableMqttService)
         // {
         //     Host.Services.GetRequiredService<MqttBackgroundService>().StartService();
@@ -105,18 +108,8 @@ public partial class App : System.Windows.Application
 
     private void ConfigureServices(IServiceCollection services)
     {
-        // Register ConnectionSettings
-        services.AddSingleton(ConnectionSettings.Load());
+        services.AddTransient<IDbContext,SqlSugarDbContext>();
 
-        // Register SqlSugarDbContext (concrete type, used by DatabaseInitializerService)
-        // SqlSugarDbContext now internally creates SqlSugarClient using ConnectionSettings
-        services.AddScoped<DMS.Infrastructure.Data.SqlSugarDbContext>();
-
-        // Register ITransaction (abstract interface for transaction management)
-        //services.AddScoped<DMS.Core.Interfaces.ITransaction, DMS.Infrastructure.Data.SqlSugarDbContext>();
-
-        //// Register IDatabaseService (abstract interface for database initialization)
-        //services.AddSingleton<DMS.Core.Interfaces.IDatabaseService, DMS.Infrastructure.Services.DatabaseInitializerService>();
 
         services.AddSingleton<DataServices>();
         services.AddSingleton<NavgatorServices>();

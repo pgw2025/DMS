@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Data;
 
-public class SqlSugarDbContext : ITransaction
+public class SqlSugarDbContext 
 {
     private readonly SqlSugarClient _db;
 
-    public SqlSugarDbContext(ConnectionSettings settings)
+    public SqlSugarDbContext(AppSettings settings)
     {
         var connectionString = settings.ToConnectionString();
-        var dbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), settings.DbType);
+        var dbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), settings.Database.DbType);
 
         _db = new SqlSugarClient(new ConnectionConfig
         {
@@ -24,23 +24,6 @@ public class SqlSugarDbContext : ITransaction
         });
     }
 
-
-    public async Task BeginTranAsync()
-    {
-        await _db.BeginTranAsync();
-    }
-
-    public async Task CommitTranAsync()
-    {
-        await _db.CommitTranAsync();
-    }
-
-  
-
-    public async Task RollbackTranAsync()
-    {
-        await _db.RollbackTranAsync();
-    }
 
     public SqlSugarClient GetInstance()
     {

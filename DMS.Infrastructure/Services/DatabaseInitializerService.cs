@@ -1,9 +1,11 @@
 using DMS.Config;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
 using SqlSugar;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Services
@@ -31,52 +33,24 @@ namespace DMS.Infrastructure.Services
             _db.CodeFirst.InitTables<DbMenu>();
         }
 
-        public async Task InitializeMenu()
+        public Task InitializeMenu()
         {
-            var homeMenu = new DbMenu()
-            { Name = "主页", Type = MenuType.MainMenu, Icon = "Home", ParentId = 0 }; // Icon needs to be adjusted if it's not a string
-
-            var deviceMenu = new DbMenu()
+            var settings = AppSettings.Load();
+            if (settings.Menus.Any())
             {
-                Name = "设备", Type = MenuType.MainMenu, Icon = "Devices3",
-                ParentId = 0
-            };
-            var dataTransfromMenu = new DbMenu()
-            {
-                Name = "数据转换", Type = MenuType.MainMenu,
-                Icon = "ChromeSwitch", ParentId = 0
-            };
-            var mqttMenu = new DbMenu()
-            {
-                Name = "Mqtt服务器", Type = MenuType.MainMenu, Icon = "Cloud",
-                ParentId = 0
-            };
-
-            var settingMenu = new DbMenu()
-            {
-                Name = "设置", Type = MenuType.MainMenu, Icon = "Settings",
-                ParentId = 0
-            };
-            var aboutMenu = new DbMenu()
-            { Name = "关于", Type = MenuType.MainMenu, Icon = "Info", ParentId = 0 };
-
-            await CheckMainMenuExist(homeMenu);
-            await CheckMainMenuExist(deviceMenu);
-            await CheckMainMenuExist(dataTransfromMenu);
-            await CheckMainMenuExist(mqttMenu);
-            await CheckMainMenuExist(settingMenu);
-            await CheckMainMenuExist(aboutMenu);
-        }
-
-        private async Task CheckMainMenuExist(DbMenu menu)
-        {
-            var homeMenuExist = await _db.Queryable<DbMenu>()
-                                        .FirstAsync(dm => dm.Name == menu.Name);
-            if (homeMenuExist == null)
-            {
-                await _db.Insertable<DbMenu>(menu)
-                        .ExecuteCommandAsync();
+                return Task.CompletedTask;
             }
+
+            settings.Menus.Add(new MenuBean() { Id=1, Name = "主页", Type = MenuType.MainMenu, Icon = "Home", ParentId = 0 });
+            settings.Menus.Add(new MenuBean() { Id = 2, Name = "设备", Type = MenuType.MainMenu, Icon = "Devices3", ParentId = 0 });
+            settings.Menus.Add(new MenuBean() { Id = 3, Name = "数据转换", Type = MenuType.MainMenu, Icon = "ChromeSwitch", ParentId = 0 });
+            settings.Menus.Add(new MenuBean() { Id = 4, Name = "Mqtt服务器", Type = MenuType.MainMenu, Icon = "Cloud", ParentId = 0 });
+            settings.Menus.Add(new MenuBean() { Id = 5, Name = "设置", Type = MenuType.MainMenu, Icon = "Settings", ParentId = 0 });
+            settings.Menus.Add(new MenuBean() { Id = 6, Name = "关于", Type = MenuType.MainMenu, Icon = "Info", ParentId = 0 });
+
+            settings.Save();
+
+            return Task.CompletedTask;
         }
     }
 }

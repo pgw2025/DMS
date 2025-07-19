@@ -11,5 +11,8 @@ namespace DMS.Infrastructure.Interfaces
         Task<int> AddAsync(User user);
         Task<int> UpdateAsync(User user);
         Task<int> DeleteAsync(int id);
+        Task BeginTranAsync();
+        Task CommitTranAsync();
+        Task RollbackTranAsync();
     }
 }

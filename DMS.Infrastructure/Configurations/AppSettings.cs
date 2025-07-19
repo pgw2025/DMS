@@ -1,10 +1,12 @@
-using System;
-using System.IO;
+using DMS.Core.Models;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace DMS.Config
 {
-    public class ConnectionSettings
+    public class DatabaseSettings
     {
         public string DbType { get; set; } = "MySql";
         public string Server { get; set; } = "127.0.0.1";
@@ -12,22 +14,28 @@ namespace DMS.Config
         public string UserId { get; set; } = "root";
         public string Password { get; set; } = "Pgw15221236646";
         public string Database { get; set; } = "pmswpf";
+    }
+
+    public class AppSettings
+    {
+        public DatabaseSettings Database { get; set; } = new DatabaseSettings();
         public string Theme { get; set; } = "跟随系统";
         public bool EnableS7Service { get; set; } = true;
         public bool EnableMqttService { get; set; } = true;
         public bool EnableOpcUaService { get; set; } = true;
         public bool MinimizeToTrayOnClose { get; set; } = true;
+        public List<MenuBean> Menus { get; set; } = new List<MenuBean>();
 
-        private static readonly string SettingsFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "connectionSettings.json");
+        private static readonly string SettingsFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appSettings.json");
 
-        public static ConnectionSettings Load()
+        public static AppSettings Load()
         {
             if (File.Exists(SettingsFilePath))
             {
                 string json = File.ReadAllText(SettingsFilePath);
-                return JsonConvert.DeserializeObject<ConnectionSettings>(json);
+                return JsonConvert.DeserializeObject<AppSettings>(json);
             }
-            return new ConnectionSettings(); // Return default settings if file doesn't exist
+            return new AppSettings();
         }
 
         public void Save()
@@ -38,8 +46,7 @@ namespace DMS.Config
 
         public string ToConnectionString()
         {
-            // This example is for MySQL. You'll need to adjust for other database types.
-            return $"server={Server};port={Port};user={UserId};password={Password};database={Database};";
+            return $"server={Database.Server};port={Database.Port};user={Database.UserId};password={Database.Password};database={Database.Database};";
         }
     }
 }

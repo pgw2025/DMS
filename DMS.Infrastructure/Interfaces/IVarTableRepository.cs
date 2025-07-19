@@ -12,6 +12,9 @@ namespace DMS.Infrastructure.Interfaces
         Task<int> DeleteAsync(DbVariableTable variableTable);
         Task<List<DbVariableTable>> GetAllAsync();
         Task<DbVariableTable> GetByIdAsync(int id);
+        Task BeginTranAsync();
+        Task CommitTranAsync();
+        Task RollbackTranAsync();
 
     }
 }

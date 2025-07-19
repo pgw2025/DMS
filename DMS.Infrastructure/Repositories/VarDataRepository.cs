@@ -49,9 +49,9 @@ public class VarDataRepository : BaseRepository<DbVariable>
 
 
 
-    // public VarDataRepository(IMapper mapper)
+    // public VarDataRepository(IMapper _mapper)
     // {
-    //     _mapper = mapper;
+    //     _mapper = _mapper;
     // }
 
     /*

@@ -33,7 +33,7 @@ public partial class MainView : Window
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        var settings = Config.ConnectionSettings.Load();
+        var settings = Config.AppSettings.Load();
         if (settings.MinimizeToTrayOnClose)
         {
             // Hide the window instead of closing it

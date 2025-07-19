@@ -16,7 +16,7 @@ namespace DMS.Infrastructure.UnitTests.Repository_Test
         public BaseRepositoryTests()
         {
             // Load real connection settings
-            var connectionSettings = new Config.ConnectionSettings()
+            var connectionSettings = new Config.AppSettings()
             {
                 Database = "DMS_test"
             };

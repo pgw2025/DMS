@@ -5,35 +5,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DMS.Config;
-using DMS.Data;
-using DMS.Helper;
 using DMS.Services;
+using DMS.WPF.Helper;
+using DMS.Infrastructure.Interfaces;
+using DMS.Helper;
 
 namespace DMS.WPF.ViewModels;
 
 public partial class SettingViewModel : ViewModelBase
 {
-    private ConnectionSettings _connectionSettings;
+    private readonly IDbContext transaction;
+    private AppSettings _settings;
 
-    public SettingViewModel()
+    public SettingViewModel(IDbContext transaction)
     {
-        _connectionSettings = ConnectionSettings.Load();
+        _settings = AppSettings.Load();
         AvailableDbTypes = Enum.GetNames(typeof(SqlSugar.DbType)).ToList();
         Themes = new List<string> { "浅色", "深色", "跟随系统" };
+        this.transaction = transaction;
     }
 
     public List<string> Themes { get; }
 
     public string SelectedTheme
     {
-        get => _connectionSettings.Theme;
+        get => _settings.Theme;
         set
         {
-            if (_connectionSettings.Theme != value)
+            if (_settings.Theme != value)
             { 
-                _connectionSettings.Theme = value;
+                _settings.Theme = value;
                 OnPropertyChanged();
-                _connectionSettings.Save();
+                _settings.Save();
                 ThemeHelper.ApplyTheme(value);
             }
         }
@@ -43,98 +46,98 @@ public partial class SettingViewModel : ViewModelBase
 
     public string SelectedDbType
     {
-        get => _connectionSettings.DbType;
+        get => _settings.Database.DbType;
         set
         {
-            if (_connectionSettings.DbType != value)
+            if (_settings.Database.DbType != value)
             {
-                _connectionSettings.DbType = value;
+                _settings.Database.DbType = value;
                 OnPropertyChanged();
-                _connectionSettings.Save();
+                _settings.Save();
             }
         }
     }
 
     public string Server
     {
-        get => _connectionSettings.Server;
+        get => _settings.Database.Server;
         set
         {
-            if (_connectionSettings.Server != value)
+            if (_settings.Database.Server != value)
             {
-                _connectionSettings.Server = value;
+                _settings.Database.Server = value;
                 OnPropertyChanged();
-                _connectionSettings.Save();
+                _settings.Save();
             }
         }
     }
 
     public int Port
     {
-        get => _connectionSettings.Port;
+        get => _settings.Database.Port;
         set
         {
-            if (_connectionSettings.Port != value)
+            if (_settings.Database.Port != value)
             {
-                _connectionSettings.Port = value;
+                _settings.Database.Port = value;
                 OnPropertyChanged();
-                _connectionSettings.Save();
+                _settings.Save();
             }
         }
     }
 
     public string UserId
     {
-        get => _connectionSettings.UserId;
+        get => _settings.Database.UserId;
         set
         {
-            if (_connectionSettings.UserId != value)
+            if (_settings.Database.UserId != value)
             {
-                _connectionSettings.UserId = value;
+                _settings.Database.UserId = value;
                 OnPropertyChanged();
-                _connectionSettings.Save();
+                _settings.Save();
             }
         }
     }
 
     public string Password
     {
-        get => _connectionSettings.Password;
+        get => _settings.Database.Password;
         set
         {
-            if (_connectionSettings.Password != value)
+            if (_settings.Database.Password != value)
             {
-                _connectionSettings.Password = value;
+                _settings.Database.Password = value;
                 OnPropertyChanged();
-                _connectionSettings.Save();
+                _settings.Save();
             }
         }
     }
 
     public string Database
     {
-        get => _connectionSettings.Database;
+        get => _settings.Database.Database;
         set
         {
-            if (_connectionSettings.Database != value)
+            if (_settings.Database.Database != value)
             {
-                _connectionSettings.Database = value;
+                _settings.Database.Database = value;
                 OnPropertyChanged();
-                _connectionSettings.Save();
+                _settings.Save();
             }
         }
     }
 
     public bool MinimizeToTrayOnClose
     {
-        get => _connectionSettings.MinimizeToTrayOnClose;
+        get => _settings.MinimizeToTrayOnClose;
         set
         {
-            if (_connectionSettings.MinimizeToTrayOnClose != value)
+            if (_settings.MinimizeToTrayOnClose != value)
             {
-                _connectionSettings.MinimizeToTrayOnClose = value;
+                _settings.MinimizeToTrayOnClose = value;
                 OnPropertyChanged(nameof(MinimizeToTrayOnClose));
-                _connectionSettings.Save();
+                _settings.Save();
             }
         }
     }
@@ -144,7 +147,7 @@ public partial class SettingViewModel : ViewModelBase
     {
         try
         {
-            using (var db = DbContext.GetInstance())
+            using (var db = transaction.GetInstance())
             {
                 await db.Ado.OpenAsync();
                 NotificationHelper.ShowSuccess("连接成功！");

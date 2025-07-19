@@ -1,4 +1,5 @@
 using DMS.Core.Models;
+using DMS.Infrastructure.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,10 +7,13 @@ namespace DMS.Infrastructure.Interfaces
 {
     public interface IMqttRepository
     {
-        Task<Mqtt> GetByIdAsync(int id);
-        Task<List<Mqtt>> GetAllAsync();
-        Task<int> AddAsync(Mqtt mqtt);
-        Task<int> UpdateAsync(Mqtt mqtt);
-        Task<int> DeleteAsync(Mqtt mqtt);
+        Task<DbMqtt> GetByIdAsync(int id);
+        Task<List<DbMqtt>> GetAllAsync();
+        Task<int> AddAsync(DbMqtt mqtt);
+        Task<int> UpdateAsync(DbMqtt mqtt);
+        Task<int> DeleteAsync(DbMqtt mqtt);
+        Task BeginTranAsync();
+        Task CommitTranAsync();
+        Task RollbackTranAsync();
     }
 }

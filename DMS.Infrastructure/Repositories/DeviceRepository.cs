@@ -13,8 +13,8 @@ namespace DMS.Infrastructure.Repositories;
 public class DeviceRepository : BaseRepository<DbDevice>,IDeviceRepository
 {
 
-    public DeviceRepository(ITransaction transaction)
-        : base(transaction)
+    public DeviceRepository(SqlSugarDbContext dbContext)
+        : base(dbContext)
     {
         
     }

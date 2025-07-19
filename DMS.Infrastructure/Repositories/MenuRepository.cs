@@ -10,19 +10,12 @@ using DMS.Infrastructure.Interfaces;
 
 namespace DMS.Infrastructure.Repositories;
 
-public class MenuRepository : BaseRepository<DbMenu>
+public class MenuRepository : BaseRepository<DbMenu>,IMenuRepository
 {
     public MenuRepository(SqlSugarDbContext dbContext)
         : base(dbContext)
     {
     }
-
-    public override async Task<int> DeleteAsync(DbMenu menu)
-    {
-        return await base.DeleteAsync(menu);
-    }
-
-    
 
     public async Task<List<DbMenu>> GetMenuTreesAsync()
     {
@@ -30,7 +23,6 @@ public class MenuRepository : BaseRepository<DbMenu>
         stopwatch.Start();
         var dbMenuTree = await Db.Queryable<DbMenu>()
                                  .ToTreeAsync(dm => dm.Items, dm => dm.ParentId, 0);
-
         stopwatch.Stop();
         NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
         return dbMenuTree;
@@ -54,9 +46,4 @@ public class MenuRepository : BaseRepository<DbMenu>
         return result;
     }
 
-    public async Task<DbMenu> GetMainMenuByNameAsync(string name)
-    {
-       var dbMenu= await Db.Queryable<DbMenu>().FirstAsync(m => m.Name == name  && m.Type == MenuType.MainMenu);
-       return dbMenu;
-    }
 }

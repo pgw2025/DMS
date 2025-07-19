@@ -1,4 +1,5 @@
 using DMS.Core.Models;
+using SqlSugar;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,5 +12,8 @@ namespace DMS.Infrastructure.Interfaces
         Task<int> DeleteAsync(DbDevice model);
         Task<List<DbDevice>> GetAllAsync();
         Task<DbDevice> GetByIdAsync(int id);
+        Task BeginTranAsync();
+        Task CommitTranAsync();
+        Task RollbackTranAsync();
     }
 }
