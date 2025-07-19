@@ -44,94 +44,10 @@ public class VarDataRepository : BaseRepository<DbVariable>
         return result;
     }
 
-    //public override async Task<DbVariable> AddAsync(DbVariable entity)
-    //{
-    //    Stopwatch stopwatch = new Stopwatch();
-    //    stopwatch.Start();
-    //    var dbVarData = await Db.Insertable(entity)
-    //                            .ExecuteReturnEntityAsync();
-    //    stopwatch.Stop();
-    //    //NlogHelper.Info($"新增VariableData '{entity.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-    //    return dbVarData.Id;
-    //}
-
-    /*
-    public async Task<int> AddAsync(IEnumerable<Variable> variableDatas)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        Stopwatch stopwatch2 = new Stopwatch();
-        stopwatch2.Start();
-        var dbList = variableDatas.Select(vb => _mapper.Map<DbVariable>(vb))
-                                  .ToList();
-        stopwatch2.Stop();
-        //NlogHelper.Info($"复制 Variable'{variableDatas.Count()}'个， 耗时：{stopwatch2.ElapsedMilliseconds}ms");
-
-        var res = await Db.Insertable<DbVariable>(dbList)
-                          .ExecuteCommandAsync();
-
-        stopwatch.Stop();
-        //NlogHelper.Info($"新增VariableData '{variableDatas.Count()}'个， 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return res;
-    }
-*/
+    
 
 
-    public override async Task<int> UpdateAsync(DbVariable entity)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await Db.Updateable(entity)
-                             .ExecuteCommandAsync();
-        stopwatch.Stop();
-        //NlogHelper.Info($"更新VariableData '{entity.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
 
-    /*
-    public async Task<int> UpdateAsync(List<Variable> variableDatas)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-
-        var dbVarDatas = variableDatas.Select(vd => _mapper.Map<DbVariable>(vd));
-        var result = await Db.Updateable<DbVariable>(dbVarDatas.ToList())
-                             .ExecuteCommandAsync();
-
-        stopwatch.Stop();
-        //NlogHelper.Info($"更新VariableData  {variableDatas.Count()}个 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
-*/
-
-    public override async Task<int> DeleteAsync(DbVariable entity)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await Db.Deleteable<DbVariable>()
-                             .Where(d => d.Id == entity.Id)
-                             .ExecuteCommandAsync();
-        stopwatch.Stop();
-        //NlogHelper.Info($"删除VariableData: '{entity.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
-
-    /*
-    public async Task<int> DeleteAsync(IEnumerable<Variable> variableDatas)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-
-        var dbList = variableDatas.Select(vd => _mapper.Map<DbVariable>(vd))
-                                  .ToList();
-        var result = await Db.Deleteable<DbVariable>(dbList)
-                             .ExecuteCommandAsync();
-
-        stopwatch.Stop();
-        //NlogHelper.Info($"删除VariableData: '{variableDatas.Count()}'个 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
-*/
 
     // public VarDataRepository(IMapper mapper)
     // {

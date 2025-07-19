@@ -37,49 +37,11 @@ public class MenuRepository : BaseRepository<DbMenu>
     }
 
 
-    public override async Task<DbMenu> AddAsync(DbMenu menu)
-    {
-        return await base.AddAsync(menu);
-    }
-
-
-    /// <summary>
-    /// 添加菜单，支持事务
-    /// </summary>
-    /// <param name="menu"></param>
-    /// <param name="db"></param>
-    /// <returns></returns>
-    
-
-
-    
-
-
-    /// <summary>
-    /// 添加设备菜单
-    /// </summary>
-    /// <param name="device"></param>
-    /// <param name="db"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    
-
-    /// <summary>
-    /// 编辑菜单
-    /// </summary>
-    /// <param name="menu"></param>
-    /// <returns></returns>
-    public override async Task<int> UpdateAsync(DbMenu menu)
-    {
-        return await base.UpdateAsync(menu);
-    }
-
     /// <summary>
     /// 编辑菜单,支持事务
     /// </summary>
     /// <param name="menu"></param>
     /// <returns></returns>
-    
 
     public async Task<DbMenu?> GetMenuByDataIdAsync(int dataId, MenuType menuType)
     {
