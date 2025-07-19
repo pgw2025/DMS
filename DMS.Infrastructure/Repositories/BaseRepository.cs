@@ -8,81 +8,75 @@ using System.Linq.Expressions;
 
 namespace DMS.Infrastructure.Repositories;
 
-public abstract class BaseRepository<TEntity, TModel>
+public abstract class BaseRepository<TEntity>
     where TEntity : class, new()
-    where TModel : class, new()
 {
-    protected readonly IMapper _mapper;
-    private readonly SqlSugarDbContext dbContext;
+    private readonly ITransaction _transaction;
 
-    protected SqlSugarClient Db => dbContext.GetInstance();
+    protected SqlSugarClient Db => _transaction.GetInstance();
 
-    protected BaseRepository(IMapper mapper, ITransaction transaction)
+    protected BaseRepository(ITransaction transaction)
     {
-        _mapper = mapper;
-        this.dbContext = dbContext;
+        this._transaction = transaction;
     }
 
-    public virtual async Task<int> AddAsync(TModel model)
+    public virtual async Task<TEntity> AddAsync(TEntity entity)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entity = _mapper.Map<TEntity>(model);
-        var result = await Db.Insertable(entity).ExecuteCommandAsync();
+        var result = await Db.Insertable(entity).ExecuteReturnEntityAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Add {typeof(TModel).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"Add {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
-    public virtual async Task<int> UpdateAsync(TModel model)
+    public virtual async Task<int> UpdateAsync(TEntity entity)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entity = _mapper.Map<TEntity>(model);
         var result = await Db.Updateable(entity).ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Update {typeof(TModel).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"Update {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
-    public virtual async Task<int> DeleteAsync(TModel model)
+    public virtual async Task<int> DeleteAsync(TEntity entity)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entity = _mapper.Map<TEntity>(model);
         var result = await Db.Deleteable(entity).ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(TModel).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"Delete {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
-    public virtual async Task<List<TModel>> GetAllAsync()
+    public virtual async Task<List<TEntity>> GetAllAsync()
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         var entities = await Db.Queryable<TEntity>().ToListAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"GetAll {typeof(TModel).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return _mapper.Map<List<TModel>>(entities);
+        NlogHelper.Info($"GetAll {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return entities;
     }
 
-    public virtual async Task<TModel> GetByIdAsync(int id)
+    public virtual async Task<TEntity> GetByIdAsync(int id)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         var entity = await Db.Queryable<TEntity>().In(id).FirstAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"GetById {typeof(TModel).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return _mapper.Map<TModel>(entity);
+        NlogHelper.Info($"GetById {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return entity;
     }
 
-    public virtual async Task<TModel> GetByConditionAsync(Expression<Func<TEntity, bool>> expression)
+    public virtual async Task<TEntity> GetByConditionAsync(Expression<Func<TEntity, bool>> expression)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         var entity = await Db.Queryable<TEntity>().FirstAsync(expression);
         stopwatch.Stop();
-        NlogHelper.Info($"GetByCondition {typeof(TModel).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return _mapper.Map<TModel>(entity);
+        NlogHelper.Info($"GetByCondition {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return entity;
     }
 }

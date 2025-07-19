@@ -10,56 +10,36 @@ using DMS.Infrastructure.Interfaces;
 
 namespace DMS.Infrastructure.Repositories;
 
-public class MenuRepository : BaseRepository<DbMenu, MenuBean>
+public class MenuRepository : BaseRepository<DbMenu>
 {
-    public MenuRepository(IMapper mapper, ITransaction transaction)
-        : base(mapper, transaction)
+    public MenuRepository(SqlSugarDbContext dbContext)
+        : base(dbContext)
     {
     }
 
-    public async Task<int> DeleteAsync(MenuBean menu)
+    public override async Task<int> DeleteAsync(DbMenu menu)
     {
-        return await DeleteAsync(menu, Db);
+        return await base.DeleteAsync(menu);
     }
 
-    public async Task<int> DeleteAsync(MenuBean menu, SqlSugarClient db)
-    {
-        
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var childList = await db.Queryable<DbMenu>()
-                                .ToChildListAsync(it => it.ParentId, menu.Id);
-        var result = await db.Deleteable<DbMenu>(childList)
-                             .ExecuteCommandAsync();
-        stopwatch.Stop();
-        NlogHelper.Info($"删除菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
+    
 
-    public async Task<List<MenuBean>> GetMenuTreesAsync()
+    public async Task<List<DbMenu>> GetMenuTreesAsync()
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        List<MenuBean> menuTree = new();
         var dbMenuTree = await Db.Queryable<DbMenu>()
                                  .ToTreeAsync(dm => dm.Items, dm => dm.ParentId, 0);
 
-        foreach (var dbMenu in dbMenuTree)
-            menuTree.Add(_mapper.Map<MenuBean>(dbMenu));
         stopwatch.Stop();
         NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return menuTree;
+        return dbMenuTree;
     }
 
 
-    public async Task<int> AddAsync(MenuBean menu)
+    public override async Task<DbMenu> AddAsync(DbMenu menu)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await AddAsync(menu, Db);
-        stopwatch.Stop();
-        NlogHelper.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
+        return await base.AddAsync(menu);
     }
 
 
@@ -69,36 +49,10 @@ public class MenuRepository : BaseRepository<DbMenu, MenuBean>
     /// <param name="menu"></param>
     /// <param name="db"></param>
     /// <returns></returns>
-    public async Task<int> AddAsync(MenuBean menu, SqlSugarClient db)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await db.Insertable<DbMenu>(_mapper.Map<DbMenu>(menu))
-                             .ExecuteCommandAsync();
-        stopwatch.Stop();
-        NlogHelper.Info($"添加菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
+    
 
 
-    public async Task<int> AddVarTableMenuAsync(DbDevice dbDevice, int parentMenuId, SqlSugarClient db)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var addVarTable = new MenuBean()
-                          {
-                              Name = "添加变量表",
-                              // Icon = SegoeFluentIcons.Add.Glyph,
-                              Type = MenuType.AddVariableTableMenu,
-                              ParentId = parentMenuId,
-                              DataId = dbDevice.Id
-                          };
-        var addTableRes = await db.Insertable<DbMenu>(addVarTable)
-                                  .ExecuteCommandAsync();
-        stopwatch.Stop();
-        // NlogHelper.Info($"添加变量表菜单 '{addVarTable.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return addTableRes;
-    }
+    
 
 
     /// <summary>
@@ -108,44 +62,16 @@ public class MenuRepository : BaseRepository<DbMenu, MenuBean>
     /// <param name="db"></param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
-    public async Task<int> AddAsync(DbDevice device, SqlSugarClient db)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var deviceMainMenu = await db.Queryable<DbMenu>()
-                                     .FirstAsync(m => m.Name == "设备");
-        if (deviceMainMenu == null)
-            throw new InvalidOperationException("没有找到设备菜单！！");
-
-        // 添加菜单项
-        MenuBean menu = new MenuBean()
-                        {
-                            Name = device.Name,
-                            Type = MenuType.DeviceMenu,
-                            DataId = device.Id,
-                            // Icon = SegoeFluentIcons.Devices4.Glyph,
-                        };
-        menu.ParentId = deviceMainMenu.Id;
-        var addDeviceMenuId = await db.Insertable<DbMenu>(_mapper.Map<DbMenu>(menu))
-                                      .ExecuteReturnIdentityAsync();
-        stopwatch.Stop();
-        NlogHelper.Info($"添加设备菜单 '{device.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return addDeviceMenuId;
-    }
+    
 
     /// <summary>
     /// 编辑菜单
     /// </summary>
     /// <param name="menu"></param>
     /// <returns></returns>
-    public async Task<int> UpdateAsync(MenuBean menu)
+    public override async Task<int> UpdateAsync(DbMenu menu)
     {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await UpdateAsync(menu, Db);
-        stopwatch.Stop();
-        NlogHelper.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
+        return await base.UpdateAsync(menu);
     }
 
     /// <summary>
@@ -153,18 +79,9 @@ public class MenuRepository : BaseRepository<DbMenu, MenuBean>
     /// </summary>
     /// <param name="menu"></param>
     /// <returns></returns>
-    public async Task<int> UpdateAsync(MenuBean menu, SqlSugarClient db)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await db.Updateable<DbMenu>(_mapper.Map<DbMenu>(menu))
-                             .ExecuteCommandAsync();
-        stopwatch.Stop();
-        NlogHelper.Info($"编辑菜单 '{menu.Name}' 耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
+    
 
-    public async Task<MenuBean?> GetMenuByDataIdAsync(int dataId, MenuType menuType)
+    public async Task<DbMenu?> GetMenuByDataIdAsync(int dataId, MenuType menuType)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -172,12 +89,12 @@ public class MenuRepository : BaseRepository<DbMenu, MenuBean>
                              .FirstAsync(m => m.DataId == dataId && m.Type == menuType);
         stopwatch.Stop();
         NlogHelper.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return _mapper.Map<MenuBean>(result);
+        return result;
     }
 
-    public async Task<MenuBean> GetMainMenuByNameAsync(string name)
+    public async Task<DbMenu> GetMainMenuByNameAsync(string name)
     {
        var dbMenu= await Db.Queryable<DbMenu>().FirstAsync(m => m.Name == name  && m.Type == MenuType.MainMenu);
-       return _mapper.Map<MenuBean>(dbMenu);
+       return dbMenu;
     }
 }

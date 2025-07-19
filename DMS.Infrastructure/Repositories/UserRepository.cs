@@ -9,10 +9,10 @@ namespace DMS.Infrastructure.Repositories;
 /// <summary>
 /// 用户仓储类，用于操作DbUser实体
 /// </summary>
-public class UserRepository : BaseRepository<DbUser, User>
+public class UserRepository : BaseRepository<DbUser>
 {
-    public UserRepository(IMapper mapper, ITransaction transaction)
-        : base(mapper, transaction)
+    public UserRepository(SqlSugarDbContext dbContext)
+        : base(dbContext)
     {
     }
 }

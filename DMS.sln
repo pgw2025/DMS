@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.WPF", "DMS.WPF\DMS.WPF.
 		{46E180A5-38CB-4229-915F-C9BC44534E77} = {46E180A5-38CB-4229-915F-C9BC44534E77}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Infrastructure.UnitTests", "DMS.Infrastructure.UnitTests\DMS.Infrastructure.UnitTests.csproj", "{98D739FC-6184-4FC6-961F-F12ED57B0CC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{6059F299-9EE8-4A3F-8CD2-D00E2BDB5D5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6059F299-9EE8-4A3F-8CD2-D00E2BDB5D5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6059F299-9EE8-4A3F-8CD2-D00E2BDB5D5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98D739FC-6184-4FC6-961F-F12ED57B0CC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98D739FC-6184-4FC6-961F-F12ED57B0CC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98D739FC-6184-4FC6-961F-F12ED57B0CC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98D739FC-6184-4FC6-961F-F12ED57B0CC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

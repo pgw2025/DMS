@@ -113,10 +113,10 @@ public partial class App : System.Windows.Application
         services.AddScoped<DMS.Infrastructure.Data.SqlSugarDbContext>();
 
         // Register ITransaction (abstract interface for transaction management)
-        services.AddScoped<DMS.Core.Interfaces.ITransaction, DMS.Infrastructure.Data.SqlSugarDbContext>();
+        //services.AddScoped<DMS.Core.Interfaces.ITransaction, DMS.Infrastructure.Data.SqlSugarDbContext>();
 
-        // Register IDatabaseService (abstract interface for database initialization)
-        services.AddSingleton<DMS.Core.Interfaces.IDatabaseService, DMS.Infrastructure.Services.DatabaseInitializerService>();
+        //// Register IDatabaseService (abstract interface for database initialization)
+        //services.AddSingleton<DMS.Core.Interfaces.IDatabaseService, DMS.Infrastructure.Services.DatabaseInitializerService>();
 
         services.AddSingleton<DataServices>();
         services.AddSingleton<NavgatorServices>();
@@ -125,6 +125,7 @@ public partial class App : System.Windows.Application
         services.AddHostedService<S7BackgroundService>();
         services.AddHostedService<OpcUaBackgroundService>();
         services.AddSingleton<MqttBackgroundService>();
+        services.AddSingleton<ChannelBusService>();
         services.AddHostedService(provider => provider.GetRequiredService<MqttBackgroundService>());
         services.AddSingleton<OpcUaBackgroundService>();
         
@@ -156,7 +157,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<SettingViewModel>();
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<VariableTableViewModel>();
-        services.AddScoped<MqttServerDetailViewModel>();
+        //services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddScoped<MqttsViewModel>();
         //注册View视图
