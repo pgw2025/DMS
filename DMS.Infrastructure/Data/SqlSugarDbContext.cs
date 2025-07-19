@@ -1,25 +1,46 @@
-﻿using DMS.Config;
+using DMS.Config;
+using DMS.Core.Interfaces;
 using SqlSugar;
+using System;
+using System.Threading.Tasks;
 
-namespace DMS.Infrastructure;
+namespace DMS.Infrastructure.Data;
 
-public class DbContext
+public class SqlSugarDbContext : IUnitOfWork
 {
-    public static SqlSugarClient GetInstance()
+    private readonly SqlSugarClient _db;
+
+    public SqlSugarDbContext(ConnectionSettings settings)
     {
-        var settings = ConnectionSettings.Load();
         var connectionString = settings.ToConnectionString();
         var dbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), settings.DbType);
 
-        var _db = new SqlSugarClient(new ConnectionConfig
+        _db = new SqlSugarClient(new ConnectionConfig
         {
             ConnectionString = connectionString,
-            DbType = dbType, // 根据实际数据库类型修改，如DbType.MySql等
+            DbType = dbType,
             IsAutoCloseConnection = true,
             InitKeyType = InitKeyType.Attribute
         });
+    }
 
-
+    public SqlSugarClient GetSqlSugarClient()
+    {
         return _db;
+    }
+
+    public async Task BeginTranAsync()
+    {
+        await _db.BeginTranAsync();
+    }
+
+    public async Task CommitTranAsync()
+    {
+        await _db.CommitTranAsync();
+    }
+
+    public async Task RollbackTranAsync()
+    {
+        await _db.RollbackTranAsync();
     }
 }

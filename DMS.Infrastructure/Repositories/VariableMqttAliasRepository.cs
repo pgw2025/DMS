@@ -1,6 +1,7 @@
 using SqlSugar;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
 
 namespace DMS.Infrastructure.Repositories;
@@ -8,7 +9,7 @@ namespace DMS.Infrastructure.Repositories;
 /// <summary>
 /// 变量与MQTT服务器别名关联的数据仓库。
 /// </summary>
-public class VariableMqttAliasRepository
+public class VariableMqttAliasRepository : IVariableMqttAliasRepository
 {
     /// <summary>
     /// 根据变量ID和MQTT服务器ID获取别名。

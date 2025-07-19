@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
-using DMS.Data.Entities;
-using DMS.Models;
-using DMS.Helper;
+using DMS.Infrastructure.Entities;
+using DMS.WPF.Models;
 
 namespace DMS.Extensions;
 

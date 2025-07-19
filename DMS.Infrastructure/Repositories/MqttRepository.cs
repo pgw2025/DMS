@@ -2,16 +2,16 @@ using System.Diagnostics;
 using AutoMapper;
 using DMS.Infrastructure.Entities;
 using DMS.Core.Enums;
-using DMS.Helper;
-using DMS.Models;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using DMS.Core.Helper;
+using DMS.Core.Models;
+using DMS.Infrastructure.Data;
 
 namespace DMS.Infrastructure.Repositories;
 
 /// <summary>
 /// Mqtt仓储类，用于操作DbMqtt实体
 /// </summary>
-public class MqttRepository
+public class MqttRepository : IMqttRepository
 {
     private readonly MenuRepository _menuRepository;
     private readonly IMapper _mapper;
@@ -83,7 +83,7 @@ public class MqttRepository
             var menu = new MenuBean()
                        {
                            Name = mqtt.Name,
-                           Icon = SegoeFluentIcons.Wifi.Glyph,
+                           // Icon = SegoeFluentIcons.Wifi.Glyph,
                            Type = MenuType.MqttMenu,
                            DataId = result,
                            ParentId = mqttMenu.Id,

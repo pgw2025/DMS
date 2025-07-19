@@ -1,16 +1,14 @@
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using DMS.Core.Enums;
-using DMS.Extensions;
 using SqlSugar;
 using System.Diagnostics;
 using AutoMapper;
 using DMS.Infrastructure.Entities;
-using DMS.Helper;
-using DMS.Models;
+using DMS.Core.Helper;
+using DMS.Core.Models;
+using DMS.Infrastructure.Data;
 
 namespace DMS.Infrastructure.Repositories;
 
-public class VarTableRepository
+public class VarTableRepository : IVarTableRepository
 {
     private readonly IMapper _mapper;
 

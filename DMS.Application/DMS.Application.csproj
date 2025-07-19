@@ -13,4 +13,8 @@
     <Folder Include="Exceptions\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DMS.Infrastructure\DMS.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

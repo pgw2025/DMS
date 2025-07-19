@@ -1,18 +1,18 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using DMS.Data.Repositories;
+using DMS.WPF.Models;
+using DMS.WPF.Message;
+using DMS.WPF.ViewModels;
+using DMS.Core.Helper;
+using DMS.Infrastructure.Repositories;
 using DMS.Core.Enums;
-using DMS.Helper;
-using DMS.Message;
-using DMS.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using DMS.ViewModels;
 using SqlSugar;
 
-namespace DMS.Services;
+namespace DMS.WPF.Services;
 
 /// <summary>
 /// 数据服务类，负责从数据库加载和管理各种数据，并提供数据变更通知。

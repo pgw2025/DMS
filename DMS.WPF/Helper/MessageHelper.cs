@@ -1,9 +1,9 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 using DMS.Core.Enums;
-using DMS.Message;
-using DMS.ViewModels;
+using DMS.WPF.Message;
+using DMS.WPF.ViewModels;
 
-namespace DMS.Helper;
+namespace DMS.WPF.Helper;
 
 public class MessageHelper
 {

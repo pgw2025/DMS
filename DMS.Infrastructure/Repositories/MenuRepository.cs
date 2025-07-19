@@ -1,16 +1,15 @@
 using System.Diagnostics;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using DMS.Extensions;
 using SqlSugar;
 using AutoMapper;
 using DMS.Infrastructure.Entities;
 using DMS.Core.Enums;
-using DMS.Helper;
-using DMS.Models;
+using DMS.Core.Helper;
+using DMS.Core.Models;
+using DMS.Infrastructure.Data;
 
 namespace DMS.Infrastructure.Repositories;
 
-public class MenuRepository
+public class MenuRepository : IMenuRepository
 {
     private readonly IMapper _mapper;
 
@@ -95,7 +94,7 @@ public class MenuRepository
         var addVarTable = new MenuBean()
                           {
                               Name = "添加变量表",
-                              Icon = SegoeFluentIcons.Add.Glyph,
+                              // Icon = SegoeFluentIcons.Add.Glyph,
                               Type = MenuType.AddVariableTableMenu,
                               ParentId = parentMenuId,
                               DataId = dbDevice.Id
@@ -130,7 +129,7 @@ public class MenuRepository
                             Name = device.Name,
                             Type = MenuType.DeviceMenu,
                             DataId = device.Id,
-                            Icon = SegoeFluentIcons.Devices4.Glyph,
+                            // Icon = SegoeFluentIcons.Devices4.Glyph,
                         };
         menu.ParentId = deviceMainMenu.Id;
         var addDeviceMenuId = await db.Insertable<DbMenu>(_mapper.Map<DbMenu>(menu))

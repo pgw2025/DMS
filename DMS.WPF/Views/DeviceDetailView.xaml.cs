@@ -1,8 +1,8 @@
-﻿using System.Windows.Controls;
-using DMS.ViewModels;
+using System.Windows.Controls;
+using DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DMS.Views;
+namespace DMS.WPF.Views;
 
 public partial class DeviceDetailView : UserControl
 {

@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DMS.Data;
-using DMS.Data.Entities;
-using DMS.Helper;
-using DMS.Models;
+using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Entities;
+using DMS.Core.Helper;
+using DMS.WPF.Models;
 using Microsoft.Extensions.Logging;
-using DMS.Services;
 
-namespace DMS.Services.Processors;
+namespace DMS.WPF.Services.Processors;
 
 public class HistoryProcessor : IVariableProcessor, IDisposable
 {

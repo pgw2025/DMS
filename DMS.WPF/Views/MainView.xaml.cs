@@ -1,13 +1,13 @@
-﻿using System.Windows;
-using DMS.Helper;
-using DMS.Models;
-using DMS.Services;
-using DMS.ViewModels;
+using System.Windows;
+using DMS.Core.Helper;
+using DMS.WPF.Models;
+using DMS.WPF.Services;
+using DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using DMS.Core.Enums;
 
-namespace DMS.Views;
+namespace DMS.WPF.Views;
 
 /// <summary>
 ///     MainView.xaml 的交互逻辑

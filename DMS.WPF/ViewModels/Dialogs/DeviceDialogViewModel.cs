@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Models;
-using S7.Net; // AddAsync this using directive
+using DMS.WPF.Models;
+using S7.Net;
 
-namespace DMS.ViewModels.Dialogs;
+namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class DeviceDialogViewModel : ObservableObject
 {

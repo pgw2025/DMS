@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace DMS.Models;
+namespace DMS.Core.Models;
 
 /// <summary>
 /// 表示OPC UA节点，用于构建节点树。

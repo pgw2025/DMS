@@ -1,6 +1,6 @@
-using DMS.Models;
+using DMS.Core.Models;
 
-namespace DMS.Models
+namespace DMS.Core.Models
 {
     public class VariableContext
     {

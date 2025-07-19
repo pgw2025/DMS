@@ -1,12 +1,13 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Data;
-using DMS.Data.Repositories;
-using DMS.Core.Enums;
-using DMS.Helper;
-using DMS.Models;
-using DMS.Services;
+using DMS.WPF.Models;
+using DMS.WPF.Services;
+using DMS.Core.Helper;
+using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Repositories;
+
+namespace DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.ViewModels;

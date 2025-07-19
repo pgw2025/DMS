@@ -1,9 +1,9 @@
 using System;
 using AutoMapper;
 using DMS.Infrastructure.Entities;
-using DMS.Models;
+using DMS.Core.Models;
 
-namespace DMS.Profiles;
+namespace DMS.Infrastructure.Profiles;
 
 /// <summary>
 /// AutoMapper 的配置类，用于定义对象之间的映射规则。

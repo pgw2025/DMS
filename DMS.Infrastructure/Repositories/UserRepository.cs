@@ -2,14 +2,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DMS.Infrastructure.Entities;
-using DMS.Helper;
+using DMS.Core.Helper;
+using DMS.Infrastructure.Data;
 
 namespace DMS.Infrastructure.Repositories;
 
 /// <summary>
 /// 用户仓储类，用于操作DbUser实体
 /// </summary>
-public class UserRepository
+public class UserRepository : IUserRepository
 {
 
     /// <summary>

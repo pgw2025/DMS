@@ -1,4 +1,4 @@
-﻿namespace DMS.Models;
+﻿namespace DMS.Core.Models;
 
 public class User
 {

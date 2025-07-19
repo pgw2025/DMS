@@ -1,8 +1,7 @@
 ﻿using System.Windows;
-using DMS.Infrastructure;
 using DMS.Infrastructure.Entities;
 using DMS.Infrastructure.Repositories;
-using DMS.Enums;
+using DMS.Core.Enums;
 using DMS.Helper;
 using DMS.Services;
 using DMS.Services.Processors;
@@ -16,6 +15,11 @@ using NLog.Extensions.Logging;
 using DMS.Extensions;
 using Microsoft.Extensions.Hosting;
 using DMS.Config;
+using DMS.Infrastructure.Data;
+using DMS.WPF.Helper;
+using DMS.WPF.Services;
+using DMS.WPF.Services.Processors;
+using DMS.WPF.ViewModels.DMS.ViewModels;
 using SqlSugar;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -24,7 +28,7 @@ namespace DMS;
 /// <summary>
 ///     Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     public IServiceProvider Services { get; }
 
@@ -43,7 +47,7 @@ public partial class App : Application
         Services = Host.Services;
     }
 
-    public new static App Current => (App)Application.Current;
+    public new static App Current => (App)System.Windows.Application.Current;
     public IHost Host { get; }
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -55,8 +59,9 @@ public partial class App : Application
 
         try
         {
-            InitializeDataBase();
-            InitializeMenu()
+            var databaseInitializer = Host.Services.GetRequiredService<DMS.Infrastructure.Services.DatabaseInitializerService>();
+            databaseInitializer.InitializeDataBase();
+            await databaseInitializer.InitializeMenu()
                 .Await((e) => { NotificationHelper.ShowError($"初始化主菜单失败：{e.Message}", e); },
                        () => { MessageHelper.SendLoadMessage(LoadTypes.Menu); });
             Host.Services.GetRequiredService<GrowlNotificationService>();
@@ -67,7 +72,7 @@ public partial class App : Application
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<MqttPublishProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
-            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
+            //dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
         }
         catch (Exception exception)
         {
@@ -100,9 +105,22 @@ public partial class App : Application
 
     private void ConfigureServices(IServiceCollection services)
     {
+        // Register ConnectionSettings
+        services.AddSingleton(ConnectionSettings.Load());
+
+        // Register SqlSugarDbContext (concrete type, used by DatabaseInitializerService)
+        // SqlSugarDbContext now internally creates SqlSugarClient using ConnectionSettings
+        services.AddScoped<DMS.Infrastructure.Data.SqlSugarDbContext>();
+
+        // Register IUnitOfWork (abstract interface for transaction management)
+        services.AddScoped<DMS.Core.Interfaces.IUnitOfWork, DMS.Infrastructure.Data.SqlSugarDbContext>();
+
+        // Register IDatabaseService (abstract interface for database initialization)
+        services.AddSingleton<DMS.Core.Interfaces.IDatabaseService, DMS.Infrastructure.Services.DatabaseInitializerService>();
+
         services.AddSingleton<DataServices>();
         services.AddSingleton<NavgatorServices>();
-        services.AddSingleton<IDialogService, DialogService>();
+        //services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<GrowlNotificationService>();
         services.AddHostedService<S7BackgroundService>();
         services.AddHostedService<OpcUaBackgroundService>();
@@ -189,72 +207,5 @@ public partial class App : Application
         };
     }
 
-    /// <summary>
-    /// 初始化菜单
-    /// </summary>
-    private async Task InitializeMenu()
-    {
-        using (var db = DbContext.GetInstance())
-        {
-            var homeMenu = new DbMenu()
-                           { Name = "主页", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Home.Glyph, ParentId = 0 };
-
-            var deviceMenu = new DbMenu()
-                             {
-                                 Name = "设备", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Devices3.Glyph,
-                                 ParentId = 0
-                             };
-            var dataTransfromMenu = new DbMenu()
-                                    {
-                                        Name = "数据转换", Type = MenuType.MainMenu,
-                                        Icon = SegoeFluentIcons.ChromeSwitch.Glyph, ParentId = 0
-                                    };
-            var mqttMenu = new DbMenu()
-                           {
-                               Name = "Mqtt服务器", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Cloud.Glyph,
-                               ParentId = 0
-                           };
-
-            var settingMenu = new DbMenu()
-                              {
-                                  Name = "设置", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Settings.Glyph,
-                                  ParentId = 0
-                              };
-            var aboutMenu = new DbMenu()
-                            { Name = "关于", Type = MenuType.MainMenu, Icon = SegoeFluentIcons.Info.Glyph, ParentId = 0 };
-            await CheckMainMenuExist(db, homeMenu);
-            await CheckMainMenuExist(db, deviceMenu);
-            await CheckMainMenuExist(db, dataTransfromMenu);
-            await CheckMainMenuExist(db, mqttMenu);
-            await CheckMainMenuExist(db, settingMenu);
-            await CheckMainMenuExist(db, aboutMenu);
-        }
-    }
-
-    private static async Task CheckMainMenuExist(SqlSugarClient db, DbMenu menu)
-    {
-        var homeMenuExist = await db.Queryable<DbMenu>()
-                                    .FirstAsync(dm => dm.Name == menu.Name);
-        if (homeMenuExist == null)
-        {
-            await db.Insertable<DbMenu>(menu)
-                    .ExecuteCommandAsync();
-        }
-    }
-
-    private void InitializeDataBase()
-    {
-        var _db = DbContext.GetInstance();
-        _db.DbMaintenance.CreateDatabase();
-        _db.CodeFirst.InitTables<DbNlog>();
-        _db.CodeFirst.InitTables<DbNlog>();
-        _db.CodeFirst.InitTables<DbDevice>();
-        _db.CodeFirst.InitTables<DbVariableTable>();
-        _db.CodeFirst.InitTables<DbVariable>();
-        _db.CodeFirst.InitTables<DbVariableHistory>();
-        _db.CodeFirst.InitTables<DbUser>();
-        _db.CodeFirst.InitTables<DbMqtt>();
-        _db.CodeFirst.InitTables<DbVariableMqtt>();
-        _db.CodeFirst.InitTables<DbMenu>();
-    }
+    
 }

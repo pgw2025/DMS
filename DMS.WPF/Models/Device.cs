@@ -5,7 +5,7 @@ using SqlSugar;
 using SqlSugar.DbConvert;
 using S7.Net; // AddAsync this using directive
 
-namespace DMS.Models;
+namespace DMS.WPF.Models;
 
 /// <summary>
 /// 表示设备信息。

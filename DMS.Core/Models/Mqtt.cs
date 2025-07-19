@@ -1,6 +1,6 @@
 ﻿using DMS.Core.Enums;
 
-namespace DMS.Models;
+namespace DMS.Core.Models;
 
 /// <summary>
 /// 表示MQTT配置信息。

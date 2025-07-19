@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using NLog;
 
-namespace DMS.Helper;
+namespace DMS.Core.Helper;
 
 /// <summary>
 /// NLog 日志帮助类，提供简化的日志记录方法，并自动捕获调用者信息。

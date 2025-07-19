@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Core.Enums;
 
-namespace DMS.Models;
+namespace DMS.WPF.Models;
 
 /// <summary>
 /// 表示变量数据信息。

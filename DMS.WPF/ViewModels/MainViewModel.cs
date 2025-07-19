@@ -2,13 +2,14 @@
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Data;
-using DMS.Data.Repositories;
-using DMS.Core.Enums;
-using DMS.Helper;
-using DMS.Models;
-using DMS.Services;
-using DMS.Views;
+using DMS.WPF.Models;
+using DMS.WPF.Services;
+using DMS.WPF.Views;
+using DMS.Core.Helper;
+using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Repositories;
+
+namespace DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

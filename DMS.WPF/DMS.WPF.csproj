@@ -149,4 +149,9 @@
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\DMS.Application\DMS.Application.csproj" />
+  </ItemGroup>
+
 </Project>

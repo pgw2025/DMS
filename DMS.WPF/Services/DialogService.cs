@@ -1,13 +1,13 @@
-﻿using DMS.Core.Enums;
-using DMS.Models;
-using DMS.ViewModels.Dialogs;
-using DMS.Views.Dialogs;
+using DMS.Core.Enums;
+using DMS.WPF.Models;
+using DMS.WPF.ViewModels.Dialogs;
+using DMS.WPF.Views.Dialogs;
 using HandyControl.Tools.Extension;
 using iNKORE.UI.WPF.Modern.Controls;
 using NPOI.SS.Formula.Functions;
-using DMS.Data.Repositories;
+using DMS.Infrastructure.Repositories;
 
-namespace DMS.Services;
+namespace DMS.WPF.Services;
 
 public class DialogService :IDialogService
 {

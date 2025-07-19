@@ -2,8 +2,7 @@ using SqlSugar;
 using SqlSugar.DbConvert;
 using S7.Net;
 using DMS.Core.Enums;
-
-namespace DMS.Infrastructure.Entities;
+using DMS.Infrastructure.Entities;
 
 /// <summary>
 /// 表示数据库中的设备实体。
@@ -76,7 +75,7 @@ public class DbDevice
     /// 设备的通信协议类型。
     /// </summary>
     [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
-    public Enums_ProtocolType ProtocolType { get; set; }
+    public ProtocolType ProtocolType { get; set; }
 
     /// <summary>
     /// OPC UA Endpoint URL。

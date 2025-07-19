@@ -1,7 +1,7 @@
 using System;
 using DMS.Core.Enums;
 
-namespace DMS.Models;
+namespace DMS.Core.Models;
 
 /// <summary>
 /// 表示变量数据与MQTT服务器之间的关联模型，包含MQTT别名。

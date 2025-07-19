@@ -1,11 +1,12 @@
+
 using System;
 using System.Linq;
 using System.Windows;
-using DMS.Config;
+using DMS.Infrastructure.Configurations;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
 
-namespace DMS.Helper;
+namespace DMS.WPF.Helper;
 
 public static class ThemeHelper
 {

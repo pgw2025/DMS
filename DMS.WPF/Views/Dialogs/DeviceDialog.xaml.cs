@@ -1,10 +1,10 @@
-﻿using System.Windows;
-using DMS.Helper;
-using DMS.ViewModels.Dialogs;
+using System.Windows;
+using DMS.Core.Helper;
+using DMS.WPF.ViewModels.Dialogs;
 using iNKORE.UI.WPF.Modern.Controls;
-using DMS.Models;
+using DMS.WPF.Models;
 
-namespace DMS.Views.Dialogs;
+namespace DMS.WPF.Views.Dialogs;
 
 public partial class DeviceDialog
 {

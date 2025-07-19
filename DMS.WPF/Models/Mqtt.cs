@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Core.Enums;
 
-namespace DMS.Models;
+namespace DMS.WPF.Models;
 
 /// <summary>
 /// 表示MQTT配置信息。

@@ -1,20 +1,20 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using DMS.Extensions;
 using SqlSugar;
 using AutoMapper;
 using Dm.util;
 using DMS.Infrastructure.Entities;
-using DMS.Helper;
-using DMS.Models;
+using DMS.Core.Helper;
+using DMS.Core.Models;
+using DMS.Infrastructure.Data;
 
 namespace DMS.Infrastructure.Repositories;
 
 /// <summary>
 /// VariableData仓储类，用于操作DbVariableData实体
 /// </summary>
-public class VarDataRepository
+public class VarDataRepository : IVarDataRepository
 {
     private readonly IMapper _mapper;
 
@@ -359,12 +359,12 @@ public class VarDataRepository
                 if (existingAliasesDict.TryGetValue(key, out var existingAlias))
                 {
                     // 如果存在但别名不同，则准备更新
-                    if (existingAlias.MqttAlias != variableMqtt.MqttAlias)
-                    {
-                        existingAlias.MqttAlias = variableMqtt.MqttAlias;
-                        existingAlias.UpdateTime = DateTime.Now;
-                        toUpdate.Add(existingAlias);
-                    }
+                    // if (existingAlias.MqttAlias != variableMqtt.MqttAlias)
+                    // {
+                    //     existingAlias.MqttAlias = variableMqtt.MqttAlias;
+                    //     existingAlias.UpdateTime = DateTime.Now;
+                    //     toUpdate.Add(existingAlias);
+                    // }
                 }
                 else
                 {
@@ -373,7 +373,7 @@ public class VarDataRepository
                     {
                         VariableId = variableMqtt.Variable.Id,
                         MqttId = variableMqtt.Mqtt.Id,
-                        MqttAlias = variableMqtt.MqttAlias,
+                        // MqttAlias = variableMqtt.MqttAlias,
                         CreateTime = DateTime.Now,
                         UpdateTime = DateTime.Now
                     });
