@@ -80,6 +80,7 @@ public abstract class BaseRepository<TEntity>
         NlogHelper.Info($"Delete {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
+    
 
     /// <summary>
     ///     异步获取所有实体。

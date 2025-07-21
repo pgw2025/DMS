@@ -2,7 +2,6 @@
 
 namespace DMS.Infrastructure.Entities;
 
-[SugarTable("VariableTables")]
 public class DbVariableTable
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]

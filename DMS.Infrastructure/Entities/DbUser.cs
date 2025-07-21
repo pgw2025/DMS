@@ -2,7 +2,6 @@
 
 namespace DMS.Infrastructure.Entities;
 
-[SugarTable("Users")]
 public class DbUser
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]

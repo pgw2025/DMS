@@ -2,7 +2,6 @@ using SqlSugar;
 
 namespace DMS.Infrastructure.Entities;
 
-[SugarTable("MqttServers")]
 public class DbMqttServer
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]

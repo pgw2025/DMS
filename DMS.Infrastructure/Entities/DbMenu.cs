@@ -2,7 +2,6 @@ using SqlSugar;
 
 namespace DMS.Infrastructure.Entities;
 
-[SugarTable("Menus")]
 public class DbMenu
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]

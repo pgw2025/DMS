@@ -6,7 +6,6 @@ namespace DMS.Infrastructure.Entities;
 /// <summary>
 /// 数据库实体：对应数据库中的 Logs 表，用于存储应用程序日志。
 /// </summary>
-[SugarTable("Logs")]
 public class DbNlog
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]

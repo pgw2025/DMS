@@ -1,3 +1,4 @@
+using AutoMapper;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Infrastructure.Data;
@@ -8,21 +9,23 @@ namespace DMS.Infrastructure.Repositories;
 public class RepositoryManager : IRepositoryManager
 {
     private readonly SqlSugarClient _db;
+    private readonly IMapper _mapper;
     private readonly SqlSugarDbContext _dbContext;
 
-    public RepositoryManager(SqlSugarDbContext dbContext)
+    public RepositoryManager(IMapper mapper, SqlSugarDbContext dbContext)
     {
+        _mapper = mapper;
         _dbContext = dbContext;
         _db = dbContext.GetInstance();
 
-        Devices = new DeviceRepository(dbContext);
-        VariableTables = new VariableTableRepository(dbContext);
-        Variables = new VariableRepository(dbContext);
-        MqttServers = new MqttServerRepository(dbContext);
-        VariableMqttAliases = new VariableMqttAliasRepository(dbContext);
-        Menus = new MenuRepository(dbContext);
-        VariableHistories = new VariableHistoryRepository(dbContext);
-        Users = new UserRepository(dbContext);
+        Devices = new DeviceRepository(mapper, dbContext);
+        VariableTables = new VariableTableRepository(mapper, dbContext);
+        Variables = new VariableRepository(mapper, dbContext);
+        MqttServers = new MqttServerRepository(mapper, dbContext);
+        VariableMqttAliases = new VariableMqttAliasRepository(mapper, dbContext);
+        Menus = new MenuRepository(mapper, dbContext);
+        VariableHistories = new VariableHistoryRepository(mapper, dbContext);
+        Users = new UserRepository(mapper, dbContext);
     }
 
     public void Dispose()

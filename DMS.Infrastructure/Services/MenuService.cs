@@ -5,9 +5,9 @@ using DMS.Infrastructure.Repositories;
 
 namespace DMS.Infrastructure.Services
 {
-    public class MenuService : BaseService<MenuBean, DbMenu, MenuRepository>
+    public class MenuService : BaseService<MenuBean, MenuRepository>
     {
-        public MenuService(IMapper mapper, MenuRepository repository) : base(mapper, repository)
+        public MenuService(MenuRepository repository) : base(repository)
         {
         }
     }

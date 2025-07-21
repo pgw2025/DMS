@@ -2,7 +2,7 @@ using SqlSugar;
 
 namespace DMS.Infrastructure.Entities;
 
-[SugarTable("VariableHistories")]
+
 public class DbVariableHistory
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]

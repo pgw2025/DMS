@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using AutoMapper;
+using DMS.Core.Helper;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
@@ -11,9 +13,12 @@ namespace DMS.Infrastructure.Repositories;
 /// </summary>
 public class VariableRepository : BaseRepository<DbVariable>, IVariableRepository
 {
-    public VariableRepository(SqlSugarDbContext dbContext)
+    private readonly IMapper _mapper;
+
+    public VariableRepository(IMapper mapper, SqlSugarDbContext dbContext)
         : base(dbContext)
     {
+        _mapper = mapper;
     }
 
 
@@ -99,13 +104,37 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
         }
     }
 */
-    public async Task<Variable> GetByIdAsync(int id) => throw new NotImplementedException();
+    public async Task<Variable> GetByIdAsync(int id)
+    {
+        var dbVariable = await base.GetByIdAsync(id);
+        return _mapper.Map<Variable>(dbVariable);
+    }
 
-    public async Task<List<Variable>> GetAllAsync() => throw new NotImplementedException();
+    public async Task<List<Variable>> GetAllAsync()
+    {
+        var dbList = await base.GetAllAsync();
+        return _mapper.Map<List<Variable>>(dbList);
+    }
 
-    public async Task<Variable> AddAsync(Variable entity) => throw new NotImplementedException();
+    public async Task<Variable> AddAsync(Variable entity)
+    {
+        var dbVariable = await base.AddAsync(_mapper.Map<DbVariable>(entity));
+        return _mapper.Map(dbVariable, entity);
+    }
 
-    public async Task<int> UpdateAsync(Variable entity) => throw new NotImplementedException();
+    public async Task<int> UpdateAsync(Variable entity) => await base.UpdateAsync(_mapper.Map<DbVariable>(entity));
 
-    public async Task<int> DeleteAsync(Variable entity) => throw new NotImplementedException();
+    public async Task<int> DeleteAsync(Variable entity) => await base.DeleteAsync(_mapper.Map<DbVariable>(entity));
+    
+    
+    public async Task<int> DeleteAsync(int id)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Deleteable(new Variable() { Id = id })
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
 }

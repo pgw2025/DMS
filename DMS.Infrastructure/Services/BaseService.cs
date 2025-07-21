@@ -1,6 +1,7 @@
 using AutoMapper;
 using DMS.Infrastructure.Repositories;
 using System.Threading.Tasks;
+using DMS.Core.Interfaces.Repositories;
 
 namespace DMS.Infrastructure.Services
 {
@@ -10,11 +11,10 @@ namespace DMS.Infrastructure.Services
     /// <typeparam name="TModel">业务逻辑模型类型。</typeparam>
     /// <typeparam name="TEntity">数据库实体类型。</typeparam>
     /// <typeparam name="TRepository">与实体对应的仓储类型。</typeparam>
-    public abstract class BaseService<TModel, TEntity, TRepository>
-        where TEntity : class, new()
-        where TRepository : BaseRepository<TEntity>
+    public abstract class BaseService<TModel, TRepository>
+        where TModel : class, new()
+        where TRepository : IBaseRepository<TModel>
     {
-        protected readonly IMapper _mapper;
         protected readonly TRepository ServerRepository;
 
         /// <summary>
@@ -22,9 +22,8 @@ namespace DMS.Infrastructure.Services
         /// </summary>
         /// <param name="mapper">AutoMapper 实例，用于对象映射。</param>
         /// <param name="serverRepository">仓储实例，用于数据访问。</param>
-        protected BaseService(IMapper mapper, TRepository serverRepository)
+        protected BaseService( TRepository serverRepository)
         {
-            _mapper = mapper;
             ServerRepository = serverRepository;
         }
 
@@ -33,10 +32,9 @@ namespace DMS.Infrastructure.Services
         /// </summary>
         /// <param name="model">要添加的业务模型对象。</param>
         /// <returns>返回添加后的数据库实体。</returns>
-        public virtual async Task<TEntity> AddAsync(TModel model)
+        public virtual async Task<TModel> AddAsync(TModel model)
         {
-            var entity = _mapper.Map<TEntity>(model);
-            return await ServerRepository.AddAsync(entity);
+            return await ServerRepository.AddAsync(model);
         }
 
         /// <summary>
@@ -46,8 +44,7 @@ namespace DMS.Infrastructure.Services
         /// <returns>返回受影响的行数。</returns>
         public virtual async Task<int> UpdateAsync(TModel model)
         {
-            var entity = _mapper.Map<TEntity>(model);
-            return await ServerRepository.UpdateAsync(entity);
+            return await ServerRepository.UpdateAsync(model);
         }
 
         /// <summary>
@@ -57,8 +54,17 @@ namespace DMS.Infrastructure.Services
         /// <returns>返回受影响的行数。</returns>
         public virtual async Task<int> DeleteAsync(TModel model)
         {
-            var entity = _mapper.Map<TEntity>(model);
-            return await ServerRepository.DeleteAsync(entity);
+            return await ServerRepository.DeleteAsync(model);
+        }
+        
+        public virtual async Task<List<TModel>> GetAllAsync()
+        {
+            return await ServerRepository.GetAllAsync();
+        }
+        
+        public virtual async Task<TModel> GetByIdAsync(int id)
+        {
+            return await ServerRepository.GetByIdAsync(id);
         }
     }
 }

@@ -2,7 +2,6 @@
 
 namespace DMS.Infrastructure.Entities;
 
-[SugarTable("Variables")]
 public class DbVariable
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
@@ -13,6 +12,7 @@ public class DbVariable
     public int PollLevel { get; set; } // 对应 PollLevelType 枚举
     public bool IsActive { get; set; }
     public int VariableTableId { get; set; }
+    public string S7Address { get; set; }
     public string OpcUaNodeId { get; set; }
     public bool IsHistoryEnabled { get; set; }
     public double HistoryDeadband { get; set; }

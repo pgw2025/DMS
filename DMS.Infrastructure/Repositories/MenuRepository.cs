@@ -31,13 +31,37 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
     }
 
 
-    public async Task<MenuBean> GetByIdAsync(int id) => throw new NotImplementedException();
+    public async Task<MenuBean> GetByIdAsync(int id)
+    {
+        var dbMenu = await base.GetByIdAsync(id);
+        return _mapper.Map<MenuBean>(dbMenu);
+    }
 
-    public async Task<List<MenuBean>> GetAllAsync() => throw new NotImplementedException();
+    public async Task<List<MenuBean>> GetAllAsync()
+    {
+        var dbList = await base.GetAllAsync();
+        return _mapper.Map<List<MenuBean>>(dbList);
+    }
 
-    public async Task<MenuBean> AddAsync(MenuBean entity) => throw new NotImplementedException();
+    public async Task<MenuBean> AddAsync(MenuBean entity)
+    {
+        var dbMenu = await base.AddAsync(_mapper.Map<DbMenu>(entity));
+        return _mapper.Map(dbMenu, entity);
+    }
 
-    public async Task<int> UpdateAsync(MenuBean entity) => throw new NotImplementedException();
+    public async Task<int> UpdateAsync(MenuBean entity) => await base.UpdateAsync(_mapper.Map<DbMenu>(entity));
 
-    public async Task<int> DeleteAsync(MenuBean entity) => throw new NotImplementedException();
+
+    public async Task<int> DeleteAsync(MenuBean entity) => await base.DeleteAsync(_mapper.Map<DbMenu>(entity));
+
+    public async Task<int> DeleteAsync(int id)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Deleteable(new DbMenu { Id = id })
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
 }

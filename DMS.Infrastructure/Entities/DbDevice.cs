@@ -7,7 +7,6 @@ namespace DMS.Infrastructure.Entities;
 /// <summary>
 /// 设备实体类，对应数据库中的 Devices 表。
 /// </summary>
-[SugarTable("Devices")]
 public class DbDevice
 {
     /// <summary>

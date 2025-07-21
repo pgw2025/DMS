@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using AutoMapper;
+using DMS.Core.Helper;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
@@ -38,4 +40,15 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
 
 
     public async Task<int> DeleteAsync(Device model) => await base.DeleteAsync(_mapper.Map<DbDevice>(model));
+
+    public async Task<int> DeleteAsync(int id)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Deleteable(new DbDevice() { Id = id })
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        NlogHelper.Info($"Delete {typeof(DbDevice)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
 }
