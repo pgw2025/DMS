@@ -56,6 +56,7 @@ public class DbDevice
     /// <summary>
     /// 
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string CpuType { get; set; }
     /// <summary>
     /// 设备槽号 (针对PLC等设备)。
@@ -73,4 +74,11 @@ public class DbDevice
     /// 设备是否激活/启用。
     /// </summary>
     public bool IsActive { get; set; }
+    
+    
+    /// <summary>
+    /// 此设备包含的变量表集合。
+    /// </summary>
+    [SugarColumn(IsIgnore = true)]
+    public List<DbVariableTable> VariableTables { get; set; } = new();
 }

@@ -1,6 +1,6 @@
-using DMS.Config;
 using DMS.Core.Interfaces;
 using DMS.Core.Models;
+using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
 using SqlSugar;
@@ -22,7 +22,6 @@ public class DatabaseService : IDatabaseService
 
     public void InitializeTables()
     {
-        
         _db.DbMaintenance.CreateDatabase();
         _db.CodeFirst.InitTables<DbNlog>();
         _db.CodeFirst.InitTables<DbDevice>();
@@ -52,8 +51,17 @@ public class DatabaseService : IDatabaseService
                                                      nameof(DbMqttServer.ServerName)
                                                  },true);
     }
-    
-    
+
+    public bool IsAnyTable(string tableName)
+    {
+       return  _db.DbMaintenance.IsAnyTable(tableName, false);
+    }
+
+    public bool IsAnyIndex(string indexName)
+    {
+       return  _db.DbMaintenance.IsAnyIndex(indexName);
+    }
+
     public void InitializeMenus()
     {
         var settings = AppSettings.Load();

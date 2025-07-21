@@ -5,5 +5,7 @@ namespace DMS.Core.Interfaces
         void InitializeTables();
         void InitializeTableIndex();
         void InitializeMenus();
+
+        bool IsAnyTable(string tableName);
     }
 }

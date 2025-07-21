@@ -1,10 +1,7 @@
 using DMS.Core.Models;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
-namespace DMS.Config
+namespace DMS.Infrastructure.Configurations
 {
     public class DatabaseSettings
     {

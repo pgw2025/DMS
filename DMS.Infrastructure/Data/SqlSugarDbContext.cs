@@ -1,4 +1,4 @@
-using DMS.Config;
+using DMS.Infrastructure.Configurations;
 using SqlSugar;
 
 namespace DMS.Infrastructure.Data;
