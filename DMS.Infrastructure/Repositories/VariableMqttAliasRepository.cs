@@ -9,7 +9,7 @@ namespace DMS.Infrastructure.Repositories;
 /// <summary>
 /// 变量与MQTT服务器别名关联的数据仓库。
 /// </summary>
-public class VariableMqttAliasRepository : BaseRepository<DbVariableMqtt>
+public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>
 {
     public VariableMqttAliasRepository(SqlSugarDbContext dbContext)
         : base(dbContext)

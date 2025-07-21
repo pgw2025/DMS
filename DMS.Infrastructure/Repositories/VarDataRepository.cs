@@ -24,8 +24,6 @@ public class VarDataRepository : BaseRepository<DbVariable>
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
         var result = await Db.Queryable<DbVariable>()
-                             .Includes(d => d.VariableTable)
-                             .Includes(d => d.VariableTable.Device)
                              .ToListAsync();
         stopwatch.Stop();
         //NlogHelper.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");

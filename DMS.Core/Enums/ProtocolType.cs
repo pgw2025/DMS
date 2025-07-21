@@ -1,11 +1,20 @@
-﻿using System.ComponentModel;
-
-namespace DMS.Core.Enums;
-
+﻿/// <summary>
+/// 定义了设备支持的通信协议类型。
+/// </summary>
 public enum ProtocolType
 {
-    [Description("S7协议")] S7,
-    [Description("OpcUA协议")] OpcUA,
-    [Description("ModbusRtu协议")] ModbusRtu,
-    [Description("ModbusTcp协议")] ModbusTcp
+    /// <summary>
+    /// Siemens S7 通信协议。
+    /// </summary>
+    S7,
+
+    /// <summary>
+    /// OPC UA (Unified Architecture) 协议。
+    /// </summary>
+    OpcUa,
+
+    /// <summary>
+    /// Modbus TCP 协议。
+    /// </summary>
+    ModbusTcp
 }

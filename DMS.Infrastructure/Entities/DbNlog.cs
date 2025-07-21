@@ -1,79 +1,51 @@
 using SqlSugar;
+using System;
 
 namespace DMS.Infrastructure.Entities;
 
 /// <summary>
-/// 表示数据库中的NLog日志实体。
+/// 数据库实体：对应数据库中的 Logs 表，用于存储应用程序日志。
 /// </summary>
-[SugarTable("nlog")]
+[SugarTable("Logs")]
 public class DbNlog
 {
-    /// <summary>
-    /// 日志调用位置。
-    /// </summary>
-    public string Callsite { get; set; }
+    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+    public long Id { get; set; }
 
     /// <summary>
-    /// 日志调用行号。
+    /// 日志记录的时间戳。
     /// </summary>
-    public int CallsiteLineNumber { get; set; }
+    public DateTime Logged { get; set; }
 
     /// <summary>
-    /// 异常信息。
-    /// </summary>
-    [SugarColumn(IsNullable = true, ColumnDataType = "text")]
-    public string Exception { get; set; }
-
-    /// <summary>
-    /// 日志的唯一标识符。
-    /// </summary>
-    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)] //数据库是自增才配自增 
-    public int Id { get; set; }
-
-    /// <summary>
-    /// 日志级别。
+    /// 日志级别 (e.g., "Info", "Warn", "Error", "Debug")。
     /// </summary>
     public string Level { get; set; }
 
     /// <summary>
-    /// 日志记录器名称。
+    /// 日志消息主体。
     /// </summary>
-    public string Logger { get; set; }
-
-    /// <summary>
-    /// 日志时间。
-    /// </summary>
-    public DateTime LogTime { get; set; }
-
-    /// <summary>
-    /// 日志消息内容。
-    /// </summary>
+    [SugarColumn(Length = -1)] // 映射为NVARCHAR(MAX)或类似类型
     public string Message { get; set; }
 
     /// <summary>
-    /// 线程ID。
+    /// 异常信息，包括堆栈跟踪。如果无异常则为null。
     /// </summary>
-    public int ThreadID { get; set; }
+    [SugarColumn(IsNullable = true, Length = -1)]
+    public string Exception { get; set; }
 
     /// <summary>
-    /// 线程名称。
+    /// 记录日志的调用点信息 (文件路径:行号)。
     /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public string ThreadName { get; set; }
+    public string CallSite { get; set; }
 
     /// <summary>
-    /// 线程名称。
+    /// 记录日志的方法名。
     /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public string CallerFilePath { get; set; }
+    public string MethodName { get; set; }
+
     /// <summary>
-    /// 线程名称。
+    /// (用于聚合) 此条日志在指定时间窗口内被触发的总次数。默认为1。
     /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public int CallerLineNumber { get; set; }
-    /// <summary>
-    /// 线程名称。
-    /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public string CallerMember { get; set; }
+    public int AggregatedCount { get; set; } = 1;
 }

@@ -44,11 +44,11 @@ namespace DMS.Infrastructure.Services
             stopwatch.Start();
             var dbList = await GetAllAsync();
             //查询设备的名字是否存在
-            if (dbList.Any(d => d.Name == device.Name || (d.Ip == device.Ip && d.Prot == device.Prot) || d.OpcUaEndpointUrl == device.OpcUaEndpointUrl))
-            {
-                NlogHelper.Warn("设备的名称，Ip:端口，OpcUrl,不可以重复。");
-                return resDevice;
-            }
+            // if (dbList.Any(d => d.Name == device.Name || (d.Ip == device.Ip && d.Prot == device.Prot) || d.OpcUaEndpointUrl == device.OpcUaEndpointUrl))
+            // {
+            //     NlogHelper.Warn("设备的名称，Ip:端口，OpcUrl,不可以重复。");
+            //     return resDevice;
+            // }
             // 2. 将设备添加到数据库
             var addDevice = await _deviceRepository.AddAsync(_mapper.Map<DbDevice>(device));
 

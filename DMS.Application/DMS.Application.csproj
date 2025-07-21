@@ -6,15 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  
+
   <ItemGroup>
-    <Folder Include="Services\" />
-    <Folder Include="DTOs\" />
-    <Folder Include="Interfaces\" />
-    <Folder Include="Exceptions\" />
+    <ProjectReference Include="..\DMS.Core\DMS.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DMS.Infrastructure\DMS.Infrastructure.csproj" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
   </ItemGroup>
 
 </Project>

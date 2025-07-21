@@ -6,11 +6,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Modles\**" />
-    <EmbeddedResource Remove="Modles\**" />
-    <None Remove="Modles\**" />
-  </ItemGroup>
+  
 
   <ItemGroup>
     <None Update="Configurations\nlog.config">
@@ -27,8 +23,6 @@
     
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
-  </ItemGroup>
+  
 
 </Project>

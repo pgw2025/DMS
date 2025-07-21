@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Services
 {
-    public class MqttService:BaseService<Mqtt, DbMqtt, MqttRepository>
+    public class MqttService:BaseService<MqttServer, DbMqttServer, MqttRepository>
     {
         public MqttService(IMapper mapper, MqttRepository repository) : base(mapper, repository)
         {

@@ -12,7 +12,7 @@ namespace DMS.Infrastructure.Repositories;
 /// <summary>
 /// Mqtt仓储类，用于操作DbMqtt实体
 /// </summary>
-public class MqttRepository : BaseRepository<DbMqtt>
+public class MqttRepository : BaseRepository<DbMqttServer>
 {
 
     public MqttRepository(SqlSugarDbContext dbContext)
@@ -25,11 +25,11 @@ public class MqttRepository : BaseRepository<DbMqtt>
     /// </summary>
     /// <param name="id">主键ID</param>
     /// <returns></returns>
-    public override async Task<DbMqtt> GetByIdAsync(int id)
+    public override async Task<DbMqttServer> GetByIdAsync(int id)
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Queryable<DbMqtt>()
+        var result = await Db.Queryable<DbMqttServer>()
                              .In(id)
                              .SingleAsync();
         stopwatch.Stop();
@@ -41,13 +41,11 @@ public class MqttRepository : BaseRepository<DbMqtt>
     /// 获取所有Mqtt配置
     /// </summary>
     /// <returns></returns>
-    public override async Task<List<DbMqtt>> GetAllAsync()
+    public override async Task<List<DbMqttServer>> GetAllAsync()
     {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Queryable<DbMqtt>()
-                             .Includes(m => m.VariableMqtts, vm => vm.Variable)
-                             .Includes(m => m.VariableMqtts, vm => vm.Mqtt)
+        var result = await Db.Queryable<DbMqttServer>()
                              .ToListAsync();
         stopwatch.Stop();
         NlogHelper.Info($"获取所有Mqtt配置耗时：{stopwatch.ElapsedMilliseconds}ms");

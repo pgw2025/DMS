@@ -2,6 +2,7 @@ using DMS.Core.Models;
 using SqlSugar;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DMS.Infrastructure.Entities;
 
 namespace DMS.Infrastructure.Interfaces
 {
