@@ -34,27 +34,54 @@ public class MqttAliasAppService : IMqttAliasAppService
 
     public async Task<int> CreateMqttAliasAsync(VariableMqttAliasDto mqttAliasDto)
     {
-        var mqttAlias = _mapper.Map<VariableMqttAlias>(mqttAliasDto);
-        await _repoManager.VariableMqttAliases.AddAsync(mqttAlias);
-        await _repoManager.CommitAsync();
-        return mqttAlias.Id;
+        try
+        {
+            _repoManager.BeginTranAsync();
+            var mqttAlias = _mapper.Map<VariableMqttAlias>(mqttAliasDto);
+            await _repoManager.VariableMqttAliases.AddAsync(mqttAlias);
+            await _repoManager.CommitAsync();
+            return mqttAlias.Id;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("创建MQTT别名时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task UpdateMqttAliasAsync(VariableMqttAliasDto mqttAliasDto)
     {
-        var mqttAlias = await _repoManager.VariableMqttAliases.GetByIdAsync(mqttAliasDto.Id);
-        if (mqttAlias == null)
+        try
         {
-            throw new ApplicationException($"MQTT Alias with ID {mqttAliasDto.Id} not found.");
+            _repoManager.BeginTranAsync();
+            var mqttAlias = await _repoManager.VariableMqttAliases.GetByIdAsync(mqttAliasDto.Id);
+            if (mqttAlias == null)
+            {
+                throw new ApplicationException($"MQTT Alias with ID {mqttAliasDto.Id} not found.");
+            }
+            _mapper.Map(mqttAliasDto, mqttAlias);
+            await _repoManager.VariableMqttAliases.UpdateAsync(mqttAlias);
+            await _repoManager.CommitAsync();
         }
-        _mapper.Map(mqttAliasDto, mqttAlias);
-        await _repoManager.VariableMqttAliases.UpdateAsync(mqttAlias);
-        await _repoManager.CommitAsync();
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("更新MQTT别名时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task DeleteMqttAliasAsync(int id)
     {
-        await _repoManager.VariableMqttAliases.DeleteAsync(id);
-        await _repoManager.CommitAsync();
+        try
+        {
+            _repoManager.BeginTranAsync();
+            await _repoManager.VariableMqttAliases.DeleteAsync(id);
+            await _repoManager.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("删除MQTT别名时发生错误，操作已回滚。", ex);
+        }
     }
 }

@@ -13,11 +13,11 @@ using DMS.Infrastructure.Repositories;
 
 namespace DMS.Infrastructure.Services
 {
-    public class VarDataService : BaseService<Variable, DbVariable, VarDataRepository>
+    public class VarDataService : BaseService<Variable, DbVariable, VariableRepository>
     {
         private readonly IMapper _mapper;
 
-        public VarDataService(IMapper mapper, VarDataRepository repository) : base(mapper, repository)
+        public VarDataService(IMapper mapper, VariableRepository repository) : base(mapper, repository)
         {
             _mapper = mapper;
         }

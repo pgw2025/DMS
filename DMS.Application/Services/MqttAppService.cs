@@ -34,27 +34,54 @@ public class MqttAppService : IMqttAppService
 
     public async Task<int> CreateMqttServerAsync(MqttServerDto mqttServerDto)
     {
-        var mqttServer = _mapper.Map<MqttServer>(mqttServerDto);
-        await _repoManager.MqttServers.AddAsync(mqttServer);
-        await _repoManager.CommitAsync();
-        return mqttServer.Id;
+        try
+        {
+            _repoManager.BeginTranAsync();
+            var mqttServer = _mapper.Map<MqttServer>(mqttServerDto);
+            await _repoManager.MqttServers.AddAsync(mqttServer);
+            await _repoManager.CommitAsync();
+            return mqttServer.Id;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("创建MQTT服务器时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task UpdateMqttServerAsync(MqttServerDto mqttServerDto)
     {
-        var mqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServerDto.Id);
-        if (mqttServer == null)
+        try
         {
-            throw new ApplicationException($"MQTT Server with ID {mqttServerDto.Id} not found.");
+            _repoManager.BeginTranAsync();
+            var mqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServerDto.Id);
+            if (mqttServer == null)
+            {
+                throw new ApplicationException($"MQTT Server with ID {mqttServerDto.Id} not found.");
+            }
+            _mapper.Map(mqttServerDto, mqttServer);
+            await _repoManager.MqttServers.UpdateAsync(mqttServer);
+            await _repoManager.CommitAsync();
         }
-        _mapper.Map(mqttServerDto, mqttServer);
-        await _repoManager.MqttServers.UpdateAsync(mqttServer);
-        await _repoManager.CommitAsync();
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("更新MQTT服务器时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task DeleteMqttServerAsync(int id)
     {
-        await _repoManager.MqttServers.DeleteAsync(id);
-        await _repoManager.CommitAsync();
+        try
+        {
+            _repoManager.BeginTranAsync();
+            await _repoManager.MqttServers.DeleteAsync(id);
+            await _repoManager.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("删除MQTT服务器时发生错误，操作已回滚。", ex);
+        }
     }
 }

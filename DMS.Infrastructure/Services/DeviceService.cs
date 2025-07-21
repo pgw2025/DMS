@@ -4,7 +4,6 @@ using DMS.Core.Models;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
 using DMS.Infrastructure.Repositories;
-using DMS.Infrastructure.Interfaces;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using DMS.Core.Interfaces;
+using DMS.Core.Interfaces.Repositories;
 
 namespace DMS.Infrastructure.Services
 {
@@ -19,7 +20,7 @@ namespace DMS.Infrastructure.Services
     {
         private readonly IDeviceRepository _deviceRepository;
         private readonly IMenuRepository _menuRepository;
-        private readonly IVarTableRepository _varTableRepository;
+        private readonly IVariableTableRepository _variableTableRepository;
         private readonly IMapper _mapper;
 
 
@@ -60,7 +61,7 @@ namespace DMS.Infrastructure.Services
             //    dbVariableTable.Description = "默认变量表";
             //    dbVariableTable.DeviceId = addDevice.Id;
             //    dbVariableTable.ProtocolType = addDevice.ProtocolType;
-            //   var dbAddVarTable= await _varTableRepository.AddAsync(dbVariableTable);
+            //   var dbAddVarTable= await _variableTableRepository.AddAsync(dbVariableTable);
             //    if (addDevice.VariableTables==null)
             //    {
             //        addDevice.VariableTables= new List<DbVariableTable>(); 

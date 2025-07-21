@@ -15,17 +15,17 @@ namespace DMS.Infrastructure.Services
         where TRepository : BaseRepository<TEntity>
     {
         protected readonly IMapper _mapper;
-        protected readonly TRepository _repository;
+        protected readonly TRepository ServerRepository;
 
         /// <summary>
         /// 初始化 BaseService 的新实例。
         /// </summary>
         /// <param name="mapper">AutoMapper 实例，用于对象映射。</param>
-        /// <param name="repository">仓储实例，用于数据访问。</param>
-        protected BaseService(IMapper mapper, TRepository repository)
+        /// <param name="serverRepository">仓储实例，用于数据访问。</param>
+        protected BaseService(IMapper mapper, TRepository serverRepository)
         {
             _mapper = mapper;
-            _repository = repository;
+            ServerRepository = serverRepository;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace DMS.Infrastructure.Services
         public virtual async Task<TEntity> AddAsync(TModel model)
         {
             var entity = _mapper.Map<TEntity>(model);
-            return await _repository.AddAsync(entity);
+            return await ServerRepository.AddAsync(entity);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace DMS.Infrastructure.Services
         public virtual async Task<int> UpdateAsync(TModel model)
         {
             var entity = _mapper.Map<TEntity>(model);
-            return await _repository.UpdateAsync(entity);
+            return await ServerRepository.UpdateAsync(entity);
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace DMS.Infrastructure.Services
         public virtual async Task<int> DeleteAsync(TModel model)
         {
             var entity = _mapper.Map<TEntity>(model);
-            return await _repository.DeleteAsync(entity);
+            return await ServerRepository.DeleteAsync(entity);
         }
     }
 }

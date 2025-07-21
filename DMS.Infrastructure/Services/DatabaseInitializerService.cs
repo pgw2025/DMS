@@ -7,10 +7,11 @@ using SqlSugar;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DMS.Core.Interfaces;
 
 namespace DMS.Infrastructure.Services
 {
-    public class DatabaseInitializerService : DMS.Infrastructure.Interfaces.IDatabaseService
+    public class DatabaseInitializerService : IDatabaseService
     {
         private readonly SqlSugarClient _db;
 

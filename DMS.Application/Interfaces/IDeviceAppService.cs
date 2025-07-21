@@ -1,5 +1,6 @@
 using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces;
 
@@ -33,7 +34,7 @@ public interface IDeviceAppService
     /// <summary>
     /// 异步删除一个设备。
     /// </summary>
-    Task DeleteDeviceAsync(int id);
+    Task DeleteDeviceAsync(Device device);
 
     /// <summary>
     /// 异步切换设备的激活状态。

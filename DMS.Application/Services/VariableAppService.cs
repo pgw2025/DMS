@@ -34,27 +34,54 @@ public class VariableAppService : IVariableAppService
 
     public async Task<int> CreateVariableAsync(VariableDto variableDto)
     {
-        var variable = _mapper.Map<Variable>(variableDto);
-        await _repoManager.Variables.AddAsync(variable);
-        await _repoManager.CommitAsync();
-        return variable.Id;
+        try
+        {
+            _repoManager.BeginTranAsync();
+            var variable = _mapper.Map<Variable>(variableDto);
+            await _repoManager.Variables.AddAsync(variable);
+            await _repoManager.CommitAsync();
+            return variable.Id;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("创建变量时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task UpdateVariableAsync(VariableDto variableDto)
     {
-        var variable = await _repoManager.Variables.GetByIdAsync(variableDto.Id);
-        if (variable == null)
+        try
         {
-            throw new ApplicationException($"Variable with ID {variableDto.Id} not found.");
+            _repoManager.BeginTranAsync();
+            var variable = await _repoManager.Variables.GetByIdAsync(variableDto.Id);
+            if (variable == null)
+            {
+                throw new ApplicationException($"Variable with ID {variableDto.Id} not found.");
+            }
+            _mapper.Map(variableDto, variable);
+            await _repoManager.Variables.UpdateAsync(variable);
+            await _repoManager.CommitAsync();
         }
-        _mapper.Map(variableDto, variable);
-        await _repoManager.Variables.UpdateAsync(variable);
-        await _repoManager.CommitAsync();
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("更新变量时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task DeleteVariableAsync(int id)
     {
-        await _repoManager.Variables.DeleteAsync(id);
-        await _repoManager.CommitAsync();
+        try
+        {
+            _repoManager.BeginTranAsync();
+            await _repoManager.Variables.DeleteAsync(id);
+            await _repoManager.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("删除变量时发生错误，操作已回滚。", ex);
+        }
     }
 }

@@ -5,9 +5,9 @@ using DMS.Infrastructure.Repositories;
 
 namespace DMS.Infrastructure.Services;
 
-public class VarTableService : BaseService<VariableTable, DbVariableTable, VarTableRepository>
+public class VarTableService : BaseService<VariableTable, DbVariableTable, VariableTableRepository>
 {
-    public VarTableService(IMapper mapper, VarTableRepository repository) : base(mapper, repository)
+    public VarTableService(IMapper mapper, VariableTableRepository repository) : base(mapper, repository)
     {
     }
 }

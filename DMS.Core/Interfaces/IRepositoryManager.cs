@@ -1,3 +1,5 @@
+using DMS.Core.Interfaces.Repositories;
+
 namespace DMS.Core.Interfaces;
 
 /// <summary>
@@ -10,47 +12,47 @@ public interface IRepositoryManager : IDisposable
     /// 获取设备仓储的实例。
     /// 所有通过此管理器获取的仓储都共享同一个数据库上下文和事务。
     /// </summary>
-    IDeviceRepository Devices { get; }
+    IDeviceRepository Devices { get; set; }
 
     /// <summary>
     /// 获取变量表仓储的实例。
     /// </summary>
-    IVariableTableRepository VariableTables { get; }
+    IVariableTableRepository VariableTables { get; set; }
 
     /// <summary>
     /// 获取变量仓储的实例。
     /// </summary>
-    IVariableRepository Variables { get; }
+    IVariableRepository Variables { get; set; }
 
     /// <summary>
     /// 获取MQTT服务器仓储的实例。
     /// </summary>
-    IMqttServerRepository MqttServers { get; }
+    IMqttServerRepository MqttServers { get; set; }
 
     /// <summary>
     /// 获取变量MQTT别名仓储的实例。
     /// </summary>
-    IVariableMqttAliasRepository VariableMqttAliases { get; }
+    IVariableMqttAliasRepository VariableMqttAliases { get; set; }
 
     /// <summary>
     /// 获取菜单仓储的实例。
     /// </summary>
-    IMenuRepository Menus { get; }
+    IMenuRepository Menus { get; set; }
 
     /// <summary>
     /// 获取变量历史仓储的实例。
     /// </summary>
-    IVariableHistoryRepository VariableHistories { get; }
+    IVariableHistoryRepository VariableHistories { get; set; }
 
     /// <summary>
     /// 获取用户仓储的实例。
     /// </summary>
-    IUserRepository Users { get; }
+    IUserRepository Users { get; set; }
 
     /// <summary>
     /// 开始一个新的数据库事务。
     /// </summary>
-    void BeginTransaction();
+    Task BeginTranAsync();
 
     /// <summary>
     /// 异步提交当前事务中的所有变更。

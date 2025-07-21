@@ -1,9 +1,9 @@
 using AutoMapper;
-using DMS.Core.Interfaces;
 using DMS.Core.Models;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Interfaces;
 
 namespace DMS.Application.Services;
 
@@ -49,7 +49,7 @@ public class DeviceAppService : IDeviceAppService
     {
         try
         {
-            _repoManager.BeginTransaction();
+            _repoManager.BeginTranAsync();
 
             var device = _mapper.Map<Device>(dto.Device);
             device.IsActive = true; // 默认激活
@@ -101,9 +101,9 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 异步删除一个设备。
     /// </summary>
-    public async Task DeleteDeviceAsync(int id)
+    public async Task DeleteDeviceAsync(Device device)
     {
-        await _repoManager.Devices.DeleteAsync(id);
+        await _repoManager.Devices.DeleteAsync(device);
         await _repoManager.CommitAsync();
     }
 
@@ -127,7 +127,7 @@ public class DeviceAppService : IDeviceAppService
     /// </summary>
     public async Task<List<DeviceDto>> GetDevicesByProtocolAsync(ProtocolType protocol)
     {
-        var devices = await _repoManager.Devices.GetActiveDevicesWithDetailsAsync(protocol);
+        var devices = await _repoManager.Devices.GetAllAsync();
         return _mapper.Map<List<DeviceDto>>(devices);
     }
 }

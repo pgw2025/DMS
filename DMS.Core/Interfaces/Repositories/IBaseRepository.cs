@@ -1,4 +1,4 @@
-namespace DMS.Core.Interfaces;
+namespace DMS.Core.Interfaces.Repositories;
 
 /// <summary>
 /// 提供泛型数据访问操作的基础仓储接口。
@@ -23,17 +23,17 @@ public interface IBaseRepository<T> where T : class
     /// 异步添加一个新实体。
     /// </summary>
     /// <param name="entity">要添加的实体。</param>
-    Task AddAsync(T entity);
+    Task<T> AddAsync(T entity);
 
     /// <summary>
     /// 异步更新一个已存在的实体。
     /// </summary>
     /// <param name="entity">要更新的实体。</param>
-    Task UpdateAsync(T entity);
+    Task<int> UpdateAsync(T entity);
 
     /// <summary>
     /// 异步根据ID删除一个实体。
     /// </summary>
     /// <param name="id">要删除的实体的主键ID。</param>
-    Task DeleteAsync(int id);
+    Task<int> DeleteAsync(T entity);
 }

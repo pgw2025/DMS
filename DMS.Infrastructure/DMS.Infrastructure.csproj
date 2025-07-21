@@ -24,4 +24,8 @@
     <ProjectReference Include="..\DMS.Core\DMS.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+  </ItemGroup>
+
 </Project>

@@ -1,49 +1,43 @@
 using System.Diagnostics;
-using SqlSugar;
 using AutoMapper;
-using DMS.Infrastructure.Entities;
-using DMS.Core.Enums;
 using DMS.Core.Helper;
+using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
-using DMS.Infrastructure.Interfaces;
+using DMS.Infrastructure.Entities;
 
 namespace DMS.Infrastructure.Repositories;
 
-public class MenuRepository : BaseRepository<DbMenu>,IMenuRepository
+public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
 {
-    public MenuRepository(SqlSugarDbContext dbContext)
+    private readonly IMapper _mapper;
+
+    public MenuRepository(IMapper mapper, SqlSugarDbContext dbContext)
         : base(dbContext)
     {
+        _mapper = mapper;
     }
 
-    public async Task<List<DbMenu>> GetMenuTreesAsync()
+
+    public async Task<List<MenuBean>> GetMenuTreesAsync()
     {
-        Stopwatch stopwatch = new Stopwatch();
+        var stopwatch = new Stopwatch();
         stopwatch.Start();
         var dbMenuTree = await Db.Queryable<DbMenu>()
                                  .ToTreeAsync(dm => dm.Childrens, dm => dm.ParentId, 0);
         stopwatch.Stop();
         NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return dbMenuTree;
+        return _mapper.Map<List<MenuBean>>(dbMenuTree);
     }
 
 
-    // /// <summary>
-    // /// 编辑菜单,支持事务
-    // /// </summary>
-    // /// <param name="menu"></param>
-    // /// <returns></returns>
-    //
-    // public async Task<DbMenu?> GetMenuByDataIdAsync(int dataId, MenuType menuType)
-    // {
-    //     Stopwatch stopwatch = new Stopwatch();
-    //     stopwatch.Start();
-    //     var result = await Db.Queryable<DbMenu>()
-    //                          .FirstAsync(m => m.DataId == dataId && m.Type == menuType);
-    //     stopwatch.Stop();
-    //     NlogHelper.Info($"根据DataId '{dataId}' 和 MenuType '{menuType}' 获取菜单耗时：{stopwatch.ElapsedMilliseconds}ms");
-    //     return result;
-    // }
+    public async Task<MenuBean> GetByIdAsync(int id) => throw new NotImplementedException();
 
+    public async Task<List<MenuBean>> GetAllAsync() => throw new NotImplementedException();
+
+    public async Task<MenuBean> AddAsync(MenuBean entity) => throw new NotImplementedException();
+
+    public async Task<int> UpdateAsync(MenuBean entity) => throw new NotImplementedException();
+
+    public async Task<int> DeleteAsync(MenuBean entity) => throw new NotImplementedException();
 }

@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
-
-namespace DMS.Infrastructure.Interfaces
+namespace DMS.Core.Interfaces
 {
     public interface IDatabaseService
     {

@@ -34,27 +34,54 @@ public class MenuService : IMenuService
 
     public async Task<int> CreateMenuAsync(MenuBeanDto menuDto)
     {
-        var menu = _mapper.Map<MenuBean>(menuDto);
-        await _repoManager.Menus.AddAsync(menu);
-        await _repoManager.CommitAsync();
-        return menu.Id;
+        try
+        {
+            _repoManager.BeginTranAsync();
+            var menu = _mapper.Map<MenuBean>(menuDto);
+            await _repoManager.Menus.AddAsync(menu);
+            await _repoManager.CommitAsync();
+            return menu.Id;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("创建菜单时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task UpdateMenuAsync(MenuBeanDto menuDto)
     {
-        var menu = await _repoManager.Menus.GetByIdAsync(menuDto.Id);
-        if (menu == null)
+        try
         {
-            throw new ApplicationException($"Menu with ID {menuDto.Id} not found.");
+            _repoManager.BeginTranAsync();
+            var menu = await _repoManager.Menus.GetByIdAsync(menuDto.Id);
+            if (menu == null)
+            {
+                throw new ApplicationException($"Menu with ID {menuDto.Id} not found.");
+            }
+            _mapper.Map(menuDto, menu);
+            await _repoManager.Menus.UpdateAsync(menu);
+            await _repoManager.CommitAsync();
         }
-        _mapper.Map(menuDto, menu);
-        await _repoManager.Menus.UpdateAsync(menu);
-        await _repoManager.CommitAsync();
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("更新菜单时发生错误，操作已回滚。", ex);
+        }
     }
 
     public async Task DeleteMenuAsync(int id)
     {
-        await _repoManager.Menus.DeleteAsync(id);
-        await _repoManager.CommitAsync();
+        try
+        {
+            _repoManager.BeginTranAsync();
+            await _repoManager.Menus.DeleteAsync(id);
+            await _repoManager.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("删除菜单时发生错误，操作已回滚。", ex);
+        }
     }
 }

@@ -1,56 +1,21 @@
-using AutoMapper;
-using DMS.Core.Models;
-using DMS.Infrastructure.Interfaces;
 using System.Diagnostics;
-using DMS.Infrastructure.Entities;
+using DMS.Core.Interfaces.Repositories;
+using DMS.Core.Models;
 using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Entities;
 
 namespace DMS.Infrastructure.Repositories;
 
 /// <summary>
-/// VariableData仓储类，用于操作DbVariableData实体
+///     VariableData仓储类，用于操作DbVariableData实体
 /// </summary>
-public class VarDataRepository : BaseRepository<DbVariable>
+public class VariableRepository : BaseRepository<DbVariable>, IVariableRepository
 {
-    public VarDataRepository(SqlSugarDbContext dbContext)
+    public VariableRepository(SqlSugarDbContext dbContext)
         : base(dbContext)
     {
     }
 
-    
-
-    public override async Task<List<DbVariable>> GetAllAsync()
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await Db.Queryable<DbVariable>()
-                             .ToListAsync();
-        stopwatch.Stop();
-        //NlogHelper.Info($"获取所有VariableData耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
-
-    public async Task<List<DbVariable>> GetByVariableTableIdAsync(int varTableId)
-    {
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
-        var result = await Db.Queryable<DbVariable>()
-                             .Where(d => d.VariableTableId == varTableId)
-                             .ToListAsync();
-        stopwatch.Stop();
-        //NlogHelper.Info($"获取变量表的所有变量{result.Count()}个耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result;
-    }
-
-    
-
-
-
-
-    // public VarDataRepository(IMapper _mapper)
-    // {
-    //     _mapper = _mapper;
-    // }
 
     /*
     /// <summary>
@@ -134,4 +99,13 @@ public class VarDataRepository : BaseRepository<DbVariable>
         }
     }
 */
+    public async Task<Variable> GetByIdAsync(int id) => throw new NotImplementedException();
+
+    public async Task<List<Variable>> GetAllAsync() => throw new NotImplementedException();
+
+    public async Task<Variable> AddAsync(Variable entity) => throw new NotImplementedException();
+
+    public async Task<int> UpdateAsync(Variable entity) => throw new NotImplementedException();
+
+    public async Task<int> DeleteAsync(Variable entity) => throw new NotImplementedException();
 }
