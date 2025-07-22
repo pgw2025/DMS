@@ -5,18 +5,16 @@ using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Profiles;
 using DMS.Infrastructure.Repositories;
 using DMS.Infrastructure.Services;
-using JetBrains.Annotations;
 
 namespace DMS.Infrastructure.UnitTests.Services;
 
-[TestSubject(typeof(DeviceService))]
-public class DeviceServiceTest
+public class VariableTableServieTest
 {
-    private readonly DeviceRepository _deviceRepository;
-    private readonly DeviceService _deviceService;
+    private readonly VariableTableRepository _variableTableRepository;
+    private readonly VariableTableService _variableTableService;
     private readonly IMapper _mapper;
 
-    public DeviceServiceTest()
+    public VariableTableServieTest()
     {
         // 1. 创建 MapperConfiguration
         var mappingConfig = new MapperConfiguration(mc =>
@@ -37,37 +35,37 @@ public class DeviceServiceTest
         AppSettings appSettings = new AppSettings();
         appSettings.Database.Database = "dms_test";
         SqlSugarDbContext dbContext = new SqlSugarDbContext(appSettings);
-       _deviceRepository= new DeviceRepository(_mapper,dbContext);
-        _deviceService = new DeviceService(_deviceRepository);
+        _variableTableRepository= new VariableTableRepository(_mapper,dbContext);
+        _variableTableService = new VariableTableService(_variableTableRepository);
     }
 
     [Fact]
     public async Task AddAsync_Test()
     {
-        var dbDevice = FakerHelper.FakeDbDevice();
-       var addDevice= await _deviceService.AddAsync(_mapper.Map<Device>(dbDevice));
-       Assert.NotEqual(0, addDevice.Id);
+        // var dbDevice = FakerHelper
+        // var addDevice= await _variableTableService.AddAsync(_mapper.Map<Device>(dbDevice));
+        // Assert.NotEqual(0, addDevice.Id);
     }
     
     [Fact]
     public async Task TakeAsync_Test()
     {
-        var device= await _deviceService.TakeAsync(2);
+        var device= await _variableTableService.TakeAsync(2);
         Assert.Equal(2,device.Count);
     }  
     [Fact]
     public async Task UpdateAsync_Test()
     {
-        var devices= await _deviceService.TakeAsync(1);
-        devices[0].IpAddress = "127.0.0.1";
-        var res= await _deviceService.UpdateAsync(devices[0]);
+        var devices= await _variableTableService.TakeAsync(1);
+        // devices[0].IpAddress = "127.0.0.1";
+        var res= await _variableTableService.UpdateAsync(devices[0]);
         Assert.Equal(1,res);
     } 
     [Fact]
     public async Task DeleteAsync_Test()
     {
-        var devices= await _deviceService.TakeAsync(1);
-        var res= await _deviceService.DeleteAsync(devices[0]);
+        var devices= await _variableTableService.TakeAsync(1);
+        var res= await _variableTableService.DeleteAsync(devices[0]);
         Assert.Equal(1,res);
     }
 }

@@ -28,16 +28,16 @@ namespace DMS.Infrastructure.UnitTests
             return dbDevice;
         }
 
-        // public static DbVariableTable FakeDbVariableTable()
-        // {
-        //     var dbVarTable = new Faker<DbVariableTable>()
-        //           .RuleFor(d => d.Name, f => f.Commerce.ProductName())
-        //           .RuleFor(d => d.Description, f => f.Commerce.ProductDescription())
-        //           .Generate();
-        //     dbVarTable.ProtocolType = Core.Enums.ProtocolType.S7;
-        //     dbVarTable.IsActive=true;
-        //     return dbVarTable;
-        // }
+        public static DbVariableTable FakeDbVariableTable()
+        {
+            var dbVarTable = new Faker<DbVariableTable>()
+                  .RuleFor(d => d.Name, f => f.Commerce.ProductName())
+                  .RuleFor(d => d.Description, f => f.Commerce.ProductDescription())
+                  .Generate();
+            dbVarTable.Protocol = ProtocolType.S7;
+            dbVarTable.IsActive=true;
+            return dbVarTable;
+        }
 
         // public static DbVariable FakeDbVariable()
         // {
