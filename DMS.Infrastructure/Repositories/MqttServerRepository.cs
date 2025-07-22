@@ -53,4 +53,11 @@ public class MqttServerRepository : BaseRepository<DbMqttServer>, IMqttServerRep
         NlogHelper.Info($"Delete {typeof(MqttServer)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
+    
+    public new async Task<List<MqttServer>> TakeAsync(int number)
+    {
+        var dbList = await base.TakeAsync(number);
+        return _mapper.Map<List<MqttServer>>(dbList);
+
+    }
 }

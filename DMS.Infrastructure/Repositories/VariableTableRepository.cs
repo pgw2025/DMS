@@ -56,4 +56,11 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
         NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
+    
+    public new async Task<List<VariableTable>> TakeAsync(int number)
+    {
+        var dbList = await base.TakeAsync(number);
+        return _mapper.Map<List<VariableTable>>(dbList);
+
+    }
 }

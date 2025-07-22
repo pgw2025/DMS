@@ -51,4 +51,11 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
         NlogHelper.Info($"Delete {typeof(DbDevice)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
+
+    public new async Task<List<Device>> TakeAsync(int number)
+    {
+        var dbList = await base.TakeAsync(number);
+        return _mapper.Map<List<Device>>(dbList);
+
+    }
 }

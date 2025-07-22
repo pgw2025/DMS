@@ -56,4 +56,12 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
         NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
+    
+    
+    public new async Task<List<VariableHistory>> TakeAsync(int number)
+    {
+        var dbList = await base.TakeAsync(number);
+        return _mapper.Map<List<VariableHistory>>(dbList);
+
+    }
 }

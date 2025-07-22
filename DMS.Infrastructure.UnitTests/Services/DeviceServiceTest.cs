@@ -48,4 +48,11 @@ public class DeviceServiceTest
        var addDevice= await _deviceService.AddAsync(_mapper.Map<Device>(dbDevice));
        Assert.NotEqual(0, addDevice.Id);
     }
+    
+    [Fact]
+    public async Task TakeAsync_Test()
+    {
+        var device= await _deviceService.TakeAsync(2);
+        Assert.Equal(2,device.Count);
+    }
 }

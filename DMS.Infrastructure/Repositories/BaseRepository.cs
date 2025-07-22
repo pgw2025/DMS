@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 using DMS.Core.Helper;
+using DMS.Core.Models;
 using DMS.Infrastructure.Data;
 using SqlSugar;
 
@@ -161,5 +162,16 @@ public abstract class BaseRepository<TEntity>
     public async Task RollbackTranAsync()
     {
         await Db.RollbackTranAsync();
+    }
+
+    protected async Task<List<TEntity>> TakeAsync(int number)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var entity = await Db.Queryable<TEntity>().Take(number).ToListAsync();
+                            
+        stopwatch.Stop();
+        NlogHelper.Info($"TakeAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return entity;
     }
 }

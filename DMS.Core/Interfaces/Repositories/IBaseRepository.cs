@@ -42,4 +42,10 @@ public interface IBaseRepository<T> where T : class
     /// </summary>
     /// <param name="id">要删除的实体的主键ID。</param>
     Task<int> DeleteAsync(int id);
+    
+    /// <summary>
+    /// 从数据库获取数据。
+    /// </summary>
+    /// <param name="number">从数据库获取数据的条数</param>
+    Task<List<T>> TakeAsync(int number);
 }

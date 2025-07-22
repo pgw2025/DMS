@@ -66,5 +66,9 @@ namespace DMS.Infrastructure.Services
         {
             return await ServerRepository.GetByIdAsync(id);
         }
+        public virtual async Task<List<TModel>> TakeAsync(int number)
+        {
+            return await ServerRepository.TakeAsync(number);
+        }
     }
 }

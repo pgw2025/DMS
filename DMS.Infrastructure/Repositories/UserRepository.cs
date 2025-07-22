@@ -64,4 +64,11 @@ public class UserRepository : BaseRepository<DbUser>, IUserRepository
         NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
+    
+    public new async Task<List<User>> TakeAsync(int number)
+    {
+        var dbList = await base.TakeAsync(number);
+        return _mapper.Map<List<User>>(dbList);
+
+    }
 }
