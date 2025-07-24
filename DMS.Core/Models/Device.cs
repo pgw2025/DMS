@@ -41,12 +41,12 @@ public class Device
     /// <summary>
     /// S7 PLC的机架号。
     /// </summary>
-    public int Rack { get; set; }
+    public short Rack { get; set; }
 
     /// <summary>
     /// S7 PLC的槽号。
     /// </summary>
-    public int Slot { get; set; }
+    public short Slot { get; set; }
 
     /// <summary>
     /// OPC UA 服务器地址 (仅当 Protocol 为 OpcUa 时有效)。
@@ -65,4 +65,5 @@ public class Device
 
     public string CpuType { get; set; }
     public DeviceType DeviceType { get; set; }
+    public bool IsRuning { get; set; }
 }

@@ -111,7 +111,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<IDbContext,SqlSugarDbContext>();
 
 
-        services.AddSingleton<DataServices>();
+        services.AddSingleton<IDeviceDataService, DeviceDataService>();
         services.AddSingleton<NavgatorServices>();
         //services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<GrowlNotificationService>();

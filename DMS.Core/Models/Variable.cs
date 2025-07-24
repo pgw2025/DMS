@@ -140,4 +140,7 @@ public class Variable
     /// 指示变量是否被修改。
     /// </summary>
     public bool IsModified { get; set; }
+
+    public PollLevelType PollLevelType { get; set; }
+    public DateTime UpdateTime { get; set; }
 }
