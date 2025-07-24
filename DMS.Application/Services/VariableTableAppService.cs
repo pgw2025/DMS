@@ -9,29 +9,53 @@ using DMS.Core.Enums;
 
 namespace DMS.Application.Services
 {
+    /// <summary>
+    /// 变量表应用服务，负责处理变量表相关的业务逻辑。
+    /// 实现 <see cref="IVariableTableAppService"/> 接口。
+    /// </summary>
     public class VariableTableAppService : IVariableTableAppService
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
 
+        /// <summary>
+        /// 构造函数，注入仓储管理器和AutoMapper。
+        /// </summary>
+        /// <param name="repositoryManager">仓储管理器实例。</param>
+        /// <param name="mapper">AutoMapper 实例。</param>
         public VariableTableAppService(IRepositoryManager repositoryManager, IMapper mapper)
         {
             _repositoryManager = repositoryManager;
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// 异步根据ID获取变量表。
+        /// </summary>
+        /// <param name="id">变量表ID。</param>
+        /// <returns>变量表数据传输对象。</returns>
         public async Task<VariableTableDto> GetVariableTableByIdAsync(int id)
         {
             var variableTable = await _repositoryManager.VariableTables.GetByIdAsync(id);
             return _mapper.Map<VariableTableDto>(variableTable);
         }
 
+        /// <summary>
+        /// 异步获取所有变量表。
+        /// </summary>
+        /// <returns>变量表数据传输对象列表。</returns>
         public async Task<List<VariableTableDto>> GetAllVariableTablesAsync()
         {
             var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
             return _mapper.Map<List<VariableTableDto>>(variableTables);
         }
 
+        /// <summary>
+        /// 异步创建变量表，并可选择性地创建关联菜单。
+        /// </summary>
+        /// <param name="createDto">包含变量表和菜单信息的创建数据传输对象。</param>
+        /// <returns>创建后的变量表数据传输对象。</returns>
+        /// <exception cref="ApplicationException">如果添加变量表失败或找不到设备菜单。</exception>
         public async Task<VariableTableDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto createDto)
         {
             await _repositoryManager.BeginTranAsync();
@@ -48,6 +72,7 @@ namespace DMS.Application.Services
 
                 if (createDto.Menu!=null)
                 {
+                    // 获取设备菜单，作为变量表菜单的父级
                     var deviceMenu
                         = await _repositoryManager.Menus.GetMenuByTargetIdAsync(
                             MenuType.DeviceMenu, createDto.DeviceId);
@@ -56,6 +81,7 @@ namespace DMS.Application.Services
                         throw new ApplicationException($"添加变量表菜单时，找不到设备ID:{createDto.DeviceId},请检查。");
                     }
 
+                    // 映射菜单实体并设置关联信息
                     var menu = _mapper.Map<MenuBean>(createDto.Menu);
                     menu.ParentId = deviceMenu.Id;
                     menu.TargetId = createdVariableTable.Id;
@@ -76,12 +102,22 @@ namespace DMS.Application.Services
             }
         }
 
+        /// <summary>
+        /// 异步更新变量表。
+        /// </summary>
+        /// <param name="variableTableDto">要更新的变量表数据传输对象。</param>
+        /// <returns>表示异步操作的任务。</returns>
         public async Task UpdateVariableTableAsync(VariableTableDto variableTableDto)
         {
             var variableTable = _mapper.Map<VariableTable>(variableTableDto);
             await _repositoryManager.VariableTables.UpdateAsync(variableTable);
         }
 
+        /// <summary>
+        /// 异步根据ID删除变量表。
+        /// </summary>
+        /// <param name="id">要删除的变量表ID。</param>
+        /// <returns>表示异步操作的任务。</returns>
         public async Task DeleteVariableTableAsync(int id)
         {
             await _repositoryManager.VariableTables.DeleteByIdAsync(id);

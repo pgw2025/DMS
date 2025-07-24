@@ -8,7 +8,8 @@ using DMS.Core.Interfaces;
 namespace DMS.Application.Services;
 
 /// <summary>
-/// 实现设备管理的应用服务。
+/// 设备应用服务，负责处理设备相关的业务逻辑。
+/// 实现 <see cref="IDeviceAppService"/> 接口。
 /// </summary>
 public class DeviceAppService : IDeviceAppService
 {
@@ -18,6 +19,8 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 构造函数，通过依赖注入获取仓储管理器和AutoMapper实例。
     /// </summary>
+    /// <param name="repoManager">仓储管理器实例。</param>
+    /// <param name="mapper">AutoMapper 实例。</param>
     public DeviceAppService(IRepositoryManager repoManager, IMapper mapper)
     {
         _repoManager = repoManager;
@@ -25,8 +28,10 @@ public class DeviceAppService : IDeviceAppService
     }
 
     /// <summary>
-    /// 异步根据ID获取设备DTO。
+    /// 异步根据ID获取设备数据传输对象。
     /// </summary>
+    /// <param name="id">设备ID。</param>
+    /// <returns>设备数据传输对象。</returns>
     public async Task<DeviceDto> GetDeviceByIdAsync(int id)
     {
         var device = await _repoManager.Devices.GetByIdAsync(id);
@@ -34,8 +39,9 @@ public class DeviceAppService : IDeviceAppService
     }
 
     /// <summary>
-    /// 异步获取所有设备DTO列表。
+    /// 异步获取所有设备数据传输对象列表。
     /// </summary>
+    /// <returns>设备数据传输对象列表。</returns>
     public async Task<List<DeviceDto>> GetAllDevicesAsync()
     {
         var devices = await _repoManager.Devices.GetAllAsync();
@@ -45,6 +51,10 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 异步创建一个新设备及其关联的变量表和菜单（事务性操作）。
     /// </summary>
+    /// <param name="dto">包含设备、变量表和菜单信息的创建数据传输对象。</param>
+    /// <returns>新创建设备的ID。</returns>
+    /// <exception cref="InvalidOperationException">如果添加设备、设备菜单或变量表失败。</exception>
+    /// <exception cref="ApplicationException">如果创建设备时发生其他错误。</exception>
     public async Task<int> CreateDeviceWithDetailsAsync(CreateDeviceWithDetailsDto dto)
     {
         try
@@ -65,7 +75,7 @@ public class DeviceAppService : IDeviceAppService
             if (dto.DeviceMenu != null)
             {
                 var deviceMenu = _mapper.Map<MenuBean>(dto.DeviceMenu);
-                deviceMenu.ParentId = 2;
+                deviceMenu.ParentId = 2; // 假设父菜单ID为2
                 deviceMenu.MenuType = MenuType.DeviceMenu;
                 deviceMenu.TargetId = addDevice.Id;
                 addDeviceMenu = await _repoManager.Menus.AddAsync(deviceMenu);
@@ -92,7 +102,7 @@ public class DeviceAppService : IDeviceAppService
                 if (dto.VariableTableMenu != null)
                 {
                     var menu = _mapper.Map<MenuBean>(dto.VariableTableMenu);
-                    menu.ParentId = addDeviceMenu.Id;
+                    menu.ParentId = addDeviceMenu.Id; // 关联设备菜单作为父级
                     menu.MenuType = MenuType.VariableTableMenu;
                     menu.TargetId = addVariableTable.Id;
                     var addVariableTableMenu = await _repoManager.Menus.AddAsync(menu);
@@ -119,6 +129,9 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 异步更新一个已存在的设备。
     /// </summary>
+    /// <param name="deviceDto">要更新的设备数据传输对象。</param>
+    /// <returns>受影响的行数。</returns>
+    /// <exception cref="ApplicationException">如果找不到设备。</exception>
     public async Task<int> UpdateDeviceAsync(UpdateDeviceDto deviceDto)
     {
         await _repoManager.BeginTranAsync();
@@ -137,11 +150,20 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 异步删除一个设备。
     /// </summary>
+    /// <param name="device">要删除的设备实体。</param>
+    /// <returns>表示异步操作的任务。</returns>
     public async Task DeleteDeviceAsync(Device device)
     {
        await DeleteDeviceByIdAsync(device.Id);
     }
 
+    /// <summary>
+    /// 异步根据ID删除一个设备，包括其关联的变量表和菜单（事务性操作）。
+    /// </summary>
+    /// <param name="deviceId">要删除设备的ID。</param>
+    /// <returns>如果删除成功则为 true，否则为 false。</returns>
+    /// <exception cref="InvalidOperationException">如果删除设备失败。</exception>
+    /// <exception cref="ApplicationException">如果删除设备时发生其他错误。</exception>
     public async Task<bool> DeleteDeviceByIdAsync(int deviceId)
     {
         try
@@ -153,8 +175,10 @@ public class DeviceAppService : IDeviceAppService
                 throw new InvalidOperationException($"删除设备失败：设备ID:{deviceId}，请检查设备Id是否存在");
             }
 
+            // 删除关联的变量表
             await _repoManager.VariableTables.DeleteByDeviceIdAsync(deviceId);
             
+            // 删除关联的菜单树
             await _repoManager.Menus.DeleteMenuTreeByTargetIdAsync(MenuType.DeviceMenu,deviceId);
 
             await _repoManager.CommitAsync();
@@ -172,6 +196,9 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 异步切换设备的激活状态。
     /// </summary>
+    /// <param name="id">设备的ID。</param>
+    /// <returns>表示异步操作的任务。</returns>
+    /// <exception cref="ApplicationException">如果找不到设备。</exception>
     public async Task ToggleDeviceActiveStateAsync(int id)
     {
         var device = await _repoManager.Devices.GetByIdAsync(id);
@@ -188,6 +215,8 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 异步获取指定协议类型的设备列表。
     /// </summary>
+    /// <param name="protocol">协议类型。</param>
+    /// <returns>设备数据传输对象列表。</returns>
     public async Task<List<DeviceDto>> GetDevicesByProtocolAsync(ProtocolType protocol)
     {
         var devices = await _repoManager.Devices.GetAllAsync();
