@@ -143,4 +143,5 @@ public class Variable
 
     public PollLevelType PollLevelType { get; set; }
     public DateTime UpdateTime { get; set; }
+    public OpcUaUpdateType OpcUaUpdateType { get; set; }
 }

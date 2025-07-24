@@ -117,10 +117,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<GrowlNotificationService>();
         services.AddHostedService<S7BackgroundService>();
         services.AddHostedService<OpcUaBackgroundService>();
-        services.AddSingleton<MqttBackgroundService>();
-        services.AddSingleton<ChannelBusService>();
-        services.AddHostedService(provider => provider.GetRequiredService<MqttBackgroundService>());
-        services.AddSingleton<OpcUaBackgroundService>();
+        services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();
+        
         
         // 注册 AutoMapper
         services.AddAutoMapper(typeof(App).Assembly);

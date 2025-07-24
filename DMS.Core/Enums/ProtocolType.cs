@@ -16,5 +16,6 @@ public enum ProtocolType
     /// <summary>
     /// Modbus TCP 协议。
     /// </summary>
-    ModbusTcp
+    ModbusTcp,
+    OpcUA
 }
