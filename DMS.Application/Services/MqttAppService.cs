@@ -75,7 +75,7 @@ public class MqttAppService : IMqttAppService
         try
         {
             _repoManager.BeginTranAsync();
-            await _repoManager.MqttServers.DeleteAsync(id);
+            await _repoManager.MqttServers.DeleteByIdAsync(id);
             await _repoManager.CommitAsync();
         }
         catch (Exception ex)

@@ -41,7 +41,7 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
 
     public async Task<int> DeleteAsync(Core.Models.Device model) => await base.DeleteAsync(_mapper.Map<DbDevice>(model));
 
-    public async Task<int> DeleteAsync(int id)
+    public async Task<int> DeleteByIdAsync(int id)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();

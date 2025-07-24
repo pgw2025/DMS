@@ -38,4 +38,14 @@ public class DeviceServiceTest : BaseServiceTest // 继承基类
         // Assert
         Assert.NotEqual(0, addedDeviceId);
     }
+
+    [Fact]
+    public async Task DeleteDeviceAsyncTest()
+    {
+        // Act
+        var isSuccess = await _deviceService.DeleteDeviceByIdAsync(4);
+
+        // Assert
+        Assert.Equal(isSuccess,true);
+    }
 }

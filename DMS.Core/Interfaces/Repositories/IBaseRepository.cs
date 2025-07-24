@@ -41,7 +41,7 @@ public interface IBaseRepository<T> where T : class
     /// 异步根据ID删除一个实体。
     /// </summary>
     /// <param name="id">要删除的实体的主键ID。</param>
-    Task<int> DeleteAsync(int id);
+    Task<int> DeleteByIdAsync(int id);
     
     /// <summary>
     /// 从数据库获取数据。

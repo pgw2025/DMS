@@ -75,7 +75,7 @@ public class VariableAppService : IVariableAppService
         try
         {
             _repoManager.BeginTranAsync();
-            await _repoManager.Variables.DeleteAsync(id);
+            await _repoManager.Variables.DeleteByIdAsync(id);
             await _repoManager.CommitAsync();
         }
         catch (Exception ex)

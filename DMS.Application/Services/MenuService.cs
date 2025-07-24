@@ -75,7 +75,7 @@ public class MenuService : IMenuService
         try
         {
             _repoManager.BeginTranAsync();
-            await _repoManager.Menus.DeleteAsync(id);
+            await _repoManager.Menus.DeleteByIdAsync(id);
             await _repoManager.CommitAsync();
         }
         catch (Exception ex)

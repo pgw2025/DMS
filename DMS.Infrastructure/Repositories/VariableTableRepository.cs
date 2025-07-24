@@ -46,7 +46,7 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
 
     public async Task<int> DeleteAsync(VariableTable entity) => await base.DeleteAsync(_mapper.Map<DbVariableTable>(entity));
     
-    public async Task<int> DeleteAsync(int id)
+    public async Task<int> DeleteByIdAsync(int id)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -62,5 +62,17 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
         var dbList = await base.TakeAsync(number);
         return _mapper.Map<List<VariableTable>>(dbList);
 
+    }
+
+    public async Task<int> DeleteByDeviceIdAsync(int deviceId)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Deleteable<DbVariableTable>()
+                             .Where(it => it.DeviceId == deviceId)
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        NlogHelper.Info($"Delete VariableTable by DeviceId={deviceId}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
     }
 }

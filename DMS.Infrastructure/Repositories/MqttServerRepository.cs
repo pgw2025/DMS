@@ -43,7 +43,7 @@ public class MqttServerRepository : BaseRepository<DbMqttServer>, IMqttServerRep
 
     public async Task<int> DeleteAsync(MqttServer entity) => await base.DeleteAsync(_mapper.Map<DbMqttServer>(entity));
     
-    public async Task<int> DeleteAsync(int id)
+    public async Task<int> DeleteByIdAsync(int id)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();

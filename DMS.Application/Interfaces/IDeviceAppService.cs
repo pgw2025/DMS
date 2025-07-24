@@ -35,6 +35,11 @@ public interface IDeviceAppService
     /// 异步删除一个设备。
     /// </summary>
     Task DeleteDeviceAsync(Device device);
+    
+    /// <summary>
+    /// 异步删除一个设备。
+    /// </summary>
+    Task<bool> DeleteDeviceByIdAsync(int deviceId);
 
     /// <summary>
     /// 异步切换设备的激活状态。

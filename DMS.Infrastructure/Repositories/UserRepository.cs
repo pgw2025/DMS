@@ -54,7 +54,7 @@ public class UserRepository : BaseRepository<DbUser>, IUserRepository
 
     public async Task<int> DeleteAsync(User entity) => await base.DeleteAsync(_mapper.Map<DbUser>(entity));
     
-    public async Task<int> DeleteAsync(int id)
+    public async Task<int> DeleteByIdAsync(int id)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();

@@ -75,7 +75,7 @@ public class MqttAliasAppService : IMqttAliasAppService
         try
         {
             _repoManager.BeginTranAsync();
-            await _repoManager.VariableMqttAliases.DeleteAsync(id);
+            await _repoManager.VariableMqttAliases.DeleteByIdAsync(id);
             await _repoManager.CommitAsync();
         }
         catch (Exception ex)
