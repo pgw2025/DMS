@@ -114,13 +114,41 @@ namespace DMS.Application.Services
         }
 
         /// <summary>
-        /// 异步根据ID删除变量表。
+        /// 异步根据ID删除变量表，包括其关联的变量、MQTT别名和菜单（事务性操作）。
         /// </summary>
         /// <param name="id">要删除的变量表ID。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        public async Task DeleteVariableTableAsync(int id)
+        /// <returns>如果删除成功则为 true，否则为 false。</returns>
+        /// <exception cref="InvalidOperationException">如果删除变量表失败。</exception>
+        /// <exception cref="ApplicationException">如果删除变量表时发生其他错误。</exception>
+        public async Task<bool> DeleteVariableTableAsync(int id)
         {
-            await _repositoryManager.VariableTables.DeleteByIdAsync(id);
+            try
+            {
+                await _repositoryManager.BeginTranAsync();
+                var delRes = await _repositoryManager.VariableTables.DeleteByIdAsync(id);
+                if (delRes == 0)
+                {
+                    throw new InvalidOperationException($"删除变量表失败：变量表ID:{id}，请检查变量表Id是否存在");
+                }
+
+                // 删除关联的变量
+                await _repositoryManager.Variables.DeleteByIdAsync(id);
+
+                // 删除关联的MQTT别名
+                // await _repositoryManager.VariableMqttAlias.DeleteByVariableTableIdAsync(id);
+
+                // 删除关联的菜单树
+                await _repositoryManager.Menus.DeleteMenuTreeByTargetIdAsync(MenuType.VariableTableMenu, id);
+
+                await _repositoryManager.CommitAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await _repositoryManager.RollbackAsync();
+                // 可以在此记录日志
+                throw new ApplicationException($"删除变量表时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
+            }
         }
     }
 }

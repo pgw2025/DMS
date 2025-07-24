@@ -11,6 +11,6 @@ namespace DMS.Application.Interfaces
         Task<List<VariableTableDto>> GetAllVariableTablesAsync();
         Task<VariableTableDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto createDto);
         Task UpdateVariableTableAsync(VariableTableDto variableTableDto);
-        Task DeleteVariableTableAsync(int id);
+        Task<bool> DeleteVariableTableAsync(int id);
     }
 }
