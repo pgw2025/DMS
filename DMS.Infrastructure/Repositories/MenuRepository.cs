@@ -101,6 +101,12 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
         return delConut;
     }
 
+    public async Task<MenuBean> GetMenuByTargetIdAsync(MenuType menuType, int targetId)
+    {
+        var dbMenu = await Db.Queryable<DbMenu>().FirstAsync(m => m.MenuType == menuType && m.TargetId == targetId);
+        return _mapper.Map<MenuBean>(dbMenu);
+    }
+
     public new async Task<List<MenuBean>> TakeAsync(int number)
     {
         var dbList = await base.TakeAsync(number);

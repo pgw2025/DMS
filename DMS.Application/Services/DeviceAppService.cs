@@ -10,7 +10,7 @@ namespace DMS.Application.Services;
 /// <summary>
 /// 实现设备管理的应用服务。
 /// </summary>
-public class DeviceService : IDeviceAppService
+public class DeviceAppService : IDeviceAppService
 {
     private readonly IRepositoryManager _repoManager;
     private readonly IMapper _mapper;
@@ -18,7 +18,7 @@ public class DeviceService : IDeviceAppService
     /// <summary>
     /// 构造函数，通过依赖注入获取仓储管理器和AutoMapper实例。
     /// </summary>
-    public DeviceService(IRepositoryManager repoManager, IMapper mapper)
+    public DeviceAppService(IRepositoryManager repoManager, IMapper mapper)
     {
         _repoManager = repoManager;
         _mapper = mapper;

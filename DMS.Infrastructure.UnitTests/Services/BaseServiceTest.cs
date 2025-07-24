@@ -49,7 +49,8 @@ public class BaseServiceTest
         services.AddTransient<IInitializeRepository, InitializeRepository>();
 
         // 注册应用服务
-        services.AddTransient<IDeviceAppService, DeviceService>();
+        services.AddTransient<IDeviceAppService, DeviceAppService>();
+        services.AddTransient<IVariableTableAppService, VariableTableAppService>();
         // services.AddTransient<IVariableAppService, VariableAppService>(); // 如果需要测试 VariableService，取消此行注释
         // ... 在这里注册所有其他的应用服务 ...
 

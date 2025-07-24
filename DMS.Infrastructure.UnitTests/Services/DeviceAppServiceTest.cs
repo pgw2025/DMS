@@ -6,12 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.Infrastructure.UnitTests.Services;
 
-[TestSubject(typeof(DeviceService))]
-public class DeviceServiceTest : BaseServiceTest // 继承基类
+[TestSubject(typeof(DeviceAppService))]
+public class DeviceAppServiceTest : BaseServiceTest // 继承基类
 {
     private readonly IDeviceAppService _deviceService;
 
-    public DeviceServiceTest() : base()
+    public DeviceAppServiceTest() : base()
     {
         // 从 IoC 容器中解析出需要测试的服务
         // 使用 GetRequiredService 可以确保如果服务未注册，测试会立即失败，这通常是我们想要的。
