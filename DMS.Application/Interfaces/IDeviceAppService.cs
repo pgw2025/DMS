@@ -29,7 +29,7 @@ public interface IDeviceAppService
     /// <summary>
     /// 异步更新一个已存在的设备。
     /// </summary>
-    Task UpdateDeviceAsync(UpdateDeviceDto deviceDto);
+    Task<int> UpdateDeviceAsync(UpdateDeviceDto deviceDto);
 
     /// <summary>
     /// 异步删除一个设备。

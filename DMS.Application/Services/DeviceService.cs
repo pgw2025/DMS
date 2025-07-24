@@ -119,8 +119,9 @@ public class DeviceService : IDeviceAppService
     /// <summary>
     /// 异步更新一个已存在的设备。
     /// </summary>
-    public async Task UpdateDeviceAsync(UpdateDeviceDto deviceDto)
+    public async Task<int> UpdateDeviceAsync(UpdateDeviceDto deviceDto)
     {
+        await _repoManager.BeginTranAsync();
         var device = await _repoManager.Devices.GetByIdAsync(deviceDto.Id);
         if (device == null)
         {
@@ -128,8 +129,9 @@ public class DeviceService : IDeviceAppService
         }
 
         _mapper.Map(deviceDto, device);
-        await _repoManager.Devices.UpdateAsync(device);
+        int res=await _repoManager.Devices.UpdateAsync(device);
         await _repoManager.CommitAsync();
+        return res;
     }
 
     /// <summary>
