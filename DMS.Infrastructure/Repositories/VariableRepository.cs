@@ -9,12 +9,18 @@ using DMS.Infrastructure.Entities;
 namespace DMS.Infrastructure.Repositories;
 
 /// <summary>
-///     VariableData仓储类，用于操作DbVariableData实体
+/// 变量仓储实现类，负责变量数据的持久化操作。
+/// 继承自 <see cref="BaseRepository{DbVariable}"/> 并实现 <see cref="IVariableRepository"/> 接口。
 /// </summary>
 public class VariableRepository : BaseRepository<DbVariable>, IVariableRepository
 {
     private readonly IMapper _mapper;
 
+    /// <summary>
+    /// 构造函数，注入 AutoMapper 和 SqlSugarDbContext。
+    /// </summary>
+    /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
+    /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
     public VariableRepository(IMapper mapper, SqlSugarDbContext dbContext)
         : base(dbContext)
     {
@@ -24,7 +30,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
 
     /*
     /// <summary>
-    /// 为变量添加MQTT服务器关联，并指定别名。
+    /// 为变量添加MQTT服务器关联，并指定别名。（此方法当前被注释，可能为待实现或废弃功能）
     /// </summary>
     /// <param name="variableMqttList"></param>
     /// <param name="variableDatas">要添加MQTT服务器的变量数据列表。</param>
@@ -104,40 +110,74 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
         }
     }
 */
+    /// <summary>
+    /// 异步根据ID获取单个变量。
+    /// </summary>
+    /// <param name="id">变量的唯一标识符。</param>
+    /// <returns>对应的变量实体，如果不存在则为null。</returns>
     public async Task<Variable> GetByIdAsync(int id)
     {
         var dbVariable = await base.GetByIdAsync(id);
         return _mapper.Map<Variable>(dbVariable);
     }
 
+    /// <summary>
+    /// 异步获取所有变量。
+    /// </summary>
+    /// <returns>包含所有变量实体的列表。</returns>
     public async Task<List<Variable>> GetAllAsync()
     {
         var dbList = await base.GetAllAsync();
         return _mapper.Map<List<Variable>>(dbList);
     }
 
+    /// <summary>
+    /// 异步添加新变量。
+    /// </summary>
+    /// <param name="entity">要添加的变量实体。</param>
+    /// <returns>添加成功后的变量实体（包含数据库生成的ID等信息）。</returns>
     public async Task<Variable> AddAsync(Variable entity)
     {
         var dbVariable = await base.AddAsync(_mapper.Map<DbVariable>(entity));
         return _mapper.Map(dbVariable, entity);
     }
 
+    /// <summary>
+    /// 异步更新现有变量。
+    /// </summary>
+    /// <param name="entity">要更新的变量实体。</param>
+    /// <returns>受影响的行数。</returns>
     public async Task<int> UpdateAsync(Variable entity) => await base.UpdateAsync(_mapper.Map<DbVariable>(entity));
 
+    /// <summary>
+    /// 异步删除变量。
+    /// </summary>
+    /// <param name="entity">要删除的变量实体。</param>
+    /// <returns>受影响的行数。</returns>
     public async Task<int> DeleteAsync(Variable entity) => await base.DeleteAsync(_mapper.Map<DbVariable>(entity));
     
     
+    /// <summary>
+    /// 异步根据ID删除变量。
+    /// </summary>
+    /// <param name="id">要删除变量的唯一标识符。</param>
+    /// <returns>受影响的行数。</returns>
     public async Task<int> DeleteByIdAsync(int id)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new Variable() { Id = id })
+        var result = await Db.Deleteable(new DbVariable() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        NlogHelper.Info($"Delete {typeof(DbVariable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     
+    /// <summary>
+    /// 异步获取指定数量的变量。
+    /// </summary>
+    /// <param name="number">要获取的变量数量。</param>
+    /// <returns>包含指定数量变量实体的列表。</returns>
     public new async Task<List<Variable>> TakeAsync(int number)
     {
         var dbList = await base.TakeAsync(number);

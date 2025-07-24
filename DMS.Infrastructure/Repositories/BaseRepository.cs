@@ -8,7 +8,7 @@ using SqlSugar;
 namespace DMS.Infrastructure.Repositories;
 
 /// <summary>
-///     通用仓储基类，封装了对实体对象的常用 CRUD 操作。
+/// 通用仓储基类，封装了对实体对象的常用 CRUD 操作。
 /// </summary>
 /// <typeparam name="TEntity">实体类型，必须是引用类型且具有无参构造函数。</typeparam>
 public abstract class BaseRepository<TEntity>
@@ -18,16 +18,16 @@ public abstract class BaseRepository<TEntity>
 
 
     /// <summary>
-    ///     初始化 BaseRepository 的新实例。
+    /// 初始化 BaseRepository 的新实例。
     /// </summary>
-    /// <param name="dbContext">事务管理对象，通过依赖注入提供。</param>
+    /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
     protected BaseRepository(SqlSugarDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
     /// <summary>
-    ///     获取当前事务的 SqlSugarClient 实例，用于数据库操作。
+    /// 获取当前事务的 SqlSugarClient 实例，用于数据库操作。
     /// </summary>
     protected SqlSugarClient Db
     {
@@ -35,7 +35,7 @@ public abstract class BaseRepository<TEntity>
     }
 
     /// <summary>
-    ///     异步添加一个新实体。
+    /// 异步添加一个新实体。
     /// </summary>
     /// <param name="entity">要添加的实体对象。</param>
     /// <returns>返回已添加的实体对象（可能包含数据库生成的主键等信息）。</returns>
@@ -51,7 +51,7 @@ public abstract class BaseRepository<TEntity>
     }
 
     /// <summary>
-    ///     异步更新一个现有实体。
+    /// 异步更新一个现有实体。
     /// </summary>
     /// <param name="entity">要更新的实体对象。</param>
     /// <returns>返回受影响的行数。</returns>
@@ -67,7 +67,7 @@ public abstract class BaseRepository<TEntity>
     }
 
     /// <summary>
-    ///     异步删除一个实体。
+    /// 异步删除一个实体。
     /// </summary>
     /// <param name="entity">要删除的实体对象。</param>
     /// <returns>返回受影响的行数。</returns>
@@ -84,7 +84,7 @@ public abstract class BaseRepository<TEntity>
     
 
     /// <summary>
-    ///     异步获取所有实体。
+    /// 异步获取所有实体。
     /// </summary>
     /// <returns>返回包含所有实体的列表。</returns>
     public virtual async Task<List<TEntity>> GetAllAsync()
@@ -100,7 +100,7 @@ public abstract class BaseRepository<TEntity>
 
 
     /// <summary>
-    ///     异步根据主键 ID 获取单个实体。
+    /// 异步根据主键 ID 获取单个实体。
     /// </summary>
     /// <param name="id">实体的主键 ID。</param>
     /// <returns>返回找到的实体，如果未找到则返回 null。</returns>
@@ -117,7 +117,7 @@ public abstract class BaseRepository<TEntity>
     }
 
     /// <summary>
-    ///     异步根据指定条件获取单个实体。
+    /// 异步根据指定条件获取单个实体。
     /// </summary>
     /// <param name="expression">查询条件的 Lambda 表达式。</param>
     /// <returns>返回满足条件的第一个实体，如果未找到则返回 null。</returns>
@@ -133,7 +133,7 @@ public abstract class BaseRepository<TEntity>
     }
 
     /// <summary>
-    ///     异步判断是否存在满足条件的实体。
+    /// 异步判断是否存在满足条件的实体。
     /// </summary>
     /// <param name="expression">查询条件的 Lambda 表达式。</param>
     /// <returns>如果存在则返回 true，否则返回 false。</returns>
@@ -148,22 +148,39 @@ public abstract class BaseRepository<TEntity>
         return result;
     }
 
+    /// <summary>
+    /// 异步开始数据库事务。
+    /// </summary>
+    /// <returns>表示异步操作的任务。</returns>
     public async Task BeginTranAsync()
     {
         await Db.BeginTranAsync();
     }
 
+    /// <summary>
+    /// 异步提交数据库事务。
+    /// </summary>
+    /// <returns>表示异步操作的任务。</returns>
     public async Task CommitTranAsync()
     {
         await Db.CommitTranAsync();
     }
 
 
+    /// <summary>
+    /// 异步回滚数据库事务。
+    /// </summary>
+    /// <returns>表示异步操作的任务。</returns>
     public async Task RollbackTranAsync()
     {
         await Db.RollbackTranAsync();
     }
 
+    /// <summary>
+    /// 异步获取指定数量的实体。
+    /// </summary>
+    /// <param name="number">要获取的实体数量。</param>
+    /// <returns>包含指定数量实体对象的列表。</returns>
     protected async Task<List<TEntity>> TakeAsync(int number)
     {
         var stopwatch = new Stopwatch();
