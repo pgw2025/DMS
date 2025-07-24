@@ -10,7 +10,7 @@ namespace DMS.Application.Interfaces
         Task<VariableTableDto> GetVariableTableByIdAsync(int id);
         Task<List<VariableTableDto>> GetAllVariableTablesAsync();
         Task<VariableTableDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto createDto);
-        Task UpdateVariableTableAsync(VariableTableDto variableTableDto);
+        Task<int> UpdateVariableTableAsync(VariableTableDto variableTableDto);
         Task<bool> DeleteVariableTableAsync(int id);
     }
 }

@@ -106,11 +106,30 @@ namespace DMS.Application.Services
         /// 异步更新变量表。
         /// </summary>
         /// <param name="variableTableDto">要更新的变量表数据传输对象。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        public async Task UpdateVariableTableAsync(VariableTableDto variableTableDto)
+        /// <returns>受影响的行数。</returns>
+        /// <exception cref="ApplicationException">如果找不到变量表。</exception>
+        public async Task<int> UpdateVariableTableAsync(VariableTableDto variableTableDto)
         {
-            var variableTable = _mapper.Map<VariableTable>(variableTableDto);
-            await _repositoryManager.VariableTables.UpdateAsync(variableTable);
+            try
+            {
+                await _repositoryManager.BeginTranAsync();
+                var variableTable = await _repositoryManager.VariableTables.GetByIdAsync(variableTableDto.Id);
+                if (variableTable == null)
+                {
+                    throw new ApplicationException($"VariableTable with ID {variableTableDto.Id} not found.");
+                }
+
+                _mapper.Map(variableTableDto, variableTable);
+                int res = await _repositoryManager.VariableTables.UpdateAsync(variableTable);
+                await _repositoryManager.CommitAsync();
+                return res;
+            }
+            catch (Exception ex)
+            {
+                await _repositoryManager.RollbackAsync();
+                // 可以在此记录日志
+                throw new ApplicationException($"更新变量表时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
+            }
         }
 
         /// <summary>
