@@ -18,28 +18,28 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
         _mapper = mapper;
     }
 
-    public async Task<List<Device>> GetAllAsync()
+    public async Task<List<Core.Models.Device>> GetAllAsync()
     {
         var dbList = await base.GetAllAsync();
-        return _mapper.Map<List<Device>>(dbList);
+        return _mapper.Map<List<Core.Models.Device>>(dbList);
     }
 
-    public async Task<Device> GetByIdAsync(int id)
+    public async Task<Core.Models.Device> GetByIdAsync(int id)
     {
         var dbDevice = await base.GetByIdAsync(id);
-        return _mapper.Map<Device>(dbDevice);
+        return _mapper.Map<Core.Models.Device>(dbDevice);
     }
 
-    public async Task<Device> AddAsync(Device model)
+    public async Task<Core.Models.Device> AddAsync(Core.Models.Device model)
     {
         var dbDevice = await base.AddAsync(_mapper.Map<DbDevice>(model));
         return _mapper.Map(dbDevice, model);
     }
 
-    public async Task<int> UpdateAsync(Device model) => await base.UpdateAsync(_mapper.Map<DbDevice>(model));
+    public async Task<int> UpdateAsync(Core.Models.Device model) => await base.UpdateAsync(_mapper.Map<DbDevice>(model));
 
 
-    public async Task<int> DeleteAsync(Device model) => await base.DeleteAsync(_mapper.Map<DbDevice>(model));
+    public async Task<int> DeleteAsync(Core.Models.Device model) => await base.DeleteAsync(_mapper.Map<DbDevice>(model));
 
     public async Task<int> DeleteAsync(int id)
     {
@@ -52,10 +52,10 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
         return result;
     }
 
-    public new async Task<List<Device>> TakeAsync(int number)
+    public new async Task<List<Core.Models.Device>> TakeAsync(int number)
     {
         var dbList = await base.TakeAsync(number);
-        return _mapper.Map<List<Device>>(dbList);
+        return _mapper.Map<List<Core.Models.Device>>(dbList);
 
     }
 }

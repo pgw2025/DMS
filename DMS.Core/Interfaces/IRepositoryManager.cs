@@ -50,6 +50,11 @@ public interface IRepositoryManager : IDisposable
     IUserRepository Users { get; set; }
 
     /// <summary>
+    /// 初始化数据库
+    /// </summary>
+    IInitializeRepository InitializeRepository { get; set; }
+
+    /// <summary>
     /// 开始一个新的数据库事务。
     /// </summary>
     Task BeginTranAsync();

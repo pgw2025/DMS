@@ -1,73 +1,41 @@
-using AutoMapper;
-using DMS.Core.Models;
-using DMS.Infrastructure.Configurations;
-using DMS.Infrastructure.Data;
-using DMS.Infrastructure.Profiles;
-using DMS.Infrastructure.Repositories;
-using DMS.Infrastructure.Services;
+using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
+using DMS.Application.Services;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.Infrastructure.UnitTests.Services;
 
 [TestSubject(typeof(DeviceService))]
-public class DeviceServiceTest
+public class DeviceServiceTest : BaseServiceTest // 继承基类
 {
-    private readonly DeviceRepository _deviceRepository;
-    private readonly DeviceService _deviceService;
-    private readonly IMapper _mapper;
+    private readonly IDeviceAppService _deviceService;
 
-    public DeviceServiceTest()
+    public DeviceServiceTest() : base()
     {
-        // 1. 创建 MapperConfiguration
-        var mappingConfig = new MapperConfiguration(mc =>
+        // 从 IoC 容器中解析出需要测试的服务
+        // 使用 GetRequiredService 可以确保如果服务未注册，测试会立即失败，这通常是我们想要的。
+        _deviceService = ServiceProvider.GetRequiredService<IDeviceAppService>();
+    }
 
+    [Fact]
+    public async Task CreateDeviceWithDetailsAsyncTest()
+    {
+        // Arrange
+        var dto = new CreateDeviceWithDetailsDto
         {
-            // 添加你的所有 Profile
-            mc.AddProfile(new MappingProfile());
-            // 如果有其他 Profile，也可以在这里添加
-            // mc.AddProfile(new AnotherProfile());
-        });
+            Device = FakerHelper.FakeCreateDeviceDto(),
+            VariableTable = FakerHelper.FakeVariableTableDto(),
+            DeviceMenu = FakerHelper.FakeCreateMenuDto(),
+            VariableTableMenu = FakerHelper.FakeCreateMenuDto()
+            
+            // ... 填充其他需要的数据
+        };
 
-        // 2. 验证映射配置是否有效 (可选，但在开发环境中推荐)
-        mappingConfig.AssertConfigurationIsValid();
-        // 3. 创建 IMapper 实例
-        _mapper = mappingConfig.CreateMapper();
+        // Act
+        var addedDeviceId = await _deviceService.CreateDeviceWithDetailsAsync(dto);
 
-
-        AppSettings appSettings = new AppSettings();
-        appSettings.Database.Database = "dms_test";
-        SqlSugarDbContext dbContext = new SqlSugarDbContext(appSettings);
-       _deviceRepository= new DeviceRepository(_mapper,dbContext);
-        _deviceService = new DeviceService(_deviceRepository);
-    }
-
-    [Fact]
-    public async Task AddAsync_Test()
-    {
-        var dbDevice = FakerHelper.FakeDbDevice();
-       var addDevice= await _deviceService.AddAsync(_mapper.Map<Device>(dbDevice));
-       Assert.NotEqual(0, addDevice.Id);
-    }
-    
-    [Fact]
-    public async Task TakeAsync_Test()
-    {
-        var device= await _deviceService.TakeAsync(2);
-        Assert.Equal(2,device.Count);
-    }  
-    [Fact]
-    public async Task UpdateAsync_Test()
-    {
-        var devices= await _deviceService.TakeAsync(1);
-        devices[0].IpAddress = "127.0.0.1";
-        var res= await _deviceService.UpdateAsync(devices[0]);
-        Assert.Equal(1,res);
-    } 
-    [Fact]
-    public async Task DeleteAsync_Test()
-    {
-        var devices= await _deviceService.TakeAsync(1);
-        var res= await _deviceService.DeleteAsync(devices[0]);
-        Assert.Equal(1,res);
+        // Assert
+        Assert.NotEqual(0, addedDeviceId);
     }
 }

@@ -17,7 +17,7 @@ public class MappingProfile : Profile
 
         // --- 设备映射 (包含List的父对象) ---
         // AutoMapper 会自动使用上面的规则来处理 VariableTables 属性
-        CreateMap<DbDevice, Device>()
+        CreateMap<DbDevice, Core.Models.Device>()
             .ReverseMap();
 
         // --- 变量表映射 (List中的元素) ---

@@ -7,5 +7,7 @@ public class CreateDeviceWithDetailsDto
 {
     public CreateDeviceDto Device { get; set; }
     public VariableTableDto VariableTable { get; set; }
-    // public MenuBeanDto Menu { get; set; } // 如果需要包含菜单信息
+
+    public MenuBeanDto DeviceMenu { get; set; } // 如果需要包含菜单信息
+    public MenuBeanDto VariableTableMenu { get; set; } // 如果需要包含菜单信息
 }

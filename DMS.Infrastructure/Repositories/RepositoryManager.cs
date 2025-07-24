@@ -18,6 +18,7 @@ public class RepositoryManager : IRepositoryManager
         _dbContext = dbContext;
         _db = dbContext.GetInstance();
 
+        InitializeRepository=new InitializeRepository(dbContext);
         Devices = new DeviceRepository(mapper, dbContext);
         VariableTables = new VariableTableRepository(mapper, dbContext);
         Variables = new VariableRepository(mapper, dbContext);
@@ -41,6 +42,7 @@ public class RepositoryManager : IRepositoryManager
     public IMenuRepository Menus { get; set; }
     public IVariableHistoryRepository VariableHistories { get; set; }
     public IUserRepository Users { get; set; }
+    public IInitializeRepository  InitializeRepository { get; set; }
     public async Task BeginTranAsync() => await _db.BeginTranAsync();
 
     public async Task CommitAsync() => await _db.CommitTranAsync();

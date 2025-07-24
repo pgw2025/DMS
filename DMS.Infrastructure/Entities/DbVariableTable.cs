@@ -35,7 +35,7 @@ public class DbVariableTable
     /// 关联的设备
     /// </summary>
     [SugarColumn(IsIgnore = true)]
-    public DbDevice Device { get; set; }
+    public DbDevice DbDevice { get; set; }
     
     /// <summary>
     /// 协议类型

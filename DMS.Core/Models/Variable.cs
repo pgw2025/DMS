@@ -27,7 +27,7 @@ public class Variable
     /// <summary>
     /// 在设备中的地址 (例如: DB1.DBD0, M100.0)。
     /// </summary>
-    public string Address { get; set; }
+    public string S7Address { get; set; }
 
     /// <summary>
     /// 变量的信号类型，例如启动信号、停止信号。

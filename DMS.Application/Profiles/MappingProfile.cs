@@ -1,7 +1,6 @@
 using AutoMapper;
 using DMS.Core.Models;
 using DMS.Application.DTOs;
-using DMS.Core.Enums;
 
 namespace DMS.Application.Profiles;
 
@@ -13,10 +12,19 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         // Device 映射
-        CreateMap<CreateDeviceDto, Device>();
-        CreateMap<UpdateDeviceDto, Device>();
+        CreateMap<CreateDeviceDto, Device>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.VariableTables, opt => opt.Ignore());
+
+        CreateMap<UpdateDeviceDto, Device>()
+            .ForMember(dest => dest.Description, opt => opt.Ignore())
+            .ForMember(dest => dest.VariableTables, opt => opt.Ignore())
+            .ForMember(dest => dest.CpuType, opt => opt.Ignore())
+            .ForMember(dest => dest.DeviceType, opt => opt.Ignore());
+
         CreateMap<Device, DeviceDto>()
-            .ForMember(dest => dest.Protocol, opt => opt.MapFrom(src => src.Protocol.ToString()));
+            .ForMember(dest => dest.Protocol, opt => opt.MapFrom(src => src.Protocol.ToString()))
+            .ForMember(dest => dest.Status, opt => opt.Ignore());
 
         // VariableTable 映射
         CreateMap<VariableTable, VariableTableDto>().ReverseMap();
@@ -24,16 +32,16 @@ public class MappingProfile : Profile
         // Variable 映射
         CreateMap<Variable, VariableDto>()
             .ForMember(dest => dest.DataType, opt => opt.MapFrom(src => src.DataType.ToString()))
-            .ForMember(dest => dest.CSharpDataType, opt => opt.MapFrom(src => src.CSharpDataType));
+            .ForMember(dest => dest.CSharpDataType, opt => opt.MapFrom(src => src.CSharpDataType))
+            .ForMember(dest => dest.Address, opt => opt.Ignore());
 
         // MqttServer 映射
         CreateMap<MqttServer, MqttServerDto>().ReverseMap();
 
         // VariableMqttAlias 映射
-        CreateMap<VariableMqttAlias, VariableMqttAliasDto>().ReverseMap();
-
-        // VariableTable 映射
-        CreateMap<VariableTable, VariableTableDto>().ReverseMap();
+        CreateMap<VariableMqttAlias, VariableMqttAliasDto>()
+            .ForMember(dest => dest.MqttServerName, opt => opt.Ignore())
+            .ReverseMap();
 
         // VariableHistory 映射
         CreateMap<VariableHistory, VariableHistoryDto>().ReverseMap();

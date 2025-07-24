@@ -62,4 +62,7 @@ public class Device
     /// 此设备包含的变量表集合。
     /// </summary>
     public List<VariableTable> VariableTables { get; set; } = new();
+
+    public string CpuType { get; set; }
+    public DeviceType DeviceType { get; set; }
 }

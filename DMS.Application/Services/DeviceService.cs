@@ -49,37 +49,69 @@ public class DeviceService : IDeviceAppService
     {
         try
         {
-            _repoManager.BeginTranAsync();
+            await _repoManager.BeginTranAsync();
 
             var device = _mapper.Map<Device>(dto.Device);
             device.IsActive = true; // 默认激活
-            await _repoManager.Devices.AddAsync(device);
+            var addDevice = await _repoManager.Devices.AddAsync(device);
+            if (addDevice == null || addDevice.Id == 0)
+            {
+                throw new InvalidOperationException($"添加设备失败：{addDevice}");
+            }
+            
+            MenuBean addDeviceMenu = null;
+            
+            // 假设有设备菜单
+            if (dto.DeviceMenu != null)
+            {
+                var deviceMenu = _mapper.Map<MenuBean>(dto.DeviceMenu);
+                deviceMenu.ParentId = 2;
+                deviceMenu.MenuType = MenuType.DeviceMenu;
+                deviceMenu.TargetId = addDevice.Id;
+                addDeviceMenu=await _repoManager.Menus.AddAsync(deviceMenu);
+                if (addDeviceMenu == null || addDeviceMenu.Id == 0)
+                {
+                    throw new InvalidOperationException($"添加设备菜单失败：{addDeviceMenu}");
+                }
+            }
+            
 
             // 假设 CreateDeviceWithDetailsDto 包含了变量表和菜单信息
             if (dto.VariableTable != null)
             {
                 var variableTable = _mapper.Map<VariableTable>(dto.VariableTable);
                 variableTable.DeviceId = device.Id; // 关联新设备ID
-                await _repoManager.VariableTables.AddAsync(variableTable);
+                variableTable.Protocol=device.Protocol;
+                var addVariableTable = await _repoManager.VariableTables.AddAsync(variableTable);
+                if (addVariableTable == null || addVariableTable.Id == 0)
+                {
+                    throw new InvalidOperationException($"添加设备变量表失败,设备：{device.Name},变量表：{variableTable.Name}");
+                }
+
+                // 假设有设备菜单
+                if (dto.VariableTableMenu != null)
+                {
+                    var menu = _mapper.Map<MenuBean>(dto.VariableTableMenu);
+                    menu.ParentId = addDeviceMenu.Id;
+                    menu.MenuType = MenuType.VariableTableMenu;
+                    menu.TargetId = addVariableTable.Id;
+                   var addVariableTableMenu= await _repoManager.Menus.AddAsync(menu);
+                    if (addVariableTableMenu == null || addVariableTableMenu.Id == 0)
+                    {
+                        throw new InvalidOperationException($"添加设备变量表菜单失败,变量表：{variableTable.Name},变量表菜单：{menu.Header}");
+                    }
+                }
             }
-
-            // 假设有菜单服务或仓储
-            // if (dto.Menu != null)
-            // {
-            //     var menu = _mapper.Map<Menu>(dto.Menu);
-            //     menu.TargetId = device.Id;
-            //     await _repoManager.Menus.AddAsync(menu);
-            // }
-
+            
             await _repoManager.CommitAsync();
 
-            return device.Id;
+            return addDevice.Id;
         }
         catch (Exception ex)
         {
             await _repoManager.RollbackAsync();
             // 可以在此记录日志
-            throw new ApplicationException("创建设备时发生错误，操作已回滚。", ex);
+            throw new ApplicationException($"创建设备时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
         }
     }
 
@@ -93,6 +125,7 @@ public class DeviceService : IDeviceAppService
         {
             throw new ApplicationException($"Device with ID {deviceDto.Id} not found.");
         }
+
         _mapper.Map(deviceDto, device);
         await _repoManager.Devices.UpdateAsync(device);
         await _repoManager.CommitAsync();
@@ -117,6 +150,7 @@ public class DeviceService : IDeviceAppService
         {
             throw new ApplicationException($"Device with ID {id} not found.");
         }
+
         device.IsActive = !device.IsActive;
         await _repoManager.Devices.UpdateAsync(device);
         await _repoManager.CommitAsync();

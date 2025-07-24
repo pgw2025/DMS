@@ -1,20 +1,18 @@
-using DMS.Core.Interfaces;
+using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
 using SqlSugar;
 
-namespace DMS.Infrastructure.Services;
+namespace DMS.Infrastructure.Repositories;
 
-
-
-public class DatabaseService : IDatabaseService
+public class InitializeRepository : IInitializeRepository
 {
     private readonly SqlSugarDbContext _dbContext;
     private readonly SqlSugarClient _db;
 
-    public DatabaseService(SqlSugarDbContext dbContext)
+    public InitializeRepository(SqlSugarDbContext dbContext)
     {
         _dbContext = dbContext;
       _db = _dbContext.GetInstance();
