@@ -59,14 +59,14 @@ public class VariableAppService : IVariableAppService
         {
             await _repoManager.BeginTranAsync();
             var variable = _mapper.Map<Variable>(variableDto);
-            await _repoManager.Variables.AddAsync(variable);
+            var addedVariable = await _repoManager.Variables.AddAsync(variable);
             await _repoManager.CommitAsync();
-            return variable.Id;
+            return addedVariable.Id;
         }
         catch (Exception ex)
         {
             await _repoManager.RollbackAsync();
-            throw new ApplicationException("创建变量时发生错误，操作已回滚。", ex);
+            throw new ApplicationException($"创建变量时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
         }
     }
 
@@ -74,9 +74,9 @@ public class VariableAppService : IVariableAppService
     /// 异步更新一个已存在的变量（事务性操作）。
     /// </summary>
     /// <param name="variableDto">要更新的变量数据传输对象。</param>
-    /// <returns>表示异步操作的任务。</returns>
+    /// <returns>受影响的行数。</returns>
     /// <exception cref="ApplicationException">如果找不到变量或更新变量时发生错误。</exception>
-    public async Task UpdateVariableAsync(VariableDto variableDto)
+    public async Task<int> UpdateVariableAsync(VariableDto variableDto)
     {
         try
         {
@@ -87,13 +87,14 @@ public class VariableAppService : IVariableAppService
                 throw new ApplicationException($"Variable with ID {variableDto.Id} not found.");
             }
             _mapper.Map(variableDto, variable);
-            await _repoManager.Variables.UpdateAsync(variable);
+            int res = await _repoManager.Variables.UpdateAsync(variable);
             await _repoManager.CommitAsync();
+            return res;
         }
         catch (Exception ex)
         {
             await _repoManager.RollbackAsync();
-            throw new ApplicationException("更新变量时发生错误，操作已回滚。", ex);
+            throw new ApplicationException($"更新变量时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
         }
     }
 
@@ -101,20 +102,26 @@ public class VariableAppService : IVariableAppService
     /// 异步删除一个变量（事务性操作）。
     /// </summary>
     /// <param name="id">要删除变量的ID。</param>
-    /// <returns>表示异步操作的任务。</returns>
-    /// <exception cref="ApplicationException">如果删除变量时发生错误。</exception>
-    public async Task DeleteVariableAsync(int id)
+    /// <returns>如果删除成功则为 true，否则为 false。</returns>
+    /// <exception cref="InvalidOperationException">如果删除变量失败。</exception>
+    /// <exception cref="ApplicationException">如果删除变量时发生其他错误。</exception>
+    public async Task<bool> DeleteVariableAsync(int id)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            await _repoManager.Variables.DeleteByIdAsync(id);
+            var delRes = await _repoManager.Variables.DeleteByIdAsync(id);
+            if (delRes == 0)
+            {
+                throw new InvalidOperationException($"删除变量失败：变量ID:{id}，请检查变量Id是否存在");
+            }
             await _repoManager.CommitAsync();
+            return true;
         }
         catch (Exception ex)
         {
             await _repoManager.RollbackAsync();
-            throw new ApplicationException("删除变量时发生错误，操作已回滚。", ex);
+            throw new ApplicationException($"删除变量时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
         }
     }
 }

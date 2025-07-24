@@ -10,7 +10,11 @@ public class VariableDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public string Address { get; set; }
+    public string? S7Address { get; set; }
+    public string? DataValue { get; set; }
+    public string? DisplayValue { get; set; }
+    public VariableTableDto? VariableTable { get; set; }
+    public List<VariableMqttAliasDto>? MqttAliases { get; set; }
     public SignalType DataType { get; set; }
     public PollLevelType PollLevel { get; set; }
     public bool IsActive { get; set; }
@@ -29,4 +33,5 @@ public class VariableDto
     public DateTime UpdatedAt { get; set; }
     public string UpdatedBy { get; set; }
     public bool IsModified { get; set; }
+    public string Description { get; set; }
 }

@@ -45,7 +45,20 @@ public class MappingProfile : Profile
         CreateMap<Variable, VariableDto>()
             .ForMember(dest => dest.DataType, opt => opt.MapFrom(src => src.DataType.ToString()))
             .ForMember(dest => dest.CSharpDataType, opt => opt.MapFrom(src => src.CSharpDataType))
-            .ForMember(dest => dest.Address, opt => opt.Ignore());
+            .ForMember(dest => dest.S7Address, opt => opt.MapFrom(src => src.S7Address))
+            .ForMember(dest => dest.DataValue, opt => opt.MapFrom(src => src.DataValue))
+            .ForMember(dest => dest.DisplayValue, opt => opt.MapFrom(src => src.DisplayValue))
+            .ForMember(dest => dest.VariableTable, opt => opt.MapFrom(src => src.VariableTable))
+            .ForMember(dest => dest.MqttAliases, opt => opt.MapFrom(src => src.MqttAliases))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+
+        CreateMap<VariableDto, Variable>()
+            .ForMember(dest => dest.S7Address, opt => opt.MapFrom(src => src.S7Address))
+            .ForMember(dest => dest.VariableTable, opt => opt.Ignore())
+            .ForMember(dest => dest.MqttAliases, opt => opt.Ignore())
+            .ForMember(dest => dest.DataValue, opt => opt.Ignore())
+            .ForMember(dest => dest.DisplayValue, opt => opt.Ignore())
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
 
         // MqttServer 映射
         CreateMap<MqttServer, MqttServerDto>().ReverseMap();

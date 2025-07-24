@@ -27,7 +27,6 @@ public class MappingProfile : Profile
             .ReverseMap();
         
         CreateMap<DbVariable, Variable>()
-            .ForMember(dest => dest.Description, opt => opt.Ignore())
             .ForMember(dest => dest.VariableTable, opt => opt.Ignore())
             .ForMember(dest => dest.MqttAliases, opt => opt.Ignore())
             .ForMember(dest => dest.DataValue, opt => opt.Ignore())

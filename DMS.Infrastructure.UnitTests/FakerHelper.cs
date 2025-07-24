@@ -142,5 +142,31 @@ namespace DMS.Infrastructure.UnitTests
             return menuDto;
         }
 
+        public static VariableDto FakeVariableDto()
+        {
+            var variableDto = new Faker<VariableDto>()
+                              .RuleFor(v => v.Name, f => f.Commerce.ProductName())
+                              .RuleFor(v => v.S7Address, f => $"DB1.DBD{f.Random.Int(0, 1000)}")
+                              .RuleFor(v => v.DataType, f => f.PickRandom<SignalType>())
+                              .RuleFor(v => v.PollLevel, f => f.PickRandom<PollLevelType>())
+                              .RuleFor(v => v.IsActive, f => f.Random.Bool())
+                              .RuleFor(v => v.IsHistoryEnabled, f => f.Random.Bool())
+                              .RuleFor(v => v.HistoryDeadband, f => f.Random.Double(0.0, 1.0))
+                              .RuleFor(v => v.IsAlarmEnabled, f => f.Random.Bool())
+                              .RuleFor(v => v.AlarmMinValue, f => f.Random.Double(0.0, 50.0))
+                              .RuleFor(v => v.AlarmMaxValue, f => f.Random.Double(50.0, 100.0))
+                              .RuleFor(v => v.AlarmDeadband, f => f.Random.Double(0.0, 1.0))
+                              .RuleFor(v => v.Protocol, f => f.PickRandom<ProtocolType>())
+                              .RuleFor(v => v.CSharpDataType, f => f.PickRandom(Enum.GetValues<CSharpDataType>()))
+                              .RuleFor(v => v.OpcUaNodeId, f => $"ns=2;s=My.Variable{f.Random.Int(1, 100)}")
+                              .RuleFor(v => v.ConversionFormula, f => "x * 1.0")
+                              .RuleFor(v => v.UpdatedBy, f => f.Name.FullName())
+                              .RuleFor(v => v.DataValue, f => f.Random.Double(0, 100).ToString())
+                              .RuleFor(v => v.DisplayValue, f => f.Random.Word())
+                              .RuleFor(v => v.Description, f => f.Lorem.Sentence())
+                              .Generate();
+            variableDto.VariableTableId = 1; // Default to 1 for testing purposes
+            return variableDto;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SqlSugar;
+using SqlSugar.DbConvert;
 
 namespace DMS.Infrastructure.Entities;
 
@@ -7,7 +8,7 @@ public class DbVariable
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
     public int Id { get; set; }
     public string Name { get; set; }
-    public string Address { get; set; }
+    public string Description { get; set; }
     public int DataType { get; set; } // 对应 SignalType 枚举
     public int PollLevel { get; set; } // 对应 PollLevelType 枚举
     public bool IsActive { get; set; }
@@ -20,8 +21,10 @@ public class DbVariable
     public double AlarmMinValue { get; set; }
     public double AlarmMaxValue { get; set; }
     public double AlarmDeadband { get; set; }
-    public int Protocol { get; set; } // 对应 ProtocolType 枚举
-    public int CSharpDataType { get; set; } // 对应 CSharpDataType 枚举
+    [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
+    public ProtocolType Protocol { get; set; } // 对应 ProtocolType 枚举
+    [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
+    public CSharpDataType CSharpDataType { get; set; } // 对应 CSharpDataType 枚举
     public string ConversionFormula { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

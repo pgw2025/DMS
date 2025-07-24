@@ -25,10 +25,10 @@ public interface IVariableAppService
     /// <summary>
     /// 异步更新一个已存在的变量。
     /// </summary>
-    Task UpdateVariableAsync(VariableDto variableDto);
+    Task<int> UpdateVariableAsync(VariableDto variableDto);
 
     /// <summary>
     /// 异步删除一个变量。
     /// </summary>
-    Task DeleteVariableAsync(int id);
+    Task<bool> DeleteVariableAsync(int id);
 }
