@@ -31,7 +31,7 @@
         </ContextMenu>
         <DataTemplate x:Key="NavigationViewMenuItem"
                       DataType="{x:Type mo:MenuBean}">
-            <ui:NavigationViewItem Content="{Binding Name}"
+            <ui:NavigationViewItem Content="{Binding Header}"
                                    MenuItemsSource="{Binding Items }">
                 <ui:NavigationViewItem.Icon>
                     <ui:FontIcon Glyph="{Binding Icon}" />
@@ -60,7 +60,7 @@
                            IsBackButtonVisible="Collapsed"
                            IsBackEnabled="False"
                            SelectionFollowsFocus="Disabled"
-                           MenuItemsSource="{Binding Menus}"
+                           MenuItemsSource="{Binding DataServices.Menus}"
                            MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
                            SelectionChanged="NavigationView_SelectionChanged">
 

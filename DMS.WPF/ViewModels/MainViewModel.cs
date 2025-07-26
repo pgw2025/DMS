@@ -25,7 +25,7 @@ namespace DMS.WPF.ViewModels;
 /// </summary>
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly DataServices _dataServices;
+    public  DataServices DataServices { get; }
     private readonly IDialogService _dialogService;
     private readonly ILogger<MainViewModel> _logger;
 
@@ -48,10 +48,10 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="dataServices">数据服务。</param>
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="logger">日志记录器。</param>
-    public MainViewModel( 
+    public MainViewModel(DataServices dataServices,
                          ILogger<MainViewModel> logger)
     {
-        // _dataServices = dataServices;
+        DataServices = dataServices;
         _logger = logger;
 
         CurrentViewModel = new HomeViewModel();

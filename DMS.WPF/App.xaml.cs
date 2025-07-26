@@ -1,7 +1,9 @@
 ﻿using System.Windows;
+using AutoMapper.Internal;
 using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Core.Enums;
+using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Helper;
 using DMS.Services;
@@ -118,8 +120,16 @@ public partial class App : System.Windows.Application
         // services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();
         //
         
-        // 注册 AutoMapper
-        services.AddAutoMapper(typeof(App).Assembly);
+        // --- 核心配置 ---
+        services.AddAutoMapper(cfg =>
+        {
+            // 最终解决方案：根据异常信息的建议，设置此标记以忽略重复的Profile加载。
+            // 注意：此属性位于 Internal() 方法下。
+            cfg.Internal().AllowAdditiveTypeMapCreation = true;
+
+            cfg.AddProfile(new DMS.Application.Profiles.MappingProfile());
+            cfg.AddProfile(new DMS.Infrastructure.Profiles.MappingProfile());
+        });
 
         // 注册数据处理服务和处理器
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
@@ -132,14 +142,27 @@ public partial class App : System.Windows.Application
         
         // 注册Core中的仓库
         services.AddSingleton<AppSettings>();
-        services.AddSingleton<SqlSugarDbContext>();
+        // services.AddSingleton<SqlSugarDbContext>();
+        // 2. 配置数据库上下文 (在测试中通常使用单例)
+        services.AddSingleton<SqlSugarDbContext>(_ =>
+        {
+            var appSettings = new AppSettings { Database = { Database = "dms_test" } };
+            return new SqlSugarDbContext(appSettings);
+        });
+        
         services.AddSingleton<IInitializeRepository, InitializeRepository>();
+        services.AddSingleton<IRepositoryManager, RepositoryManager>();
+        
+        
         // 注册App服务
         services.AddSingleton<IInitializeService,InitializeService>();
         services.AddSingleton<IDeviceAppService,DeviceAppService>();
-
+        services.AddSingleton<IVariableAppService,VariableAppService>();
+        services.AddSingleton<IVariableTableAppService,VariableTableAppService>();
         services.AddSingleton<INavigationService, NavigationService>();
-        
+        services.AddSingleton<IMenuService, MenuService>();
+        //注册WPF中的服务
+        services.AddSingleton<DataServices>();
         // 注册视图模型
         services.AddSingleton<SplashViewModel>();
         services.AddSingleton<MainViewModel>();

@@ -1,14 +1,17 @@
 using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
 using DMS.Core.Helper;
 using DMS.Core.Enums;
 using DMS.Core.Models;
 using DMS.Helper;
 using DMS.Message;
 using DMS.WPF.Helper;
+using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -22,21 +25,26 @@ namespace DMS.WPF.Services;
 public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 {
     private readonly IMapper _mapper;
+
+    private readonly IDeviceAppService _deviceAppService;
+    private readonly IVariableTableAppService _variableTableAppService;
+    private readonly IVariableAppService _variableAppService;
+
     // 设备列表，使用ObservableProperty特性，当值改变时会自动触发属性变更通知。
     [ObservableProperty]
-    private List<Device> _devices;
+    private ObservableCollection<DeviceItemViewModel> _devices;
 
     // 变量表列表。
     [ObservableProperty]
-    private List<VariableTable> _variableTables;
+    private ObservableCollection<VariableTableItemViewModel> _variableTables;
 
     // 变量数据列表。
     [ObservableProperty]
-    private List<Variable> _variables;
+    private ObservableCollection<VariableItemViewModel> _variables;
 
     // 菜单树列表。
     [ObservableProperty]
-    private List<MenuBean> menuTrees;
+    private ObservableCollection<MenuBeanItemViewModel> _menus;
 
     // MQTT配置列表。
     // [ObservableProperty]
@@ -44,18 +52,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
 
     public ConcurrentDictionary<int, Variable> AllVariables;
+    private readonly IMenuService _menuService;
 
-    // 设备数据仓库，用于设备数据的CRUD操作。
-    // private readonly DeviceRepository _deviceRepository;
-    //
-    // // 菜单数据仓库，用于菜单数据的CRUD操作。
-    // private readonly MenuRepository _menuRepository;
-    //
-    // // MQTT数据仓库，用于MQTT配置数据的CRUD操作。
-    // private readonly MqttRepository _mqttRepository;
-    //
-    // // 变量数据仓库，用于变量数据的CRUD操作。
-    // private readonly VarDataRepository _varDataRepository;
 
     // 设备列表变更事件，当设备列表数据更新时触发。
     public event Action<List<Device>> OnDeviceListChanged;
@@ -84,20 +82,27 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     //     OnVariableDataChanged?.Invoke(this, value);
     // }
 
-    // /// <summary>
-    // /// DataServices类的构造函数。
-    // /// 注入ILogger<DataServices>，并初始化各个数据仓库。
-    // /// </summary>
-    // /// <param name="mapper">AutoMapper 实例。</param>
-    // /// <param name="varDataRepository"></param>
-    // public DataServices(IMapper mapper,DeviceRepository deviceRepository,MenuRepository menuRepository,MqttRepository mqttRepository,VarDataRepository varDataRepository)
-    // {
-    //     _mapper = mapper;
-    //     IsActive = true; // 激活消息接收器
-    //     
-    //     _variables = new List<Variable>();
-    //     AllVariables = new ConcurrentDictionary<int, Variable>();
-    // }
+    /// <summary>
+    /// DataServices类的构造函数。
+    /// 注入ILogger<DataServices>，并初始化各个数据仓库。
+    /// </summary>
+    /// <param name="mapper">AutoMapper 实例。</param>
+    /// <param name="varDataRepository"></param>
+    public DataServices(IMapper mapper, IDeviceAppService deviceAppService,
+                        IVariableTableAppService variableTableAppService, IVariableAppService variableAppService,IMenuService menuService)
+    {
+        _mapper = mapper;
+        _deviceAppService = deviceAppService;
+        _variableTableAppService = variableTableAppService;
+        _variableAppService = variableAppService;
+        _menuService = menuService;
+        IsActive = true; // 激活消息接收器
+        Devices = new ObservableCollection<DeviceItemViewModel>();
+        VariableTables = new ObservableCollection<VariableTableItemViewModel>();
+        Variables = new ObservableCollection<VariableItemViewModel>();
+        Menus = new ObservableCollection<MenuBeanItemViewModel>();
+        // AllVariables = new ConcurrentDictionary<int, Variable>();
+    }
 
     // /// <summary>
     // /// 接收加载消息，根据消息类型从数据库加载对应的数据。
@@ -134,88 +139,127 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     // }
 
     /// <summary>
-    /// 异步加载设备数据。
+    /// 异步加载设备数据，并以高效的方式更新UI集合。
+    /// 此方法会比较新旧数据，只对有变化的设备进行更新、添加或删除，避免不必要的UI刷新。
     /// </summary>
-    /// <returns>表示异步操作的任务。</returns>
-    private async Task LoadDevices()
+    public async Task LoadDevices()
     {
-        // 取消订阅旧设备的属性变更事件，防止内存泄漏
-        // if (Devices != null)
-        // {
-        //     foreach (var device in Devices)
-        //     {
-        //         device.PropertyChanged -= Device_PropertyChanged;
-        //     }
-        // }
-        //
-        // Devices = await _deviceRepository.GetAllAsync();
-        //
-        // // 订阅新设备的属性变更事件
-        // if (Devices != null)
-        // {
-        //     foreach (var device in Devices)
-        //     {
-        //         device.PropertyChanged += Device_PropertyChanged;
-        //     }
-        //
-        //     var allVar = await _varDataRepository.GetAllAsync();
-        //    foreach (var variable in allVar)
-        //    {
-        //        AllVariables.AddOrUpdate(variable.Id, variable, (key, old) => variable);
-        //    }
-        //
-        // }
-        //
-        // OnDeviceListChanged?.Invoke(Devices);
-    }
+        var deviceDtos = await _deviceAppService.GetAllDevicesAsync();
+        var deviceDtoIds = new HashSet<int>(deviceDtos.Select(d => d.Id));
 
-    private void Device_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(Device.IsActive))
+        // 1. 更新现有项 & 查找需要删除的项
+        var itemsToRemove = new List<DeviceItemViewModel>();
+        foreach (var existingItem in Devices)
         {
-            if (sender is Device device)
+            if (deviceDtoIds.Contains(existingItem.Id))
             {
-                NlogHelper.Info($"设备 {device.Name} 的IsActive状态改变为 {device.IsActive}，触发设备IsActive状态变更事件。");
-                OnDeviceIsActiveChanged?.Invoke(device, device.IsActive);
+                // 设备仍然存在，检查是否有更新
+                var dto = deviceDtos.First(d => d.Id == existingItem.Id);
+                
+                // 逐一比较属性，只有在发生变化时才更新
+                if (existingItem.Name != dto.Name) existingItem.Name = dto.Name;
+                if (existingItem.Protocol != dto.Protocol) existingItem.Protocol = dto.Protocol;
+                if (existingItem.IpAddress != dto.IpAddress) existingItem.IpAddress = dto.IpAddress;
+                if (existingItem.Port != dto.Port) existingItem.Port = dto.Port;
+                if (existingItem.Rack != dto.Rack) existingItem.Rack = dto.Rack;
+                if (existingItem.Slot != dto.Slot) existingItem.Slot = dto.Slot;
+                if (existingItem.OpcUaServerUrl != dto.OpcUaServerUrl) existingItem.OpcUaServerUrl = dto.OpcUaServerUrl;
+                if (existingItem.IsActive != dto.IsActive) existingItem.IsActive = dto.IsActive;
+                if (existingItem.Status != dto.Status) existingItem.Status = dto.Status;
+            }
+            else
+            {
+                // 设备在新列表中不存在，标记为待删除
+                itemsToRemove.Add(existingItem);
+            }
+        }
+
+        // 2. 从UI集合中删除不再存在的项
+        foreach (var item in itemsToRemove)
+        {
+            Devices.Remove(item);
+        }
+
+        // 3. 添加新项
+        var existingIds = new HashSet<int>(Devices.Select(d => d.Id));
+        foreach (var dto in deviceDtos)
+        {
+            if (!existingIds.Contains(dto.Id))
+            {
+                // 这是一个新设备，添加到集合中
+                var newItem = _mapper.Map<DeviceItemViewModel>(dto);
+                Devices.Add(newItem);
             }
         }
     }
 
+    // private void Device_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    // {
+    //     if (e.PropertyName == nameof(Device.IsActive))
+    //     {
+    //         if (sender is Device device)
+    //         {
+    //             NlogHelper.Info($"设备 {device.Name} 的IsActive状态改变为 {device.IsActive}，触发设备IsActive状态变更事件。");
+    //             OnDeviceIsActiveChanged?.Invoke(device, device.IsActive);
+    //         }
+    //     }
+    // }
+
     /// <summary>
-    /// 异步加载菜单数据，并进行父级关联和排序。
+    /// 异步加载菜单数据，并以高效的方式更新UI集合。
+    /// 此方法会比较新旧数据，只对有变化的菜单项进行更新、添加或删除，避免不必要的UI刷新。
     /// </summary>
-    /// <returns>表示异步操作的任务。</returns>
-    private async Task LoadMenus()
+    public async Task LoadMenus()
     {
-        // MenuTrees = await _menuRepository.GetMenuTreesAsync();
-        // foreach (MenuBean menu in MenuTrees)
-        // {
-        //     MenuHelper.MenuAddParent(menu); // 为菜单添加父级引用
-        //     DataServicesHelper.SortMenus(menu); // 排序菜单
-        // }
-        //
-        // OnMenuTreeListChanged?.Invoke(MenuTrees);
+        var newMenus = await _menuService.GetAllMenusAsync(); // 获取最新的菜单树 (MenuItemViewModel 列表)
+        var newMenuIds = new HashSet<int>(newMenus.Select(m => m.Id));
+
+        // 1. 更新现有项 & 查找需要删除的项
+        var itemsToRemove = new List<MenuBeanItemViewModel>();
+        foreach (var existingItem in Menus)
+        {
+            if (newMenuIds.Contains(existingItem.Id))
+            {
+                // 菜单项仍然存在，检查是否有更新
+                var newDto = newMenus.First(m => m.Id == existingItem.Id);
+
+                // 逐一比较属性，只有在发生变化时才更新
+                // 注意：MenuItemViewModel 的属性是 ObservableProperty，直接赋值会触发通知
+                if (existingItem.Header != newDto.Header) existingItem.Header = newDto.Header;
+                if (existingItem.Icon != newDto.Icon) existingItem.Icon = newDto.Icon;
+                // 对于 TargetViewKey 和 NavigationParameter，它们在 MenuItemViewModel 中是私有字段，
+                // 并且在构造时通过 INavigationService 绑定到 NavigateCommand。
+                // 如果这些需要动态更新，MenuItemViewModel 内部需要提供公共属性或方法来处理。
+                // 目前，我们假设如果这些变化，IMenuService 会返回一个新的 MenuItemViewModel 实例。
+                // 如果需要更细粒度的更新，需要修改 MenuItemViewModel 的设计。
+                // 这里我们只更新直接暴露的 ObservableProperty。
+            }
+            else
+            {
+                // 菜单项在新列表中不存在，标记为待删除
+                itemsToRemove.Add(existingItem);
+            }
+        }
+
+        // 2. 从UI集合中删除不再存在的项
+        foreach (var item in itemsToRemove)
+        {
+            Menus.Remove(item);
+        }
+
+        // 3. 添加新项
+        var existingIds = new HashSet<int>(Menus.Select(m => m.Id));
+        foreach (var newDto in newMenus)
+        {
+            if (!existingIds.Contains(newDto.Id))
+            {
+                // 这是一个新菜单项，添加到集合中
+                // 注意：这里直接添加 IMenuService 返回的 MenuItemViewModel 实例
+                Menus.Add(_mapper.Map<MenuBeanItemViewModel>(newDto));
+            }
+        }
     }
 
-    // /// <summary>
-    // /// 异步获取所有MQTT配置。
-    // /// </summary>
-    // /// <returns>包含所有MQTT配置的列表。</returns>
-    // public async Task<List<Mqtt>> GetMqttsAsync()
-    // {
-    //     var mqtts = await _mqttRepository.GetAllAsync();
-    //     OnMqttListChanged?.Invoke(mqtts);
-    //     return mqtts;
-    // }
-
-    // /// <summary>
-    // /// 异步加载MQTT配置数据。
-    // /// </summary>
-    // /// <returns>表示异步操作的任务。</returns>
-    // private async Task LoadMqtts()
-    // {
-    //     Mqtts = await _mqttRepository.GetAllAsync();
-    // }
 
 
     // /// <summary>
@@ -249,6 +293,127 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
     public void Receive(LoadMessage message)
     {
-        
+    }
+
+    /// <summary>
+    /// 异步加载变量数据，并以高效的方式更新UI集合。
+    /// 此方法会比较新旧数据，只对有变化的变量进行更新、添加或删除，避免不必要的UI刷新。
+    /// </summary>
+    public async Task LoadVariables()
+    {
+        var variableDtos = await _variableAppService.GetAllVariablesAsync(); // 假设有此方法
+        var variableDtoIds = new HashSet<int>(variableDtos.Select(v => v.Id));
+
+        // 1. 更新现有项 & 查找需要删除的项
+        var itemsToRemove = new List<VariableItemViewModel>();
+        foreach (var existingItem in Variables)
+        {
+            if (variableDtoIds.Contains(existingItem.Id))
+            {
+                // 变量仍然存在，检查是否有更新
+                var dto = variableDtos.First(v => v.Id == existingItem.Id);
+
+                // 逐一比较属性，只有在发生变化时才更新
+                if (existingItem.Name != dto.Name) existingItem.Name = dto.Name;
+                if (existingItem.S7Address != dto.S7Address) existingItem.S7Address = dto.S7Address;
+                if (existingItem.DataValue != dto.DataValue) existingItem.DataValue = dto.DataValue;
+                if (existingItem.DisplayValue != dto.DisplayValue) existingItem.DisplayValue = dto.DisplayValue;
+                // 注意：VariableTable 和 MqttAliases 是复杂对象，需要更深层次的比较或重新映射
+                // 为了简化，这里只比较基本类型属性
+                if (existingItem.DataType != dto.DataType) existingItem.DataType = dto.DataType;
+                if (existingItem.PollLevel != dto.PollLevel) existingItem.PollLevel = dto.PollLevel;
+                if (existingItem.IsActive != dto.IsActive) existingItem.IsActive = dto.IsActive;
+                if (existingItem.VariableTableId != dto.VariableTableId) existingItem.VariableTableId = dto.VariableTableId;
+                if (existingItem.OpcUaNodeId != dto.OpcUaNodeId) existingItem.OpcUaNodeId = dto.OpcUaNodeId;
+                if (existingItem.IsHistoryEnabled != dto.IsHistoryEnabled) existingItem.IsHistoryEnabled = dto.IsHistoryEnabled;
+                if (existingItem.HistoryDeadband != dto.HistoryDeadband) existingItem.HistoryDeadband = dto.HistoryDeadband;
+                if (existingItem.IsAlarmEnabled != dto.IsAlarmEnabled) existingItem.IsAlarmEnabled = dto.IsAlarmEnabled;
+                if (existingItem.AlarmMinValue != dto.AlarmMinValue) existingItem.AlarmMinValue = dto.AlarmMinValue;
+                if (existingItem.AlarmMaxValue != dto.AlarmMaxValue) existingItem.AlarmMaxValue = dto.AlarmMaxValue;
+                if (existingItem.AlarmDeadband != dto.AlarmDeadband) existingItem.AlarmDeadband = dto.AlarmDeadband;
+                if (existingItem.Protocol != dto.Protocol) existingItem.Protocol = dto.Protocol;
+                if (existingItem.CSharpDataType != dto.CSharpDataType) existingItem.CSharpDataType = dto.CSharpDataType;
+                if (existingItem.ConversionFormula != dto.ConversionFormula) existingItem.ConversionFormula = dto.ConversionFormula;
+                if (existingItem.CreatedAt != dto.CreatedAt) existingItem.CreatedAt = dto.CreatedAt;
+                if (existingItem.UpdatedAt != dto.UpdatedAt) existingItem.UpdatedAt = dto.UpdatedAt;
+                if (existingItem.UpdatedBy != dto.UpdatedBy) existingItem.UpdatedBy = dto.UpdatedBy;
+                if (existingItem.IsModified != dto.IsModified) existingItem.IsModified = dto.IsModified;
+                if (existingItem.Description != dto.Description) existingItem.Description = dto.Description;
+            }
+            else
+            {
+                // 变量在新列表中不存在，标记为待删除
+                itemsToRemove.Add(existingItem);
+            }
+        }
+
+        // 2. 从UI集合中删除不再存在的项
+        foreach (var item in itemsToRemove)
+        {
+            Variables.Remove(item);
+        }
+
+        // 3. 添加新项
+        var existingIds = new HashSet<int>(Variables.Select(v => v.Id));
+        foreach (var dto in variableDtos)
+        {
+            if (!existingIds.Contains(dto.Id))
+            {
+                // 这是一个新变量，添加到集合中
+                var newItem = _mapper.Map<VariableItemViewModel>(dto);
+                Variables.Add(newItem);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 异步加载变量表数据，并以高效的方式更新UI集合。
+    /// 此方法会比较新旧数据，只对有变化的变量表进行更新、添加或删除，避免不必要的UI刷新。
+    /// </summary>
+    public async Task LoadVariableTables()
+    {
+        var variableTableDtos = await _variableTableAppService.GetAllVariableTablesAsync(); // 假设有此方法
+        var variableTableDtoIds = new HashSet<int>(variableTableDtos.Select(vt => vt.Id));
+
+        // 1. 更新现有项 & 查找需要删除的项
+        var itemsToRemove = new List<VariableTableItemViewModel>();
+        foreach (var existingItem in VariableTables)
+        {
+            if (variableTableDtoIds.Contains(existingItem.Id))
+            {
+                // 变量表仍然存在，检查是否有更新
+                var dto = variableTableDtos.First(vt => vt.Id == existingItem.Id);
+
+                // 逐一比较属性，只有在发生变化时才更新
+                if (existingItem.Name != dto.Name) existingItem.Name = dto.Name;
+                if (existingItem.Description != dto.Description) existingItem.Description = dto.Description;
+                if (existingItem.IsActive != dto.IsActive) existingItem.IsActive = dto.IsActive;
+                if (existingItem.DeviceId != dto.DeviceId) existingItem.DeviceId = dto.DeviceId;
+                if (existingItem.Protocol != dto.Protocol) existingItem.Protocol = dto.Protocol;
+            }
+            else
+            {
+                // 变量表在新列表中不存在，标记为待删除
+                itemsToRemove.Add(existingItem);
+            }
+        }
+
+        // 2. 从UI集合中删除不再存在的项
+        foreach (var item in itemsToRemove)
+        {
+            VariableTables.Remove(item);
+        }
+
+        // 3. 添加新项
+        var existingIds = new HashSet<int>(VariableTables.Select(vt => vt.Id));
+        foreach (var dto in variableTableDtos)
+        {
+            if (!existingIds.Contains(dto.Id))
+            {
+                // 这是一个新变量表，添加到集合中
+                var newItem = _mapper.Map<VariableTableItemViewModel>(dto);
+                VariableTables.Add(newItem);
+            }
+        }
     }
 }

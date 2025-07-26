@@ -1,3 +1,4 @@
+using DMS.Core.Enums;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Configurations;
@@ -91,26 +92,28 @@ public class InitializeRepository : IInitializeRepository
 
     /// <summary>
     /// 初始化默认菜单。
-    /// 如果配置文件中没有菜单，则添加一组默认菜单项。
+    /// 如果数据库中没有菜单，则添加一组默认菜单项。
     /// </summary>
     public void InitializeMenus()
     {
-        var settings = AppSettings.Load();
-        if (settings.Menus.Any())
+        // 检查数据库中是否已存在菜单数据
+        if (_db.Queryable<DbMenu>().Any())
         {
-            return ; // 如果已经有菜单，则不进行初始化
+            return; // 如果数据库中已经有菜单，则不进行初始化
         }
 
-        // 添加默认菜单项
-        settings.Menus.Add(new MenuBean() { Id=1, Header = "主页",  Icon = "Home", ParentId = 0 });
-        settings.Menus.Add(new MenuBean() { Id = 2, Header = "设备",  Icon = "Devices3", ParentId = 0 });
-        settings.Menus.Add(new MenuBean() { Id = 3, Header = "数据转换",  Icon = "ChromeSwitch", ParentId = 0 });
-        settings.Menus.Add(new MenuBean() { Id = 4, Header = "Mqtt服务器",  Icon = "Cloud", ParentId = 0 });
-        settings.Menus.Add(new MenuBean() { Id = 5, Header = "设置",  Icon = "Settings", ParentId = 0 });
-        settings.Menus.Add(new MenuBean() { Id = 6, Header = "关于",  Icon = "Info", ParentId = 0 });
+        // 创建默认菜单项的 DbMenu 实体列表
+        var defaultMenus = new List<DbMenu>
+        {
+            new DbMenu { Id = 1, Header = "主页", Icon = "\uE80F", ParentId = 0,MenuType = MenuType.MainMenu, DisplayOrder = 1 },
+            new DbMenu { Id = 2, Header = "设备", Icon = "\uE975", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 2 },
+            new DbMenu { Id = 3, Header = "数据转换", Icon = "\uF1CB", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 3 },
+            new DbMenu { Id = 4, Header = "Mqtt服务器", Icon = "\uE753", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 4 },
+            new DbMenu { Id = 5, Header = "设置", Icon = "\uE713", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 5 },
+            new DbMenu { Id = 6, Header = "关于", Icon = "\uE946", ParentId = 0, MenuType= MenuType.MainMenu ,DisplayOrder = 6 } // 假设有一个AboutView
+        };
 
-        settings.Save(); // 保存菜单到配置文件
-
-        return ;
+        // 批量插入菜单到数据库
+        _db.Insertable(defaultMenus).ExecuteCommand();
     }
 }

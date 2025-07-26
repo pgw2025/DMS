@@ -18,14 +18,16 @@ public partial class SplashViewModel : ObservableObject
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IInitializeService _initializeService;
+    private readonly DataServices _dataServices;
 
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
-    public SplashViewModel(IServiceProvider serviceProvider, IInitializeService initializeService)
+    public SplashViewModel(IServiceProvider serviceProvider, IInitializeService initializeService,DataServices dataServices)
     {
         _serviceProvider = serviceProvider;
         _initializeService = initializeService;
+        _dataServices = dataServices;
     }
 
     /// <summary>
@@ -37,8 +39,13 @@ public partial class SplashViewModel : ObservableObject
         {
             LoadingMessage = "正在初始化数据库...";
              _initializeService.InitializeTables();
+             _initializeService.InitializeMenus();
 
             LoadingMessage = "正在加载系统配置...";
+            await _dataServices.LoadDevices();
+            await _dataServices.LoadVariableTables();
+            await _dataServices.LoadVariables();
+            await _dataServices.LoadMenus();
             // 可以在这里添加加载配置的逻辑
             await Task.Delay(500); // 模拟耗时
 
