@@ -137,7 +137,6 @@ namespace DMS.Infrastructure.UnitTests
                           .RuleFor(m => m.Icon, f => f.Random.Word())
                           .RuleFor(m => m.DisplayOrder, f => f.Random.Number(1, 100))
                           .RuleFor(m => m.ParentId, f => f.Random.Number(0, 10)) // 假设可以有父菜单
-                          .RuleFor(m => m.MenuType, f => f.PickRandom<MenuType>()) // 假设 MenuType 是一个枚举
                           .Generate();
             return menuDto;
         }

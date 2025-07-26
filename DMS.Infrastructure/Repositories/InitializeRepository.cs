@@ -24,7 +24,7 @@ public class InitializeRepository : IInitializeRepository
     public InitializeRepository(SqlSugarDbContext dbContext)
     {
         _dbContext = dbContext;
-      _db = _dbContext.GetInstance();
+        _db = _dbContext.GetInstance();
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public class InitializeRepository : IInitializeRepository
         _db.CodeFirst.InitTables<DbVariableMqttAlias>();
         _db.CodeFirst.InitTables<DbMenu>();
     }
-    
+
     /// <summary>
     /// 初始化数据库表索引。
     /// 为特定表的列创建唯一索引，以提高查询效率和数据完整性。
@@ -52,22 +52,22 @@ public class InitializeRepository : IInitializeRepository
     public void InitializeTableIndex()
     {
         // 为 DbDevice 表创建索引
-        _db.DbMaintenance.CreateIndex(nameof(DbDevice),new []
-                                                 {
-                                                     nameof(DbDevice.Name),
-                                                     nameof(DbDevice.OpcUaServerUrl),
-                                                 },true); 
-        
+        _db.DbMaintenance.CreateIndex(nameof(DbDevice), new[]
+                                                        {
+                                                            nameof(DbDevice.Name),
+                                                            nameof(DbDevice.OpcUaServerUrl),
+                                                        }, true);
+
         // 为 DbVariable 表创建索引
-        _db.DbMaintenance.CreateIndex(nameof(DbVariable),new []
-                                                 {
-                                                     nameof(DbVariable.OpcUaNodeId)
-                                                 },true);
+        _db.DbMaintenance.CreateIndex(nameof(DbVariable), new[]
+                                                          {
+                                                              nameof(DbVariable.OpcUaNodeId)
+                                                          }, true);
         // 为 DbMqttServer 表创建索引
-        _db.DbMaintenance.CreateIndex(nameof(DbMqttServer),new []
-                                                 {
-                                                     nameof(DbMqttServer.ServerName)
-                                                 },true);
+        _db.DbMaintenance.CreateIndex(nameof(DbMqttServer), new[]
+                                                            {
+                                                                nameof(DbMqttServer.ServerName)
+                                                            }, true);
     }
 
     /// <summary>
@@ -77,7 +77,7 @@ public class InitializeRepository : IInitializeRepository
     /// <returns>如果表存在则为 true，否则为 false。</returns>
     public bool IsAnyTable(string tableName)
     {
-       return  _db.DbMaintenance.IsAnyTable(tableName, false);
+        return _db.DbMaintenance.IsAnyTable(tableName, false);
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ public class InitializeRepository : IInitializeRepository
     /// <returns>如果索引存在则为 true，否则为 false。</returns>
     public bool IsAnyIndex(string indexName)
     {
-       return  _db.DbMaintenance.IsAnyIndex(indexName);
+        return _db.DbMaintenance.IsAnyIndex(indexName);
     }
 
     /// <summary>
@@ -97,23 +97,53 @@ public class InitializeRepository : IInitializeRepository
     public void InitializeMenus()
     {
         // 检查数据库中是否已存在菜单数据
-        if (_db.Queryable<DbMenu>().Any())
+        if (_db.Queryable<DbMenu>()
+               .Any())
         {
             return; // 如果数据库中已经有菜单，则不进行初始化
         }
 
         // 创建默认菜单项的 DbMenu 实体列表
         var defaultMenus = new List<DbMenu>
-        {
-            new DbMenu { Id = 1, Header = "主页", Icon = "\uE80F", ParentId = 0,MenuType = MenuType.MainMenu, DisplayOrder = 1 },
-            new DbMenu { Id = 2, Header = "设备", Icon = "\uE975", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 2 },
-            new DbMenu { Id = 3, Header = "数据转换", Icon = "\uF1CB", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 3 },
-            new DbMenu { Id = 4, Header = "Mqtt服务器", Icon = "\uE753", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 4 },
-            new DbMenu { Id = 5, Header = "设置", Icon = "\uE713", ParentId = 0,MenuType = MenuType.MainMenu , DisplayOrder = 5 },
-            new DbMenu { Id = 6, Header = "关于", Icon = "\uE946", ParentId = 0, MenuType= MenuType.MainMenu ,DisplayOrder = 6 } // 假设有一个AboutView
-        };
+                           {
+                               new DbMenu
+                               {
+                                   Id = 1, Header = "主页", Icon = "\uE80F", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "HomeView", DisplayOrder = 1
+                               },
+                               new DbMenu
+                               {
+                                   Id = 2, Header = "设备", Icon = "\uE975", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "DevicesView",
+                                   DisplayOrder = 2
+                               },
+                               new DbMenu
+                               {
+                                   Id = 3, Header = "数据转换", Icon = "\uF1CB", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "DataTransformView",
+                                   DisplayOrder = 3
+                               },
+                               new DbMenu
+                               {
+                                   Id = 4, Header = "Mqtt服务器", Icon = "\uE753", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "MqttsView",
+                                   DisplayOrder = 4
+                               },
+                               new DbMenu
+                               {
+                                   Id = 5, Header = "设置", Icon = "\uE713", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   DisplayOrder = 5
+                               },
+                               new DbMenu
+                               {
+                                   Id = 6, Header = "关于", Icon = "\uE946", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "", DisplayOrder = 6
+                               } // 假设有一个AboutView
+                           };
 
         // 批量插入菜单到数据库
-        _db.Insertable(defaultMenus).ExecuteCommand();
+        _db.Insertable(defaultMenus)
+           .ExecuteCommand();
     }
 }

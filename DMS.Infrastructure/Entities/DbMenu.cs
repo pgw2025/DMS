@@ -41,6 +41,10 @@ public class DbMenu
     /// 菜单关联的数据ID，例如设备Id，变量表Id
     /// </summary>
     public int TargetId { get; set; }
+    /// <summary>
+    /// 菜单关联的数据ID，例如设备Id，变量表Id
+    /// </summary>
+    public string TargetViewKey { get; set; }
 
     /// <summary>
     /// 导航的可选参数

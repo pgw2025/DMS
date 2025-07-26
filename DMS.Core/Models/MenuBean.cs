@@ -19,7 +19,11 @@ public class MenuBean
     /// <summary>
     /// 菜单关联的数据ID，例如设备Id，变量表Id
     /// </summary>
-    public int TargetId { get; set; }
+    public int TargetId { get; set; }  
+    /// <summary>
+    /// 菜单关联的数据ID，例如设备Id，变量表Id
+    /// </summary>
+    public string TargetViewKey { get; set; }
     public string NavigationParameter { get; set; }
     public int DisplayOrder { get; set; }
 }

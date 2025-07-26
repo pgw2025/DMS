@@ -32,6 +32,7 @@
         <DataTemplate x:Key="NavigationViewMenuItem"
                       DataType="{x:Type mo:MenuBean}">
             <ui:NavigationViewItem Content="{Binding Header}"
+                                   
                                    MenuItemsSource="{Binding Children }">
                 <ui:NavigationViewItem.Icon>
                     <ui:FontIcon Glyph="{Binding Icon}" />

@@ -56,6 +56,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
     public ConcurrentDictionary<int, Variable> AllVariables;
     private readonly IMenuService _menuService;
+    private readonly INavigationService _navigationService;
 
 
     // 设备列表变更事件，当设备列表数据更新时触发。
@@ -79,13 +80,14 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="varDataRepository"></param>
     public DataServices(IMapper mapper, IDeviceAppService deviceAppService,
-                        IVariableTableAppService variableTableAppService, IVariableAppService variableAppService,IMenuService menuService)
+                        IVariableTableAppService variableTableAppService, IVariableAppService variableAppService,IMenuService menuService,INavigationService navigationService)
     {
         _mapper = mapper;
         _deviceAppService = deviceAppService;
         _variableTableAppService = variableTableAppService;
         _variableAppService = variableAppService;
         _menuService = menuService;
+        _navigationService = navigationService;
         IsActive = true; // 激活消息接收器
         Devices = new ObservableCollection<DeviceItemViewModel>();
         VariableTables = new ObservableCollection<VariableTableItemViewModel>();
@@ -246,7 +248,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             {
                 // 这是一个新菜单项，添加到集合中
                 // 注意：这里直接添加 IMenuService 返回的 MenuItemViewModel 实例
-                Menus.Add(_mapper.Map<MenuBeanItemViewModel>(newDto));
+                Menus.Add(new MenuBeanItemViewModel(newDto,_navigationService));
             }
         }
         
