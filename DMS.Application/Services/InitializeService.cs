@@ -5,7 +5,7 @@ namespace DMS.Application.Services;
 /// <summary>
 /// 初始化服务，负责应用程序启动时的数据库和菜单初始化。
 /// </summary>
-public class InitializeService
+public class InitializeService : IInitializeService
 {
     private readonly IInitializeRepository _repository;
 

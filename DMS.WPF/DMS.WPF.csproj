@@ -152,6 +152,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DMS.Application\DMS.Application.csproj" />
+    <ProjectReference Include="..\DMS.Infrastructure\DMS.Infrastructure.csproj" />
   </ItemGroup>
 
 

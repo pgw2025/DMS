@@ -1,5 +1,8 @@
 ﻿using System.Windows;
+using DMS.Application.Interfaces;
+using DMS.Application.Services;
 using DMS.Core.Enums;
+using DMS.Core.Interfaces.Repositories;
 using DMS.Helper;
 using DMS.Services;
 using DMS.Services.Processors;
@@ -10,10 +13,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using DMS.Extensions;
+using DMS.Infrastructure.Configurations;
+using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Repositories;
 using Microsoft.Extensions.Hosting;
 using DMS.WPF.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.Services.Processors;
+using IDataProcessingService = DMS.Services.IDataProcessingService;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace DMS;
@@ -73,7 +80,7 @@ public partial class App : System.Windows.Application
             NotificationHelper.ShowError("加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}", exception);
         }
         
-        MainWindow = Host.Services.GetRequiredService<MainView>();
+        MainWindow = Host.Services.GetRequiredService<SplashWindow>();
         MainWindow.Show();
 
         // 根据配置启动服务
@@ -123,8 +130,18 @@ public partial class App : System.Windows.Application
         services.AddSingleton<HistoryProcessor>();
         services.AddSingleton<MqttPublishProcessor>();
         
+        // 注册Core中的仓库
+        services.AddSingleton<AppSettings>();
+        services.AddSingleton<SqlSugarDbContext>();
+        services.AddSingleton<IInitializeRepository, InitializeRepository>();
+        // 注册App服务
+        services.AddSingleton<IInitializeService,InitializeService>();
+        services.AddSingleton<IDeviceAppService,DeviceAppService>();
+
+        services.AddSingleton<INavigationService, NavigationService>();
         
         // 注册视图模型
+        services.AddSingleton<SplashViewModel>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<DevicesViewModel>();
@@ -136,6 +153,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddScoped<MqttsViewModel>();
         //注册View视图
+        services.AddSingleton<SplashWindow>();
         services.AddSingleton<SettingView>();
         services.AddSingleton<MainView>();
         services.AddSingleton<HomeView>();
