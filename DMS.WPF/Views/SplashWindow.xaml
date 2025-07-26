@@ -10,7 +10,7 @@
     <Grid>
         <Border CornerRadius="10" Background="#FF333333">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Image Source="/Assets/AppIcon.png" Width="100" Height="100"/>
+                <Image Source="/Assets/AppIcon2.ico" Width="100" Height="100"/>
                 <TextBlock Text="{Binding LoadingMessage}" Foreground="White" FontSize="16" Margin="0,20,0,0"/>
             </StackPanel>
         </Border>

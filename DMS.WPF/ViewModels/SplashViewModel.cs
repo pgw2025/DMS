@@ -6,6 +6,8 @@ using DMS.WPF.Services;
 using System;
 using System.Threading.Tasks;
 using DMS.Application.Services;
+using DMS.WPF.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ViewModels;
 
@@ -38,24 +40,27 @@ public partial class SplashViewModel : ObservableObject
 
             LoadingMessage = "正在加载系统配置...";
             // 可以在这里添加加载配置的逻辑
-            await Task.Delay(1500); // 模拟耗时
+            await Task.Delay(500); // 模拟耗时
 
             LoadingMessage = "正在连接后台服务...";
             // 可以在这里添加连接服务的逻辑
-            await Task.Delay(1500); // 模拟耗时
+            await Task.Delay(500); // 模拟耗时
 
             LoadingMessage = "加载完成，正在启动主界面...";
-            await Task.Delay(1500);
+            await Task.Delay(500);
 
             // 初始化完成，显示主窗口
-            var navigationService = (INavigationService)_serviceProvider.GetService(typeof(INavigationService));
-            await navigationService.ShowMainWindowAsync();
+            var mainView = App.Current.Services.GetRequiredService<MainView>();
+            // 将 MainView 设置为新的主窗口
+            App.Current.MainWindow = mainView;
+            mainView.Show();
             return true;
         }
         catch (Exception ex)
         {
             // 处理初始化过程中的异常
             LoadingMessage = $"初始化失败: {ex.Message}";
+            Console.WriteLine($"初始化失败: {ex.Message}");
             // 在此可以记录日志或显示错误对话框
             return false;
         }

@@ -48,20 +48,7 @@ public class NavigationService : INavigationService
         mainViewModel.CurrentViewModel = viewModel;
     }
 
-    /// <summary>
-    /// 显示主窗口。
-    /// </summary>
-    public Task ShowMainWindowAsync()
-    {
-        return App.Current.Dispatcher.InvokeAsync(() =>
-                  {
-                      var mainView = _serviceProvider.GetRequiredService<MainView>();
-                      // 将 MainView 设置为新的主窗口
-                      App.Current.MainWindow = mainView;
-                      mainView.Show();
-                  })
-                  .Task;
-    }
+
 
     private Type GetViewModelTypeByKey(string key)
     {

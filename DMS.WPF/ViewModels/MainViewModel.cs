@@ -28,7 +28,6 @@ public partial class MainViewModel : ViewModelBase
     private readonly DataServices _dataServices;
     private readonly IDialogService _dialogService;
     private readonly ILogger<MainViewModel> _logger;
-    private readonly NavgatorServices _navgatorServices;
 
     /// <summary>
     /// 当前显示的视图模型。
@@ -49,22 +48,18 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="dataServices">数据服务。</param>
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="logger">日志记录器。</param>
-    public MainViewModel(NavgatorServices navgatorServices, DataServices dataServices, IDialogService dialogService,
+    public MainViewModel( 
                          ILogger<MainViewModel> logger)
     {
-        _navgatorServices = navgatorServices;
-        _dataServices = dataServices;
-        _dialogService = dialogService;
+        // _dataServices = dataServices;
         _logger = logger;
-
-        _navgatorServices.OnViewModelChanged += () => { CurrentViewModel = _navgatorServices.CurrentViewModel; };
 
         CurrentViewModel = new HomeViewModel();
         CurrentViewModel.OnLoaded();
         // 发送消息加载数据
         MessageHelper.SendLoadMessage(LoadTypes.All);
         // 当菜单加载成功后，在前台显示菜单
-        dataServices.OnMenuTreeListChanged += (menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
+        // dataServices.OnMenuTreeListChanged += (menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
     }
 
     /// <summary>

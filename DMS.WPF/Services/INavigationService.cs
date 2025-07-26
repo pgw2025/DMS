@@ -15,8 +15,4 @@ public interface INavigationService
     /// <param name="parameter">要传递给目标ViewModel的参数。</param>
     Task NavigateToAsync(string viewKey, object parameter = null);
 
-    /// <summary>
-    /// 显示主窗口。
-    /// </summary>
-    Task ShowMainWindowAsync();
 }

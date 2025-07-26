@@ -15,14 +15,12 @@ namespace DMS.WPF.Views;
 
 public partial class MainView : Window
 {
-    private readonly DataServices _dataServices;
     private MainViewModel _viewModel;
 
-    public MainView(DataServices dataServices)
+    public MainView()
     {
         InitializeComponent();
         _viewModel = App.Current.Services.GetRequiredService<MainViewModel>();
-        _dataServices = dataServices;
         DataContext = _viewModel;
         NlogHelper.Info("主界面加载成功");
 

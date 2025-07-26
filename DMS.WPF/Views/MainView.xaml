@@ -42,7 +42,7 @@
     <Grid>
         <taskbarNotification:TaskbarIcon x:Name="MyNotifyIcon"
                         ToolTipText="设备管理系统"
-                        IconSource="/AppIcon2.ico"
+                        IconSource="/Assets/AppIcon2.ico"
                         DoubleClickCommand="{Binding ShowWindowCommand}">
             <taskbarNotification:TaskbarIcon.ContextMenu>
                 <ContextMenu>
