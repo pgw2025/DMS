@@ -55,7 +55,7 @@ public partial class App : System.Windows.Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        ShutdownMode = ShutdownMode.OnLastWindowClose;
         ThemeHelper.InitializeTheme();
         await Host.StartAsync();
 
@@ -80,8 +80,8 @@ public partial class App : System.Windows.Application
             NotificationHelper.ShowError("加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}", exception);
         }
         
-        MainWindow = Host.Services.GetRequiredService<SplashWindow>();
-        MainWindow.Show();
+        var splashWindow = Host.Services.GetRequiredService<SplashWindow>();
+        splashWindow.Show();
 
         // 根据配置启动服务
         // var connectionSettings = DMS.Config.AppSettings.Load();

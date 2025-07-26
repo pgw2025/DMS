@@ -15,8 +15,11 @@ public partial class SplashWindow : Window
         DataContext = viewModel;
         Loaded += async (s, e) =>
         {
-            await viewModel.InitializeAsync();
-            Close();
+            var success = await viewModel.InitializeAsync();
+            if (success)
+            {
+                Close();
+            }
         };
     }
 }

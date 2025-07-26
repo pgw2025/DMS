@@ -1,10 +1,13 @@
 // 文件: DMS.WPF/Services/NavigationService.cs
+
 using DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows;
 using DMS.ViewModels;
+using DMS.WPF.Views;
 
 namespace DMS.WPF.Services;
 
@@ -50,23 +53,28 @@ public class NavigationService : INavigationService
     /// </summary>
     public Task ShowMainWindowAsync()
     {
-        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-        mainWindow.Show();
-        return Task.CompletedTask;
+        return App.Current.Dispatcher.InvokeAsync(() =>
+                  {
+                      var mainView = _serviceProvider.GetRequiredService<MainView>();
+                      // 将 MainView 设置为新的主窗口
+                      App.Current.MainWindow = mainView;
+                      mainView.Show();
+                  })
+                  .Task;
     }
 
     private Type GetViewModelTypeByKey(string key)
     {
         return key switch
-        {
-            "HomeView" => typeof(HomeViewModel),
-            "DevicesView" => typeof(DevicesViewModel),
-            "DeviceDetailView" => typeof(DeviceDetailViewModel),
-            "VariableTableView" => typeof(VariableTableViewModel),
-            "MqttsView" => typeof(MqttsViewModel),
-            "MqttServerDetailView" => typeof(MqttServerDetailViewModel),
-            "SettingView" => typeof(SettingViewModel),
-            _ => throw new KeyNotFoundException($"未找到与键 '{key}' 关联的视图模型类型。请检查 NavigationService 的映射配置。")
-        };
+               {
+                   "HomeView" => typeof(HomeViewModel),
+                   "DevicesView" => typeof(DevicesViewModel),
+                   "DeviceDetailView" => typeof(DeviceDetailViewModel),
+                   "VariableTableView" => typeof(VariableTableViewModel),
+                   "MqttsView" => typeof(MqttsViewModel),
+                   "MqttServerDetailView" => typeof(MqttServerDetailViewModel),
+                   "SettingView" => typeof(SettingViewModel),
+                   _ => throw new KeyNotFoundException($"未找到与键 '{key}' 关联的视图模型类型。请检查 NavigationService 的映射配置。")
+               };
     }
 }

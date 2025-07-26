@@ -29,7 +29,7 @@ public partial class SplashViewModel : ObservableObject
     /// <summary>
     /// 开始执行初始化任务。
     /// </summary>
-    public async Task InitializeAsync()
+    public async Task<bool> InitializeAsync()
     {
         try
         {
@@ -50,12 +50,14 @@ public partial class SplashViewModel : ObservableObject
             // 初始化完成，显示主窗口
             var navigationService = (INavigationService)_serviceProvider.GetService(typeof(INavigationService));
             await navigationService.ShowMainWindowAsync();
+            return true;
         }
         catch (Exception ex)
         {
             // 处理初始化过程中的异常
             LoadingMessage = $"初始化失败: {ex.Message}";
             // 在此可以记录日志或显示错误对话框
+            return false;
         }
     }
 }
