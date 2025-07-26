@@ -45,6 +45,9 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     // 菜单树列表。
     [ObservableProperty]
     private ObservableCollection<MenuBeanItemViewModel> _menus;
+    // 菜单树列表。
+    [ObservableProperty]
+    private ObservableCollection<MenuBeanItemViewModel> _menuTrees;
 
     // MQTT配置列表。
     // [ObservableProperty]
@@ -68,19 +71,6 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     public event Action<Device, bool> OnDeviceIsActiveChanged;
 
 
-    // /// <summary>
-    // /// 当_mqtts属性值改变时触发的局部方法，用于调用OnMqttListChanged事件。
-    // /// </summary>
-    // /// <param name="mqtts">新的MQTT配置列表。</param>
-    // partial void OnMqttsChanged(List<Mqtt> mqtts)
-    // {
-    //     OnMqttListChanged?.Invoke(mqtts);
-    // }
-
-    // 注释掉的代码块，可能用于变量数据变更事件的触发，但目前未启用。
-    // {
-    //     OnVariableDataChanged?.Invoke(this, value);
-    // }
 
     /// <summary>
     /// DataServices类的构造函数。
@@ -101,6 +91,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         VariableTables = new ObservableCollection<VariableTableItemViewModel>();
         Variables = new ObservableCollection<VariableItemViewModel>();
         Menus = new ObservableCollection<MenuBeanItemViewModel>();
+        MenuTrees = new ObservableCollection<MenuBeanItemViewModel>();
         // AllVariables = new ConcurrentDictionary<int, Variable>();
     }
 
@@ -258,6 +249,44 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 Menus.Add(_mapper.Map<MenuBeanItemViewModel>(newDto));
             }
         }
+        
+        BuildMenuTree();
+    }
+    
+    /// <summary>
+    /// 根据扁平菜单列表构建树形结构。
+    /// </summary>
+    /// <param name="flatMenus">扁平菜单列表。</param>
+    /// <returns>树形结构的根菜单列表。</returns>
+    private void BuildMenuTree()
+    {
+        // 1. 创建一个查找表，以便通过ID快速访问菜单项
+        var menuLookup = Menus.ToDictionary(m => m.Id);
+
+        // 存储根菜单项的列表
+        // var rootMenus = new List<MenuBeanDto>();
+
+        // 2. 遍历所有菜单项，构建树形结构
+        foreach (var menu in Menus)
+        {
+            // 检查是否有父ID，并且父ID不为0（通常0或null表示根节点）
+            if (menu.ParentId.HasValue && menu.ParentId.Value != 0)
+            {
+                // 尝试从查找表中找到父菜单
+                if (menuLookup.TryGetValue(menu.ParentId.Value, out var parentMenu))
+                {
+                    // 将当前菜单添加到父菜单的Children列表中
+                    parentMenu.Children.Add(menu);
+                }
+                // else: 如果找不到父菜单，这可能是一个数据完整性问题，可以根据需要处理
+            }
+            else
+            {
+                // 如果没有父ID，则这是一个根菜单
+                MenuTrees.Add(menu);
+            }
+        }
+
     }
 
 

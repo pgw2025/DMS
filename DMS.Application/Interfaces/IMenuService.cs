@@ -31,4 +31,5 @@ public interface IMenuService
     /// 异步删除一个菜单。
     /// </summary>
     Task DeleteMenuAsync(int id);
+
 }

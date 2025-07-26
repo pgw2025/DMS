@@ -67,7 +67,7 @@ public partial class SplashViewModel : ObservableObject
         {
             // 处理初始化过程中的异常
             LoadingMessage = $"初始化失败: {ex.Message}";
-            Console.WriteLine($"初始化失败: {ex.Message}");
+            Console.WriteLine($"初始化失败: {ex}");
             // 在此可以记录日志或显示错误对话框
             return false;
         }

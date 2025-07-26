@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using DMS.Core.Enums;
@@ -28,6 +29,8 @@ public partial class MenuBeanItemViewModel : ObservableObject
 
     [ObservableProperty]
     private int _displayOrder;
+    [ObservableProperty]
+    private ObservableCollection<MenuBeanItemViewModel> _children=new ();
 
     public MenuBeanItemViewModel(MenuBeanDto dto)
     {
