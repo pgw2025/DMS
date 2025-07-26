@@ -8,6 +8,7 @@
         xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
         xmlns:mo="clr-namespace:DMS.Core.Models;assembly=DMS.Core"
         xmlns:hc="https://handyorg.github.io/handycontrol"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:tb="http://hardcodet.net/taskbar"
         xmlns:taskbarNotification="http://www.hardcodet.net/taskbar"
         Title="设备管理系统"
@@ -32,7 +33,7 @@
         <DataTemplate x:Key="NavigationViewMenuItem"
                       DataType="{x:Type mo:MenuBean}">
             <ui:NavigationViewItem Content="{Binding Header}"
-                                   
+                                   Tag="{Binding }"
                                    MenuItemsSource="{Binding Children }">
                 <ui:NavigationViewItem.Icon>
                     <ui:FontIcon Glyph="{Binding Icon}" />
@@ -61,10 +62,11 @@
                            IsBackButtonVisible="Collapsed"
                            IsBackEnabled="False"
                            SelectionFollowsFocus="Disabled"
+                           SelectionChanged="NavigationView_SelectionChanged"
                            MenuItemsSource="{Binding DataServices.MenuTrees}"
-                           MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
-                           SelectionChanged="NavigationView_SelectionChanged">
+                           MenuItemTemplate="{StaticResource NavigationViewMenuItem}">
 
+     
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox AutomationProperties.Name="Search">

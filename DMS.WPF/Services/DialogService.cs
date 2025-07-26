@@ -8,7 +8,7 @@ using iNKORE.UI.WPF.Modern.Controls;
 
 namespace DMS.WPF.Services;
 
-public class DialogService 
+public class DialogService :IDialogService
 {
     // private readonly DataServices _dataServices;
     //

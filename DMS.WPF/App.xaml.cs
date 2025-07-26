@@ -161,6 +161,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IVariableTableAppService,VariableTableAppService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IMenuService, MenuService>();
+        services.AddSingleton<IDialogService, DialogService>();
         //注册WPF中的服务
         services.AddSingleton<DataServices>();
         // 注册视图模型
@@ -174,7 +175,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<VariableTableViewModel>();
         //services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
-        services.AddScoped<MqttsViewModel>();
+        services.AddSingleton<MqttsViewModel>();
         //注册View视图
         services.AddSingleton<SplashWindow>();
         services.AddSingleton<SettingView>();

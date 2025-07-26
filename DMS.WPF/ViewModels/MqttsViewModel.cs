@@ -50,13 +50,12 @@ public partial class MqttsViewModel : ViewModelBase
     private MqttServerItemViewModel _selectedMqtt;
 
     public MqttsViewModel(
-        ILogger<MqttsViewModel> logger, IDialogService dialogService, DataServices dataServices, NavgatorServices navgatorServices
+        ILogger<MqttsViewModel> logger, IDialogService dialogService, DataServices dataServices
     )
     {
         _logger = logger;
         _dialogService = dialogService;
         _dataServices = dataServices;
-        _navgatorServices = navgatorServices;
 
         // if (dataServices.Mqtts == null || dataServices.Mqtts.Count == 0)
         // {

@@ -17,7 +17,7 @@ namespace DMS.WPF.ViewModels;
 /// <summary>
 /// 设备管理视图模型，负责设备的增删改查操作。
 /// </summary>
-public partial class DevicesViewModel : ViewModelBase
+public partial class DevicesViewModel : ViewModelBase,INavigatable
 {
     private readonly DataServices _dataServices;
     private readonly IDialogService _dialogService;
@@ -196,5 +196,10 @@ public partial class DevicesViewModel : ViewModelBase
         var deviceDetailVm = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
         deviceDetailVm.CurrentDevice = SelectedDevice;
         MessageHelper.SendNavgatorMessage(deviceDetailVm);
+    }
+
+    public async Task OnNavigatedToAsync(object parameter)
+    {
+        
     }
 }

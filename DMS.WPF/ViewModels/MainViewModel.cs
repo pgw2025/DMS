@@ -11,6 +11,7 @@ using DMS.Helper;
 using DMS.Services;
 using DMS.ViewModels;
 using DMS.WPF.Helper;
+using DMS.WPF.ViewModels.Items;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,13 +28,14 @@ public partial class MainViewModel : ViewModelBase
 {
     public  DataServices DataServices { get; }
     private readonly IDialogService _dialogService;
+    private readonly INavigationService _navigationService;
     private readonly ILogger<MainViewModel> _logger;
 
     /// <summary>
     /// 当前显示的视图模型。
     /// </summary>
     [ObservableProperty]
-    private ViewModelBase currentViewModel;
+    private ViewModelBase _currentViewModel;
 
     /// <summary>
     /// 应用程序的菜单列表。
@@ -48,10 +50,11 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="dataServices">数据服务。</param>
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="logger">日志记录器。</param>
-    public MainViewModel(DataServices dataServices,
+    public MainViewModel(DataServices dataServices,INavigationService navigationService,
                          ILogger<MainViewModel> logger)
     {
         DataServices = dataServices;
+        _navigationService = navigationService;
         _logger = logger;
 
         CurrentViewModel = new HomeViewModel();
@@ -161,8 +164,9 @@ public partial class MainViewModel : ViewModelBase
     /// 处理菜单选择变化的逻辑。
     /// </summary>
     /// <param name="menu">被选中的菜单项。</param>
-    public async Task MenuSelectionChanged(MenuBean menu)
+    public async Task MenuSelectionChanged(MenuBeanItemViewModel menu)
     {
+        _navigationService.NavigateToAsync(menu.TargetViewKey);
         // try
         // {
         //     switch (menu.Type)

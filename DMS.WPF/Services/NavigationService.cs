@@ -36,9 +36,8 @@ public class NavigationService : INavigationService
             return;
         }
 
-        var mainViewModel = _serviceProvider.GetRequiredService<MainViewModel>();
-        var viewModelType = GetViewModelTypeByKey(viewKey);
-        var viewModel = _serviceProvider.GetRequiredService(viewModelType) as ViewModelBase;
+        var mainViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
+        var viewModel = GetViewModelByKey(viewKey);
 
         if (viewModel is INavigatable navigatableViewModel)
         {
@@ -49,19 +48,28 @@ public class NavigationService : INavigationService
     }
 
 
-
-    private Type GetViewModelTypeByKey(string key)
+    private ViewModelBase GetViewModelByKey(string key)
     {
-        return key switch
-               {
-                   "HomeView" => typeof(HomeViewModel),
-                   "DevicesView" => typeof(DevicesViewModel),
-                   "DeviceDetailView" => typeof(DeviceDetailViewModel),
-                   "VariableTableView" => typeof(VariableTableViewModel),
-                   "MqttsView" => typeof(MqttsViewModel),
-                   "MqttServerDetailView" => typeof(MqttServerDetailViewModel),
-                   "SettingView" => typeof(SettingViewModel),
-                   _ => throw new KeyNotFoundException($"未找到与键 '{key}' 关联的视图模型类型。请检查 NavigationService 的映射配置。")
-               };
+        switch (key)
+        {
+            case "HomeView":
+                return App.Current.Services.GetRequiredService<HomeViewModel>();
+            case "DevicesView":
+                return App.Current.Services.GetRequiredService<DevicesViewModel>();
+            case "DeviceDetailView":
+                return App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
+            case "DataTransformView":
+                return App.Current.Services.GetRequiredService<DataTransformViewModel>();
+            case "VariableTableView":
+                return App.Current.Services.GetRequiredService<VariableTableViewModel>();
+            case "MqttsView":
+                return App.Current.Services.GetRequiredService<MqttsViewModel>();
+            case "MqttServerDetailView":
+                return App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
+            case "SettingView":
+                return App.Current.Services.GetRequiredService<SettingViewModel>();
+            default:
+                throw new KeyNotFoundException($"未找到与键 '{key}' 关联的视图模型类型。请检查 NavigationService 的映射配置。");
+        }
     }
 }

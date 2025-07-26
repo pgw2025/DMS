@@ -5,6 +5,7 @@ using DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using DMS.Core.Enums;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.Views;
 
@@ -58,15 +59,12 @@ public partial class MainView : Window
     /// <param name="args"></param>
     private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        // var menu = args.SelectedItem as MenuBean;
-        // if (menu != null)
-        // {
-        //    await _viewModel.MenuSelectionChanged(menu);
-        // }
-        // else
-        // {
-        //     NotificationHelper.ShowError("选择的菜单项为空！");
-        // }
+        var menu = args.SelectedItem as MenuBeanItemViewModel;
+        if (menu != null)
+        {
+           await _viewModel.MenuSelectionChanged(menu);
+        }
+       
     }
 
     private async void MainView_OnLoaded(object sender, RoutedEventArgs e)
