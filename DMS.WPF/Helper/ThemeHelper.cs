@@ -50,18 +50,18 @@ public static class ThemeHelper
     public static void InitializeTheme()
     {
         // 从应用设置中读取保存的主题并应用
-        ApplyTheme(App.Current.Settings.Theme);
-
-        // 监听系统主题变化事件
-        SystemEvents.UserPreferenceChanged += (s, e) =>
-        {
-            // 当用户偏好设置中的"常规"类别发生变化，并且应用主题设置为"跟随系统"时
-            if (e.Category == UserPreferenceCategory.General && App.Current.Settings.Theme == "跟随系统")
-            {
-                // 在UI线程上调用ApplyTheme来更新主题，以响应系统主题的变化
-                App.Current.Dispatcher.Invoke(() => { ApplyTheme("跟随系统"); });
-            }
-        };
+        // ApplyTheme(App.Current.Settings.Theme);
+        //
+        // // 监听系统主题变化事件
+        // SystemEvents.UserPreferenceChanged += (s, e) =>
+        // {
+        //     // 当用户偏好设置中的"常规"类别发生变化，并且应用主题设置为"跟随系统"时
+        //     if (e.Category == UserPreferenceCategory.General && App.Current.Settings.Theme == "跟随系统")
+        //     {
+        //         // 在UI线程上调用ApplyTheme来更新主题，以响应系统主题的变化
+        //         App.Current.Dispatcher.Invoke(() => { ApplyTheme("跟随系统"); });
+        //     }
+        // };
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Core.Enums;
-using DMS.WPF.Message;
+using DMS.Message;
 using DMS.WPF.ViewModels;
 
 namespace DMS.WPF.Helper;

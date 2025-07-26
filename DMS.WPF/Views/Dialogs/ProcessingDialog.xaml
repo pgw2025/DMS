@@ -4,7 +4,7 @@
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-                  xmlns:vmd="clr-namespace:DMS.ViewModels.Dialogs"
+                  xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   Title="{Binding Title}"
                   Background="#fff"
                   d:DataContext="{d:DesignInstance vmd:ProcessingDialogViewModel}"

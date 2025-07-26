@@ -1,7 +1,6 @@
-using System.Windows.Controls;
 using DMS.WPF.ViewModels.Dialogs;
 
-namespace DMS.Views.Dialogs;
+namespace DMS.WPF.Views.Dialogs;
 
 public partial class VarDataDialog 
 {

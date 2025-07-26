@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Core.Enums;
+using DMS.Core.Helper;
 using DMS.Message;
 
 namespace DMS.Helper;

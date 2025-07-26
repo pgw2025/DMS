@@ -1,3 +1,5 @@
+using DMS.Core.Enums;
+
 namespace DMS.Application.DTOs;
 
 /// <summary>

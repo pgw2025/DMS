@@ -1,13 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using DMS.WPF.Models;
-using DMS.WPF.Models;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class VarDataDialogViewModel : ObservableObject
 {
     [ObservableProperty]
-    private Variable _variable;
+    private VariableItemViewModel _variable;
     [ObservableProperty]
     private string title;
     [ObservableProperty]

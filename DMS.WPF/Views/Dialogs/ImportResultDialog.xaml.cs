@@ -1,7 +1,7 @@
 using DMS.WPF.ViewModels.Dialogs;
 using iNKORE.UI.WPF.Modern.Controls;
 
-namespace DMS.Views.Dialogs;
+namespace DMS.WPF.Views.Dialogs;
 
 /// <summary>
 /// ImportResultDialog.xaml 的交互逻辑

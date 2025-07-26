@@ -1,12 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using DMS.WPF.Models;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class VarTableDialogViewModel:ObservableObject
 {
     [ObservableProperty] 
-    private VariableTable variableTable;
+    private VariableTableItemViewModel variableTable;
     [ObservableProperty]
     private string title;
     [ObservableProperty]

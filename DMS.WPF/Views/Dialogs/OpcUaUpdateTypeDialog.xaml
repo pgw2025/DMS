@@ -6,7 +6,8 @@
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                   xmlns:enums="clr-namespace:DMS.Core.Enums"
                   xmlns:extensions="clr-namespace:DMS.Extensions"
-                  xmlns:viewModels="clr-namespace:DMS.ViewModels.Dialogs"
+                  xmlns:viewModels="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+                  xmlns:enums1="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
                   mc:Ignorable="d"
                   d:DataContext="{d:DesignInstance Type=viewModels:OpcUaUpdateTypeDialogViewModel}"
                   Title="修改 OPC UA 更新方式"
@@ -16,7 +17,7 @@
 
     <Grid>
         <ComboBox Margin="15"
-                  ItemsSource="{Binding Source={extensions:EnumBindingSource {x:Type enums:OpcUaUpdateType}}}"
+                  ItemsSource="{Binding Source={extensions:EnumBindingSource {x:Type enums1:OpcUaUpdateType}}}"
                   SelectedValue="{Binding SelectedUpdateType}"
                   VerticalAlignment="Center"/>
     </Grid>

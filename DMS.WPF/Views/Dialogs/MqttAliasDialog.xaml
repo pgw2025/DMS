@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:vm="clr-namespace:DMS.ViewModels.Dialogs"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance vm:MqttAliasDialogViewModel}"
     Title="{Binding Title}"

@@ -1,15 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using DMS.Core.Enums;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using DMS.Data.Repositories;
+using DMS.Core.Models;
 using DMS.Helper;
-using DMS.WPF.Models;
 using DMS.Services;
+using DMS.WPF.Services;
+using DMS.WPF.ViewModels;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.ViewModels
 {
@@ -27,15 +25,14 @@ namespace DMS.ViewModels
         /// 当前正在编辑的MQTT服务器对象。
         /// </summary>
         [ObservableProperty]
-        private Mqtt _currentMqtt;
+        private MqttServerItemViewModel _currentMqtt;
 
         /// <summary>
         /// 与当前MQTT服务器关联的变量数据集合。
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<VariableMqtt> _associatedVariables;
+        private ObservableCollection<VariableMqttAlias> _associatedVariables;
 
-        private readonly VariableMqttAliasRepository _variableMqttAliasRepository;
 
         /// <summary>
         /// 构造函数。
@@ -44,20 +41,19 @@ namespace DMS.ViewModels
         /// <param name="dataServices">数据服务。</param>
         /// <param name="dialogService">对话框服务。</param>
         public MqttServerDetailViewModel(ILogger<MqttServerDetailViewModel> logger, DataServices dataServices,
-                                         IDialogService dialogService, VariableMqttAliasRepository variableMqttAliasRepository)
+                                         IDialogService dialogService)
         {
             _logger = logger;
             _dataServices = dataServices;
             _dialogService = dialogService;
-            _variableMqttAliasRepository = variableMqttAliasRepository;
         }
 
         public override void OnLoaded()
         {
-            if (CurrentMqtt.VariableMqtts != null)
-            {
-                AssociatedVariables =new ObservableCollection<VariableMqtt>(CurrentMqtt.VariableMqtts) ;
-            }
+            // if (CurrentMqtt.VariableMqtts != null)
+            // {
+            //     AssociatedVariables =new ObservableCollection<VariableMqtt>(CurrentMqtt.VariableMqtts) ;
+            // }
         }
 
 
@@ -95,32 +91,32 @@ namespace DMS.ViewModels
         [RelayCommand]
         private async Task RemoveVariables(System.Collections.IList variablesToRemove)
         {
-            if (CurrentMqtt == null || variablesToRemove == null || variablesToRemove.Count == 0)
-            {
-                NotificationHelper.ShowInfo("请选择要移除的变量。");
-                return;
-            }
-
-            var variablesList = variablesToRemove.Cast<Variable>()
-                                                 .ToList();
-
-            var result = await _dialogService.ShowConfrimeDialog(
-                "确认移除", $"确定要从MQTT服务器 '{CurrentMqtt.Name}' 中移除选定的 {variablesList.Count} 个变量吗？");
-            if (result != true) return;
-
-            foreach (var variable in variablesList) // 使用ToList()避免在迭代时修改集合
-            {
-                // 移除变量与当前MQTT服务器的关联
-                // variable.Mqtts?.Remove(CurrentMqtt);
-                // // 标记变量为已修改，以便保存时更新数据库
-                // variable.IsModified = true;
-                // AssociatedVariables.Remove(variable);
-                // _logger.LogInformation($"Removed variable {variable.Name} from MQTT server {CurrentMqtt.Name}.");
-            }
-
-            // TODO: 这里需要调用DataServices来更新数据库中VariableData的Mqtt关联
-            // 例如：await _dataServices.UpdateVariableDataAssociationsAsync(variablesToRemove);
-            NotificationHelper.ShowSuccess("变量移除成功，请记得保存更改。");
+            // if (CurrentMqtt == null || variablesToRemove == null || variablesToRemove.Count == 0)
+            // {
+            //     NotificationHelper.ShowInfo("请选择要移除的变量。");
+            //     return;
+            // }
+            //
+            // var variablesList = variablesToRemove.Cast<Variable>()
+            //                                      .ToList();
+            //
+            // var result = await _dialogService.ShowConfrimeDialog(
+            //     "确认移除", $"确定要从MQTT服务器 '{CurrentMqtt.ServerName}' 中移除选定的 {variablesList.Count} 个变量吗？");
+            // if (result != true) return;
+            //
+            // foreach (var variable in variablesList) // 使用ToList()避免在迭代时修改集合
+            // {
+            //     // 移除变量与当前MQTT服务器的关联
+            //     // variable.Mqtts?.Remove(CurrentMqtt);
+            //     // // 标记变量为已修改，以便保存时更新数据库
+            //     // variable.IsModified = true;
+            //     // AssociatedVariables.Remove(variable);
+            //     // _logger.LogInformation($"Removed variable {variable.Name} from MQTT server {CurrentMqtt.Name}.");
+            // }
+            //
+            // // 
+            // // 例如：await _dataServices.UpdateVariableDataAssociationsAsync(variablesToRemove);
+            // NotificationHelper.ShowSuccess("变量移除成功，请记得保存更改。");
         }
 
         /// <summary>

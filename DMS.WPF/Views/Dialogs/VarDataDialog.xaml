@@ -5,10 +5,12 @@
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                   xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-                  xmlns:vmd="clr-namespace:DMS.ViewModels.Dialogs"
+                  xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   xmlns:vc="clr-namespace:DMS.ValueConverts"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:en="clr-namespace:DMS.Core.Enums"
+                  xmlns:sockets="clr-namespace:System.Net.Sockets;assembly=System.Net.Sockets"
+                  xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
@@ -51,7 +53,7 @@
                            Style="{StaticResource TextBlockSubTitle}" />
                 <ComboBox SelectedValue="{Binding Variable.ProtocolType, UpdateSourceTrigger=PropertyChanged}"
                           SelectedValuePath="Tag"
-                          ItemsSource="{ex:EnumBindingSource {x:Type en:ProtocolType}}">
+                          ItemsSource="{ex:EnumBindingSource {x:Type sockets:ProtocolType}}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -67,7 +69,7 @@
                            Style="{StaticResource TextBlockSubTitle}" />
                 <ComboBox SelectedValue="{Binding Variable.SignalType, UpdateSourceTrigger=PropertyChanged}"
                           SelectedValuePath="Tag"
-                          ItemsSource="{ex:EnumBindingSource {x:Type en:SignalType}}">
+                          ItemsSource="{ex:EnumBindingSource {x:Type enums:SignalType}}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -79,7 +81,7 @@
                            Style="{StaticResource TextBlockSubTitle}" />
                 <ComboBox SelectedValue="{Binding Variable.PollLevelType, UpdateSourceTrigger=PropertyChanged}"
                           SelectedValuePath="Tag"
-                          ItemsSource="{ex:EnumBindingSource {x:Type en:PollLevelType}}">
+                          ItemsSource="{ex:EnumBindingSource {x:Type enums:PollLevelType}}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />

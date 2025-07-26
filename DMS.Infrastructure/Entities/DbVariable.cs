@@ -1,5 +1,7 @@
-﻿using SqlSugar;
+﻿using DMS.Core.Enums;
+using SqlSugar;
 using SqlSugar.DbConvert;
+using CSharpDataType = SqlSugar.CSharpDataType;
 
 namespace DMS.Infrastructure.Entities;
 

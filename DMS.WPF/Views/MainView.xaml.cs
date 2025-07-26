@@ -1,6 +1,5 @@
 using System.Windows;
 using DMS.Core.Helper;
-using DMS.WPF.Models;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -33,17 +32,17 @@ public partial class MainView : Window
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-        var settings = Config.AppSettings.Load();
-        if (settings.MinimizeToTrayOnClose)
-        {
-            // Hide the window instead of closing it
-            e.Cancel = true;
-            Hide();
-        }
-        else
-        {
-            Application.Current.Shutdown();
-        }
+        // var settings = Config.AppSettings.Load();
+        // if (settings.MinimizeToTrayOnClose)
+        // {
+        //     // Hide the window instead of closing it
+        //     e.Cancel = true;
+        //     Hide();
+        // }
+        // else
+        // {
+        //     Application.Current.Shutdown();
+        // }
     }
 
     public void ShowApplication()
@@ -61,15 +60,15 @@ public partial class MainView : Window
     /// <param name="args"></param>
     private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var menu = args.SelectedItem as MenuBean;
-        if (menu != null)
-        {
-           await _viewModel.MenuSelectionChanged(menu);
-        }
-        else
-        {
-            NotificationHelper.ShowError("选择的菜单项为空！");
-        }
+        // var menu = args.SelectedItem as MenuBean;
+        // if (menu != null)
+        // {
+        //    await _viewModel.MenuSelectionChanged(menu);
+        // }
+        // else
+        // {
+        //     NotificationHelper.ShowError("选择的菜单项为空！");
+        // }
     }
 
     private async void MainView_OnLoaded(object sender, RoutedEventArgs e)

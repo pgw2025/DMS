@@ -154,4 +154,9 @@
     <ProjectReference Include="..\DMS.Application\DMS.Application.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="ViewModels\Items\" />
+  </ItemGroup>
+
 </Project>

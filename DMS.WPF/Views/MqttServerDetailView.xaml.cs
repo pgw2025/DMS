@@ -1,8 +1,6 @@
 using System.Windows.Controls;
-using Microsoft.Extensions.DependencyInjection;
-using DMS.WPF.ViewModels;
 
-namespace DMS.Views
+namespace DMS.WPF.Views
 {
     /// <summary>
     /// MqttServerDetailView.xaml 的交互逻辑

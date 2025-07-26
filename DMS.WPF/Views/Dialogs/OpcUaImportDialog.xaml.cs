@@ -1,11 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
-using CommunityToolkit.Mvvm.Messaging;
-using DMS.WPF.Models;
 using DMS.WPF.ViewModels.Dialogs;
 using iNKORE.UI.WPF.Modern.Controls;
 
-namespace DMS.Views.Dialogs;
+namespace DMS.WPF.Views.Dialogs;
 
 /// <summary>
 /// OpcUaImportDialog.xaml 的交互逻辑
@@ -37,22 +35,22 @@ public partial class OpcUaImportDialog : ContentDialog
 
     private async void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
-        if (e.NewValue is OpcUaNode selectedNode)
-        {
-            await ViewModel.LoadNodeVariables(selectedNode);
-        }
+        // if (e.NewValue is OpcUaNode selectedNode)
+        // {
+        //     await ViewModel.LoadNodeVariables(selectedNode);
+        // }
     }
 
 
     private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs args)
     {
-        if (args.AddedItems!=null && args.AddedItems.Count>0)
-        {
-            foreach (var item in args.AddedItems)
-            {
-                ViewModel.SelectedVariables.Add((Variable)item);
-            }
-            
-        }
+       // if (args.AddedItems!=null && args.AddedItems.Count>0)
+       //  {
+       //      foreach (var item in args.AddedItems)
+       //      {
+       //          ViewModel.SelectedVariables.Add((Variable)item);
+       //      }
+       //      
+       //  } 
     }
 }

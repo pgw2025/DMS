@@ -1,4 +1,8 @@
-﻿/// <summary>
+﻿
+namespace DMS.Core.Enums;
+
+
+/// <summary>
 /// 定义了设备支持的通信协议类型。
 /// </summary>
 public enum ProtocolType

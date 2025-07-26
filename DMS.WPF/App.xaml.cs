@@ -1,6 +1,4 @@
 ﻿using System.Windows;
-using DMS.Infrastructure.Entities;
-using DMS.Infrastructure.Repositories;
 using DMS.Core.Enums;
 using DMS.Helper;
 using DMS.Services;
@@ -11,19 +9,12 @@ using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
-using NLog.Extensions.Logging;
 using DMS.Extensions;
 using Microsoft.Extensions.Hosting;
-using DMS.Config;
-using DMS.Infrastructure.Data;
 using DMS.WPF.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.Services.Processors;
-using DMS.WPF.ViewModels.DMS.WPF.ViewModels;
-using SqlSugar;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-using DMS.Infrastructure.Services;
-using DMS.Infrastructure.Interfaces;
 
 namespace DMS;
 
@@ -33,7 +24,7 @@ namespace DMS;
 public partial class App : System.Windows.Application
 {
     public IServiceProvider Services { get; }
-    public AppSettings Settings { get; private set; }
+    // public AppSettings Settings { get; private set; }
 
 
     public App()
@@ -63,10 +54,10 @@ public partial class App : System.Windows.Application
 
         try
         {
-            var databaseInitializer = Host.Services.GetRequiredService<DatabaseInitializerService>();
-            databaseInitializer.InitializeDataBase();
-            await databaseInitializer.InitializeMenu();
-            Settings = AppSettings.Load();
+            // var databaseInitializer = Host.Services.GetRequiredService<DatabaseInitializerService>();
+            // databaseInitializer.InitializeDataBase();
+            // await databaseInitializer.InitializeMenu();
+            // Settings = AppSettings.Load();
             Host.Services.GetRequiredService<GrowlNotificationService>();
             
             // 初始化数据处理链
@@ -108,17 +99,17 @@ public partial class App : System.Windows.Application
 
     private void ConfigureServices(IServiceCollection services)
     {
-        services.AddTransient<IDbContext,SqlSugarDbContext>();
-
-
-        services.AddSingleton<IDeviceDataService, DeviceDataService>();
-        services.AddSingleton<NavgatorServices>();
-        //services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<GrowlNotificationService>();
-        services.AddHostedService<S7BackgroundService>();
-        services.AddHostedService<OpcUaBackgroundService>();
-        services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();
-        
+        // services.AddTransient<IDbContext,SqlSugarDbContext>();
+        //
+        //
+        // services.AddSingleton<IDeviceDataService, DeviceDataService>();
+        // services.AddSingleton<NavgatorServices>();
+        // //services.AddSingleton<IDialogService, DialogService>();
+        // services.AddSingleton<GrowlNotificationService>();
+        // services.AddHostedService<S7BackgroundService>();
+        // services.AddHostedService<OpcUaBackgroundService>();
+        // services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();
+        //
         
         // 注册 AutoMapper
         services.AddAutoMapper(typeof(App).Assembly);
@@ -132,14 +123,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<HistoryProcessor>();
         services.AddSingleton<MqttPublishProcessor>();
         
-        // 注册数据仓库
-        services.AddSingleton<DeviceRepository>();
-        services.AddSingleton<MenuRepository>();
-        services.AddSingleton<MqttRepository>();
-        services.AddSingleton<UserRepository>();
-        services.AddSingleton<VarDataRepository>();
-        services.AddSingleton<VarTableRepository>();
-        services.AddSingleton<VariableMqttAliasRepository>();
+        
         // 注册视图模型
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<HomeViewModel>();
@@ -166,7 +150,7 @@ public partial class App : System.Windows.Application
         LogManager.Setup().LoadConfigurationFromFile("Config/nlog.config");
         loggingBuilder.ClearProviders();
         loggingBuilder.SetMinimumLevel(LogLevel.Trace);
-        loggingBuilder.AddNLog();
+        // loggingBuilder.AddNLog();
 
         // 捕获未处理的异常并记录
         AppDomain.CurrentDomain.UnhandledException += (sender, args) =>

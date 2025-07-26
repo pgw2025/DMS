@@ -1,8 +1,7 @@
 
 using DMS.Core.Enums;
-using DMS.WPF.Models;
+using DMS.Core.Models;
 using DMS.WPF.ViewModels;
-using DMS.WPF.Models;
 using DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,26 +33,26 @@ public class DataServicesHelper
     
     public static MenuBean FindMenusForDevice(Device device, IEnumerable<MenuBean> menus)
     {
-        if (menus == null)
-        {
-            return null;
-        }
-
-        foreach (var menu in menus)
-        {
-            // 检查当前菜单项是否匹配
-            if (menu.Type==MenuType.DeviceMenu && menu.DataId ==device.Id)
-            {
-                return menu;
-            }
-
-            // 递归搜索子菜单
-            var foundInSubMenu = FindMenusForDevice(device, menu.Items);
-            if (foundInSubMenu != null)
-            {
-                return foundInSubMenu;
-            }
-        }
+        // if (menus == null)
+        // {
+        //     return null;
+        // }
+        //
+        // foreach (var menu in menus)
+        // {
+        //     // 检查当前菜单项是否匹配
+        //     if (menu.Type==MenuType.DeviceMenu && menu.DataId ==device.Id)
+        //     {
+        //         return menu;
+        //     }
+        //
+        //     // 递归搜索子菜单
+        //     var foundInSubMenu = FindMenusForDevice(device, menu.Items);
+        //     if (foundInSubMenu != null)
+        //     {
+        //         return foundInSubMenu;
+        //     }
+        // }
 
         return null;
     }
@@ -64,15 +63,15 @@ public class DataServicesHelper
     /// <param name="menu"></param>
     public static void SortMenus(MenuBean menu)
     {
-        if (menu.Items == null || menu.Items.Count() == 0)
-            return;
-        menu.Items.Sort((a, b) =>
-            a.Type.ToString().Length.CompareTo(b.Type.ToString().Length)
-        );
-        foreach (var menuItem in menu.Items)
-        {
-            SortMenus(menuItem);
-        }
+        // if (menu.Items == null || menu.Items.Count() == 0)
+        //     return;
+        // menu.Items.Sort((a, b) =>
+        //     a.Type.ToString().Length.CompareTo(b.Type.ToString().Length)
+        // );
+        // foreach (var menuItem in menu.Items)
+        // {
+        //     SortMenus(menuItem);
+        // }
     }
     
     public static ViewModelBase GetMainViewModel(string name)
@@ -102,26 +101,26 @@ public class DataServicesHelper
 
     public static MenuBean FindVarTableMenu(int varTableId, List<MenuBean> menus)
     {
-        if (menus == null)
-        {
-            return null;
-        }
-
-        foreach (var menu in menus)
-        {
-            // 检查当前菜单项是否匹配
-            if (menu.Type==MenuType.VariableTableMenu && menu.DataId ==varTableId)
-            {
-                return menu;
-            }
-
-            // 递归搜索子菜单
-            var foundInSubMenu = FindVarTableMenu(varTableId, menu.Items);
-            if (foundInSubMenu != null)
-            {
-                return foundInSubMenu;
-            }
-        }
+        // if (menus == null)
+        // {
+        //     return null;
+        // }
+        //
+        // foreach (var menu in menus)
+        // {
+        //     // 检查当前菜单项是否匹配
+        //     if (menu.Type==MenuType.VariableTableMenu && menu.DataId ==varTableId)
+        //     {
+        //         return menu;
+        //     }
+        //
+        //     // 递归搜索子菜单
+        //     var foundInSubMenu = FindVarTableMenu(varTableId, menu.Items);
+        //     if (foundInSubMenu != null)
+        //     {
+        //         return foundInSubMenu;
+        //     }
+        // }
 
         return null;
     }

@@ -5,10 +5,12 @@
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                   xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-                  xmlns:vmd="clr-namespace:DMS.ViewModels.Dialogs"
+                  xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   xmlns:vc="clr-namespace:DMS.ValueConverts"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:en="clr-namespace:DMS.Core.Enums"
+                  xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
+                  xmlns:global="clr-namespace:;assembly=DMS.Core"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
@@ -17,9 +19,9 @@
                   mc:Ignorable="d">
     <ui:ContentDialog.Resources>
         <ex:EnumBindingSource x:Key="deviceType"
-                              EnumType="{x:Type en:DeviceType}" />
+                              EnumType="{x:Type enums:DeviceType}" />
         <ex:EnumBindingSource x:Key="protocolType"
-                              EnumType="{x:Type en:ProtocolType}" />
+                              EnumType="{x:Type enums:ProtocolType}" />
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
 
 
@@ -103,7 +105,7 @@
                     <Style TargetType="StackPanel">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Device.ProtocolType}"
-                                         Value="{x:Static en:ProtocolType.S7}">
+                                         Value="{x:Static enums:ProtocolType.S7}">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>

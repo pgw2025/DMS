@@ -3,10 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:local="clr-namespace:DMS.Views"
+        xmlns:local="clr-namespace:DMS.WPF.Views"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:DMS.ViewModels"
-        xmlns:mo="clr-namespace:DMS.Models"
+        xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
+        xmlns:mo="clr-namespace:DMS.Core.Models;assembly=DMS.Core"
         xmlns:hc="https://handyorg.github.io/handycontrol"
         xmlns:tb="http://hardcodet.net/taskbar"
         xmlns:taskbarNotification="http://www.hardcodet.net/taskbar"
@@ -107,9 +107,9 @@
                             <local:VariableTableView DataContext="{Binding }"/>
                         </DataTemplate>
                         <!-- Mqtt服务器详情页 -->
-                        <DataTemplate DataType="{x:Type vm:MqttServerDetailViewModel}">
-                            <local:MqttServerDetailView DataContext="{Binding }"/>
-                        </DataTemplate>
+                        <!-- <DataTemplate DataType="{x:Type vm:MqttServerDetailViewModel}"> -->
+                        <!--     <local:MqttServerDetailView DataContext="{Binding }"/> -->
+                        <!-- </DataTemplate> -->
                     </ContentControl.Resources>
                 </ContentControl>
 

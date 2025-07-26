@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
-using DMS.Helper;
-using DMS.WPF.Models;
+using DMS.Core.Helper;
+using DMS.Core.Models;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace DMS.Services;
 

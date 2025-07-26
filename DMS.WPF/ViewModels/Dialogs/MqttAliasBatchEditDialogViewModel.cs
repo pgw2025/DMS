@@ -3,8 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
-using DMS.WPF.Models;
-using DMS.WPF.Models;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
@@ -14,22 +13,22 @@ public partial class MqttAliasBatchEditDialogViewModel : ObservableObject
     private string _title = "批量设置MQTT别名";
 
     [ObservableProperty]
-    private ObservableCollection<VariableMqtt> _variablesToEdit;
+    private ObservableCollection<VariableMqttAlias> _variablesToEdit;
 
-    public Mqtt SelectedMqtt { get; private set; }
+    public MqttServerItemViewModel SelectedMqtt { get; private set; }
 
-    public MqttAliasBatchEditDialogViewModel(List<Variable> selectedVariables, Mqtt selectedMqtt)
+    public MqttAliasBatchEditDialogViewModel(List<VariableItemViewModel> selectedVariables, MqttServerItemViewModel selectedMqtt)
     {
         SelectedMqtt = selectedMqtt;
-        Title=$"设置：{SelectedMqtt.Name}-MQTT服务器关联变量的别名";
-        VariablesToEdit = new ObservableCollection<VariableMqtt>(
-            selectedVariables.Select(v => new VariableMqtt(v, selectedMqtt))
-        );
+        Title=$"设置：{SelectedMqtt.ServerName}-MQTT服务器关联变量的别名";
+        // VariablesToEdit = new ObservableCollection<VariableMqttAlias>(
+        //     selectedVariables.Select(v => new VariableMqttAlias(v, selectedMqtt))
+        // );
     }
 
     public MqttAliasBatchEditDialogViewModel()
     {
         // For design time
-        VariablesToEdit = new ObservableCollection<VariableMqtt>();
+        // VariablesToEdit = new ObservableCollection<VariableMqtt>();
     }
 }
