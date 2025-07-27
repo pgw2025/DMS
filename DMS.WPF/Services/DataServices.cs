@@ -447,4 +447,96 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             }
         }
     }
+
+    /// <summary>
+    /// 将变量表关联到对应的设备上。
+    /// </summary>
+    public void AssociateVariableTablesToDevices()
+    {
+        // 1. 创建一个字典，按 DeviceId 分组所有变量表，以便高效查找
+        var variableTablesGroupedByDevice = _variableTables
+            .GroupBy(vt => vt.DeviceId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var device in _devices)
+        {
+            // 获取当前设备应该关联的所有变量表
+            List<VariableTableItemViewModel> associatedVariableTables = new List<VariableTableItemViewModel>();
+            if (variableTablesGroupedByDevice.TryGetValue(device.Id, out var foundTables))
+            {
+                associatedVariableTables = foundTables;
+            }
+
+            // 创建一个HashSet，用于快速查找当前设备应有的变量表ID
+            var shouldHaveVariableTableIds = new HashSet<int>(associatedVariableTables.Select(vt => vt.Id));
+
+            // 2. 移除不再关联的变量表
+            // 从后往前遍历，避免在循环中修改集合导致索引问题
+            for (int i = device.VariableTables.Count - 1; i >= 0; i--)
+            {
+                var existingVariableTable = device.VariableTables[i];
+                if (!shouldHaveVariableTableIds.Contains(existingVariableTable.Id))
+                {
+                    device.VariableTables.RemoveAt(i);
+                }
+            }
+
+            // 3. 添加新关联的变量表
+            var currentlyHasVariableTableIds = new HashSet<int>(device.VariableTables.Select(vt => vt.Id));
+            foreach (var newVariableTable in associatedVariableTables)
+            {
+                if (!currentlyHasVariableTableIds.Contains(newVariableTable.Id))
+                {
+                    device.VariableTables.Add(newVariableTable);
+                }
+                // 如果已经存在，则不需要额外操作，因为 LoadVariableTables 已经更新了 _variableTables 中的实例
+            }
+        }
+    }
+
+    /// <summary>
+    /// 将变量关联到对应的变量表上。
+    /// </summary>
+    public void AssociateVariablesToVariableTables()
+    {
+        // 1. 创建一个字典，按 VariableTableId 分组所有变量，以便高效查找
+        var variablesGroupedByVariableTable = _variables
+            .GroupBy(v => v.VariableTableId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        foreach (var variableTable in _variableTables)
+        {
+            // 获取当前变量表应该关联的所有变量
+            List<VariableItemViewModel> associatedVariables = new List<VariableItemViewModel>();
+            if (variablesGroupedByVariableTable.TryGetValue(variableTable.Id, out var foundVariables))
+            {
+                associatedVariables = foundVariables;
+            }
+
+            // 创建一个HashSet，用于快速查找当前变量表应有的变量ID
+            var shouldHaveVariableIds = new HashSet<int>(associatedVariables.Select(v => v.Id));
+
+            // 2. 移除不再关联的变量
+            // 从后往前遍历，避免在循环中修改集合导致索引问题
+            for (int i = variableTable.Variables.Count - 1; i >= 0; i--)
+            {
+                var existingVariable = variableTable.Variables[i];
+                if (!shouldHaveVariableIds.Contains(existingVariable.Id))
+                {
+                    variableTable.Variables.RemoveAt(i);
+                }
+            }
+
+            // 3. 添加新关联的变量
+            var currentlyHasVariableIds = new HashSet<int>(variableTable.Variables.Select(v => v.Id));
+            foreach (var newVariable in associatedVariables)
+            {
+                if (!currentlyHasVariableIds.Contains(newVariable.Id))
+                {
+                    variableTable.Variables.Add(newVariable);
+                }
+                // 如果已经存在，则不需要额外操作，因为 LoadVariables 已经更新了 _variables 中的实例
+            }
+        }
+    }
 }

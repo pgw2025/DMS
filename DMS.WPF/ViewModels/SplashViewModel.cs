@@ -46,6 +46,10 @@ public partial class SplashViewModel : ObservableObject
             await _dataServices.LoadVariableTables();
             await _dataServices.LoadVariables();
             await _dataServices.LoadMenus();
+            
+            _dataServices.AssociateVariableTablesToDevices();
+            _dataServices.AssociateVariablesToVariableTables();
+            
             // 可以在这里添加加载配置的逻辑
             await Task.Delay(500); // 模拟耗时
 

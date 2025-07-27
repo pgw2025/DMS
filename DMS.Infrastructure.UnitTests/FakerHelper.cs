@@ -25,7 +25,7 @@ namespace DMS.Infrastructure.UnitTests
             dbDevice.Protocol = ProtocolType.S7;
             dbDevice.Slot = 1;
             dbDevice.Rack = 0;
-            dbDevice.CpuType = "S7-1200";
+            dbDevice.CpuType = CpuType.S71200;
             dbDevice.DeviceType = Core.Enums.DeviceType.SiemensPLC;
 
             return dbDevice;

@@ -63,7 +63,7 @@ public class Device
     /// </summary>
     public List<VariableTable> VariableTables { get; set; } = new();
 
-    public string CpuType { get; set; }
+    public CpuType CpuType { get; set; }
     public DeviceType DeviceType { get; set; }
     public bool IsRunning { get; set; }
 }

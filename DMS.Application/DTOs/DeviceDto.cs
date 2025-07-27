@@ -15,7 +15,7 @@ public class DeviceDto
     public int Port { get; set; }
     public int Rack { get; set; }
     public int Slot { get; set; }
-    public string CpuType { get; set; }
+    public CpuType CpuType { get; set; }
     public DeviceType DeviceType { get; set; }
     public string OpcUaServerUrl { get; set; }
     public bool IsActive { get; set; }

@@ -113,25 +113,25 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                                               PrimaryButContent = "添加设备"
                                                           };
             // 1. 显示添加设备对话框
-            // DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
-            // // 如果用户取消或对话框未返回设备，则直接返回
-            // if (device == null)
-            // {
-            //     return;
-            // }
+            DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
+            // 如果用户取消或对话框未返回设备，则直接返回
+            if (device == null)
+            {
+                return;
+            }
 
-            DeviceItemViewModel device = new DeviceItemViewModel()
-                                         {
-                                             Name = "Test",
-                                             Description = "Test Device",
-                                             IpAddress = "127.0.0.1",
-                                             Port = 8080,
-                                             Protocol = ProtocolType.S7,
-                                             CpuType = "S7-1200",
-                                             DeviceType = DeviceType.SiemensPLC,
-                                             IsActive = true,
-                                             
-                                         };
+            // DeviceItemViewModel device = new DeviceItemViewModel()
+            //                              {
+            //                                  Name = "Test",
+            //                                  Description = "Test Device",
+            //                                  IpAddress = "127.0.0.1",
+            //                                  Port = 8080,
+            //                                  Protocol = ProtocolType.S7,
+            //                                  CpuType = "S7-1200",
+            //                                  DeviceType = DeviceType.SiemensPLC,
+            //                                  IsActive = true,
+            //                                  
+            //                              };
 
 
             CreateDeviceWithDetailsDto dto = new CreateDeviceWithDetailsDto();

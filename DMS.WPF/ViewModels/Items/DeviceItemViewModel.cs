@@ -1,4 +1,6 @@
 // 文件: DMS.WPF/ViewModels/Items/DeviceItemViewModel.cs
+
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using DMS.Core.Enums;
@@ -35,7 +37,7 @@ public partial class DeviceItemViewModel : ObservableObject
     private int _slot;
 
     [ObservableProperty]
-    private string _cpuType;
+    private CpuType _cpuType;
 
     [ObservableProperty]
     private DeviceType _deviceType;
@@ -51,8 +53,8 @@ public partial class DeviceItemViewModel : ObservableObject
 
     [ObservableProperty]
     private string _status;
-    
-    public List<VariableTableItemViewModel> VariableTables { get; set; }
+
+    public ObservableCollection<VariableTableItemViewModel> VariableTables { get; set; } = new();
 
     public DeviceItemViewModel(DeviceDto dto)
     {

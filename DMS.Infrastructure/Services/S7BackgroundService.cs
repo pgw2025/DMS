@@ -8,6 +8,7 @@ using DateTime = System.DateTime;
 using Microsoft.Extensions.Logging;
 using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
+using CpuType = DMS.Core.Enums.CpuType;
 
 namespace DMS.Infrastructure.Services;
 
@@ -378,12 +379,12 @@ public class S7BackgroundService : BackgroundService
     /// <param name="cpuTypeString">CPU类型的字符串表示。</param>
     /// <returns>对应的S7.Net.CpuType枚举值。</returns>
     /// <exception cref="ArgumentException">如果无法解析CPU类型字符串。</exception>
-    private S7.Net.CpuType ConvertCpuType(string cpuTypeString)
+    private S7.Net.CpuType ConvertCpuType(CpuType cpuTypeString)
     {
-        if (Enum.TryParse(cpuTypeString, true, out S7.Net.CpuType cpuType))
-        {
-            return cpuType;
-        }
+        // if (Enum.TryParse(cpuTypeString, true, out S7.Net.CpuType cpuType))
+        // {
+        //     return cpuType;
+        // }
         throw new ArgumentException($"无法解析CPU类型: {cpuTypeString}");
     }
 

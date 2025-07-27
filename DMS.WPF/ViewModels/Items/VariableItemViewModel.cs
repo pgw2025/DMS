@@ -29,7 +29,7 @@ public partial class VariableItemViewModel : ObservableObject
     private List<VariableMqttAliasDto>? _mqttAliases;
 
     [ObservableProperty]
-    private SignalType _signalType;
+    private SignalType _signalType ;
 
     [ObservableProperty]
     private PollLevelType _pollLevel;

@@ -56,8 +56,8 @@ public class DbDevice
     /// <summary>
     /// 
     /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public string CpuType { get; set; }
+    [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
+    public CpuType CpuType { get; set; }
     /// <summary>
     /// 设备槽号 (针对PLC等设备)。
     /// </summary>

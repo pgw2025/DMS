@@ -31,6 +31,8 @@
                               EnumType="{x:Type enums:DeviceType}" />
         <ex:EnumBindingSource x:Key="protocolType"
                               EnumType="{x:Type enums:ProtocolType}" />
+        <ex:EnumBindingSource x:Key="cpuType"
+                              EnumType="{x:Type enums:CpuType}" />
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
 
 
@@ -125,7 +127,7 @@
                            HorizontalAlignment="Left"
                            Style="{StaticResource TextBlockSubTitle}" />
                 <ComboBox SelectedItem="{Binding Device.CpuType}"
-                          ItemsSource="{Binding CpuTypes}" />
+                          ItemsSource="{Binding Source={StaticResource cpuType}}" />
 
                 <!-- Rack -->
                 <TextBlock Text="机架号"
