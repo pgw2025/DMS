@@ -6,10 +6,10 @@
                   xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                  xmlns:vc="clr-namespace:DMS.ValueConverts"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
                   xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                  xmlns:vc="clr-namespace:DMS.WPF.ValueConverts"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
@@ -34,6 +34,7 @@
         <ex:EnumBindingSource x:Key="cpuType"
                               EnumType="{x:Type enums:CpuType}" />
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <vc:EnumToStringConverter x:Key="EnumToStringConverter" />
 
 
     </ui:ContentDialog.Resources>
@@ -61,17 +62,17 @@
                      Text="{Binding Device.IpAddress, UpdateSourceTrigger=PropertyChanged}" />
 
             <!-- 设备类型 -->
-            <!-- <TextBlock Text="设备类型" -->
-            <!--            HorizontalAlignment="Left" -->
-            <!--            Style="{StaticResource TextBlockSubTitle}" /> -->
-            <!-- <ComboBox SelectedItem="{Binding Device}" -->
-            <!--           ItemsSource="{Binding Source={StaticResource deviceType} }"> -->
-            <!--     <ComboBox.ItemTemplate> -->
-            <!--         <DataTemplate> -->
-            <!--             <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" /> -->
-            <!--         </DataTemplate> -->
-            <!--     </ComboBox.ItemTemplate> -->
-            <!-- </ComboBox> -->
+            <TextBlock Text="设备类型"
+                       HorizontalAlignment="Left"
+                       Style="{StaticResource TextBlockSubTitle}" />
+            <ComboBox SelectedItem="{Binding Device}"
+                      ItemsSource="{Binding Source={StaticResource deviceType} }">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
 
             <CheckBox FontSize="16"
                       Content="是否添加默认变量表"
@@ -101,7 +102,7 @@
             <TextBlock Text="设备通信协议"
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox SelectedItem="{Binding Device.Protocol}"
+            <ComboBox x:Name="ProtocolComboBox" SelectedItem="{Binding Device.Protocol}"
                       ItemsSource="{Binding Source={StaticResource protocolType} }">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -109,14 +110,15 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-
+            
             <!-- S7 Specific Properties -->
-            <StackPanel x:Name="S7PropertiesPanel" Visibility="Visible" Background="LightGray">
+            <StackPanel x:Name="S7PropertiesPanel" Background="LightGray">
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Device.Protocol}"
-                                         Value="{x:Static enums:ProtocolType.S7}">
+                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}"
+                                         Value="S7">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>

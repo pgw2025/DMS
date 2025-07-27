@@ -54,6 +54,11 @@ public partial class DeviceItemViewModel : ObservableObject
     [ObservableProperty]
     private string _status;
 
+    partial void OnProtocolChanged(ProtocolType oldValue, ProtocolType newValue)
+    {
+        
+    }
+
     public ObservableCollection<VariableTableItemViewModel> VariableTables { get; set; } = new();
 
     public DeviceItemViewModel(DeviceDto dto)

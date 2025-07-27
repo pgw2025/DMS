@@ -1,8 +1,7 @@
-using System;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace DMS.ValueConverts
+namespace DMS.WPF.ValueConverts
 {
     public class NullableBooleanConverter : IValueConverter
     {

@@ -5,7 +5,7 @@
                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                         xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
                         xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                        xmlns:vc="clr-namespace:DMS.ValueConverts"
+                        xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
                         mc:Ignorable="d"
                         d:DataContext="{d:DesignInstance vm:IsActiveDialogViewModel}"
                         Title="修改激活状态"
@@ -14,7 +14,7 @@
                         PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
                         SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
     <controls:ContentDialog.Resources>
-        <vc:NullableBooleanConverter x:Key="NullableBooleanConverter" />
+        <valueConverts:NullableBooleanConverter x:Key="NullableBooleanConverter" />
     </controls:ContentDialog.Resources>
     <Grid>
         <StackPanel Orientation="Vertical" Margin="10">

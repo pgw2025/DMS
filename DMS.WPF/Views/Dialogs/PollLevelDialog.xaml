@@ -6,14 +6,14 @@
              xmlns:enums="clr-namespace:DMS.Core.Enums"
              xmlns:extensions="clr-namespace:DMS.Extensions"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-             xmlns:vc="clr-namespace:DMS.ValueConverts"
+             xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
              mc:Ignorable="d"
              Title="修改轮询频率"
              PrimaryButtonText="确定"
              CloseButtonText="取消"
              d:DesignHeight="150" d:DesignWidth="300">
     <ui:ContentDialog.Resources>
-        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
     </ui:ContentDialog.Resources>
     <Grid>
         <ComboBox 

@@ -6,11 +6,11 @@
                   xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                  xmlns:vc="clr-namespace:DMS.ValueConverts"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:en="clr-namespace:DMS.Core.Enums"
                   xmlns:sockets="clr-namespace:System.Net.Sockets;assembly=System.Net.Sockets"
                   xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
+                  xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
@@ -19,7 +19,7 @@
                   d:DataContext="{d:DesignInstance vmd:VarDataDialogViewModel}"
                   mc:Ignorable="d">
     <ui:ContentDialog.Resources>
-        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
     </ui:ContentDialog.Resources>
 
     <Grid Margin="10" Width="480">

@@ -6,7 +6,6 @@
                   xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                  xmlns:vc="clr-namespace:DMS.ValueConverts"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:en="clr-namespace:DMS.Core.Enums"
                   Title="{Binding Title}"

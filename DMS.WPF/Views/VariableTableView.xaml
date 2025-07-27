@@ -8,11 +8,11 @@
              xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
              xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
              mc:Ignorable="d"
-             xmlns:vc="clr-namespace:DMS.ValueConverts"
              xmlns:ex="clr-namespace:DMS.Extensions"
              xmlns:en="clr-namespace:DMS.Core.Enums"
              xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
              xmlns:global="clr-namespace:;assembly=DMS.Core"
+             xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
              Loaded="VariableTableView_OnLoaded"
              d:DataContext="{d:DesignInstance vm:VariableTableViewModel}"
              d:DesignHeight="600"
@@ -23,7 +23,7 @@
                               EnumType="{x:Type enums:SignalType}" />
         <ex:EnumBindingSource x:Key="protocolType"
                               EnumType="{x:Type enums:ProtocolType}" />
-        <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
         <ex:EnumBindingSource x:Key="pollLevelType"
                               EnumType="{x:Type enums:PollLevelType}" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
