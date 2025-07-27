@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace DMS.WPF.ViewModels.Items;
 
@@ -47,6 +49,9 @@ public partial class MqttServerItemViewModel : ObservableObject
     [ObservableProperty]
     private string _messageFormat;
 
+    [ObservableProperty]
+    private ObservableCollection<VariableMqttAliasItemViewModel> _variableAliases = new();
+
     public MqttServerItemViewModel(MqttServerDto dto)
     {
         Id = dto.Id;
@@ -63,5 +68,6 @@ public partial class MqttServerItemViewModel : ObservableObject
         _connectedAt = dto.ConnectedAt;
         _connectionDuration = dto.ConnectionDuration;
         _messageFormat = dto.MessageFormat;
+        _variableAliases = new ObservableCollection<VariableMqttAliasItemViewModel>(dto.VariableAliases.Select(va => new VariableMqttAliasItemViewModel(va)));
     }
 }

@@ -11,17 +11,16 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // Device 映射
-        CreateMap<CreateDeviceDto, Device>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.VariableTables, opt => opt.Ignore());
 
+
+        // Device 映射
         CreateMap<UpdateDeviceDto, Device>()
             // 1. 首先，忽略那些永远不应从DTO更新的属性
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Description, opt => opt.Ignore())
             .ForMember(dest => dest.VariableTables, opt => opt.Ignore())
             .ForMember(dest => dest.CpuType, opt => opt.Ignore())
+            .ForMember(dest => dest.IsRunning, opt => opt.Ignore())
             .ForMember(dest => dest.DeviceType, opt => opt.Ignore())
 
             // 2. 然后，为每个可空属性单独设置条件
@@ -35,30 +34,21 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.IsActive, opt => opt.Condition(src => src.IsActive.HasValue));
 
         CreateMap<Device, DeviceDto>()
-            .ForMember(dest => dest.Protocol, opt => opt.MapFrom(src => src.Protocol.ToString()))
-            .ForMember(dest => dest.Status, opt => opt.Ignore());
+            .ReverseMap();
+          
+           
 
         // VariableTable 映射
         CreateMap<VariableTable, VariableTableDto>().ReverseMap();
 
         // Variable 映射
         CreateMap<Variable, VariableDto>()
-            .ForMember(dest => dest.DataType, opt => opt.MapFrom(src => src.DataType.ToString()))
-            .ForMember(dest => dest.CSharpDataType, opt => opt.MapFrom(src => src.CSharpDataType))
-            .ForMember(dest => dest.S7Address, opt => opt.MapFrom(src => src.S7Address))
-            .ForMember(dest => dest.DataValue, opt => opt.MapFrom(src => src.DataValue))
-            .ForMember(dest => dest.DisplayValue, opt => opt.MapFrom(src => src.DisplayValue))
-            .ForMember(dest => dest.VariableTable, opt => opt.MapFrom(src => src.VariableTable))
-            .ForMember(dest => dest.MqttAliases, opt => opt.MapFrom(src => src.MqttAliases))
-            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+            .ReverseMap();
+
 
         CreateMap<VariableDto, Variable>()
-            .ForMember(dest => dest.S7Address, opt => opt.MapFrom(src => src.S7Address))
-            .ForMember(dest => dest.VariableTable, opt => opt.Ignore())
-            .ForMember(dest => dest.MqttAliases, opt => opt.Ignore())
-            .ForMember(dest => dest.DataValue, opt => opt.Ignore())
-            .ForMember(dest => dest.DisplayValue, opt => opt.Ignore())
-            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
+            .ReverseMap();
+           
 
         // MqttServer 映射
         CreateMap<MqttServer, MqttServerDto>().ReverseMap();

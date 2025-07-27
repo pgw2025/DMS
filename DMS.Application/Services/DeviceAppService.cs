@@ -55,20 +55,22 @@ public class DeviceAppService : IDeviceAppService
     /// <returns>新创建设备的ID。</returns>
     /// <exception cref="InvalidOperationException">如果添加设备、设备菜单或变量表失败。</exception>
     /// <exception cref="ApplicationException">如果创建设备时发生其他错误。</exception>
-    public async Task<int> CreateDeviceWithDetailsAsync(CreateDeviceWithDetailsDto dto)
+    public async Task<CreateDeviceWithDetailsDto> CreateDeviceWithDetailsAsync(CreateDeviceWithDetailsDto dto)
     {
         try
         {
             await _repoManager.BeginTranAsync();
 
             var device = _mapper.Map<Device>(dto.Device);
-            device.IsActive = true; // 默认激活
+            if (device.Protocol == ProtocolType.OpcUA)
+                device.OpcUaServerUrl = $"opc.tcp://{device.IpAddress}:{device.Port}";
             var addDevice = await _repoManager.Devices.AddAsync(device);
             if (addDevice == null || addDevice.Id == 0)
             {
                 throw new InvalidOperationException($"添加设备失败：{addDevice}");
             }
 
+            _mapper.Map(addDevice,dto.Device);
             MenuBean addDeviceMenu = null;
 
             // 假设有设备菜单
@@ -83,6 +85,7 @@ public class DeviceAppService : IDeviceAppService
                 {
                     throw new InvalidOperationException($"添加设备菜单失败：{addDeviceMenu}");
                 }
+                _mapper.Map(addDeviceMenu,dto.DeviceMenu);
             }
 
 
@@ -97,6 +100,7 @@ public class DeviceAppService : IDeviceAppService
                 {
                     throw new InvalidOperationException($"添加设备变量表失败,设备：{device.Name},变量表：{variableTable.Name}");
                 }
+                 _mapper.Map(addVariableTable,dto.VariableTable);
 
                 // 假设有设备菜单
                 if (dto.VariableTableMenu != null)
@@ -111,12 +115,13 @@ public class DeviceAppService : IDeviceAppService
                         throw new InvalidOperationException(
                             $"添加设备变量表菜单失败,变量表：{variableTable.Name},变量表菜单：{menu.Header}");
                     }
+                    _mapper.Map(menu,dto.VariableTableMenu);
                 }
             }
 
             await _repoManager.CommitAsync();
 
-            return addDevice.Id;
+            return dto;
         }
         catch (Exception ex)
         {

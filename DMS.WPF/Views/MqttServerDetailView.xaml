@@ -91,7 +91,7 @@
                     <DataGridTextColumn Header="变量名称" Binding="{Binding  Variable.Name}"/>
                     <DataGridTextColumn Header="MQTT发送名称" Binding="{Binding  MqttAlias}"/>
                     <DataGridTextColumn Header="地址" Binding="{Binding Variable.S7Address}"/>
-                    <DataGridTextColumn Header="数据类型" Binding="{Binding Variable.DataType}"/>
+                    <DataGridTextColumn Header="数据类型" Binding="{Binding Variable.SignalType}"/>
                     <DataGridTextColumn Header="当前值" Binding="{Binding Variable.DataValue}"/>
                     <DataGridTextColumn Header="显示值" Binding="{Binding Variable.DisplayValue}"/>
                     <DataGridTextColumn Header="更新时间" Binding="{Binding Variable.UpdateTime, StringFormat='yyyy-MM-dd HH:mm:ss'}"/>

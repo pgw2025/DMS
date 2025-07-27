@@ -112,23 +112,23 @@ namespace DMS.Infrastructure.UnitTests
             return dbMqttServer;
         }
 
-        public static CreateDeviceDto FakeCreateDeviceDto()
-        {
-            var deviceDto = new Faker<CreateDeviceDto>()
-                            .RuleFor(d => d.Name, f => f.Commerce.ProductName())
-                            .RuleFor(d => d.Description, f => f.Commerce.ProductDescription())
-                            .RuleFor(d => d.IpAddress, f => f.Internet.Ip())
-                            .RuleFor(d => d.OpcUaServerUrl, f => f.Internet.Url())
-                            .Generate();
-            deviceDto.Port = 102;
-            deviceDto.Protocol = ProtocolType.S7;
-            deviceDto.Slot = 1;
-            deviceDto.Rack = 0;
-            deviceDto.CpuType = "S7-1200";
-            deviceDto.DeviceType = Core.Enums.DeviceType.SiemensPLC;
-
-            return deviceDto;
-        }
+        // public static CreateDeviceDto FakeCreateDeviceDto()
+        // {
+        //     var deviceDto = new Faker<CreateDeviceDto>()
+        //                     .RuleFor(d => d.Name, f => f.Commerce.ProductName())
+        //                     .RuleFor(d => d.Description, f => f.Commerce.ProductDescription())
+        //                     .RuleFor(d => d.IpAddress, f => f.Internet.Ip())
+        //                     .RuleFor(d => d.OpcUaServerUrl, f => f.Internet.Url())
+        //                     .Generate();
+        //     deviceDto.Port = 102;
+        //     deviceDto.Protocol = ProtocolType.S7;
+        //     deviceDto.Slot = 1;
+        //     deviceDto.Rack = 0;
+        //     deviceDto.CpuType = "S7-1200";
+        //     deviceDto.DeviceType = Core.Enums.DeviceType.SiemensPLC;
+        //
+        //     return deviceDto;
+        // }
 
         public static MenuBeanDto FakeCreateMenuDto()
         {
@@ -146,7 +146,7 @@ namespace DMS.Infrastructure.UnitTests
             var variableDto = new Faker<VariableDto>()
                               .RuleFor(v => v.Name, f => f.Commerce.ProductName())
                               .RuleFor(v => v.S7Address, f => $"DB1.DBD{f.Random.Int(0, 1000)}")
-                              .RuleFor(v => v.DataType, f => f.PickRandom<SignalType>())
+                              .RuleFor(v => v.SignalType, f => f.PickRandom<SignalType>())
                               .RuleFor(v => v.PollLevel, f => f.PickRandom<PollLevelType>())
                               .RuleFor(v => v.IsActive, f => f.Random.Bool())
                               .RuleFor(v => v.IsHistoryEnabled, f => f.Random.Bool())

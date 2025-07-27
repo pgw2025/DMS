@@ -32,7 +32,7 @@ public class Variable
     /// <summary>
     /// 变量的信号类型，例如启动信号、停止信号。
     /// </summary>
-    public SignalType DataType { get; set; }
+    public SignalType SignalType { get; set; }
 
     /// <summary>
     /// 变量的轮询级别，决定了其读取频率。
@@ -97,8 +97,7 @@ public class Variable
     /// <summary>
     /// 存储从设备读取到的最新值。此属性不应持久化到数据库，仅用于运行时。
     /// </summary>
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped] // 标记此属性不映射到数据库
-    public object DataValue { get; set; }
+    public string DataValue { get; set; }
 
     /// <summary>
     /// 变量的通讯协议。
@@ -118,8 +117,7 @@ public class Variable
     /// <summary>
     /// 经过转换公式计算后的显示值。此属性不应持久化到数据库，仅用于运行时。
     /// </summary>
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
-    public object DisplayValue { get; set; }
+    public string DisplayValue { get; set; }
 
     /// <summary>
     /// 变量的创建时间。
@@ -141,7 +139,6 @@ public class Variable
     /// </summary>
     public bool IsModified { get; set; }
 
-    public PollLevelType PollLevelType { get; set; }
-    public DateTime UpdateTime { get; set; }
+
     public OpcUaUpdateType OpcUaUpdateType { get; set; }
 }

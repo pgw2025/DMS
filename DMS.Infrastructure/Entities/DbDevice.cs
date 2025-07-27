@@ -45,13 +45,13 @@ public class DbDevice
     /// 设备机架号 (针对PLC等设备)。
     /// </summary>
     [SugarColumn(IsNullable = true)]
-    public int Rack { get; set; }
+    public short Rack { get; set; }
 
     /// <summary>
     /// 设备槽号 (针对PLC等设备)。
     /// </summary>
     [SugarColumn(IsNullable = true)]
-    public int Slot { get; set; }
+    public short Slot { get; set; }
     
     /// <summary>
     /// 
@@ -75,6 +75,9 @@ public class DbDevice
     /// </summary>
     public bool IsActive { get; set; }
     
+    
+    [SugarColumn(IsIgnore = true)]
+    public bool IsRunning { get; set; }
     
     /// <summary>
     /// 此设备包含的变量表集合。

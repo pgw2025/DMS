@@ -29,7 +29,7 @@ public partial class VariableItemViewModel : ObservableObject
     private List<VariableMqttAliasDto>? _mqttAliases;
 
     [ObservableProperty]
-    private SignalType _dataType;
+    private SignalType _signalType;
 
     [ObservableProperty]
     private PollLevelType _pollLevel;
@@ -85,6 +85,10 @@ public partial class VariableItemViewModel : ObservableObject
     [ObservableProperty]
     private string _description;
 
+
+    [ObservableProperty]
+    private OpcUaUpdateType _opcUaUpdateType;
+
     public VariableItemViewModel(VariableDto dto)
     {
         Id = dto.Id;
@@ -94,7 +98,7 @@ public partial class VariableItemViewModel : ObservableObject
         _displayValue = dto.DisplayValue;
         _variableTable = dto.VariableTable;
         _mqttAliases = dto.MqttAliases;
-        _dataType = dto.DataType;
+        _signalType = dto.SignalType;
         _pollLevel = dto.PollLevel;
         _isActive = dto.IsActive;
         _variableTableId = dto.VariableTableId;
@@ -113,5 +117,6 @@ public partial class VariableItemViewModel : ObservableObject
         _updatedBy = dto.UpdatedBy;
         _isModified = dto.IsModified;
         _description = dto.Description;
+        _opcUaUpdateType = dto.OpcUaUpdateType;
     }
 }

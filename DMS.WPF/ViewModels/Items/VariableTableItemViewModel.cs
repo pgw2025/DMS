@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace DMS.WPF.ViewModels.Items;
 
@@ -23,6 +25,9 @@ public partial class VariableTableItemViewModel : ObservableObject
     [ObservableProperty]
     private ProtocolType _protocol;
 
+    [ObservableProperty]
+    private ObservableCollection<VariableItemViewModel> _variables = new();
+
     public VariableTableItemViewModel(VariableTableDto dto)
     {
         Id = dto.Id;
@@ -31,5 +36,6 @@ public partial class VariableTableItemViewModel : ObservableObject
         _isActive = dto.IsActive;
         _deviceId = dto.DeviceId;
         _protocol = dto.Protocol;
+        _variables = new ObservableCollection<VariableItemViewModel>(dto.Variables.Select(v => new VariableItemViewModel(v)));
     }
 }

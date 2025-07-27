@@ -351,7 +351,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 if (existingItem.DisplayValue != dto.DisplayValue) existingItem.DisplayValue = dto.DisplayValue;
                 // 注意：VariableTable 和 MqttAliases 是复杂对象，需要更深层次的比较或重新映射
                 // 为了简化，这里只比较基本类型属性
-                if (existingItem.DataType != dto.DataType) existingItem.DataType = dto.DataType;
+                if (existingItem.SignalType != dto.SignalType) existingItem.SignalType = dto.SignalType;
                 if (existingItem.PollLevel != dto.PollLevel) existingItem.PollLevel = dto.PollLevel;
                 if (existingItem.IsActive != dto.IsActive) existingItem.IsActive = dto.IsActive;
                 if (existingItem.VariableTableId != dto.VariableTableId) existingItem.VariableTableId = dto.VariableTableId;

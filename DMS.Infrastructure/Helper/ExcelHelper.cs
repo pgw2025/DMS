@@ -254,7 +254,7 @@ public static class ExcelHelper
         {
             DMS.Core.Models.Variable variable = new DMS.Core.Models.Variable();
             variable.Name = dataRow["Name"].ToString();
-            variable.DataType = (DMS.Core.Enums.SignalType)Enum.Parse(typeof(DMS.Core.Enums.SignalType), SiemensHelper.S7ToCSharpTypeString(dataRow["Data Type"].ToString()));
+            variable.SignalType = (DMS.Core.Enums.SignalType)Enum.Parse(typeof(DMS.Core.Enums.SignalType), SiemensHelper.S7ToCSharpTypeString(dataRow["Data Type"].ToString()));
             var exS7Addr = dataRow["Logical Address"].ToString();
             if (exS7Addr.StartsWith("%"))
             {

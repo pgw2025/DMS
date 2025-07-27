@@ -1,36 +1,33 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.WPF.ViewModels.Items;
+using System.Threading.Tasks;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class DeviceDialogViewModel : ObservableObject
+public partial class DeviceDialogViewModel : DialogViewModelBase<DeviceItemViewModel>
 {
+    
+    
+    
     [ObservableProperty]
     private DeviceItemViewModel _device;
-    partial void OnDeviceChanged(DeviceItemViewModel value)
-    {
-        // if (value != null)
-        // {
-        //     System.Diagnostics.Debug.WriteLine($"Device ProtocolType changed to: {value.ProtocolType}");
-        // }
-    }
-    
-    [ObservableProperty] private string title ;
-    [ObservableProperty] private string primaryButContent ;
 
     public DeviceDialogViewModel(DeviceItemViewModel device)
     {
         _device = device;
     }
 
-    // AddAsync a property to expose CpuType enum values for ComboBox
-    // public Array CpuTypes => Enum.GetValues(typeof(CpuType));
-
+    [RelayCommand]
+    private async Task Save()
+    {
+        // Here you can add validation logic before closing.
+        await Close(Device);
+    }
 
     [RelayCommand]
-    public void AddDevice()
+    private async Task Cancel()
     {
-
+        await Close(null);
     }
 }

@@ -60,7 +60,7 @@
                 <DataGridTextColumn Header="名称"
                                     Binding="{Binding Name}" />
                 <DataGridTextColumn Header="数据类型"
-                                    Binding="{Binding DataType}" />
+                                    Binding="{Binding SignalType}" />
                 <DataGridTextColumn Header="S7地址"
                                     Binding="{Binding S7Address}" />
             </DataGrid.Columns>

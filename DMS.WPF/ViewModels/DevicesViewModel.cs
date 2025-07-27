@@ -1,6 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Helper;
 using DMS.Core.Models;
@@ -10,16 +13,20 @@ using DMS.WPF.Helper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using DMS.WPF.Services;
+using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 
 namespace DMS.WPF.ViewModels;
 
 /// <summary>
 /// 设备管理视图模型，负责设备的增删改查操作。
 /// </summary>
-public partial class DevicesViewModel : ViewModelBase,INavigatable
+public partial class DevicesViewModel : ViewModelBase, INavigatable
 {
-    private readonly DataServices _dataServices;
+    public  DataServices DataServices { get;  }
+    private readonly IDeviceAppService _deviceAppService;
+    private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
 
 
@@ -29,7 +36,7 @@ public partial class DevicesViewModel : ViewModelBase,INavigatable
     [ObservableProperty]
     private ObservableCollection<DeviceItemViewModel> _devices;
 
-    
+
     /// <summary>
     /// 当前选中的设备。
     /// </summary>
@@ -42,17 +49,15 @@ public partial class DevicesViewModel : ViewModelBase,INavigatable
     /// <param name="logger">日志记录器。</param>
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="dataServices">数据服务。</param>
-    public DevicesViewModel(
-        IDialogService dialogService, DataServices dataServices)
+    public DevicesViewModel(IMapper mapper,
+                            IDialogService dialogService, DataServices dataServices, IDeviceAppService deviceAppService)
     {
-        
+        _mapper = mapper;
         _dialogService = dialogService;
-        _dataServices = dataServices;
+        DataServices = dataServices;
+        _deviceAppService = deviceAppService;
         Devices = new ObservableCollection<DeviceItemViewModel>();
-        _dataServices.OnDeviceListChanged += (devices) =>
-        {
-            
-        };
+        DataServices.OnDeviceListChanged += (devices) => { };
     }
 
     // public override void OnLoaded()
@@ -98,28 +103,71 @@ public partial class DevicesViewModel : ViewModelBase,INavigatable
     /// 添加设备命令。
     /// </summary>
     [RelayCommand]
-    public async void AddDevice()
+    public async Task AddDevice()
     {
-        // try
-        // {
-        //     // 1. 显示添加设备对话框
-        //     var device = await _dialogService.ShowAddDeviceDialog();
-        //     // 如果用户取消或对话框未返回设备，则直接返回
-        //     if (device == null)
-        //     {
-        //         NlogHelper.Info("用户取消了添加设备操作。");
-        //         return;
-        //     }
-        //
-        //     if (device.ProtocolType == ProtocolType.OpcUA)
-        //         device.OpcUaEndpointUrl = $"opc.tcp://{device.Ip}:{device.Prot}";
-        //
-        //     await _deviceRepository.AddAsync(device);
-        // }
-        // catch (Exception e)
-        // {
-        //     NotificationHelper.ShowError($"添加设备的过程中发生错误：{e.Message}", e);
-        // }
+        try
+        {
+            DeviceItemViewModel deviceItemViewModel = new DeviceItemViewModel();
+            DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel(deviceItemViewModel)
+                                                          {
+                                                              PrimaryButContent = "添加设备"
+                                                          };
+            // 1. 显示添加设备对话框
+            // DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
+            // // 如果用户取消或对话框未返回设备，则直接返回
+            // if (device == null)
+            // {
+            //     return;
+            // }
+
+            DeviceItemViewModel device = new DeviceItemViewModel()
+                                         {
+                                             Name = "Test",
+                                             Description = "Test Device",
+                                             IpAddress = "127.0.0.1",
+                                             Port = 8080,
+                                             Protocol = ProtocolType.S7,
+                                             CpuType = "S7-1200",
+                                             DeviceType = DeviceType.SiemensPLC,
+                                             IsActive = true,
+                                             
+                                         };
+
+
+            CreateDeviceWithDetailsDto dto = new CreateDeviceWithDetailsDto();
+            dto.Device = _mapper.Map<DeviceDto>(device);
+
+            dto.VariableTable = new VariableTableDto()
+                                {
+                                    Name = "默认变量表",
+                                    Description = "默认变量表",
+                                    IsActive = true
+                                };
+
+            dto.DeviceMenu = new MenuBeanDto()
+                             {
+                                 Header = device.Name,
+                                 Icon = SegoeFluentIcons.Devices2.Glyph,
+                                 TargetViewKey = "DevicesView"
+                             };
+
+            dto.VariableTableMenu = new MenuBeanDto()
+                                    {
+                                        Header = dto.VariableTable.Name,
+                                        Icon = SegoeFluentIcons.DataSense.Glyph,
+                                        TargetViewKey = "VariableTableView"
+                                    };
+
+            var addDto = await _deviceAppService.CreateDeviceWithDetailsAsync(dto);
+           DataServices.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
+            //
+            // await _deviceRepository.AddAsync(device);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            NotificationHelper.ShowError($"添加设备的过程中发生错误：{e.Message}", e);
+        }
     }
 
     /// <summary>
@@ -128,7 +176,6 @@ public partial class DevicesViewModel : ViewModelBase,INavigatable
     [RelayCommand]
     public async void DeleteDevice()
     {
-        
         // try
         // {
         //     if (SelectedDevice == null)
@@ -188,7 +235,7 @@ public partial class DevicesViewModel : ViewModelBase,INavigatable
         //     NotificationHelper.ShowError($"编辑设备的过程中发生错误：{e.Message}", e);
         // }
     }
-    
+
     [RelayCommand]
     public void NavigateToDetail()
     {
@@ -200,6 +247,5 @@ public partial class DevicesViewModel : ViewModelBase,INavigatable
 
     public async Task OnNavigatedToAsync(object parameter)
     {
-        
     }
 }

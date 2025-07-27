@@ -129,6 +129,7 @@ public partial class App : System.Windows.Application
 
             cfg.AddProfile(new DMS.Application.Profiles.MappingProfile());
             cfg.AddProfile(new DMS.Infrastructure.Profiles.MappingProfile());
+            cfg.AddProfile(new DMS.WPF.Profiles.MappingProfile());
         });
 
         // 注册数据处理服务和处理器
@@ -176,6 +177,8 @@ public partial class App : System.Windows.Application
         //services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddSingleton<MqttsViewModel>();
+        // 注册对话框
+        services.AddSingleton<DevicesView>();
         //注册View视图
         services.AddSingleton<SplashWindow>();
         services.AddSingleton<SettingView>();

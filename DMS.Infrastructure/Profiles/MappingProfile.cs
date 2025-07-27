@@ -22,16 +22,9 @@ public class MappingProfile : Profile
 
         // --- 变量表映射 (List中的元素) ---
         CreateMap<DbVariableTable, VariableTable>()
-            .ForMember(dest => dest.Variables, opt => opt.Ignore())
-            .ForMember(dest => dest.Device, opt => opt.Ignore())
             .ReverseMap();
         
-        CreateMap<DbVariable, Variable>()
-            .ForMember(dest => dest.VariableTable, opt => opt.Ignore())
-            .ForMember(dest => dest.MqttAliases, opt => opt.Ignore())
-            .ForMember(dest => dest.DataValue, opt => opt.Ignore())
-            .ForMember(dest => dest.DisplayValue, opt => opt.Ignore())
-            .ReverseMap();
+        CreateMap<DbVariable, Variable>().ReverseMap();
         // --- MQTT 和 变量数据 映射 ---
         CreateMap<DbMqttServer, MqttServer>()
             .ForMember(dest => dest.VariableAliases, opt => opt.Ignore())

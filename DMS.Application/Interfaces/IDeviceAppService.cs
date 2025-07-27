@@ -24,7 +24,7 @@ public interface IDeviceAppService
     /// </summary>
     /// <param name="dto">包含设备、变量表和菜单信息的DTO。</param>
     /// <returns>新创建设备的ID。</returns>
-    Task<int> CreateDeviceWithDetailsAsync(CreateDeviceWithDetailsDto dto);
+    Task<CreateDeviceWithDetailsDto> CreateDeviceWithDetailsAsync(CreateDeviceWithDetailsDto dto);
 
     /// <summary>
     /// 异步更新一个已存在的设备。

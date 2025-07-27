@@ -11,10 +11,14 @@ public class DbVariable
     public int Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public int DataType { get; set; } // 对应 SignalType 枚举
-    public int PollLevel { get; set; } // 对应 PollLevelType 枚举
+    [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
+    public SignalType SignalType { get; set; } // 对应 SignalType 枚举
+    [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
+    public PollLevelType PollLevel { get; set; } // 对应 PollLevelType 枚举
     public bool IsActive { get; set; }
     public int VariableTableId { get; set; }
+    public string DataValue { get; set; }
+    public string DisplayValue { get; set; }
     public string S7Address { get; set; }
     public string OpcUaNodeId { get; set; }
     public bool IsHistoryEnabled { get; set; }
@@ -32,4 +36,6 @@ public class DbVariable
     public DateTime UpdatedAt { get; set; }
     public string UpdatedBy { get; set; }
     public bool IsModified { get; set; }
+    [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
+    public OpcUaUpdateType OpcUaUpdateType { get; set; }
 }

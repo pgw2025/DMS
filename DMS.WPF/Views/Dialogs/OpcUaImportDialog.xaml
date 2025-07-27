@@ -89,7 +89,7 @@
                 <DataGridTextColumn Header="节点ID"
                                     Binding="{Binding OpcUaNodeId}" />
                 <DataGridTextColumn Header="数据类型"
-                                    Binding="{Binding DataType}" />
+                                    Binding="{Binding SignalType}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

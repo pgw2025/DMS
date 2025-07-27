@@ -65,5 +65,5 @@ public class Device
 
     public string CpuType { get; set; }
     public DeviceType DeviceType { get; set; }
-    public bool IsRuning { get; set; }
+    public bool IsRunning { get; set; }
 }

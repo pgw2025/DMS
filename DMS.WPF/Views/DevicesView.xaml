@@ -77,9 +77,9 @@
                                          Margin="0,0,8,0"
                                          FontSize="14" />
                             <TextBlock>
-                                <Run Text="{Binding Ip, FallbackValue='192.168.1.1'}" />
+                                <Run Text="{Binding IpAddress, FallbackValue='192.168.1.1'}" />
                                 <Run Text=":" />
-                                <Run Text="{Binding Prot, FallbackValue='102'}" />
+                                <Run Text="{Binding Port, FallbackValue='102'}" />
                             </TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
@@ -167,7 +167,7 @@
                      Margin="20"
                      IsItemClickEnabled="True"
                      SelectedItem="{Binding SelectedDevice }"
-                     ItemsSource="{Binding Devices}"
+                     ItemsSource="{Binding DataServices.Devices }"
                      ItemTemplate="{StaticResource DeviceItemTemplate}"
                      SelectionMode="Single">
             <hc:Interaction.Triggers>

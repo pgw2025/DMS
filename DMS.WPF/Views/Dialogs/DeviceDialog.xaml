@@ -8,15 +8,24 @@
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   xmlns:vc="clr-namespace:DMS.ValueConverts"
                   xmlns:ex="clr-namespace:DMS.Extensions"
-                  xmlns:en="clr-namespace:DMS.Core.Enums"
                   xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
-                  xmlns:global="clr-namespace:;assembly=DMS.Core"
+                  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
                   PrimaryButtonText="{Binding PrimaryButContent}"
                   d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
                   mc:Ignorable="d">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PrimaryButtonClick">
+            <i:InvokeCommandAction Command="{Binding SaveCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="CloseButtonClick">
+            <i:InvokeCommandAction Command="{Binding CancelCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <ui:ContentDialog.Resources>
         <ex:EnumBindingSource x:Key="deviceType"
                               EnumType="{x:Type enums:DeviceType}" />
@@ -47,20 +56,20 @@
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
             <TextBox AcceptsReturn="True"
-                     Text="{Binding Device.Ip, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding Device.IpAddress, UpdateSourceTrigger=PropertyChanged}" />
 
             <!-- 设备类型 -->
-            <TextBlock Text="设备类型"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox SelectedItem="{Binding Device.DeviceType}"
-                      ItemsSource="{Binding Source={StaticResource deviceType} }">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <!-- <TextBlock Text="设备类型" -->
+            <!--            HorizontalAlignment="Left" -->
+            <!--            Style="{StaticResource TextBlockSubTitle}" /> -->
+            <!-- <ComboBox SelectedItem="{Binding Device}" -->
+            <!--           ItemsSource="{Binding Source={StaticResource deviceType} }"> -->
+            <!--     <ComboBox.ItemTemplate> -->
+            <!--         <DataTemplate> -->
+            <!--             <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" /> -->
+            <!--         </DataTemplate> -->
+            <!--     </ComboBox.ItemTemplate> -->
+            <!-- </ComboBox> -->
 
             <CheckBox FontSize="16"
                       Content="是否添加默认变量表"
@@ -83,14 +92,14 @@
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
             <TextBox AcceptsReturn="True"
-                     Text="{Binding Device.Prot, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding Device.Port, UpdateSourceTrigger=PropertyChanged}" />
 
 
             <!-- 通讯协议-->
             <TextBlock Text="设备通信协议"
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox SelectedItem="{Binding Device.ProtocolType}"
+            <ComboBox SelectedItem="{Binding Device.Protocol}"
                       ItemsSource="{Binding Source={StaticResource protocolType} }">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -104,7 +113,7 @@
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding Device.ProtocolType}"
+                            <DataTrigger Binding="{Binding Device.Protocol}"
                                          Value="{x:Static enums:ProtocolType.S7}">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>

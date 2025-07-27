@@ -369,12 +369,12 @@ public class OpcUaBackgroundService : BackgroundService
         foreach (var variable in variableList)
         {
             if (stoppingToken.IsCancellationRequested) return;
-
-            if (!PollingIntervals.TryGetValue(variable.PollLevelType, out var interval) || (DateTime.Now - variable.UpdateTime) < interval)
+        
+            if (!PollingIntervals.TryGetValue(variable.PollLevel, out var interval) || (DateTime.Now - variable.UpdatedAt) < interval)
             {
                 continue;
             }
-
+        
             await ReadAndProcessOpcUaVariableAsync(session, variable, stoppingToken);
         }
     }
@@ -437,7 +437,7 @@ public class OpcUaBackgroundService : BackgroundService
             // 更新变量的原始数据值和显示值。
             variable.DataValue = value.ToString();
             variable.DisplayValue = value.ToString(); // 或者根据需要进行格式化
-            variable.UpdateTime = DateTime.Now;
+            variable.UpdatedAt = DateTime.Now;
             // Console.WriteLine($"OpcUa后台服务轮询变量：{variable.Name},值：{variable.DataValue}");
             // 将更新后的数据推入处理队列。
             await _dataProcessingService.EnqueueAsync(variable);

@@ -230,14 +230,14 @@ public class S7BackgroundService : BackgroundService
 
                     // 获取变量的轮询间隔。
                     if (!PollingIntervals.TryGetValue(
-                            variable.PollLevelType, out var interval))
+                            variable.PollLevel, out var interval))
                     {
-                        _logger.LogInformation($"未知轮询级别 {variable.PollLevelType}，跳过变量 {variable.Name}。");
+                        _logger.LogInformation($"未知轮询级别 {variable.PollLevel}，跳过变量 {variable.Name}。");
                         continue;
                     }
 
                     // 检查是否达到轮询时间。
-                    if ((DateTime.Now - variable.UpdateTime) < interval)
+                    if ((DateTime.Now - variable.UpdatedAt) < interval)
                         continue; // 未到轮询时间，跳过。
 
                     dataItemsToRead[variable.Id] = DataItem.FromAddress(variable.S7Address);
@@ -299,7 +299,7 @@ public class S7BackgroundService : BackgroundService
             // 更新变量的原始数据值和显示值。
             variable.DataValue = dataItem.Value.ToString();
             variable.DisplayValue = dataItem.Value.ToString();
-            variable.UpdateTime = DateTime.Now;
+            variable.UpdatedAt = DateTime.Now;
             // Console.WriteLine($"S7后台服务轮询变量：{variable.Name}，值：{variable.DataValue}");
             // 将更新后的数据推入处理队列。
             await _dataProcessingService.EnqueueAsync(variable);
@@ -406,7 +406,7 @@ public class S7BackgroundService : BackgroundService
             int totalVariableCount = 0;
             foreach (var device in s7Devices)
             {
-                device.IsRuning = true;
+                // device.IsRuning = true;
                 _s7Devices.AddOrUpdate(device.Id, device, (key, oldValue) => device);
 
                 // 过滤出当前设备和S7协议相关的变量。

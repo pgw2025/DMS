@@ -7,10 +7,9 @@ namespace DMS.WPF.Views.Dialogs;
 
 public partial class DeviceDialog
 {
-    public DeviceDialog(DeviceDialogViewModel viewModel)
+    public DeviceDialog()
     {
         InitializeComponent();
-        DataContext = viewModel;
 
         // Log the ProtocolType value
         // if (viewModel.Device != null)

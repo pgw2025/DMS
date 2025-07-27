@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace DMS.Application.DTOs;
 
@@ -21,4 +22,5 @@ public class MqttServerDto
     public DateTime? ConnectedAt { get; set; }
     public long ConnectionDuration { get; set; }
     public string MessageFormat { get; set; }
+    public List<VariableMqttAliasDto> VariableAliases { get; set; } = new();
 }

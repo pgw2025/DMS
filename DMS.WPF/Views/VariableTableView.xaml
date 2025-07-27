@@ -292,7 +292,7 @@
                                     Binding="{Binding OpcUaNodeId}" />
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="数据类型"
-                                    Binding="{Binding DataType}" />
+                                    Binding="{Binding SignalType}" />
                 <DataGridTemplateColumn Header="信号类型"
                                         SortMemberPath="SignalType">
                     <DataGridTemplateColumn.CellTemplate>
