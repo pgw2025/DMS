@@ -12,7 +12,7 @@ namespace DMS.WPF.ViewModels.Items;
 /// </summary>
 public partial class DeviceItemViewModel : ObservableObject
 {
-    public int Id { get; }
+    public int Id { get; set; }
 
     [ObservableProperty]
     private string _name;

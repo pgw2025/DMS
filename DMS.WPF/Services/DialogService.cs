@@ -14,6 +14,7 @@ namespace DMS.WPF.Services
         private static readonly Dictionary<Type, Type> _viewModelViewMap = new Dictionary<Type, Type>
         {
             { typeof(DeviceDialogViewModel), typeof(DeviceDialog) },
+            { typeof(ConfrimDialogViewModel), typeof(ConfirmDialog) },
             // { typeof(MqttDialogViewModel), typeof(MqttDialog) }, // Add other mappings here
             // ... other dialogs
         };
@@ -48,7 +49,7 @@ namespace DMS.WPF.Services
 
                 viewModel.CloseRequested += closeHandler;
 
-                _ = dialog.ShowAsync();
+                _ = await dialog.ShowAsync();
 
                 return await tcs.Task;
             }

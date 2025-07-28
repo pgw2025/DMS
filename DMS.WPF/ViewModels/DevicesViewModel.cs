@@ -154,7 +154,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             DataServices.AddMenuItem(_mapper.Map<MenuBeanItemViewModel>(addDto.DeviceMenu));
             DataServices.AddVariableTable(_mapper.Map<VariableTableItemViewModel>(addDto.VariableTable));
             DataServices.AddMenuItem(_mapper.Map<MenuBeanItemViewModel>(addDto.VariableTableMenu));
-            
+
             NotificationHelper.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
         }
         catch (Exception e)
@@ -170,31 +170,36 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     public async void DeleteDevice()
     {
-        // try
-        // {
-        //     if (SelectedDevice == null)
-        //     {
-        //         NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击删除设备");
-        //         return;
-        //     }
-        //
-        //     string msg = $"确认要删除设备名为:{SelectedDevice.Name}";
-        //     var isDel = await _dialogService.ShowConfrimeDialog("删除设备", msg, "删除设备");
-        //     if (isDel)
-        //     {
-        //         
-        //         // 删除设备
-        //         await _deviceRepository.DeleteAsync(SelectedDevice ,_dataServices.MenuTrees);
-        //
-        //         MessageHelper.SendLoadMessage(LoadTypes.Menu);
-        //         MessageHelper.SendLoadMessage(LoadTypes.Devices);
-        //         NotificationHelper.ShowSuccess($"删除设备成功,设备名：{SelectedDevice.Name}");
-        //     }
-        // }
-        // catch (Exception e)
-        // {
-        //     NotificationHelper.ShowError($"删除设备的过程中发生错误：{e.Message}", e);
-        // }
+        try
+        {
+            if (SelectedDevice == null)
+            {
+                NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击删除设备");
+                return;
+            }
+
+            ConfrimDialogViewModel viewModel = new ConfrimDialogViewModel();
+            viewModel.Message = $"确认要删除设备名为:{SelectedDevice.Name}";
+            viewModel.Title = "删除设备";
+            viewModel.PrimaryButContent = "删除";
+
+            var resViewModel = await _dialogService.ShowDialogAsync(viewModel);
+            if (resViewModel.IsPrimaryButton)
+            {
+                var isDel = await _deviceAppService.DeleteDeviceByIdAsync(SelectedDevice.Id);
+                if (isDel)
+                {
+                    // 更新界面
+                    DataServices.DeleteDeviceById(SelectedDevice.Id);
+
+                    NotificationHelper.ShowSuccess($"删除设备成功,设备名：{SelectedDevice.Name}");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowError($"删除设备的过程中发生错误：{e.Message}", e);
+        }
     }
 
     /// <summary>

@@ -114,7 +114,7 @@ public partial class App : System.Windows.Application
         // services.AddSingleton<IDeviceDataService, DeviceDataService>();
         // services.AddSingleton<NavgatorServices>();
         // //services.AddSingleton<IDialogService, DialogService>();
-        // services.AddSingleton<GrowlNotificationService>();
+        services.AddSingleton<GrowlNotificationService>();
         // services.AddHostedService<S7BackgroundService>();
         // services.AddHostedService<OpcUaBackgroundService>();
         // services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();

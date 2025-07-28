@@ -6,9 +6,8 @@ namespace DMS.WPF.Views.Dialogs;
 public partial class ConfirmDialog : ContentDialog
 {
     
-    public ConfirmDialog(ConfrimDialogViewModel viewModel)
+    public ConfirmDialog()
     {
         InitializeComponent();
-        this.DataContext = viewModel;
     }
 }

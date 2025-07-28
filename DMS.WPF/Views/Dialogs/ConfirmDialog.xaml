@@ -6,18 +6,24 @@
                   xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+                  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:en="clr-namespace:DMS.Core.Enums"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
-                  PrimaryButtonText="{Binding PrimaryButtonText}"
+                  PrimaryButtonText="{Binding PrimaryButContent}"
                   Background="#fff"
                   d:DataContext="{d:DesignInstance vmd:ConfrimDialogViewModel}"
                   mc:Ignorable="d">
-    <ui:ContentDialog.Resources>
-
-    </ui:ContentDialog.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PrimaryButtonClick">
+            <i:InvokeCommandAction Command="{Binding ParimaryButtonCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="CloseButtonClick">
+            <i:InvokeCommandAction Command="{Binding CancleButtonCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
     <Grid Width="360"
           Margin="10">

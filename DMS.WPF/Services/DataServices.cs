@@ -497,4 +497,70 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             device.VariableTables.Add(variableTableItemViewModel);
         }
     }
+
+    public void DeleteMenuItem(MenuBeanItemViewModel menuBeanItemViewModel)
+    {
+        if (menuBeanItemViewModel == null)
+        {
+            return;
+        }
+
+        // 从扁平菜单列表中移除
+        Menus.Remove(menuBeanItemViewModel);
+
+        // 从树形结构中移除
+        if (menuBeanItemViewModel.ParentId.HasValue && menuBeanItemViewModel.ParentId.Value != 0)
+        {
+            // 如果有父菜单，从父菜单的Children中移除
+            var parentMenu = Menus.FirstOrDefault(m => m.Id == menuBeanItemViewModel.ParentId.Value);
+            parentMenu?.Children.Remove(menuBeanItemViewModel);
+        }
+        else
+        {
+            // 如果是根菜单，从MenuTrees中移除
+            MenuTrees.Remove(menuBeanItemViewModel);
+        }
+    }
+
+    public async Task DeleteDeviceById(int selectedDeviceId)
+    {
+        var device = Devices.FirstOrDefault(d => d.Id == selectedDeviceId);
+        if (device != null)
+        {
+            // 1. 删除与设备关联的所有变量表及其变量
+            var variableTablesToDelete = VariableTables.Where(vt => vt.DeviceId == device.Id).ToList();
+            foreach (var vt in variableTablesToDelete)
+            {
+                // 删除与当前变量表关联的所有变量
+                var variablesToDelete = Variables.Where(v => v.VariableTableId == vt.Id).ToList();
+                foreach (var variable in variablesToDelete)
+                {
+                    Variables.Remove(variable);
+                }
+
+                // 删除变量表
+                VariableTables.Remove(vt);
+
+                // 删除与变量表关联的菜单项
+                var variableTableMenu = Menus.FirstOrDefault(m => m.TargetViewKey == "VariableTableView" && m.Header == vt.Name);
+                if (variableTableMenu != null)
+                {
+                    DeleteMenuItem(variableTableMenu);
+                }
+            }
+
+            // 2. 删除设备
+            Devices.Remove(device);
+
+            // 3. 删除与设备关联的菜单项
+            var deviceMenu = Menus.FirstOrDefault(m => m.TargetViewKey == "DevicesView" && m.Header == device.Name);
+            if (deviceMenu != null)
+            {
+                DeleteMenuItem(deviceMenu);
+            }
+
+            // 4. 重新构建菜单树以反映变更
+            // BuildMenuTree();
+        }
+    }
 }
