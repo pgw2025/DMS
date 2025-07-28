@@ -45,6 +45,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     // 菜单树列表。
     [ObservableProperty]
     private ObservableCollection<MenuBeanItemViewModel> _menus;
+
     // 菜单树列表。
     [ObservableProperty]
     private ObservableCollection<MenuBeanItemViewModel> _menuTrees;
@@ -72,7 +73,6 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     public event Action<Device, bool> OnDeviceIsActiveChanged;
 
 
-
     /// <summary>
     /// DataServices类的构造函数。
     /// 注入ILogger<DataServices>，并初始化各个数据仓库。
@@ -80,7 +80,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="varDataRepository"></param>
     public DataServices(IMapper mapper, IDeviceAppService deviceAppService,
-                        IVariableTableAppService variableTableAppService, IVariableAppService variableAppService,IMenuService menuService,INavigationService navigationService)
+                        IVariableTableAppService variableTableAppService, IVariableAppService variableAppService,
+                        IMenuService menuService, INavigationService navigationService)
     {
         _mapper = mapper;
         _deviceAppService = deviceAppService;
@@ -115,7 +116,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             {
                 // 设备仍然存在，检查是否有更新
                 var dto = deviceDtos.First(d => d.Id == existingItem.Id);
-                
+
                 // 逐一比较属性，只有在发生变化时才更新
                 if (existingItem.Name != dto.Name) existingItem.Name = dto.Name;
                 if (existingItem.Protocol != dto.Protocol) existingItem.Protocol = dto.Protocol;
@@ -204,13 +205,13 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             {
                 // 这是一个新菜单项，添加到集合中
                 // 注意：这里直接添加 IMenuService 返回的 MenuItemViewModel 实例
-                Menus.Add(new MenuBeanItemViewModel(newDto,_navigationService));
+                Menus.Add(new MenuBeanItemViewModel(newDto, _navigationService));
             }
         }
-        
+
         BuildMenuTree();
     }
-    
+
     /// <summary>
     /// 根据扁平菜单列表构建树形结构。
     /// </summary>
@@ -244,7 +245,6 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 MenuTrees.Add(menu);
             }
         }
-
     }
 
 
@@ -280,17 +280,21 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 if (existingItem.SignalType != dto.SignalType) existingItem.SignalType = dto.SignalType;
                 if (existingItem.PollLevel != dto.PollLevel) existingItem.PollLevel = dto.PollLevel;
                 if (existingItem.IsActive != dto.IsActive) existingItem.IsActive = dto.IsActive;
-                if (existingItem.VariableTableId != dto.VariableTableId) existingItem.VariableTableId = dto.VariableTableId;
+                if (existingItem.VariableTableId != dto.VariableTableId)
+                    existingItem.VariableTableId = dto.VariableTableId;
                 if (existingItem.OpcUaNodeId != dto.OpcUaNodeId) existingItem.OpcUaNodeId = dto.OpcUaNodeId;
-                if (existingItem.IsHistoryEnabled != dto.IsHistoryEnabled) existingItem.IsHistoryEnabled = dto.IsHistoryEnabled;
-                if (existingItem.HistoryDeadband != dto.HistoryDeadband) existingItem.HistoryDeadband = dto.HistoryDeadband;
+                if (existingItem.IsHistoryEnabled != dto.IsHistoryEnabled)
+                    existingItem.IsHistoryEnabled = dto.IsHistoryEnabled;
+                if (existingItem.HistoryDeadband != dto.HistoryDeadband)
+                    existingItem.HistoryDeadband = dto.HistoryDeadband;
                 if (existingItem.IsAlarmEnabled != dto.IsAlarmEnabled) existingItem.IsAlarmEnabled = dto.IsAlarmEnabled;
                 if (existingItem.AlarmMinValue != dto.AlarmMinValue) existingItem.AlarmMinValue = dto.AlarmMinValue;
                 if (existingItem.AlarmMaxValue != dto.AlarmMaxValue) existingItem.AlarmMaxValue = dto.AlarmMaxValue;
                 if (existingItem.AlarmDeadband != dto.AlarmDeadband) existingItem.AlarmDeadband = dto.AlarmDeadband;
                 if (existingItem.Protocol != dto.Protocol) existingItem.Protocol = dto.Protocol;
                 if (existingItem.CSharpDataType != dto.CSharpDataType) existingItem.CSharpDataType = dto.CSharpDataType;
-                if (existingItem.ConversionFormula != dto.ConversionFormula) existingItem.ConversionFormula = dto.ConversionFormula;
+                if (existingItem.ConversionFormula != dto.ConversionFormula)
+                    existingItem.ConversionFormula = dto.ConversionFormula;
                 if (existingItem.CreatedAt != dto.CreatedAt) existingItem.CreatedAt = dto.CreatedAt;
                 if (existingItem.UpdatedAt != dto.UpdatedAt) existingItem.UpdatedAt = dto.UpdatedAt;
                 if (existingItem.UpdatedBy != dto.UpdatedBy) existingItem.UpdatedBy = dto.UpdatedBy;
@@ -381,8 +385,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     {
         // 1. 创建一个字典，按 DeviceId 分组所有变量表，以便高效查找
         var variableTablesGroupedByDevice = _variableTables
-            .GroupBy(vt => vt.DeviceId)
-            .ToDictionary(g => g.Key, g => g.ToList());
+                                            .GroupBy(vt => vt.DeviceId)
+                                            .ToDictionary(g => g.Key, g => g.ToList());
 
         foreach (var device in _devices)
         {
@@ -427,8 +431,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     {
         // 1. 创建一个字典，按 VariableTableId 分组所有变量，以便高效查找
         var variablesGroupedByVariableTable = _variables
-            .GroupBy(v => v.VariableTableId)
-            .ToDictionary(g => g.Key, g => g.ToList());
+                                              .GroupBy(v => v.VariableTableId)
+                                              .ToDictionary(g => g.Key, g => g.ToList());
 
         foreach (var variableTable in _variableTables)
         {
@@ -463,6 +467,34 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 }
                 // 如果已经存在，则不需要额外操作，因为 LoadVariables 已经更新了 _variables 中的实例
             }
+        }
+    }
+
+    public void AddMenuItem(MenuBeanItemViewModel menuBeanItemViewModel)
+    {
+        if (menuBeanItemViewModel == null)
+        {
+            return;
+        }
+
+        var deviceMenu = Menus.FirstOrDefault(m => m.Id == menuBeanItemViewModel.ParentId);
+        if (deviceMenu != null)
+        {
+            deviceMenu.Children.Add(menuBeanItemViewModel);
+            Menus.Add(menuBeanItemViewModel);
+        }
+    }
+
+    public void AddVariableTable(VariableTableItemViewModel variableTableItemViewModel)
+    {
+        if (variableTableItemViewModel == null)
+            return;
+
+        VariableTables.Add(variableTableItemViewModel);
+        var device = Devices.FirstOrDefault(d => d.Id == variableTableItemViewModel.DeviceId);
+        if (device != null)
+        {
+            device.VariableTables.Add(variableTableItemViewModel);
         }
     }
 }

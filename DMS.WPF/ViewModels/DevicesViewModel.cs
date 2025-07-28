@@ -147,18 +147,15 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                         };
             }
 
-
             var addDto = await _deviceAppService.CreateDeviceWithDetailsAsync(dto);
 
+            // 更新界面
             DataServices.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
-            if (addDto.DeviceMenu != null)
-            {
-                var deviceMenu = DataServices.Menus.FirstOrDefault(m => m.Id == addDto.DeviceMenu.ParentId);
-                if (deviceMenu!=null)
-                {
-                    deviceMenu.Children.Add(_mapper.Map<MenuBeanItemViewModel>(addDto.DeviceMenu));
-                }
-            }
+            DataServices.AddMenuItem(_mapper.Map<MenuBeanItemViewModel>(addDto.DeviceMenu));
+            DataServices.AddVariableTable(_mapper.Map<VariableTableItemViewModel>(addDto.VariableTable));
+            DataServices.AddMenuItem(_mapper.Map<MenuBeanItemViewModel>(addDto.VariableTableMenu));
+            
+            NotificationHelper.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
         }
         catch (Exception e)
         {
