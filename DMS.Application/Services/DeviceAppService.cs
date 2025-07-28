@@ -62,8 +62,6 @@ public class DeviceAppService : IDeviceAppService
             await _repoManager.BeginTranAsync();
 
             var device = _mapper.Map<Device>(dto.Device);
-            if (device.Protocol == ProtocolType.OpcUA)
-                device.OpcUaServerUrl = $"opc.tcp://{device.IpAddress}:{device.Port}";
             var addDevice = await _repoManager.Devices.AddAsync(device);
             if (addDevice == null || addDevice.Id == 0)
             {

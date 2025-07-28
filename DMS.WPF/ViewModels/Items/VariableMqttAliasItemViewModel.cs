@@ -19,12 +19,5 @@ public partial class VariableMqttAliasItemViewModel : ObservableObject
     [ObservableProperty]
     private string _alias;
 
-    public VariableMqttAliasItemViewModel(VariableMqttAliasDto dto)
-    {
-        Id = dto.Id;
-        _variableId = dto.VariableId;
-        _mqttServerId = dto.MqttServerId;
-        _mqttServerName = dto.MqttServerName;
-        _alias = dto.Alias;
-    }
+    
 }

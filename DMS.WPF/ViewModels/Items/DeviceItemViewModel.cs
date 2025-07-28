@@ -2,7 +2,6 @@
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DMS.Application.DTOs;
 using DMS.Core.Enums;
 
 namespace DMS.WPF.ViewModels.Items;
@@ -53,55 +52,26 @@ public partial class DeviceItemViewModel : ObservableObject
 
     [ObservableProperty]
     private string _status;
+    
+    [ObservableProperty]
+    private bool _isAddDefVarTable;
 
-    partial void OnProtocolChanged(ProtocolType oldValue, ProtocolType newValue)
+    partial void OnIpAddressChanged(string newIpAddress)
     {
-        
+        if (Protocol == ProtocolType.OpcUa)
+        {
+            OpcUaServerUrl="opc.tcp://" + IpAddress+":"+Port;
+        }
+    }
+
+    partial void OnPortChanged(int newPort)
+    {
+        if (Protocol == ProtocolType.OpcUa)
+        {
+            OpcUaServerUrl="opc.tcp://" + IpAddress+":"+Port;
+        }
     }
 
     public ObservableCollection<VariableTableItemViewModel> VariableTables { get; set; } = new();
 
-    public DeviceItemViewModel(DeviceDto dto)
-    {
-        Id = dto.Id;
-        _name = dto.Name;
-        _description = dto.Description;
-        _protocol = dto.Protocol;
-        _ipAddress = dto.IpAddress;
-        _port = dto.Port;
-        _rack = dto.Rack;
-        _slot = dto.Slot;
-        _cpuType = dto.CpuType;
-        _deviceType = dto.DeviceType;
-        _opcUaServerUrl = dto.OpcUaServerUrl;
-        _isActive = dto.IsActive;
-        _isRunning = dto.IsRunning;
-        _status = dto.Status;
-    }
-
-    public DeviceItemViewModel()
-    {
-        
-    }
-
-    public DeviceDto ToDto()
-    {
-        return new DeviceDto
-        {
-            Id = this.Id,
-            Name = this.Name,
-            Description = this.Description,
-            Protocol = this.Protocol,
-            IpAddress = this.IpAddress,
-            Port = this.Port,
-            Rack = this.Rack,
-            Slot = this.Slot,
-            CpuType = this.CpuType,
-            DeviceType = this.DeviceType,
-            OpcUaServerUrl = this.OpcUaServerUrl,
-            IsActive = this.IsActive,
-            IsRunning = this.IsRunning,
-            Status = this.Status
-        };
-    }
 }

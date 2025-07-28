@@ -144,7 +144,7 @@ public class OpcUaBackgroundService : BackgroundService
 
     private async void HandleDeviceIsActiveChanged(Device device, bool isActive)
     {
-        if (device.Protocol != ProtocolType.OpcUA)
+        if (device.Protocol != ProtocolType.OpcUa)
             return;
 
         _logger.LogInformation($"设备 {device.Name} (ID: {device.Id}) 的IsActive状态改变为 {isActive}。");
@@ -194,7 +194,7 @@ public class OpcUaBackgroundService : BackgroundService
 
             _logger.LogInformation("开始加载OPC UA变量....");
             var opcUaDevices = _deviceDataService
-                               .Devices.Where(d => d.Protocol == ProtocolType.OpcUA && d.IsActive == true)
+                               .Devices.Where(d => d.Protocol == ProtocolType.OpcUa && d.IsActive == true)
                                .ToList();
 
             if (opcUaDevices.Count == 0)
@@ -213,7 +213,7 @@ public class OpcUaBackgroundService : BackgroundService
                 //查找设备中所有要轮询的变量
                 var dPollList = opcUaDevice.VariableTables?.SelectMany(vt => vt.Variables)
                                            .Where(vd => vd.IsActive == true &&
-                                                        vd.Protocol == ProtocolType.OpcUA &&
+                                                        vd.Protocol == ProtocolType.OpcUa &&
                                                         vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaPoll)
                                            .ToList();
                 // 将变量保存到字典中，方便Read后还原
@@ -229,7 +229,7 @@ public class OpcUaBackgroundService : BackgroundService
                 //查找设备中所有要订阅的变量
                 var dSubList = opcUaDevice.VariableTables?.SelectMany(vt => vt.Variables)
                                           .Where(vd => vd.IsActive == true &&
-                                                       vd.Protocol == ProtocolType.OpcUA &&
+                                                       vd.Protocol == ProtocolType.OpcUa &&
                                                        vd.OpcUaUpdateType == OpcUaUpdateType.OpcUaSubscription)
                                           .ToList();
                 totalSubVariableCount += dSubList.Count;

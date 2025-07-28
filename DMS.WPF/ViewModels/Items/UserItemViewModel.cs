@@ -16,11 +16,5 @@ public partial class UserItemViewModel : ObservableObject
     [ObservableProperty]
     private bool _isActive;
 
-    public UserItemViewModel(UserDto dto)
-    {
-        Id = dto.Id;
-        _username = dto.Username;
-        _role = dto.Role;
-        _isActive = dto.IsActive;
-    }
+   
 }

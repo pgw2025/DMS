@@ -24,7 +24,7 @@ namespace DMS.WPF.ViewModels;
 /// </summary>
 public partial class DevicesViewModel : ViewModelBase, INavigatable
 {
-    public  DataServices DataServices { get;  }
+    public DataServices DataServices { get; }
     private readonly IDeviceAppService _deviceAppService;
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
@@ -120,29 +120,10 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            // DeviceItemViewModel device = new DeviceItemViewModel()
-            //                              {
-            //                                  Name = "Test",
-            //                                  Description = "Test Device",
-            //                                  IpAddress = "127.0.0.1",
-            //                                  Port = 8080,
-            //                                  Protocol = ProtocolType.S7,
-            //                                  CpuType = "S7-1200",
-            //                                  DeviceType = DeviceType.SiemensPLC,
-            //                                  IsActive = true,
-            //                                  
-            //                              };
-
 
             CreateDeviceWithDetailsDto dto = new CreateDeviceWithDetailsDto();
             dto.Device = _mapper.Map<DeviceDto>(device);
 
-            dto.VariableTable = new VariableTableDto()
-                                {
-                                    Name = "默认变量表",
-                                    Description = "默认变量表",
-                                    IsActive = true
-                                };
 
             dto.DeviceMenu = new MenuBeanDto()
                              {
@@ -150,18 +131,34 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                  Icon = SegoeFluentIcons.Devices2.Glyph,
                                  TargetViewKey = "DevicesView"
                              };
-
-            dto.VariableTableMenu = new MenuBeanDto()
+            if (device.IsAddDefVarTable)
+            {
+                dto.VariableTable = new VariableTableDto()
                                     {
-                                        Header = dto.VariableTable.Name,
-                                        Icon = SegoeFluentIcons.DataSense.Glyph,
-                                        TargetViewKey = "VariableTableView"
+                                        Name = "默认变量表",
+                                        Description = "默认变量表",
+                                        IsActive = true
                                     };
+                dto.VariableTableMenu = new MenuBeanDto()
+                                        {
+                                            Header = dto.VariableTable.Name,
+                                            Icon = SegoeFluentIcons.DataSense.Glyph,
+                                            TargetViewKey = "VariableTableView"
+                                        };
+            }
+
 
             var addDto = await _deviceAppService.CreateDeviceWithDetailsAsync(dto);
-           DataServices.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
-            //
-            // await _deviceRepository.AddAsync(device);
+
+            DataServices.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
+            if (addDto.DeviceMenu != null)
+            {
+                var deviceMenu = DataServices.Menus.FirstOrDefault(m => m.Id == addDto.DeviceMenu.ParentId);
+                if (deviceMenu!=null)
+                {
+                    deviceMenu.Children.Add(_mapper.Map<MenuBeanItemViewModel>(addDto.DeviceMenu));
+                }
+            }
         }
         catch (Exception e)
         {

@@ -89,34 +89,5 @@ public partial class VariableItemViewModel : ObservableObject
     [ObservableProperty]
     private OpcUaUpdateType _opcUaUpdateType;
 
-    public VariableItemViewModel(VariableDto dto)
-    {
-        Id = dto.Id;
-        _name = dto.Name;
-        _s7Address = dto.S7Address;
-        _dataValue = dto.DataValue;
-        _displayValue = dto.DisplayValue;
-        _variableTable = dto.VariableTable;
-        _mqttAliases = dto.MqttAliases;
-        _signalType = dto.SignalType;
-        _pollLevel = dto.PollLevel;
-        _isActive = dto.IsActive;
-        _variableTableId = dto.VariableTableId;
-        _opcUaNodeId = dto.OpcUaNodeId;
-        _isHistoryEnabled = dto.IsHistoryEnabled;
-        _historyDeadband = dto.HistoryDeadband;
-        _isAlarmEnabled = dto.IsAlarmEnabled;
-        _alarmMinValue = dto.AlarmMinValue;
-        _alarmMaxValue = dto.AlarmMaxValue;
-        _alarmDeadband = dto.AlarmDeadband;
-        _protocol = dto.Protocol;
-        _cSharpDataType = dto.CSharpDataType;
-        _conversionFormula = dto.ConversionFormula;
-        _createdAt = dto.CreatedAt;
-        _updatedAt = dto.UpdatedAt;
-        _updatedBy = dto.UpdatedBy;
-        _isModified = dto.IsModified;
-        _description = dto.Description;
-        _opcUaUpdateType = dto.OpcUaUpdateType;
-    }
+    
 }

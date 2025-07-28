@@ -17,11 +17,5 @@ public partial class VariableHistoryItemViewModel : ObservableObject
     [ObservableProperty]
     private DateTime _timestamp;
 
-    public VariableHistoryItemViewModel(VariableHistoryDto dto)
-    {
-        Id = dto.Id;
-        _variableId = dto.VariableId;
-        _value = dto.Value;
-        _timestamp = dto.Timestamp;
-    }
+    
 }

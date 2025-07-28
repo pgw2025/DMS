@@ -65,7 +65,7 @@
             <TextBlock Text="设备类型"
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox SelectedItem="{Binding Device}"
+            <ComboBox SelectedItem="{Binding Device.DeviceType}"
                       ItemsSource="{Binding Source={StaticResource deviceType} }">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -110,6 +110,25 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            
+            <StackPanel  Background="LightGray">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}"
+                                         Value="OpcUa">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <TextBlock Text="OpcUa服务器地址"
+                           HorizontalAlignment="Left"
+                           Style="{StaticResource TextBlockSubTitle}" />
+                <TextBox Text="{Binding Device.OpcUaServerUrl}"/>
+                </StackPanel>
+            
             
             <!-- S7 Specific Properties -->
             <StackPanel x:Name="S7PropertiesPanel" Background="LightGray">

@@ -52,22 +52,5 @@ public partial class MqttServerItemViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<VariableMqttAliasItemViewModel> _variableAliases = new();
 
-    public MqttServerItemViewModel(MqttServerDto dto)
-    {
-        Id = dto.Id;
-        _serverName = dto.ServerName;
-        _brokerAddress = dto.BrokerAddress;
-        _port = dto.Port;
-        _username = dto.Username;
-        _password = dto.Password;
-        _isActive = dto.IsActive;
-        _subscribeTopic = dto.SubscribeTopic;
-        _publishTopic = dto.PublishTopic;
-        _clientId = dto.ClientId;
-        _createdAt = dto.CreatedAt;
-        _connectedAt = dto.ConnectedAt;
-        _connectionDuration = dto.ConnectionDuration;
-        _messageFormat = dto.MessageFormat;
-        _variableAliases = new ObservableCollection<VariableMqttAliasItemViewModel>(dto.VariableAliases.Select(va => new VariableMqttAliasItemViewModel(va)));
-    }
+
 }

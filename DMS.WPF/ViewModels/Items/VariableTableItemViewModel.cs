@@ -28,14 +28,5 @@ public partial class VariableTableItemViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<VariableItemViewModel> _variables = new();
 
-    public VariableTableItemViewModel(VariableTableDto dto)
-    {
-        Id = dto.Id;
-        _name = dto.Name;
-        _description = dto.Description;
-        _isActive = dto.IsActive;
-        _deviceId = dto.DeviceId;
-        _protocol = dto.Protocol;
-        _variables = new ObservableCollection<VariableItemViewModel>(dto.Variables.Select(v => new VariableItemViewModel(v)));
-    }
+   
 }
