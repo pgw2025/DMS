@@ -7,15 +7,25 @@ namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class DeviceDialogViewModel : DialogViewModelBase<DeviceItemViewModel>
 {
-    
-    
+    [ObservableProperty]
+    private bool _isAddMode;
     
     [ObservableProperty]
     private DeviceItemViewModel _device;
 
-    public DeviceDialogViewModel(DeviceItemViewModel device)
+    public DeviceDialogViewModel(DeviceItemViewModel device=null)
     {
-        _device = device;
+        if (device==null)
+        {
+            _device = new DeviceItemViewModel();
+            IsAddMode=true;
+        }
+        else
+        {
+            _device=device;
+         
+        }
+        
     }
 
     [RelayCommand]

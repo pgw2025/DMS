@@ -65,7 +65,9 @@
             <TextBlock Text="设备类型"
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox SelectedItem="{Binding Device.DeviceType}"
+            <ComboBox 
+                IsEnabled="{Binding IsAddMode}"
+                SelectedItem="{Binding Device.DeviceType}"
                       ItemsSource="{Binding Source={StaticResource deviceType} }">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
@@ -102,7 +104,9 @@
             <TextBlock Text="设备通信协议"
                        HorizontalAlignment="Left"
                        Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox x:Name="ProtocolComboBox" SelectedItem="{Binding Device.Protocol}"
+            <ComboBox x:Name="ProtocolComboBox" 
+                      IsEnabled="{Binding IsAddMode}"
+                      SelectedItem="{Binding Device.Protocol}"
                       ItemsSource="{Binding Source={StaticResource protocolType} }">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>

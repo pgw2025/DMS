@@ -60,18 +60,6 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         DataServices.OnDeviceListChanged += (devices) => { };
     }
 
-    // public override void OnLoaded()
-    // {
-    //     if (_dataServices.Devices!=null && _dataServices.Devices.Count>0)
-    //     {
-    //         Devices=new ObservableCollection<Device>(_dataServices.Devices);
-    //         foreach (var device in Devices)
-    //         {
-    //             device.OnDeviceIsActiveChanged += HandleDeviceIsActiveChanged;
-    //             
-    //         }
-    //     }
-    // }
 
     public override Task<bool> OnExitAsync()
     {
@@ -86,19 +74,6 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         return Task.FromResult(true);
     }
 
-    private async void HandleDeviceIsActiveChanged(Device device, bool isActive)
-    {
-        // try
-        // {
-        //     await _deviceRepository.UpdateAsync(device);
-        //     NotificationHelper.ShowSuccess($"设备 {device.Name} 的激活状态已更新。");
-        // }
-        // catch (Exception ex)
-        // {
-        //     NotificationHelper.ShowError($"更新设备 {device.Name} 激活状态失败: {ex.Message}", ex);
-        // }
-    }
-
     /// <summary>
     /// 添加设备命令。
     /// </summary>
@@ -107,8 +82,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     {
         try
         {
-            DeviceItemViewModel deviceItemViewModel = new DeviceItemViewModel();
-            DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel(deviceItemViewModel)
+            DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel()
                                                           {
                                                               PrimaryButContent = "添加设备"
                                                           };
@@ -208,31 +182,42 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     public async void EditDevice()
     {
-        // try
-        // {
-        //     if (SelectedDevice == null)
-        //     {
-        //         NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击编辑设备");
-        //         return;
-        //     }
-        //
-        //     var editDievce = await _dialogService.ShowEditDeviceDialog(SelectedDevice);
-        //     if (editDievce != null)
-        //     {
-        //         // 更新菜单
-        //         var res = await _deviceRepository.UpdateAsync(editDievce);
-        //         var menu = DataServicesHelper.FindMenusForDevice(editDievce, _dataServices.MenuTrees);
-        //         if (menu != null)
-        //             await _menuRepository.UpdateAsync(menu);
-        //
-        //         MessageHelper.SendLoadMessage(LoadTypes.Menu);
-        //         MessageHelper.SendLoadMessage(LoadTypes.Devices);
-        //     }
-        // }
-        // catch (Exception e)
-        // {
-        //     NotificationHelper.ShowError($"编辑设备的过程中发生错误：{e.Message}", e);
-        // }
+        try
+        {
+            if (SelectedDevice == null)
+            {
+                NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击编辑设备");
+                return;
+            }
+
+            DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel(SelectedDevice)
+                                                          {
+                                                              PrimaryButContent = "编辑设备"
+                                                          };
+            // 1. 显示设备对话框
+            DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
+            // 如果用户取消或对话框未返回设备，则直接返回
+            if (device == null)
+            {
+                return;
+            }
+
+            int res = await _deviceAppService.UpdateDeviceAsync(_mapper.Map<DeviceDto>(device));
+            if (res > 0)
+            {
+                var menu = DataServices.Menus.FirstOrDefault(m =>
+                                                                 m.MenuType == MenuType.DeviceMenu &&
+                                                                 m.TargetId == device.Id);
+                if (menu!=null)
+                {
+                    menu.Header=device.Name;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowError($"编辑设备的过程中发生错误：{e.Message}", e);
+        }
     }
 
     [RelayCommand]

@@ -135,7 +135,7 @@ public class DeviceAppService : IDeviceAppService
     /// <param name="deviceDto">要更新的设备数据传输对象。</param>
     /// <returns>受影响的行数。</returns>
     /// <exception cref="ApplicationException">如果找不到设备。</exception>
-    public async Task<int> UpdateDeviceAsync(UpdateDeviceDto deviceDto)
+    public async Task<int> UpdateDeviceAsync(DeviceDto deviceDto)
     {
         await _repoManager.BeginTranAsync();
         var device = await _repoManager.Devices.GetByIdAsync(deviceDto.Id);
@@ -146,6 +146,12 @@ public class DeviceAppService : IDeviceAppService
 
         _mapper.Map(deviceDto, device);
         int res=await _repoManager.Devices.UpdateAsync(device);
+        var menu=await _repoManager.Menus.GetMenuByTargetIdAsync(MenuType.DeviceMenu, deviceDto.Id);
+        if (menu != null)
+        {
+            menu.Header = device.Name;
+           await  _repoManager.Menus.UpdateAsync(menu);
+        }
         await _repoManager.CommitAsync();
         return res;
     }
