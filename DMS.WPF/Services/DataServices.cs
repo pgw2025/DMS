@@ -367,6 +367,11 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             {
                 // 这是一个新变量表，添加到集合中
                 var newItem = _mapper.Map<VariableTableItemViewModel>(dto);
+                var device=Devices.FirstOrDefault(d=>d.Id==dto.DeviceId);
+                if (device!=null)
+                {
+                    newItem.Device=device;
+                }
                 VariableTables.Add(newItem);
             }
         }

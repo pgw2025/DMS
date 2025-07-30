@@ -63,7 +63,7 @@
                                          FontSize="14" />
                             <TextBlock>
                                 <Run Text="协议: " />
-                                <Run Text="{Binding ProtocolType}" />
+                                <Run Text="{Binding Protocol}" />
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>
@@ -101,9 +101,9 @@
                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Connect}" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="16" />
                     <TextBlock>
                         <Run Text="IP: " />
-                        <Run Text="{Binding CurrentDevice.Ip}" />
+                        <Run Text="{Binding CurrentDevice.IpAddress}" />
                         <Run Text=" Port: " />
-                        <Run Text="{Binding CurrentDevice.Prot}" />
+                        <Run Text="{Binding CurrentDevice.Port}" />
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,2">
@@ -112,7 +112,7 @@
                         <Run Text="设备类型: " />
                         <Run Text="{Binding CurrentDevice.DeviceType}" />
                         <Run Text=" 协议类型: " />
-                        <Run Text="{Binding CurrentDevice.ProtocolType}" />
+                        <Run Text="{Binding CurrentDevice.Protocol}" />
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,2">

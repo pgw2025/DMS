@@ -21,6 +21,9 @@ public partial class VariableTableItemViewModel : ObservableObject
 
     [ObservableProperty]
     private int _deviceId;
+    
+    [ObservableProperty]
+    private DeviceItemViewModel _device;
 
     [ObservableProperty]
     private ProtocolType _protocol;

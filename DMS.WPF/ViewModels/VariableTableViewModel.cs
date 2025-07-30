@@ -66,15 +66,6 @@ partial class VariableTableViewModel : ViewModelBase,INavigatable
     /// </summary>
     public bool IsLoadCompletion { get; set; } = false;
 
-    /// <summary>
-    /// 变量表数据仓库，用于与变量表相关的数据库操作。
-    /// </summary>
-    // private readonly VarTableRepository _varTableRepository;
-    //
-    // /// <summary>
-    // /// 变量数据仓库，用于与变量数据相关的数据库操作。
-    // /// </summary>
-    // private readonly VarDataRepository _varDataRepository;
 
     /// <summary>
     /// 原始变量数据的深拷贝备份，用于在用户取消保存时还原数据。
