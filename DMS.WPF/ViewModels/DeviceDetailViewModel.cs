@@ -1,15 +1,17 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DMS.Core.Enums;
 using DMS.WPF.Services;
 using DMS.Services;
 using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels;
 
-public partial class DeviceDetailViewModel : ViewModelBase
+public partial class DeviceDetailViewModel : ViewModelBase,INavigatable
 {
     private readonly IDialogService _dialogService;
-    private readonly DataServices _dataServices;
+    private readonly INavigationService _navigationService;
+    public DataServices DataServices { get; set; }
 
     [ObservableProperty]
     private DeviceItemViewModel _currentDevice;
@@ -17,10 +19,11 @@ public partial class DeviceDetailViewModel : ViewModelBase
     [ObservableProperty]
     private VariableItemViewModel _selectedVariableTable;
 
-    public DeviceDetailViewModel(IDialogService dialogService, DataServices dataServices)
+    public DeviceDetailViewModel(IDialogService dialogService,INavigationService navigationService, DataServices dataServices)
     {
         _dialogService = dialogService;
-        _dataServices = dataServices;
+        _navigationService = navigationService;
+        DataServices = dataServices;
     }
 
     public override void OnLoaded()
@@ -95,11 +98,11 @@ public partial class DeviceDetailViewModel : ViewModelBase
     [RelayCommand]
     private async Task EditVariableTable()
     {
-        // if (SelectedVariableTable == null)
-        // {
-        //     //NotificationHelper.ShowInfo("请选择要编辑的变量表。");
-        //     return;
-        // }
+        if (SelectedVariableTable == null)
+        {
+            // NotificationHelper.ShowInfo("请选择要编辑的变量表。");
+            return;
+        }
         //
         // using var db = DbContext.GetInstance();
         // try
@@ -218,13 +221,23 @@ public partial class DeviceDetailViewModel : ViewModelBase
         await Task.CompletedTask;
     }
 
-    [RelayCommand]
-    private void NavigateToVariableTable()
+
+    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        // if (SelectedVariableTable == null) return;
-        //
-        // var variableTableVm = App.Current.Services.GetRequiredService<VariableTableViewModel>();
-        // variableTableVm.VariableTable = SelectedVariableTable;
-        // MessageHelper.SendNavgatorMessage(variableTableVm);
+       var device= DataServices.Devices.FirstOrDefault(d => d.Id == menu.TargetId);
+       if (device!=null)
+       {
+           CurrentDevice = device;
+       }
+        
+    }
+
+    [RelayCommand]
+    public void NavigateToVariableTable()
+    {
+        if (SelectedVariableTable == null) return;
+        var menu=DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == SelectedVariableTable.Id);
+        if (menu==null) return;
+        _navigationService.NavigateToAsync(menu);
     }
 }

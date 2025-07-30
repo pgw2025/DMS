@@ -16,39 +16,8 @@ using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels;
 
-/// <summary>
-/// VariableTableViewModel 是用于管理和显示变量表数据的视图模型。
-/// 它与 VariableTableView 视图进行数据绑定，并处理用户交互逻辑。
-///
-/// 调用逻辑概述：
-/// 1.  **实例化**: 当导航到 VariableTableView 时，通常会通过依赖注入框架（如 CommunityToolkit.Mvvm 的服务定位器或自定义工厂）实例化 VariableTableViewModel。
-///     构造函数 <see cref="VariableTableViewModel"/> 负责初始化必要的服务和数据仓库。
-/// 2.  **数据加载**: 
-///     -   当视图加载完成时，框架会自动调用 <see cref="OnLoaded"/> 方法。
-///     -   此方法会根据传入的 <see cref="VariableTable"/> 对象初始化 <see cref="Variables"/> 集合，并设置协议类型相关的布尔属性。
-///     -   它还会创建 <see cref="_originalVariables"/> 的深拷贝，用于在用户取消保存时还原数据。
-/// 3.  **数据绑定与显示**: 
-///     -   <see cref="VariableTable"/> 属性绑定到视图中显示的当前变量表信息。
-///     -   <see cref="Variables"/> 属性（ObservableCollection）绑定到视图中的数据网格或列表，用于显示变量数据。
-///     -   <see cref="VariableView"/> 是一个 ICollectionView，用于支持数据过滤（通过 <see cref="FilterVariables"/> 方法）和排序。
-///     -   <see cref="SearchText"/> 属性绑定到搜索框，当其值改变时，会自动触发 <see cref="OnSearchTextChanged(string)"/> 方法刷新视图。
-/// 4.  **用户交互与命令**: 
-///     -   视图中的按钮和其他交互元素通过 `RelayCommand` 绑定到 ViewModel 中的命令方法。
-///     -   例如，"保存"按钮可能绑定到 <see cref="SaveModifiedVarDataCommand"/>，"编辑"按钮绑定到 <see cref="EditVarDataCommand"/> 等。
-///     -   这些命令方法负责执行业务逻辑，如更新数据库、显示对话框、导入数据等。
-/// 5.  **对话框交互**: 
-///     -   ViewModel 通过注入的 <see cref="IDialogService"/> 接口与各种对话框进行交互，例如确认对话框、编辑对话框、导入对话框等。
-///     -   对话框的显示和结果处理都在 ViewModel 中完成。
-/// 6.  **数据保存与退出**: 
-///     -   当用户尝试离开当前视图时，框架会调用 <see cref="OnExitAsync"/> 方法。
-///     -   此方法会检查是否有未保存的修改，并提示用户是否保存或放弃更改。
-///     -   <see cref="SaveModifiedVarDataCommand"/> 用于显式保存修改。
-/// 7.  **通知**: 
-///     -   通过 <see cref="NotificationHelper"/> 显示成功、错误或信息提示给用户。
-/// 8.  **协议类型切换**: 
-///     -   <see cref="IsS7ProtocolSelected"/> 和 <see cref="IsOpcUaProtocolSelected"/> 属性用于控制视图中与协议相关的UI元素的可见性或状态。
-/// </summary>
-partial class VariableTableViewModel : ViewModelBase
+
+partial class VariableTableViewModel : ViewModelBase,INavigatable
 {
     private readonly IMapper _mapper;
 
@@ -62,7 +31,7 @@ partial class VariableTableViewModel : ViewModelBase
     /// 通过 ObservableProperty 自动生成 VariableTable 属性和 OnVariableTableChanged 方法。
     /// </summary>
     [ObservableProperty]
-    private VariableItemViewModel variableTable;
+    private VariableTableItemViewModel currentVariableTable;
 
     /// <summary>
     /// 存储当前变量表中的所有变量数据的集合。
@@ -922,5 +891,15 @@ partial class VariableTableViewModel : ViewModelBase
         //     NotificationHelper.ShowError($"变量表：{VariableTable.Name},状态修改失败，状态：{active}");
         //     // _logger.LogInformation($"变量表：{VariableTable.Name},状态修改失败，状态：{active}"); // 可以选择记录日志
         // }
+    }
+
+    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
+    {
+        var varTable = _dataServices.VariableTables.FirstOrDefault(v => v.Id == menu.TargetId);
+        if (varTable!=null)
+        {
+            CurrentVariableTable=varTable;
+        }
+        
     }
 }

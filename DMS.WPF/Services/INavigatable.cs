@@ -1,4 +1,7 @@
 // 文件: DMS.WPF/Services/INavigatable.cs
+
+using DMS.WPF.ViewModels.Items;
+
 namespace DMS.WPF.Services;
 
 /// <summary>
@@ -10,5 +13,5 @@ public interface INavigatable
     /// 当导航到此ViewModel时，由导航服务调用此方法，以传递参数。
     /// </summary>
     /// <param name="parameter">从导航源传递过来的参数对象。</param>
-    Task OnNavigatedToAsync(object parameter);
+    Task OnNavigatedToAsync(MenuItemViewModel menu);
 }

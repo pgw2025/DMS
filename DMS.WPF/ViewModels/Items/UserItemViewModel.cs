@@ -5,7 +5,7 @@ namespace DMS.WPF.ViewModels.Items;
 
 public partial class UserItemViewModel : ObservableObject
 {
-    public int Id { get; }
+    public int Id { get; set; }
 
     [ObservableProperty]
     private string _username;

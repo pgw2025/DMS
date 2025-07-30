@@ -28,6 +28,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     private readonly IDeviceAppService _deviceAppService;
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
+    private readonly INavigationService _navigationService;
 
 
     /// <summary>
@@ -50,10 +51,12 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="dataServices">数据服务。</param>
     public DevicesViewModel(IMapper mapper,
-                            IDialogService dialogService, DataServices dataServices, IDeviceAppService deviceAppService)
+                            IDialogService dialogService, INavigationService navigationService,
+                            DataServices dataServices, IDeviceAppService deviceAppService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
+        _navigationService = navigationService;
         DataServices = dataServices;
         _deviceAppService = deviceAppService;
         Devices = new ObservableCollection<DeviceItemViewModel>();
@@ -125,9 +128,9 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
             // 更新界面
             DataServices.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
-            DataServices.AddMenuItem(_mapper.Map<MenuBeanItemViewModel>(addDto.DeviceMenu));
+            DataServices.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
             DataServices.AddVariableTable(_mapper.Map<VariableTableItemViewModel>(addDto.VariableTable));
-            DataServices.AddMenuItem(_mapper.Map<MenuBeanItemViewModel>(addDto.VariableTableMenu));
+            DataServices.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
 
             NotificationHelper.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
         }
@@ -208,9 +211,9 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 var menu = DataServices.Menus.FirstOrDefault(m =>
                                                                  m.MenuType == MenuType.DeviceMenu &&
                                                                  m.TargetId == device.Id);
-                if (menu!=null)
+                if (menu != null)
                 {
-                    menu.Header=device.Name;
+                    menu.Header = device.Name;
                 }
             }
         }
@@ -224,12 +227,14 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     public void NavigateToDetail()
     {
         if (SelectedDevice == null) return;
-        var deviceDetailVm = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
-        deviceDetailVm.CurrentDevice = SelectedDevice;
-        MessageHelper.SendNavgatorMessage(deviceDetailVm);
+
+        var menu=DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu && m.TargetId == SelectedDevice.Id);
+        if (menu==null) return;
+        
+        _navigationService.NavigateToAsync(menu);
     }
 
-    public async Task OnNavigatedToAsync(object parameter)
+    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
     }
 }

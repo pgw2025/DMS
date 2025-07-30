@@ -5,7 +5,7 @@ namespace DMS.WPF.ViewModels.Items;
 
 public partial class VariableMqttAliasItemViewModel : ObservableObject
 {
-    public int Id { get; }
+    public int Id { get; set; }
 
     [ObservableProperty]
     private int _variableId;

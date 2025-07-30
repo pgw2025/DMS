@@ -27,11 +27,11 @@
     </i:Interaction.Triggers>
 
     <ui:ContentDialog.Resources>
-        <ex:EnumBindingSource x:Key="deviceType"
+        <ex:EnumBindingSource x:Key="DeviceType"
                               EnumType="{x:Type enums:DeviceType}" />
-        <ex:EnumBindingSource x:Key="protocolType"
+        <ex:EnumBindingSource x:Key="ProtocolType"
                               EnumType="{x:Type enums:ProtocolType}" />
-        <ex:EnumBindingSource x:Key="cpuType"
+        <ex:EnumBindingSource x:Key="CpuType"
                               EnumType="{x:Type enums:CpuType}" />
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
         <vc:EnumToStringConverter x:Key="EnumToStringConverter" />
@@ -68,7 +68,7 @@
             <ComboBox 
                 IsEnabled="{Binding IsAddMode}"
                 SelectedItem="{Binding Device.DeviceType}"
-                      ItemsSource="{Binding Source={StaticResource deviceType} }">
+                      ItemsSource="{Binding Source={StaticResource DeviceType} }">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -107,7 +107,7 @@
             <ComboBox x:Name="ProtocolComboBox" 
                       IsEnabled="{Binding IsAddMode}"
                       SelectedItem="{Binding Device.Protocol}"
-                      ItemsSource="{Binding Source={StaticResource protocolType} }">
+                      ItemsSource="{Binding Source={StaticResource ProtocolType} }">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -152,7 +152,7 @@
                            HorizontalAlignment="Left"
                            Style="{StaticResource TextBlockSubTitle}" />
                 <ComboBox SelectedItem="{Binding Device.CpuType}"
-                          ItemsSource="{Binding Source={StaticResource cpuType}}" />
+                          ItemsSource="{Binding Source={StaticResource CpuType}}" />
 
                 <!-- Rack -->
                 <TextBlock Text="机架号"

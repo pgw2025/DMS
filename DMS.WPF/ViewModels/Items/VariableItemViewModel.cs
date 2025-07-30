@@ -8,7 +8,7 @@ namespace DMS.WPF.ViewModels.Items;
 
 public partial class VariableItemViewModel : ObservableObject
 {
-    public int Id { get; }
+    public int Id { get; set; }
 
     [ObservableProperty]
     private string _name;

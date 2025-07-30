@@ -1,5 +1,6 @@
 // 文件: DMS.WPF/Services/INavigationService.cs
 using System.Threading.Tasks;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.Services;
 
@@ -13,6 +14,6 @@ public interface INavigationService
     /// </summary>
     /// <param name="viewKey">在DI容器中注册的目标视图的唯一键（通常是ViewModel的名称）。</param>
     /// <param name="parameter">要传递给目标ViewModel的参数。</param>
-    Task NavigateToAsync(string viewKey, object parameter = null);
+    Task NavigateToAsync(MenuItemViewModel menu);
 
 }

@@ -164,64 +164,8 @@ public partial class MainViewModel : ViewModelBase
     /// 处理菜单选择变化的逻辑。
     /// </summary>
     /// <param name="menu">被选中的菜单项。</param>
-    public async Task MenuSelectionChanged(MenuBeanItemViewModel menu)
+    public async Task MenuSelectionChanged(MenuItemViewModel menu)
     {
-        _navigationService.NavigateToAsync(menu.TargetViewKey);
-        // try
-        // {
-        //     switch (menu.Type)
-        //     {
-        //         // 导航到一级菜单
-        //         case MenuType.MainMenu:
-        //             menu.ViewModel = DataServicesHelper.GetMainViewModel(menu.Name);
-        //             break;
-        //         // 导航到设备下面的菜单
-        //         case MenuType.DeviceMenu:
-        //             var deviceDetailVm = App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
-        //             var currentDevice = _dataServices.Devices.FirstOrDefault(d => d.Id == menu.DataId);
-        //             deviceDetailVm.CurrentDevice = currentDevice;
-        //             menu.ViewModel = deviceDetailVm;
-        //             menu.Data = currentDevice;
-        //             break;
-        //         // 导航到变量表菜单
-        //         case MenuType.VariableTableMenu:
-        //             VariableTableViewModel varTableVM =
-        //                 App.Current.Services.GetRequiredService<VariableTableViewModel>();
-        //             varTableVM.VariableTable =
-        //                 DataServicesHelper.FindVarTableForDevice(_dataServices.Devices, menu.DataId);
-        //
-        //             varTableVM.IsLoadCompletion = false;
-        //             menu.ViewModel = varTableVM;
-        //             menu.Data = varTableVM.VariableTable;
-        //             break;
-        //         // 导航到添加变量表的菜单
-        //         case MenuType.AddVariableTableMenu:
-        //             await AddVariableTable(menu);
-        //             return;
-        //             break;
-        //         // 导航到Mqtt服务器
-        //         case MenuType.MqttMenu:
-        //             var mqttVM = App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
-        //             mqttVM.CurrentMqtt = _dataServices.Mqtts.FirstOrDefault(d => d.Id == menu.DataId);
-        //             menu.ViewModel = mqttVM;
-        //             break;
-        //     }
-        //
-        //
-        //     if (menu.ViewModel != null)
-        //     {
-        //         MessageHelper.SendNavgatorMessage(menu.ViewModel);
-        //         _logger.LogInformation($"导航到：{menu.Name}");
-        //     }
-        //     else
-        //     {
-        //         NotificationHelper.ShowInfo($"菜单：{menu.Name},没有对应的ViewModel.");
-        //         _logger.LogInformation($"菜单：{menu.Name},没有对应的ViewModel.");
-        //     }
-        // }
-        // catch (Exception e)
-        // {
-        //     NotificationHelper.ShowError($"菜单切换时出现了错误:{e.Message}", e);
-        // }
+        _navigationService.NavigateToAsync(menu);
     }
 }

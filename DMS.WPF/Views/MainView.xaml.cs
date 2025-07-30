@@ -59,7 +59,7 @@ public partial class MainView : Window
     /// <param name="args"></param>
     private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var menu = args.SelectedItem as MenuBeanItemViewModel;
+        var menu = args.SelectedItem as MenuItemViewModel;
         if (menu != null)
         {
            await _viewModel.MenuSelectionChanged(menu);

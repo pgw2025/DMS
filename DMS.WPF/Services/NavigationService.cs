@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using DMS.ViewModels;
+using DMS.WPF.ViewModels.Items;
 using DMS.WPF.Views;
 
 namespace DMS.WPF.Services;
@@ -29,19 +30,19 @@ public class NavigationService : INavigationService
     /// <summary>
     /// 导航到指定键的视图，并传递参数。
     /// </summary>
-    public async Task NavigateToAsync(string viewKey, object parameter = null)
+    public async Task NavigateToAsync(MenuItemViewModel menu)
     {
-        if (string.IsNullOrEmpty(viewKey))
+        if (string.IsNullOrEmpty(menu.TargetViewKey))
         {
             return;
         }
 
         var mainViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
-        var viewModel = GetViewModelByKey(viewKey);
+        var viewModel = GetViewModelByKey(menu.TargetViewKey);
 
         if (viewModel is INavigatable navigatableViewModel)
         {
-            await navigatableViewModel.OnNavigatedToAsync(parameter);
+            await navigatableViewModel.OnNavigatedToAsync(menu);
         }
 
         mainViewModel.CurrentViewModel = viewModel;

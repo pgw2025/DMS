@@ -44,11 +44,11 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
     // 菜单树列表。
     [ObservableProperty]
-    private ObservableCollection<MenuBeanItemViewModel> _menus;
+    private ObservableCollection<MenuItemViewModel> _menus;
 
     // 菜单树列表。
     [ObservableProperty]
-    private ObservableCollection<MenuBeanItemViewModel> _menuTrees;
+    private ObservableCollection<MenuItemViewModel> _menuTrees;
 
     // MQTT配置列表。
     // [ObservableProperty]
@@ -93,8 +93,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         Devices = new ObservableCollection<DeviceItemViewModel>();
         VariableTables = new ObservableCollection<VariableTableItemViewModel>();
         Variables = new ObservableCollection<VariableItemViewModel>();
-        Menus = new ObservableCollection<MenuBeanItemViewModel>();
-        MenuTrees = new ObservableCollection<MenuBeanItemViewModel>();
+        Menus = new ObservableCollection<MenuItemViewModel>();
+        MenuTrees = new ObservableCollection<MenuItemViewModel>();
         // AllVariables = new ConcurrentDictionary<int, Variable>();
     }
 
@@ -165,7 +165,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         var newMenuIds = new HashSet<int>(newMenus.Select(m => m.Id));
 
         // 1. 更新现有项 & 查找需要删除的项
-        var itemsToRemove = new List<MenuBeanItemViewModel>();
+        var itemsToRemove = new List<MenuItemViewModel>();
         foreach (var existingItem in Menus)
         {
             if (newMenuIds.Contains(existingItem.Id))
@@ -177,12 +177,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 // 注意：MenuItemViewModel 的属性是 ObservableProperty，直接赋值会触发通知
                 if (existingItem.Header != newDto.Header) existingItem.Header = newDto.Header;
                 if (existingItem.Icon != newDto.Icon) existingItem.Icon = newDto.Icon;
-                // 对于 TargetViewKey 和 NavigationParameter，它们在 MenuItemViewModel 中是私有字段，
-                // 并且在构造时通过 INavigationService 绑定到 NavigateCommand。
-                // 如果这些需要动态更新，MenuItemViewModel 内部需要提供公共属性或方法来处理。
-                // 目前，我们假设如果这些变化，IMenuService 会返回一个新的 MenuItemViewModel 实例。
-                // 如果需要更细粒度的更新，需要修改 MenuItemViewModel 的设计。
-                // 这里我们只更新直接暴露的 ObservableProperty。
+
             }
             else
             {
@@ -205,7 +200,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             {
                 // 这是一个新菜单项，添加到集合中
                 // 注意：这里直接添加 IMenuService 返回的 MenuItemViewModel 实例
-                Menus.Add(new MenuBeanItemViewModel(newDto, _navigationService));
+                Menus.Add(_mapper.Map<MenuItemViewModel>(newDto));
             }
         }
 
@@ -470,18 +465,18 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         }
     }
 
-    public void AddMenuItem(MenuBeanItemViewModel menuBeanItemViewModel)
+    public void AddMenuItem(MenuItemViewModel menuItemViewModel)
     {
-        if (menuBeanItemViewModel == null)
+        if (menuItemViewModel == null)
         {
             return;
         }
 
-        var deviceMenu = Menus.FirstOrDefault(m => m.Id == menuBeanItemViewModel.ParentId);
+        var deviceMenu = Menus.FirstOrDefault(m => m.Id == menuItemViewModel.ParentId);
         if (deviceMenu != null)
         {
-            deviceMenu.Children.Add(menuBeanItemViewModel);
-            Menus.Add(menuBeanItemViewModel);
+            deviceMenu.Children.Add(menuItemViewModel);
+            Menus.Add(menuItemViewModel);
         }
     }
 
@@ -498,27 +493,27 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         }
     }
 
-    public void DeleteMenuItem(MenuBeanItemViewModel menuBeanItemViewModel)
+    public void DeleteMenuItem(MenuItemViewModel menuItemViewModel)
     {
-        if (menuBeanItemViewModel == null)
+        if (menuItemViewModel == null)
         {
             return;
         }
 
         // 从扁平菜单列表中移除
-        Menus.Remove(menuBeanItemViewModel);
+        Menus.Remove(menuItemViewModel);
 
         // 从树形结构中移除
-        if (menuBeanItemViewModel.ParentId.HasValue && menuBeanItemViewModel.ParentId.Value != 0)
+        if (menuItemViewModel.ParentId.HasValue && menuItemViewModel.ParentId.Value != 0)
         {
             // 如果有父菜单，从父菜单的Children中移除
-            var parentMenu = Menus.FirstOrDefault(m => m.Id == menuBeanItemViewModel.ParentId.Value);
-            parentMenu?.Children.Remove(menuBeanItemViewModel);
+            var parentMenu = Menus.FirstOrDefault(m => m.Id == menuItemViewModel.ParentId.Value);
+            parentMenu?.Children.Remove(menuItemViewModel);
         }
         else
         {
             // 如果是根菜单，从MenuTrees中移除
-            MenuTrees.Remove(menuBeanItemViewModel);
+            MenuTrees.Remove(menuItemViewModel);
         }
     }
 

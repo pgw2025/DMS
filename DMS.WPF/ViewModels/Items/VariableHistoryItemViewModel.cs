@@ -6,7 +6,7 @@ namespace DMS.WPF.ViewModels.Items;
 
 public partial class VariableHistoryItemViewModel : ObservableObject
 {
-    public long Id { get; }
+    public long Id { get; set; }
 
     [ObservableProperty]
     private int _variableId;

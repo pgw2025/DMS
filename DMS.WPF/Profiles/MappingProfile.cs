@@ -11,10 +11,10 @@ namespace DMS.WPF.Profiles
             CreateMap<DeviceDto, DeviceItemViewModel>()
                 .ReverseMap();
 
-            CreateMap<MenuBeanDto, MenuBeanItemViewModel>()
+            CreateMap<MenuBeanDto, MenuItemViewModel>()
                 .ForMember(dest => dest.Children, opt => opt.Ignore())
-                .ConstructUsing(src => new MenuBeanItemViewModel(
-                                    src, null)); // 假设 NavigationService 可以通过依赖注入获取或在ViewModel中处理
+                .ReverseMap();
+                
             CreateMap<MqttServerDto, MqttServerItemViewModel>().ReverseMap();
             CreateMap<UserDto, UserItemViewModel>().ReverseMap();
             CreateMap<VariableHistoryDto, VariableHistoryItemViewModel>().ReverseMap();
