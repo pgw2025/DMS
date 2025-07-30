@@ -56,7 +56,7 @@ namespace DMS.Application.Services
         /// <param name="createDto">包含变量表和菜单信息的创建数据传输对象。</param>
         /// <returns>创建后的变量表数据传输对象。</returns>
         /// <exception cref="ApplicationException">如果添加变量表失败或找不到设备菜单。</exception>
-        public async Task<VariableTableDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto createDto)
+        public async Task<CreateVariableTableWithMenuDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto createDto)
         {
             await _repositoryManager.BeginTranAsync();
             try
@@ -69,6 +69,8 @@ namespace DMS.Application.Services
                 {
                     throw new ApplicationException($"添加变量表失败，设备ID:{createDto.DeviceId},请检查。");
                 }
+                
+                _mapper.Map(createdVariableTable, createDto.VariableTable);
 
                 if (createDto.Menu!=null)
                 {
@@ -84,16 +86,18 @@ namespace DMS.Application.Services
                     // 映射菜单实体并设置关联信息
                     var menu = _mapper.Map<MenuBean>(createDto.Menu);
                     menu.ParentId = deviceMenu.Id;
+                    menu.TargetViewKey = "VariableTableMenu";
                     menu.TargetId = createdVariableTable.Id;
                     menu.MenuType = MenuType.VariableTableMenu;
-                    await _repositoryManager.Menus.AddAsync(menu);
+                   var addMenu= await _repositoryManager.Menus.AddAsync(menu);
+                   _mapper.Map(addMenu, createDto.Menu);
                 }
                 
 
 
                 await _repositoryManager.CommitAsync();
 
-                return _mapper.Map<VariableTableDto>(createdVariableTable);
+                return createDto;
             }
             catch
             {

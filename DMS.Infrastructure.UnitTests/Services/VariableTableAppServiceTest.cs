@@ -26,7 +26,7 @@ public class VariableTableAppServiceTest : BaseServiceTest
                       DeviceId = 5
                   };
       var addVarTable= await  _variableTableAppService.CreateVariableTableAsync(dto);
-      Assert.NotEqual(addVarTable.Id, 0);
+      Assert.NotEqual(addVarTable.VariableTable.Id, 0);
     }
 
     [Fact]
@@ -40,16 +40,16 @@ public class VariableTableAppServiceTest : BaseServiceTest
             DeviceId = 5 // Assuming a device with ID 5 exists for testing
         };
         var createdVariableTable = await _variableTableAppService.CreateVariableTableAsync(createDto);
-        Assert.NotEqual(createdVariableTable.Id, 0);
+        Assert.NotEqual(createdVariableTable.VariableTable.Id, 0);
 
         // Act: Delete the created variable table
-        var isDeleted = await _variableTableAppService.DeleteVariableTableAsync(createdVariableTable.Id);
+        var isDeleted = await _variableTableAppService.DeleteVariableTableAsync(createdVariableTable.VariableTable.Id);
 
         // Assert: Verify deletion was successful
         Assert.True(isDeleted);
 
         // Optionally, try to retrieve the deleted variable table to confirm it's gone
-        var deletedTable = await _variableTableAppService.GetVariableTableByIdAsync(createdVariableTable.Id);
+        var deletedTable = await _variableTableAppService.GetVariableTableByIdAsync(createdVariableTable.VariableTable.Id);
         Assert.Null(deletedTable);
     }
 
@@ -64,20 +64,20 @@ public class VariableTableAppServiceTest : BaseServiceTest
             DeviceId = 5 // Assuming a device with ID 5 exists for testing
         };
         var createdVariableTable = await _variableTableAppService.CreateVariableTableAsync(createDto);
-        Assert.NotEqual(createdVariableTable.Id, 0);
+        Assert.NotEqual(createdVariableTable.VariableTable.Id, 0);
 
         // Modify some properties of the DTO
-        createdVariableTable.Name = "Updated Variable Table Name";
-        createdVariableTable.Description = "This is an updated description.";
+        createdVariableTable.VariableTable.Name = "Updated Variable Table Name";
+        createdVariableTable.VariableTable.Description = "This is an updated description.";
 
         // Act: Update the variable table
-        var affectedRows = await _variableTableAppService.UpdateVariableTableAsync(createdVariableTable);
+        var affectedRows = await _variableTableAppService.UpdateVariableTableAsync(createdVariableTable.VariableTable);
 
         // Assert: Verify update was successful
         Assert.Equal(1, affectedRows);
 
         // Retrieve the updated variable table to confirm changes
-        var updatedTable = await _variableTableAppService.GetVariableTableByIdAsync(createdVariableTable.Id);
+        var updatedTable = await _variableTableAppService.GetVariableTableByIdAsync(createdVariableTable.VariableTable.Id);
         Assert.NotNull(updatedTable);
         Assert.Equal("Updated Variable Table Name", updatedTable.Name);
         Assert.Equal("This is an updated description.", updatedTable.Description);

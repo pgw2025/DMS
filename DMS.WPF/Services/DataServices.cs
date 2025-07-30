@@ -484,12 +484,12 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     {
         if (variableTableItemViewModel == null)
             return;
-
-        VariableTables.Add(variableTableItemViewModel);
+        
         var device = Devices.FirstOrDefault(d => d.Id == variableTableItemViewModel.DeviceId);
         if (device != null)
         {
             device.VariableTables.Add(variableTableItemViewModel);
+            VariableTables.Add(variableTableItemViewModel);
         }
     }
 

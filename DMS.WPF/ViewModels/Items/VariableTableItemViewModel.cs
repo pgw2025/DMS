@@ -17,7 +17,7 @@ public partial class VariableTableItemViewModel : ObservableObject
     private string _description;
 
     [ObservableProperty]
-    private bool _isActive;
+    private bool _isActive=true;
 
     [ObservableProperty]
     private int _deviceId;

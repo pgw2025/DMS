@@ -1,25 +1,30 @@
-<ui:ContentDialog x:Class="DMS.WPF.Views.Dialogs.VarTableDialog"
+<ui:ContentDialog x:Class="DMS.WPF.Views.Dialogs.VariableTableDialog"
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                   xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+                  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                  xmlns:ex="clr-namespace:DMS.Extensions"
-                  xmlns:en="clr-namespace:DMS.Core.Enums"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
-                  PrimaryButtonText="{Binding PrimaryButtonText}"
+                  PrimaryButtonText="{Binding PrimaryButContent}"
                   Background="#fff"
-                  d:DataContext="{d:DesignInstance vmd:VarTableDialogViewModel}"
+                  d:DataContext="{d:DesignInstance vmd:VariableTableDialogViewModel}"
                   mc:Ignorable="d">
-    <ui:ContentDialog.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PrimaryButtonClick">
+            <i:InvokeCommandAction Command="{Binding ParimaryButtonCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="CloseButtonClick">
+            <i:InvokeCommandAction Command="{Binding CancleButtonCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
-    </ui:ContentDialog.Resources>
-
-    <ikw:SimpleStackPanel Width="300" Grid.Column="0"
+    <ikw:SimpleStackPanel Width="300"
+                          Grid.Column="0"
                           Margin="10 10 20 10 "
                           Spacing="12">
         <!-- 设备名称 -->
@@ -34,6 +39,12 @@
         <TextBox AcceptsReturn="True"
                  Text="{Binding VariableTable.Description, UpdateSourceTrigger=PropertyChanged}" />
         
+        <CheckBox FontSize="16"
+                  Content="是否启用变量表"
+                  Margin="0 30 0 0"
+                  IsChecked="{Binding VariableTable.IsActive}" />
+
+
     </ikw:SimpleStackPanel>
 
 </ui:ContentDialog>

@@ -3,11 +3,10 @@ using iNKORE.UI.WPF.Modern.Controls;
 
 namespace DMS.WPF.Views.Dialogs;
 
-public partial class VarTableDialog : ContentDialog
+public partial class VariableTableDialog : ContentDialog
 {
-    public VarTableDialog(VarTableDialogViewModel viewModel)
+    public VariableTableDialog()
     {
         InitializeComponent();
-        this.DataContext = viewModel;
     }
 }

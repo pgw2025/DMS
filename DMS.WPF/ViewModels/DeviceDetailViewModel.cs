@@ -1,16 +1,24 @@
+using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Helper;
 using DMS.WPF.Services;
 using DMS.Services;
+using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 
 namespace DMS.WPF.ViewModels;
 
-public partial class DeviceDetailViewModel : ViewModelBase,INavigatable
+public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
 {
+    private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
+    private readonly IVariableTableAppService _variableTableAppService;
     public DataServices DataServices { get; set; }
 
     [ObservableProperty]
@@ -19,80 +27,50 @@ public partial class DeviceDetailViewModel : ViewModelBase,INavigatable
     [ObservableProperty]
     private VariableItemViewModel _selectedVariableTable;
 
-    public DeviceDetailViewModel(IDialogService dialogService,INavigationService navigationService, DataServices dataServices)
+    public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, INavigationService navigationService,
+                                 DataServices dataServices, IVariableTableAppService variableTableAppService)
     {
+        _mapper = mapper;
         _dialogService = dialogService;
         _navigationService = navigationService;
+        _variableTableAppService = variableTableAppService;
         DataServices = dataServices;
-    }
-
-    public override void OnLoaded()
-    {
-        // Ensure VariableTables is an ObservableCollection for UI binding
-        // if (_curentDevice.VariableTables != null &&
-        //     !(_curentDevice.VariableTables is ObservableCollection<VariableTable>))
-        // {
-        //     _curentDevice.VariableTables = new ObservableCollection<VariableTable>(_curentDevice.VariableTables);
-        // }
-        // else if (_curentDevice.VariableTables == null)
-        // {
-        //     _curentDevice.VariableTables = new ObservableCollection<VariableTable>();
-        // }
     }
 
     [RelayCommand]
     private async Task AddVariableTable()
     {
-        // using var db = DbContext.GetInstance();
-        // try
-        // {
-        //     // 1. Show dialog to get new variable table details
-        //     var newVarTable = await _dialogService.ShowAddVarTableDialog();
-        //     if (newVarTable == null) return; // User cancelled
-        //
-        //     // 2. Set properties for the new variable table
-        //     newVarTable.DeviceId = CurrentDevice.Id;
-        //     newVarTable.ProtocolType = CurrentDevice.ProtocolType;
-        //     newVarTable.IsActive = true;
-        //
-        //     // 3. Find the parent menu for the current device
-        //     var parentMenu = DataServicesHelper.FindMenusForDevice(CurrentDevice, _dataServices.MenuTrees);
-        //     if (parentMenu == null)
-        //     {
-        //         //NotificationHelper.ShowError("无法找到当前设备的父级菜单，无法添加变量表菜单。");
-        //         return;
-        //     }
-        //
-        //     // 4. Start database transaction
-        //     await db.BeginTranAsync();
-        //
-        //     // 5. AddAsync variable table to the database
-        //     var addedVarTable = await _varTableRepository.AddAsync(newVarTable, db);
-        //
-        //     // 6. Create and add the corresponding menu item
-        //     var newMenu = new MenuBean
-        //                   {
-        //                       Name = addedVarTable.Name,
-        //                       DataId = addedVarTable.Id,
-        //                       Type = MenuType.VariableTableMenu,
-        //                       ParentId = parentMenu.Id,
-        //                       Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Tablet.Glyph
-        //                   };
-        //     await _menuRepository.AddAsync(newMenu, db);
-        //
-        //     // 7. Commit transaction
-        //     await db.CommitTranAsync();
-        //
-        //     // 8. Update UI
-        //     CurrentDevice?.VariableTables?.Add(addedVarTable);
-        //     MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
-        //     //NotificationHelper.ShowSuccess($"变量表 {addedVarTable.Name} 添加成功。");
-        // }
-        // catch (Exception ex)
-        // {
-        //     await db.RollbackTranAsync();
-        //     //NotificationHelper.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
-        // }
+        try
+        {
+            VariableTableDialogViewModel variableTableDialogViewModel = new VariableTableDialogViewModel()
+                                                                        {
+                                                                            PrimaryButContent = "添加变量表"
+                                                                        };
+            // 1. 显示添加设备对话框
+            var variableTableItemViewModel = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
+            // 如果用户取消或对话框未返回设备，则直接返回
+            if (variableTableItemViewModel == null)
+            {
+                return;
+            }
+
+            CreateVariableTableWithMenuDto createDto = new CreateVariableTableWithMenuDto();
+            createDto.VariableTable = _mapper.Map<VariableTableDto>(variableTableItemViewModel);
+            createDto.DeviceId = CurrentDevice.Id;
+            createDto.Menu = new MenuBeanDto()
+                             {
+                                 Header = variableTableItemViewModel.Name,
+                                 Icon = SegoeFluentIcons.DataSense.Glyph
+                             };
+            CreateVariableTableWithMenuDto
+                resCreateDto = await _variableTableAppService.CreateVariableTableAsync(createDto);
+            DataServices.AddVariableTable(_mapper.Map<VariableTableItemViewModel>(resCreateDto.VariableTable));
+            DataServices.AddMenuItem(_mapper.Map<MenuItemViewModel>(resCreateDto.Menu));
+        }
+        catch (Exception ex)
+        {
+            NotificationHelper.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
+        }
     }
 
     [RelayCommand]
@@ -224,20 +202,20 @@ public partial class DeviceDetailViewModel : ViewModelBase,INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-       var device= DataServices.Devices.FirstOrDefault(d => d.Id == menu.TargetId);
-       if (device!=null)
-       {
-           CurrentDevice = device;
-       }
-        
+        var device = DataServices.Devices.FirstOrDefault(d => d.Id == menu.TargetId);
+        if (device != null)
+        {
+            CurrentDevice = device;
+        }
     }
 
     [RelayCommand]
     public void NavigateToVariableTable()
     {
         if (SelectedVariableTable == null) return;
-        var menu=DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == SelectedVariableTable.Id);
-        if (menu==null) return;
+        var menu = DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu &&
+                                                          m.TargetId == SelectedVariableTable.Id);
+        if (menu == null) return;
         _navigationService.NavigateToAsync(menu);
     }
 }
