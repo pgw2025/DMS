@@ -177,7 +177,6 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 // 注意：MenuItemViewModel 的属性是 ObservableProperty，直接赋值会触发通知
                 if (existingItem.Header != newDto.Header) existingItem.Header = newDto.Header;
                 if (existingItem.Icon != newDto.Icon) existingItem.Icon = newDto.Icon;
-
             }
             else
             {
@@ -484,7 +483,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
     {
         if (variableTableItemViewModel == null)
             return;
-        
+
         var device = Devices.FirstOrDefault(d => d.Id == variableTableItemViewModel.DeviceId);
         if (device != null)
         {
@@ -523,11 +522,13 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
         if (device != null)
         {
             // 1. 删除与设备关联的所有变量表及其变量
-            var variableTablesToDelete = VariableTables.Where(vt => vt.DeviceId == device.Id).ToList();
+            var variableTablesToDelete = VariableTables.Where(vt => vt.DeviceId == device.Id)
+                                                       .ToList();
             foreach (var vt in variableTablesToDelete)
             {
                 // 删除与当前变量表关联的所有变量
-                var variablesToDelete = Variables.Where(v => v.VariableTableId == vt.Id).ToList();
+                var variablesToDelete = Variables.Where(v => v.VariableTableId == vt.Id)
+                                                 .ToList();
                 foreach (var variable in variablesToDelete)
                 {
                     Variables.Remove(variable);
@@ -537,7 +538,8 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 VariableTables.Remove(vt);
 
                 // 删除与变量表关联的菜单项
-                var variableTableMenu = Menus.FirstOrDefault(m => m.TargetViewKey == "VariableTableView" && m.Header == vt.Name);
+                var variableTableMenu
+                    = Menus.FirstOrDefault(m => m.TargetViewKey == "VariableTableView" && m.Header == vt.Name);
                 if (variableTableMenu != null)
                 {
                     DeleteMenuItem(variableTableMenu);
@@ -556,6 +558,36 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
             // 4. 重新构建菜单树以反映变更
             // BuildMenuTree();
+        }
+    }
+
+    public void DeleteVariableTableById(int id)
+    {
+        var variableTable = VariableTables.FirstOrDefault(vt => vt.Id == id);
+        if (variableTable != null)
+        {
+            // 删除与当前变量表关联的所有变量
+            var variablesToDelete = Variables.Where(v => v.VariableTableId == variableTable.Id)
+                                             .ToList();
+            foreach (var variable in variablesToDelete)
+            {
+                Variables.Remove(variable);
+            }
+
+
+            var device = Devices.FirstOrDefault(d => d.Id == variableTable.DeviceId);
+            if (device != null)
+                device.VariableTables.Remove(variableTable);
+            // 删除变量表
+            VariableTables.Remove(variableTable);
+
+            // 删除与变量表关联的菜单项
+            var variableTableMenu
+                = Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);
+            if (variableTableMenu != null)
+            {
+                DeleteMenuItem(variableTableMenu);
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     private DeviceItemViewModel _currentDevice;
 
     [ObservableProperty]
-    private VariableItemViewModel _selectedVariableTable;
+    private VariableTableItemViewModel _selectedVariableTable;
 
     public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, INavigationService navigationService,
                                  DataServices dataServices, IVariableTableAppService variableTableAppService)
@@ -76,110 +76,78 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     private async Task EditVariableTable()
     {
-        if (SelectedVariableTable == null)
+        try
         {
-            // NotificationHelper.ShowInfo("请选择要编辑的变量表。");
-            return;
+            if (SelectedVariableTable == null)
+            {
+                NotificationHelper.ShowError("你没有选择任何变量表，请选择变量表后再点击编辑变量表");
+                return;
+            }
+
+            VariableTableDialogViewModel variableTableDialogViewModel = new VariableTableDialogViewModel(SelectedVariableTable)
+                                                                          {
+                                                                              PrimaryButContent = "编辑变量表"
+                                                                          };
+            // 1. 显示变量表对话框
+            VariableTableItemViewModel variableTable = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
+            // 如果用户取消或对话框未返回变量表，则直接返回
+            if (variableTable == null)
+            {
+                return;
+            }
+
+            int res = await _variableTableAppService.UpdateVariableTableAsync(_mapper.Map<VariableTableDto>(variableTable));
+            if (res > 0)
+            {
+                var menu = DataServices.Menus.FirstOrDefault(m =>
+                                                                 m.MenuType == MenuType.VariableTableMenu &&
+                                                                 m.TargetId == variableTable.Id);
+                if (menu != null)
+                {
+                    menu.Header = variableTable.Name;
+                }
+            }
         }
-        //
-        // using var db = DbContext.GetInstance();
-        // try
-        // {
-        //     var originalName = SelectedVariableTable.Name; // Store original name for comparison
-        //     var editedVarTable = await _dialogService.ShowEditVarTableDialog(SelectedVariableTable);
-        //     if (editedVarTable == null) return;
-        //
-        //     await db.BeginTranAsync();
-        //
-        //     // Update variable table in DB
-        //     var result = await _varTableRepository.UpdateAsync(SelectedVariableTable, db);
-        //
-        //     if (result > 0)
-        //     {
-        //         // Update corresponding menu item if name changed
-        //         if (originalName != SelectedVariableTable.Name)
-        //         {
-        //             var menu = DataServicesHelper.FindVarTableMenu(SelectedVariableTable.Id, _dataServices.MenuTrees);
-        //             if (menu != null)
-        //             {
-        //                 menu.Name = SelectedVariableTable.Name;
-        //                 await _menuRepository.UpdateAsync(menu, db);
-        //             }
-        //         }
-        //
-        //         await db.CommitTranAsync();
-        //         //NotificationHelper.ShowSuccess($"变量表 {SelectedVariableTable.Name} 编辑成功。");
-        //         MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
-        //     }
-        //     else
-        //     {
-        //         await db.RollbackTranAsync();
-        //         //NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 编辑失败。");
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     await db.RollbackTranAsync();
-        //     //NotificationHelper.ShowError($"编辑变量表时发生错误: {ex.Message}", ex);
-        // }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowError($"编辑变量表的过程中发生错误：{e.Message}", e);
+        }
     }
 
     [RelayCommand]
     private async Task DeleteVariableTable()
     {
-        // if (SelectedVariableTable == null)
-        // {
-        //     //NotificationHelper.ShowInfo("请选择要删除的变量表。");
-        //     return;
-        // }
-        //
-        // var confirm = await _dialogService.ShowConfrimeDialog(
-        //     "删除确认",
-        //     $"确定要删除变量表 \"{SelectedVariableTable.Name}\" 吗?\n\n此操作将同时删除该变量表下的所有变量数据，且无法恢复！",
-        //     "删除");
-        //
-        // if (!confirm) return;
-        //
-        // using var db = DbContext.GetInstance();
-        // try
-        // {
-        //     await db.BeginTranAsync();
-        //
-        //     // Find the corresponding menu item
-        //     MenuBean menuToDelete = null;
-        //     if (_dataServices.MenuTrees != null)
-        //     {
-        //         menuToDelete = DataServicesHelper.FindVarTableMenu( SelectedVariableTable.Id,_dataServices.MenuTrees);
-        //     }
-        //
-        //     // Delete variable table from DB
-        //     var result = await _varTableRepository.DeleteAsync(SelectedVariableTable, db);
-        //
-        //     if (result > 0)
-        //     {
-        //         // Delete corresponding menu item
-        //         if (menuToDelete != null)
-        //         {
-        //             await _menuRepository.DeleteAsync(menuToDelete, db);
-        //         }
-        //
-        //         await db.CommitTranAsync();
-        //         var delVarTableName = SelectedVariableTable.Name;
-        //         CurrentDevice?.VariableTables?.Remove(SelectedVariableTable);
-        //         //NotificationHelper.ShowSuccess($"变量表 {delVarTableName} 删除成功。");
-        //         MessageHelper.SendLoadMessage(Enums.LoadTypes.Menu); // Refresh the main navigation menu
-        //     }
-        //     else
-        //     {
-        //         await db.RollbackTranAsync();
-        //         //NotificationHelper.ShowError($"变量表 {SelectedVariableTable.Name} 删除失败。");
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     await db.RollbackTranAsync();
-        //     //NotificationHelper.ShowError($"删除变量表时发生错误: {ex.Message}", ex);
-        // }
+        try
+        { 
+            if (SelectedVariableTable == null)
+            {
+                NotificationHelper.ShowError("你没有选择任何变量表，请选择变量表后再点击删除变量表");
+                return;
+            }
+
+            ConfrimDialogViewModel viewModel = new ConfrimDialogViewModel();
+            viewModel.Message = $"确认要删除变量表名为:{SelectedVariableTable.Name} \n\n此操作将同时删除该变量表下的所有变量数据，且无法恢复！";
+            viewModel.Title = "删除变量表";
+            viewModel.PrimaryButContent = "删除";
+
+            var resViewModel = await _dialogService.ShowDialogAsync(viewModel);
+            if (resViewModel.IsPrimaryButton)
+            {
+                var isDel = await _variableTableAppService.DeleteVariableTableAsync(SelectedVariableTable.Id);
+                if (isDel)
+                {
+                    var delName = SelectedVariableTable.Name;
+                    // 更新界面
+                    DataServices.DeleteVariableTableById(SelectedVariableTable.Id);
+
+                    NotificationHelper.ShowSuccess($"删除变量表成功,变量表名：{delName}");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowError($"删除变量表的过程中发生错误：{e.Message}", e);
+        }
     }
 
     // Placeholder for EditDeviceCommand and DeleteDeviceCommand if they are needed here
