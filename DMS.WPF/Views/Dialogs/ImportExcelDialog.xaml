@@ -6,12 +6,12 @@
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                   xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+                  xmlns:helper="clr-namespace:DMS.WPF.Helper"
                   Title="从Excel导入"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
                   PrimaryButtonText="导入全部"
                   SecondaryButtonText="导入选择"
-         
                   d:DataContext="{d:DesignInstance vmd:ImportExcelDialogViewModel}"
                   mc:Ignorable="d"
                   AllowDrop="True"
@@ -20,10 +20,10 @@
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="PrimaryButtonClick">
-            <i:InvokeCommandAction Command="{Binding PrimaryButtonCommand}" />
+            <i:InvokeCommandAction Command="{Binding ImportAllCommand}" />
         </i:EventTrigger>
         <i:EventTrigger EventName="SecondaryButtonClick">
-            <i:InvokeCommandAction Command="{Binding SecondaryButtonCommand}" />
+            <i:InvokeCommandAction Command="{Binding ImportSelectedCommand}" />
         </i:EventTrigger>
         <i:EventTrigger EventName="CloseButtonClick">
             <i:InvokeCommandAction Command="{Binding CancleButtonCommand}" />
@@ -59,6 +59,9 @@
                   ItemsSource="{Binding Variables}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False">
+            <i:Interaction.Behaviors>
+                <helper:SelectedItemsBehavior SelectedItems="{Binding SelectedVariables}" />
+            </i:Interaction.Behaviors>
             <DataGrid.Style>
                 <Style BasedOn="{StaticResource {x:Type DataGrid}}"
                        TargetType="DataGrid">
@@ -75,7 +78,7 @@
                 <DataGridTextColumn Header="名称"
                                     Binding="{Binding Name}" />
                 <DataGridTextColumn Header="数据类型"
-                                    Binding="{Binding SignalType}" />
+                                    Binding="{Binding CSharpDataType}" />
                 <DataGridTextColumn Header="S7地址"
                                     Binding="{Binding S7Address}" />
             </DataGrid.Columns>

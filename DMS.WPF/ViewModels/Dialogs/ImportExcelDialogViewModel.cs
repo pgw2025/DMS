@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.ObjectModel;
+using System.Linq;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,7 +13,6 @@ namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Variable>>
 {
-    private readonly IMapper _mapper;
     private readonly IExcelService _excelService;
 
     [ObservableProperty]
@@ -19,12 +20,12 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
 
     [ObservableProperty]
     private List<Variable> _variables = new();
-    
 
+    [ObservableProperty]
+    private IList _selectedVariables = new ArrayList();
 
-    public ImportExcelDialogViewModel(IMapper mapper,IExcelService excelService)
+    public ImportExcelDialogViewModel(IExcelService excelService)
     {
-        _mapper = mapper;
         _excelService = excelService;
     }
 
@@ -44,17 +45,20 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
             NotificationHelper.ShowError($"从Excel文件中读取变量时发生了错误:{ex.Message}",ex);
         }
     }
-    [RelayCommand]
-    public void SecondaryButton()
-    {
-       
-    }
     
     [RelayCommand]
-    private void PrimaryButton()
+    private void ImportAll()
     {
          Close(Variables);
     }
+
+    [RelayCommand]
+    private void ImportSelected()
+    {
+        var selected = SelectedVariables.Cast<Variable>().ToList();
+        Close(selected);
+    }
+
     [RelayCommand]
     private void CancleButton()
     {

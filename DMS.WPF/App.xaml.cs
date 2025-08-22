@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using DMS.WPF.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.Services.Processors;
+using DMS.WPF.ViewModels.Dialogs;
 using DataProcessingService = DMS.Services.DataProcessingService;
 using IDataProcessingService = DMS.Services.IDataProcessingService;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -179,6 +180,8 @@ public partial class App : System.Windows.Application
         //services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddSingleton<MqttsViewModel>();
+        // 注册对话框模型
+        services.AddTransient<ImportExcelDialogViewModel>();
         // 注册对话框
         services.AddSingleton<DevicesView>();
         //注册View视图

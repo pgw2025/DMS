@@ -10,6 +10,7 @@ using DMS.WPF.ViewModels.Items;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ViewModels;
 
@@ -17,7 +18,6 @@ namespace DMS.WPF.ViewModels;
 partial class VariableTableViewModel : ViewModelBase, INavigatable
 {
     private readonly IMapper _mapper;
-    private readonly IExcelService _excelService;
 
     /// <summary>
     /// 对话服务接口，用于显示各种对话框（如确认、编辑、导入等）。
@@ -91,10 +91,9 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// <param name="dialogService">对话服务接口的实例。</param>
     private readonly DataServices _dataServices;
 
-    public VariableTableViewModel(IMapper mapper, IExcelService excelService, IDialogService dialogService, DataServices dataServices)
+    public VariableTableViewModel(IMapper mapper,  IDialogService dialogService, DataServices dataServices)
     {
         _mapper = mapper;
-        _excelService = excelService;
         _dialogService = dialogService;
         _dataServices = dataServices;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
@@ -295,10 +294,10 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     private async void ImprotFromTiaVarTable()
     {
-        ImportExcelDialogViewModel viewModel = new ImportExcelDialogViewModel(_mapper, _excelService);
-
+        ImportExcelDialogViewModel viewModel = App.Current.Services.GetRequiredService<ImportExcelDialogViewModel>();
         List<Variable> improtVariable = await _dialogService.ShowDialogAsync(viewModel);
-        if (improtVariable == null) return;
+        
+        if (improtVariable == null || improtVariable.Count==0) return;
 
 
 
