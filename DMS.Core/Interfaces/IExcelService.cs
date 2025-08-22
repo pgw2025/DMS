@@ -1,6 +1,6 @@
 using DMS.Core.Models;
 
-namespace DMS.Infrastructure.Services;
+namespace DMS.Core.Interfaces;
 
 public interface IExcelService
 {

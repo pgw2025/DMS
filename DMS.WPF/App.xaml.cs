@@ -6,7 +6,6 @@ using DMS.Core.Enums;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Helper;
-using DMS.Services;
 using DMS.Services.Processors;
 using DMS.WPF.ViewModels;
 using DMS.WPF.Views;
@@ -18,10 +17,12 @@ using DMS.Extensions;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Repositories;
+using DMS.Infrastructure.Services;
 using Microsoft.Extensions.Hosting;
 using DMS.WPF.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.Services.Processors;
+using DataProcessingService = DMS.Services.DataProcessingService;
 using IDataProcessingService = DMS.Services.IDataProcessingService;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -153,6 +154,7 @@ public partial class App : System.Windows.Application
         
         services.AddSingleton<IInitializeRepository, InitializeRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
+        services.AddSingleton<IExcelService, ExcelService>();
         
         
         // 注册App服务

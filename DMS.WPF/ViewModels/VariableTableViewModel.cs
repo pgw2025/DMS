@@ -1,25 +1,23 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Data;
-using System.Windows.Input;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DMS.Core.Enums;
+using DMS.Core.Interfaces;
 using DMS.Core.Models;
-using DMS.Helper;
-using DMS.Services;
-using iNKORE.UI.WPF.Modern.Controls;
-using Newtonsoft.Json;
-using DMS.Extensions;
 using DMS.WPF.Services;
+using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace DMS.WPF.ViewModels;
 
 
-partial class VariableTableViewModel : ViewModelBase,INavigatable
+partial class VariableTableViewModel : ViewModelBase, INavigatable
 {
     private readonly IMapper _mapper;
+    private readonly IExcelService _excelService;
 
     /// <summary>
     /// 对话服务接口，用于显示各种对话框（如确认、编辑、导入等）。
@@ -93,9 +91,10 @@ partial class VariableTableViewModel : ViewModelBase,INavigatable
     /// <param name="dialogService">对话服务接口的实例。</param>
     private readonly DataServices _dataServices;
 
-    public VariableTableViewModel(IMapper mapper, IDialogService dialogService, DataServices dataServices)
+    public VariableTableViewModel(IMapper mapper, IExcelService excelService, IDialogService dialogService, DataServices dataServices)
     {
         _mapper = mapper;
+        _excelService = excelService;
         _dialogService = dialogService;
         _dataServices = dataServices;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
@@ -296,6 +295,13 @@ partial class VariableTableViewModel : ViewModelBase,INavigatable
     [RelayCommand]
     private async void ImprotFromTiaVarTable()
     {
+        ImportExcelDialogViewModel viewModel = new ImportExcelDialogViewModel(_mapper, _excelService);
+
+        List<Variable> improtVariable = await _dialogService.ShowDialogAsync(viewModel);
+        if (improtVariable == null) return;
+
+
+
         // ContentDialog processingDialog = null; // 用于显示处理中的对话框
         // try
         // {
@@ -887,10 +893,20 @@ partial class VariableTableViewModel : ViewModelBase,INavigatable
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
         var varTable = _dataServices.VariableTables.FirstOrDefault(v => v.Id == menu.TargetId);
-        if (varTable!=null)
+        if (varTable != null)
         {
-            CurrentVariableTable=varTable;
+            CurrentVariableTable = varTable;
+
+            if (CurrentVariableTable.Protocol == ProtocolType.S7)
+            {
+                IsS7ProtocolSelected = true;
+            }
+            else if (CurrentVariableTable.Protocol == ProtocolType.OpcUa)
+            {
+                IsOpcUaProtocolSelected = true;
+            }
+
         }
-        
+
     }
 }

@@ -8,10 +8,9 @@ namespace DMS.WPF.Views.Dialogs;
 
 public partial class ImportExcelDialog : ContentDialog
 {
-    public ImportExcelDialog(ImportExcelDialogViewModel viewModel)
+    public ImportExcelDialog()
     {
         InitializeComponent();
-        DataContext = viewModel;
     }
 
     private void Dialog_DragEnter(object sender, DragEventArgs e)

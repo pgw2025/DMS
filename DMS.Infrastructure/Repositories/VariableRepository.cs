@@ -184,4 +184,10 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
         return _mapper.Map<List<Variable>>(dbList);
 
     }
+
+    public Task<bool> AddBatchAsync(List<Variable> entities)
+    {
+        var dbEntities = _mapper.Map<List<DbVariable>>(entities);
+        return base.AddBatchAsync(dbEntities);
+    }
 }

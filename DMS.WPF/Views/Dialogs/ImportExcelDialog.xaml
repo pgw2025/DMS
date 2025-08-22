@@ -4,16 +4,31 @@
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+                  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   Title="从Excel导入"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
-                  PrimaryButtonText="导入"
+                  PrimaryButtonText="导入全部"
+                  SecondaryButtonText="导入选择"
+         
                   d:DataContext="{d:DesignInstance vmd:ImportExcelDialogViewModel}"
                   mc:Ignorable="d"
                   AllowDrop="True"
                   DragEnter="Dialog_DragEnter"
                   Drop="Dialog_Drop">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PrimaryButtonClick">
+            <i:InvokeCommandAction Command="{Binding PrimaryButtonCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="SecondaryButtonClick">
+            <i:InvokeCommandAction Command="{Binding SecondaryButtonCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="CloseButtonClick">
+            <i:InvokeCommandAction Command="{Binding CancleButtonCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
     <Grid Margin="10">
         <Grid.RowDefinitions>

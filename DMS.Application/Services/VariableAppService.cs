@@ -124,4 +124,18 @@ public class VariableAppService : IVariableAppService
             throw new ApplicationException($"删除变量时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
         }
     }
+
+    public async Task<bool> BatchImportVariablesAsync(List<VariableDto> variables)
+    {
+        try
+        {
+            var variableModels = _mapper.Map<List<Variable>>(variables);
+            var result = await _repoManager.Variables.AddBatchAsync(variableModels);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"批量导入变量时发生错误,错误信息:{ex.Message}", ex);
+        }
+    }
 }

@@ -173,4 +173,10 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
         var dbList = await base.TakeAsync(number);
         return _mapper.Map<List<MenuBean>>(dbList);
     }
+
+    public Task<bool> AddBatchAsync(List<MenuBean> entities)
+    {
+        var dbEntities = _mapper.Map<List<DbMenu>>(entities);
+        return base.AddBatchAsync(dbEntities);
+    }
 }

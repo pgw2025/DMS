@@ -101,4 +101,10 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
         return _mapper.Map<List<Core.Models.Device>>(dbList);
 
     }
+
+    public Task<bool> AddBatchAsync(List<Device> entities)
+    {
+        var dbEntities = _mapper.Map<List<DbDevice>>(entities);
+        return base.AddBatchAsync(dbEntities);
+    }
 }

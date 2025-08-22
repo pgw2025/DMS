@@ -31,4 +31,9 @@ public interface IVariableAppService
     /// 异步删除一个变量。
     /// </summary>
     Task<bool> DeleteVariableAsync(int id);
+
+    /// <summary>
+    /// 异步批量导入变量。
+    /// </summary>
+    Task<bool> BatchImportVariablesAsync(List<VariableDto> variables);
 }

@@ -1,5 +1,6 @@
 using AutoMapper;
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.Profiles
@@ -9,6 +10,8 @@ namespace DMS.WPF.Profiles
         public MappingProfile()
         {
             CreateMap<DeviceDto, DeviceItemViewModel>()
+                .ReverseMap();
+            CreateMap<Variable, VariableItemViewModel>()
                 .ReverseMap();
 
             CreateMap<MenuBeanDto, MenuItemViewModel>()

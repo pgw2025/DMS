@@ -103,6 +103,12 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
 
     }
 
+    public Task<bool> AddBatchAsync(List<VariableTable> entities)
+    {
+        var dbEntities = _mapper.Map<List<DbVariableTable>>(entities);
+        return base.AddBatchAsync(dbEntities);
+    }
+
     /// <summary>
     /// 异步根据设备ID删除所有关联的变量表。
     /// </summary>

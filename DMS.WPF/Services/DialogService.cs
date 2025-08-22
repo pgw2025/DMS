@@ -16,6 +16,7 @@ namespace DMS.WPF.Services
             { typeof(DeviceDialogViewModel), typeof(DeviceDialog) },
             { typeof(ConfrimDialogViewModel), typeof(ConfirmDialog) },
             { typeof(VariableTableDialogViewModel), typeof(VariableTableDialog) },
+            { typeof(ImportExcelDialogViewModel), typeof(ImportExcelDialog) },
             // { typeof(MqttDialogViewModel), typeof(MqttDialog) }, // Add other mappings here
             // ... other dialogs
         };

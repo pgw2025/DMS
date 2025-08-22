@@ -100,4 +100,10 @@ public class MqttServerRepository : BaseRepository<DbMqttServer>, IMqttServerRep
         return _mapper.Map<List<MqttServer>>(dbList);
 
     }
+
+    public Task<bool> AddBatchAsync(List<MqttServer> entities)
+    {
+        var dbEntities = _mapper.Map<List<DbMqttServer>>(entities);
+        return base.AddBatchAsync(dbEntities);
+    }
 }

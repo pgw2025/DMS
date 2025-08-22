@@ -103,4 +103,10 @@ public class UserRepository : BaseRepository<DbUser>, IUserRepository
         return _mapper.Map<List<User>>(dbList);
 
     }
+
+    public Task<bool> AddBatchAsync(List<User> entities)
+    {
+        var dbEntities = _mapper.Map<List<DbUser>>(entities);
+        return base.AddBatchAsync(dbEntities);
+    }
 }

@@ -191,4 +191,14 @@ public abstract class BaseRepository<TEntity>
         NlogHelper.Info($"TakeAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entity;
     }
+
+    public async Task<bool> AddBatchAsync(List<TEntity> entities)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Insertable(entities).ExecuteCommandAsync();
+        stopwatch.Stop();
+        NlogHelper.Info($"AddBatchAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result > 0;
+    }
 }

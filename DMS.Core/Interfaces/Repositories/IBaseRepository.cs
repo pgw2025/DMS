@@ -48,4 +48,10 @@ public interface IBaseRepository<T> where T : class
     /// </summary>
     /// <param name="number">从数据库获取数据的条数</param>
     Task<List<T>> TakeAsync(int number);
+
+    /// <summary>
+    /// 异步批量添加实体。
+    /// </summary>
+    /// <param name="entities">要添加的实体列表。</param>
+    Task<bool> AddBatchAsync(List<T> entities);
 }
