@@ -58,8 +58,7 @@
             <controls:CommandBar x:Name="PrimaryCommandBar"
                                  DefaultLabelPosition="Right"
                                  IsOpen="False">
-                <ui:AppBarButton Command="{Binding AddVarDataCommand}"
-                                 CommandParameter="{Binding VariableTable}"
+                <ui:AppBarButton Command="{Binding AddVariableCommand}"
                                  Label="添加变量">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
@@ -312,18 +311,17 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="轮询频率"
-                                        
                                         SortMemberPath="PollLevelType">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock
-                                Text="{Binding PollLevelType, Converter={StaticResource EnumDescriptionConverter}}" />
+                                Text="{Binding PollLevel, Converter={StaticResource EnumDescriptionConverter}}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                     <DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
                             <ComboBox ItemsSource="{Binding Source={StaticResource pollLevelType}}"
-                                      SelectedItem="{Binding PollLevelType}">
+                                      SelectedItem="{Binding PollLevel}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -343,24 +341,24 @@
 
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="创建时间"
-                                    Binding="{Binding CreateTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                    Binding="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="更新时间"
-                                    Binding="{Binding UpdateTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                    Binding="{Binding UpdatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                 <DataGridTextColumn Header="转换规则"
-                                    Binding="{Binding Converstion}" />
+                                    Binding="{Binding ConversionFormula}" />
                 <DataGridCheckBoxColumn Header="启用"
                                         Binding="{Binding IsActive}" />
                 <DataGridCheckBoxColumn Header="保存"
-                                        Binding="{Binding IsSave}" />
+                                        Binding="{Binding IsHistoryEnabled}" />
                 <DataGridTextColumn Header="保存范围"
-                                    Binding="{Binding SaveRange}" />
+                                    Binding="{Binding HistoryDeadband}" />
                 <DataGridCheckBoxColumn Header="报警"
-                                        Binding="{Binding IsAlarm}" />
+                                        Binding="{Binding IsAlarmEnabled}" />
                 <DataGridTextColumn Header="报警最小值"
-                                    Binding="{Binding AlarmMin}" />
+                                    Binding="{Binding AlarmMinValue}" />
                 <DataGridTextColumn Header="报警最大值"
-                                    Binding="{Binding AlarmMax}" />
+                                    Binding="{Binding AlarmMaxValue}" />
             </DataGrid.Columns>
         </DataGrid>
     </DockPanel>

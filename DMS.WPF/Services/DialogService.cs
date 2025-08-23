@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
+using DMS.WPF.Views;
+using DMS.WPF.Views.HandyDialogs;
 using iNKORE.UI.WPF.Modern.Controls;
 
 namespace DMS.WPF.Services
@@ -17,6 +19,7 @@ namespace DMS.WPF.Services
             { typeof(ConfrimDialogViewModel), typeof(ConfirmDialog) },
             { typeof(VariableTableDialogViewModel), typeof(VariableTableDialog) },
             { typeof(ImportExcelDialogViewModel), typeof(ImportExcelDialog) },
+            { typeof(VariableDialogViewModel), typeof(VariableEditorDialog) },
             // { typeof(MqttDialogViewModel), typeof(MqttDialog) }, // Add other mappings here
             // ... other dialogs
         };

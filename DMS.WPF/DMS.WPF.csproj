@@ -79,7 +79,7 @@
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\Dialogs\VarDataDialog.xaml">
+    <Page Update="Views\Dialogs\VariableDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
@@ -135,6 +135,11 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Resources\DevicesItemTemplateDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\HandyDialogs\VariableEditorDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>

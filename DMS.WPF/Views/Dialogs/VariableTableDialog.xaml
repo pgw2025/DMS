@@ -10,7 +10,7 @@
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
-                  PrimaryButtonText="{Binding PrimaryButContent}"
+                  PrimaryButtonText="{Binding PrimaryButText}"
                   Background="#fff"
                   d:DataContext="{d:DesignInstance vmd:VariableTableDialogViewModel}"
                   mc:Ignorable="d">

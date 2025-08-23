@@ -13,7 +13,7 @@ public partial class ConfrimDialogViewModel : DialogViewModelBase<Boolean>
     {
         Message = message;
         Title = title;
-        PrimaryButContent = primaryButText;
+        PrimaryButText = primaryButText;
     }
 
 

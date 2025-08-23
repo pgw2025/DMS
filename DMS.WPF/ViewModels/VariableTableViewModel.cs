@@ -9,11 +9,17 @@ using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Data;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Helper;
+using DMS.WPF.Views;
+using DMS.WPF.Views.HandyDialogs;
+using HandyControl.Controls;
+using HandyControl.Data;
+using HandyControl.Tools.Extension;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
 
@@ -482,78 +488,88 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="variableTable">当前操作的变量表，用于设置新变量的所属ID。</param>
     [RelayCommand]
-    private async void AddVarData(VariableTable variableTable)
+    private async void AddVariable(VariableTable variableTable)
     {
-        // try
-        // {
-        //     // 显示添加变量数据的对话框
-        //     var varData = await _dialogService.ShowAddVarDataDialog();
-        //
-        //     // 如果用户取消或对话框未返回数据，则直接返回
-        //     if (varData == null)
-        //         return;
-        //
-        //     // 设置新变量的所属变量表ID
-        //     varData.VariableTableId = variableTable.Id;
-        //
-        //     // --- 重复性检查逻辑开始 ---
-        //     bool isDuplicate = false;
-        //     string duplicateReason = string.Empty;
-        //
-        //     // 检查名称是否重复
-        //     if (Variables.Any(v => v.Name == varData.Name))
-        //     {
-        //         isDuplicate = true;
-        //         duplicateReason = $"名称 '{varData.Name}' 已存在。";
-        //     }
-        //     else
-        //     {
-        //         // 根据协议类型检查S7地址或NodeId是否重复
-        //         if (variableTable.ProtocolType == ProtocolType.S7)
-        //         {
-        //             if (!string.IsNullOrEmpty(varData.S7Address) &&
-        //                 Variables.Any(v => v.S7Address == varData.S7Address))
-        //             {
-        //                 isDuplicate = true;
-        //                 duplicateReason = $"S7地址 '{varData.S7Address}' 已存在。";
-        //             }
-        //         }
-        //         else if (variableTable.ProtocolType == ProtocolType.OpcUA)
-        //         {
-        //             if (!string.IsNullOrEmpty(varData.NodeId) && Variables.Any(v => v.NodeId == varData.NodeId))
-        //             {
-        //                 isDuplicate = true;
-        //                 duplicateReason = $"OPC UA NodeId '{varData.NodeId}' 已存在。";
-        //             }
-        //         }
-        //     }
-        //
-        //     if (isDuplicate)
-        //     {
-        //         NotificationHelper.ShowError($"添加变量失败：{duplicateReason}");
-        //         return;
-        //     }
-        //     // --- 重复性检查逻辑结束 ---
-        //
-        //     // 添加变量数据到数据库
-        //     var resVarData = await _varDataRepository.AddAsync(varData);
-        //     if (resVarData == null)
-        //     {
-        //         NotificationHelper.ShowError($"添加变量失败了:{varData?.Name}");
-        //         return;
-        //     }
-        //
-        //     // 更新当前页面显示的数据：将新变量添加到集合中
-        //     Variables.Add(resVarData);
-        //
-        //     // 显示成功通知
-        //     NotificationHelper.ShowSuccess($"添加变量成功:{varData?.Name}");
-        // }
-        // catch (Exception e)
-        // {
-        //     // 捕获并显示错误通知
-        //     NotificationHelper.ShowError($"添加变量的过程中发生了不可预期的错误：{e.Message}", e);
-        // }
+        try
+        {
+            // 显示添加变量数据的对话框
+            VariableDialogViewModel variableDialogViewModel=new VariableDialogViewModel("添加变量","添加变量");
+
+            VariableEditorDialog editorDialog = new VariableEditorDialog() { DataContext = variableDialogViewModel };
+
+            Dialog.Show(new MessageBoxInfo()
+                        {
+                            Message = "操作成功",
+                            Caption = "提示",
+                            Button = MessageBoxButton.OKCancel,
+                        });
+            // var variableItemViewModel = await _dialogService.ShowDialogAsync(variableDialogViewModel);
+        
+            // 如果用户取消或对话框未返回数据，则直接返回
+            // if (res == null)
+                // return;
+        
+            // // 设置新变量的所属变量表ID
+            // varData.VariableTableId = variableTable.Id;
+            //
+            // // --- 重复性检查逻辑开始 ---
+            // bool isDuplicate = false;
+            // string duplicateReason = string.Empty;
+            //
+            // // 检查名称是否重复
+            // if (Variables.Any(v => v.Name == varData.Name))
+            // {
+            //     isDuplicate = true;
+            //     duplicateReason = $"名称 '{varData.Name}' 已存在。";
+            // }
+            // else
+            // {
+            //     // 根据协议类型检查S7地址或NodeId是否重复
+            //     if (variableTable.ProtocolType == ProtocolType.S7)
+            //     {
+            //         if (!string.IsNullOrEmpty(varData.S7Address) &&
+            //             Variables.Any(v => v.S7Address == varData.S7Address))
+            //         {
+            //             isDuplicate = true;
+            //             duplicateReason = $"S7地址 '{varData.S7Address}' 已存在。";
+            //         }
+            //     }
+            //     else if (variableTable.ProtocolType == ProtocolType.OpcUA)
+            //     {
+            //         if (!string.IsNullOrEmpty(varData.NodeId) && Variables.Any(v => v.NodeId == varData.NodeId))
+            //         {
+            //             isDuplicate = true;
+            //             duplicateReason = $"OPC UA NodeId '{varData.NodeId}' 已存在。";
+            //         }
+            //     }
+            // }
+            //
+            // if (isDuplicate)
+            // {
+            //     NotificationHelper.ShowError($"添加变量失败：{duplicateReason}");
+            //     return;
+            // }
+            // // --- 重复性检查逻辑结束 ---
+            //
+            // // 添加变量数据到数据库
+            // var resVarData = await _varDataRepository.AddAsync(varData);
+            // if (resVarData == null)
+            // {
+            //     NotificationHelper.ShowError($"添加变量失败了:{varData?.Name}");
+            //     return;
+            // }
+            //
+            // // 更新当前页面显示的数据：将新变量添加到集合中
+            // Variables.Add(resVarData);
+            //
+            // // 显示成功通知
+            // NotificationHelper.ShowSuccess($"添加变量成功:{varData?.Name}");
+        }
+        catch (Exception e)
+        {
+            // 捕获并显示错误通知
+            NotificationHelper.ShowError($"添加变量的过程中发生了不可预期的错误：{e.Message}", e);
+        }
     }
 
     /// <summary>

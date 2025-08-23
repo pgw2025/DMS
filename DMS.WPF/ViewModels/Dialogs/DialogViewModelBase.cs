@@ -11,7 +11,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         private string _title;
         
         [ObservableProperty]
-        private string _primaryButContent;
+        private string _primaryButText;
 
         public event Func<TResult, Task> CloseRequested;
 

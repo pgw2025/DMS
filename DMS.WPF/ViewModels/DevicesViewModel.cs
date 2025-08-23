@@ -87,7 +87,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         {
             DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel()
                                                           {
-                                                              PrimaryButContent = "添加设备"
+                                                              PrimaryButText = "添加设备"
                                                           };
             // 1. 显示添加设备对话框
             DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
@@ -190,7 +190,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
             DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel(SelectedDevice)
                                                           {
-                                                              PrimaryButContent = "编辑设备"
+                PrimaryButText = "编辑设备"
                                                           };
             // 1. 显示设备对话框
             DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);

@@ -44,7 +44,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
         {
             VariableTableDialogViewModel variableTableDialogViewModel = new VariableTableDialogViewModel()
                                                                         {
-                                                                            PrimaryButContent = "添加变量表"
+                                                                            PrimaryButText = "添加变量表"
                                                                         };
             // 1. 显示添加设备对话框
             var variableTableItemViewModel = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
@@ -86,7 +86,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
 
             VariableTableDialogViewModel variableTableDialogViewModel = new VariableTableDialogViewModel(SelectedVariableTable)
                                                                           {
-                                                                              PrimaryButContent = "编辑变量表"
+                                                                              PrimaryButText = "编辑变量表"
                                                                           };
             // 1. 显示变量表对话框
             VariableTableItemViewModel variableTable = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
