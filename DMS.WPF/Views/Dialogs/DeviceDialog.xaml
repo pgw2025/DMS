@@ -1,10 +1,10 @@
-﻿<ui:ContentDialog x:Class="DMS.WPF.Views.Dialogs.DeviceDialog"
+<ui:ContentDialog x:Class="DMS.WPF.Views.Dialogs.DeviceDialog"
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                  xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+                  xmlns:hc="https://handyorg.github.io/handycontrol"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
@@ -14,157 +14,133 @@
                   DefaultButton="Primary"
                   PrimaryButtonText="{Binding PrimaryButText}"
                   PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
-                   CloseButtonCommand="{Binding CancleButtonCommand}"
+                  CloseButtonCommand="{Binding CancleButtonCommand}"
                   d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
-                  mc:Ignorable="d">
+                  mc:Ignorable="d"
+                  >
 
     <ui:ContentDialog.Resources>
-        <ex:EnumBindingSource x:Key="DeviceType"
-                              EnumType="{x:Type enums:DeviceType}" />
-        <ex:EnumBindingSource x:Key="ProtocolType"
-                              EnumType="{x:Type enums:ProtocolType}" />
-        <ex:EnumBindingSource x:Key="CpuType"
-                              EnumType="{x:Type enums:CpuType}" />
+        <ex:EnumBindingSource x:Key="DeviceType" EnumType="{x:Type enums:DeviceType}" />
+        <ex:EnumBindingSource x:Key="ProtocolType" EnumType="{x:Type enums:ProtocolType}" />
+        <ex:EnumBindingSource x:Key="CpuType" EnumType="{x:Type enums:CpuType}" />
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
         <vc:EnumToStringConverter x:Key="EnumToStringConverter" />
 
-
+        <!-- 统一定义输入控件的下边距 -->
+        <Style TargetType="hc:TextBox" BasedOn="{StaticResource {x:Type hc:TextBox}}">
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+        <Style TargetType="hc:ComboBox" BasedOn="{StaticResource {x:Type hc:ComboBox}}">
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="Margin" Value="0,10,0,0"/>
+        </Style>
+        <Style x:Key="ConditionalPanelStyle" TargetType="Border">
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
     </ui:ContentDialog.Resources>
 
-    <Grid 
-          Margin="10">
+    <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
+
         <!-- 左边列 -->
-        <ikw:SimpleStackPanel Grid.Column="0"
-                              Margin="10 10 20 10 "
-                              Spacing="12">
-            <!-- 设备名称 -->
-            <TextBlock Text="设备名称"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <TextBox Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
-            <!-- 设备IP地址 -->
-            <TextBlock Text="设备IP地址"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <TextBox AcceptsReturn="True"
-                     Text="{Binding Device.IpAddress, UpdateSourceTrigger=PropertyChanged}" />
+        <StackPanel Grid.Column="0" MinWidth="220" Margin="0,0,10,0">
+            <hc:TextBox hc:InfoElement.Title="设备名称"
+                        Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
 
-            <!-- 设备类型 -->
-            <TextBlock Text="设备类型"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox 
-                IsEnabled="{Binding IsAddMode}"
-                SelectedItem="{Binding Device.DeviceType}"
-                      ItemsSource="{Binding Source={StaticResource DeviceType} }">
+            <hc:TextBox hc:InfoElement.Title="设备IP地址"
+                        Text="{Binding Device.IpAddress, UpdateSourceTrigger=PropertyChanged}" />
+
+            <hc:ComboBox hc:InfoElement.Title="设备类型"
+                         IsEnabled="{Binding IsAddMode}"
+                         ItemsSource="{Binding Source={StaticResource DeviceType}}"
+                         SelectedItem="{Binding Device.DeviceType}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
-            </ComboBox>
+            </hc:ComboBox>
 
-            <CheckBox FontSize="16"
-                      Content="是否添加默认变量表"
-                      Margin="0 30 0 0"
-                      IsChecked="{Binding Device.IsAddDefVarTable}" />
+            <CheckBox Content="是否添加默认变量表"
+                         IsChecked="{Binding Device.IsAddDefVarTable}" />
+        </StackPanel>
 
-        </ikw:SimpleStackPanel>
         <!-- 右边列 -->
-        <ikw:SimpleStackPanel Margin="10"
-                              Grid.Column="1"
-                              Spacing="12">
+        <StackPanel Grid.Column="1" MinWidth="220" Margin="10,0,0,0">
+            <hc:TextBox hc:InfoElement.Title="设备描述"
+                        Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
 
-            <!-- 设备描述 -->
-            <TextBlock Text="设备描述"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <TextBox Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
-            <!-- 设备IP地址 -->
-            <TextBlock Text="设备端口"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <TextBox AcceptsReturn="True"
-                     Text="{Binding Device.Port, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Margin="8,0,0,5" Text="设备端口"/>
+            <hc:NumericUpDown 
+                        Value="{Binding Device.Port, UpdateSourceTrigger=PropertyChanged}" />
 
-
-            <!-- 通讯协议-->
-            <TextBlock Text="设备通信协议"
-                       HorizontalAlignment="Left"
-                       Style="{StaticResource TextBlockSubTitle}" />
-            <ComboBox x:Name="ProtocolComboBox" 
-                      IsEnabled="{Binding IsAddMode}"
-                      SelectedItem="{Binding Device.Protocol}"
-                      ItemsSource="{Binding Source={StaticResource ProtocolType} }">
+            <hc:ComboBox x:Name="ProtocolComboBox"
+                         hc:InfoElement.Title="设备通信协议"
+                         IsEnabled="{Binding IsAddMode}"
+                         ItemsSource="{Binding Source={StaticResource ProtocolType}}"
+                         SelectedItem="{Binding Device.Protocol}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
-            </ComboBox>
+            </hc:ComboBox>
 
-            <StackPanel  Background="LightGray">
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed" />
+            <!-- OpcUa Specific Properties -->
+            <Border x:Name="OpcUaPanel">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource ConditionalPanelStyle}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}"
-                                         Value="OpcUa">
+                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}" Value="OpcUa">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </StackPanel.Style>
-                <TextBlock Text="OpcUa服务器地址"
-                           HorizontalAlignment="Left"
-                           Style="{StaticResource TextBlockSubTitle}" />
-                <TextBox Text="{Binding Device.OpcUaServerUrl}"/>
-            </StackPanel>
-
+                </Border.Style>
+                <StackPanel>
+                    <hc:TextBox hc:InfoElement.Title="OpcUa服务器地址"
+                                Text="{Binding Device.OpcUaServerUrl}"/>
+                </StackPanel>
+            </Border>
 
             <!-- S7 Specific Properties -->
-            <StackPanel x:Name="S7PropertiesPanel" Background="LightGray">
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed" />
+            <Border x:Name="S7PropertiesPanel">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource ConditionalPanelStyle}">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}"
-                                         Value="S7">
+                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}" Value="S7">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </StackPanel.Style>
-                <!-- CpuType -->
-                <TextBlock Text="CPU 类型"
-                           HorizontalAlignment="Left"
-                           Style="{StaticResource TextBlockSubTitle}" />
-                <ComboBox SelectedItem="{Binding Device.CpuType}"
-                          ItemsSource="{Binding Source={StaticResource CpuType}}" />
+                </Border.Style>
+                <StackPanel>
+                    <hc:ComboBox hc:InfoElement.Title="CPU 类型"
+                                 ItemsSource="{Binding Source={StaticResource CpuType}}"
+                                 SelectedItem="{Binding Device.CpuType}" />
+                    <TextBlock Margin="8,0,0,5" Text="机架号"/>
+                    <hc:NumericUpDown 
+                                Value="{Binding Device.Rack, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Margin="8,0,0,5" Text="槽号"/>
+                    <hc:NumericUpDown 
+                                Value="{Binding Device.Slot, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Border>
 
-                <!-- Rack -->
-                <TextBlock Text="机架号"
-                           HorizontalAlignment="Left"
-                           Style="{StaticResource TextBlockSubTitle}" />
-                <TextBox Text="{Binding Device.Rack, UpdateSourceTrigger=PropertyChanged}" />
-
-                <!-- Slot -->
-                <TextBlock Text="槽号"
-                           HorizontalAlignment="Left"
-                           Style="{StaticResource TextBlockSubTitle}" />
-                <TextBox Text="{Binding Device.Slot, UpdateSourceTrigger=PropertyChanged}" />
-            </StackPanel>
-
-            <CheckBox FontSize="16"
-                      Content="是否启用"
-                      Margin="0 30 0 0"
-                      IsChecked="{Binding Device.IsActive}" />
-
-        </ikw:SimpleStackPanel>
+            <CheckBox Content="是否启用"
+                         IsChecked="{Binding Device.IsActive}" />
+        </StackPanel>
     </Grid>
 
 </ui:ContentDialog>
