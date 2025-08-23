@@ -15,6 +15,7 @@ using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Helper;
 using Microsoft.Extensions.DependencyInjection;
+using ObservableCollections;
 
 namespace DMS.WPF.ViewModels;
 
@@ -57,11 +58,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     [ObservableProperty]
     private string _searchText;
 
-    /// <summary>
-    /// 用于在UI中显示和过滤变量数据的视图集合。
-    /// </summary>
-    [ObservableProperty]
-    private ICollectionView variableView;
 
     /// <summary>
     /// 指示视图是否已完成首次加载。
@@ -96,6 +92,10 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// <param name="dialogService">对话服务接口的实例。</param>
     private readonly DataServices _dataServices;
 
+    private readonly ObservableList<VariableItemViewModel> _variableItemList;
+    private readonly ISynchronizedView<VariableItemViewModel, VariableItemViewModel> _synchronizedView;
+    public NotifyCollectionChangedSynchronizedViewList<VariableItemViewModel> VariableItemListView { get; }
+
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
                                   DataServices dataServices)
     {
@@ -105,8 +105,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         _dataServices = dataServices;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
         _variables = new ObservableCollection<VariableItemViewModel>(); // 初始化集合
-        VariableView = CollectionViewSource.GetDefaultView(Variables); // 获取集合视图
-        VariableView.Filter = FilterVariables; // 设置过滤方法
+
+
+        _variableItemList = new ObservableList<VariableItemViewModel>();
+        _synchronizedView = _variableItemList.CreateView(v => v);
+
+        VariableItemListView = _synchronizedView.ToNotifyCollectionChanged();
     }
 
     /// <summary>
@@ -115,34 +119,23 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="item">要过滤的集合中的单个项。</param>
     /// <returns>如果项匹配搜索条件则为 true，否则为 false。</returns>
-    private bool FilterVariables(object item)
+    private bool FilterVariables(VariableItemViewModel item)
     {
-        // 如果搜索文本为空或空白，则显示所有项
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            return true;
-        }
-
         // 尝试将项转换为 Variable 类型
-        // if (item is Variable variable)
-        // {
-        //     var searchTextLower = SearchText.ToLower();
-        //     // 检查变量的名称、描述、NodeId、S7地址、数据值或显示值是否包含搜索文本
-        //     return variable.Name?.ToLower()
-        //                    .Contains(searchTextLower) == true ||
-        //            variable.Description?.ToLower()
-        //                    .Contains(searchTextLower) == true ||
-        //            variable.NodeId?.ToLower()
-        //                    .Contains(searchTextLower) == true ||
-        //            variable.S7Address?.ToLower()
-        //                    .Contains(searchTextLower) == true ||
-        //            variable.DataValue?.ToLower()
-        //                    .Contains(searchTextLower) == true ||
-        //            variable.DisplayValue?.ToLower()
-        //                    .Contains(searchTextLower) == true;
-        // }
-
-        return false;
+        var searchTextLower = SearchText.ToLower();
+        // 检查变量的名称、描述、NodeId、S7地址、数据值或显示值是否包含搜索文本
+        return item.Name?.ToLower()
+                   .Contains(searchTextLower) == true ||
+               item.Description?.ToLower()
+                   .Contains(searchTextLower) == true ||
+               item.OpcUaNodeId?.ToLower()
+                   .Contains(searchTextLower) == true ||
+               item.S7Address?.ToLower()
+                   .Contains(searchTextLower) == true ||
+               item.DataValue?.ToLower()
+                   .Contains(searchTextLower) == true ||
+               item.DisplayValue?.ToLower()
+                   .Contains(searchTextLower) == true;
     }
 
     /// <summary>
@@ -152,7 +145,15 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// <param name="value">新的搜索文本值。</param>
     partial void OnSearchTextChanged(string value)
     {
-        VariableView?.Refresh();
+        // 如果搜索文本为空或空白，则显示所有项
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            _synchronizedView.ResetFilter();
+        }
+        else
+        {
+            _synchronizedView.AttachFilter(FilterVariables);
+        }
     }
 
     /// <summary>
@@ -161,22 +162,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     public override void OnLoaded()
     {
-        // 根据变量表的协议类型设置对应的布尔属性
-        // IsS7ProtocolSelected = VariableTable.ProtocolType == ProtocolType.S7;
-        // IsOpcUaProtocolSelected = VariableTable.ProtocolType == ProtocolType.OpcUA;
-        //
-        // // 如果变量表包含数据变量，则进行初始化
-        // if (VariableTable.Variables != null)
-        // {
-        //     // // 将变量表中的数据变量复制到可观察集合中
-        //     Variables.Clear(); // 清空现有集合
-        //     foreach (var item in VariableTable.Variables)
-        //     {
-        //         Variables.Add(item); // 添加新项
-        //     }
-        //
-        //
-        //     VariableView.Refresh(); // 刷新视图以应用过滤和排序
+        _variableItemList.AddRange(CurrentVariableTable.Variables);
         //
         //     // 创建原始数据的深拷贝备份，用于在取消保存时还原
         //     var settings = new JsonSerializerSettings
@@ -191,7 +177,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         //     {
         //         variable.IsModified = false;
         //     }
-        // }
 
         // 标记加载完成
         IsLoadCompletion = true;
@@ -314,6 +299,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             {
                 variableDto.CreatedAt = DateTime.Now;
                 variableDto.UpdatedAt = DateTime.Now;
+                variableDto.VariableTableId = CurrentVariableTable.Id;
             }
 
             var existList = await _variableAppService.FindExistingVariablesAsync(improtVariableDtos);
@@ -334,6 +320,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 var isSuccess = await _variableAppService.BatchImportVariablesAsync(improtVariableDtos);
                 if (isSuccess)
                 {
+                    _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(improtVariableDtos));
                     NotificationHelper.ShowSuccess($"从Excel导入变量成功，共导入变量：{improtVariableDtos.Count}个");
                 }
             }
@@ -867,9 +854,11 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
         var varTable = _dataServices.VariableTables.FirstOrDefault(v => v.Id == menu.TargetId);
+
         if (varTable != null)
         {
             CurrentVariableTable = varTable;
+            // 根据变量表的协议类型设置对应的布尔属性
 
             if (CurrentVariableTable.Protocol == ProtocolType.S7)
             {
@@ -879,6 +868,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             {
                 IsOpcUaProtocolSelected = true;
             }
+
+            OnLoaded();
         }
     }
 }

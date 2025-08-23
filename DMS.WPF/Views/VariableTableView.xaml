@@ -21,8 +21,6 @@
         <ex:BindingProxy x:Key="proxy" Data="{Binding}" />
         <ex:EnumBindingSource x:Key="signalType"
                               EnumType="{x:Type enums:SignalType}" />
-        <ex:EnumBindingSource x:Key="protocolType"
-                              EnumType="{x:Type enums:ProtocolType}" />
         <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
         <ex:EnumBindingSource x:Key="pollLevelType"
                               EnumType="{x:Type enums:PollLevelType}" />
@@ -167,7 +165,7 @@
                   CanUserSortColumns="True"
                   SelectionMode="Extended"
                   SelectedItem="{Binding SelectedVariable}"
-                  ItemsSource="{Binding VariableView}"
+                  ItemsSource="{Binding VariableItemListView}"
                   Style="{StaticResource DataGridBaseStyle}">
             <DataGrid.ContextMenu>
                 <ContextMenu>
@@ -292,7 +290,7 @@
                                     Binding="{Binding OpcUaNodeId}" />
                 <DataGridTextColumn IsReadOnly="True"
                                     Header="数据类型"
-                                    Binding="{Binding SignalType}" />
+                                    Binding="{Binding CSharpDataType}" />
                 <DataGridTemplateColumn Header="信号类型"
                                         SortMemberPath="SignalType">
                     <DataGridTemplateColumn.CellTemplate>
