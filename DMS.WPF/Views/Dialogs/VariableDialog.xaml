@@ -7,8 +7,7 @@
                   xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   xmlns:ex="clr-namespace:DMS.Extensions"
-                  xmlns:en="clr-namespace:DMS.Core.Enums"
-                  xmlns:sockets="clr-namespace:System.Net.Sockets;assembly=System.Net.Sockets"
+                  xmlns:en="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
                   xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
                   xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
                   xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -17,7 +16,6 @@
                   DefaultButton="Primary"
                   PrimaryButtonText="{Binding PrimaryButText}"
                   Background="#fff"
-      
                   d:DataContext="{d:DesignInstance vmd:VariableDialogViewModel}"
                   mc:Ignorable="d">
     
@@ -36,7 +34,6 @@
     <Grid >
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
@@ -61,7 +58,7 @@
                            Style="{StaticResource TextBlockSubTitle}" />
                 <ComboBox SelectedValue="{Binding Variable.Protocol, UpdateSourceTrigger=PropertyChanged}"
                           SelectedValuePath="Tag"
-                          ItemsSource="{ex:EnumBindingSource {x:Type sockets:ProtocolType}}">
+                          ItemsSource="{ex:EnumBindingSource {x:Type en:ProtocolType}}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -135,10 +132,6 @@
                               IsChecked="{Binding Variable.IsAlarmEnabled, UpdateSourceTrigger=PropertyChanged}" />
                 </ikw:SimpleStackPanel>
             </GroupBox>
-        </ikw:SimpleStackPanel>
-
-        <ikw:SimpleStackPanel Grid.Row="0" Grid.Column="2" Width="100">
-            
         </ikw:SimpleStackPanel>
 
     </Grid>

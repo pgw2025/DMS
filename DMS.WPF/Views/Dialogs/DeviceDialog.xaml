@@ -39,7 +39,7 @@
 
     </ui:ContentDialog.Resources>
 
-    <Grid Width="480"
+    <Grid 
           Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />

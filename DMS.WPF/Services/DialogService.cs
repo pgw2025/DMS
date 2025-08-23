@@ -19,7 +19,7 @@ namespace DMS.WPF.Services
             { typeof(ConfrimDialogViewModel), typeof(ConfirmDialog) },
             { typeof(VariableTableDialogViewModel), typeof(VariableTableDialog) },
             { typeof(ImportExcelDialogViewModel), typeof(ImportExcelDialog) },
-            { typeof(VariableDialogViewModel), typeof(VariableEditorDialog) },
+            { typeof(VariableDialogViewModel), typeof(VariableDialog) },
             // { typeof(MqttDialogViewModel), typeof(MqttDialog) }, // Add other mappings here
             // ... other dialogs
         };

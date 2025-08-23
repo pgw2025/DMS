@@ -495,19 +495,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 显示添加变量数据的对话框
             VariableDialogViewModel variableDialogViewModel=new VariableDialogViewModel("添加变量","添加变量");
 
-            VariableEditorDialog editorDialog = new VariableEditorDialog() { DataContext = variableDialogViewModel };
 
-            Dialog.Show(new MessageBoxInfo()
-                        {
-                            Message = "操作成功",
-                            Caption = "提示",
-                            Button = MessageBoxButton.OKCancel,
-                        });
-            // var variableItemViewModel = await _dialogService.ShowDialogAsync(variableDialogViewModel);
+            var variableItemViewModel = await _dialogService.ShowDialogAsync(variableDialogViewModel);
         
             // 如果用户取消或对话框未返回数据，则直接返回
-            // if (res == null)
-                // return;
+            if (variableItemViewModel == null)
+                return;
         
             // // 设置新变量的所属变量表ID
             // varData.VariableTableId = variableTable.Id;
