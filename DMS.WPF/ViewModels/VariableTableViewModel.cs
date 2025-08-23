@@ -10,10 +10,13 @@ using DMS.WPF.ViewModels.Items;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
+using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
+using DMS.Application.Services;
+using DMS.Helper;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ViewModels;
-
 
 partial class VariableTableViewModel : ViewModelBase, INavigatable
 {
@@ -23,6 +26,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// 对话服务接口，用于显示各种对话框（如确认、编辑、导入等）。
     /// </summary>
     private readonly IDialogService _dialogService;
+
+    private readonly IVariableAppService _variableAppService;
 
     /// <summary>
     /// 当前正在操作的变量表实体。
@@ -91,10 +96,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// <param name="dialogService">对话服务接口的实例。</param>
     private readonly DataServices _dataServices;
 
-    public VariableTableViewModel(IMapper mapper,  IDialogService dialogService, DataServices dataServices)
+    public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
+                                  DataServices dataServices)
     {
         _mapper = mapper;
         _dialogService = dialogService;
+        _variableAppService = variableAppService;
         _dataServices = dataServices;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
         _variables = new ObservableCollection<VariableItemViewModel>(); // 初始化集合
@@ -199,7 +206,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         // 查找所有已修改的变量数据
         var modifiedDatas = Variables.Where(d => d.IsModified == true)
-                                         .ToList();
+                                     .ToList();
         // 如果没有修改，则直接允许退出
         if (modifiedDatas.Count == 0)
             return true;
@@ -294,83 +301,51 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     private async void ImprotFromTiaVarTable()
     {
-        ImportExcelDialogViewModel viewModel = App.Current.Services.GetRequiredService<ImportExcelDialogViewModel>();
-        List<Variable> improtVariable = await _dialogService.ShowDialogAsync(viewModel);
-        
-        if (improtVariable == null || improtVariable.Count==0) return;
+        try
+        {
+            ImportExcelDialogViewModel
+                viewModel = App.Current.Services.GetRequiredService<ImportExcelDialogViewModel>();
+            List<Variable> improtVariable = await _dialogService.ShowDialogAsync(viewModel);
 
+            if (improtVariable == null || improtVariable.Count == 0) return;
 
+            var improtVariableDtos = _mapper.Map<List<VariableDto>>(improtVariable);
+            foreach (var variableDto in improtVariableDtos)
+            {
+                variableDto.CreatedAt = DateTime.Now;
+                variableDto.UpdatedAt = DateTime.Now;
+            }
 
-        // ContentDialog processingDialog = null; // 用于显示处理中的对话框
-        // try
-        // {
-        //     // 让用户选择要导入的Excel文件路径
-        //     var filePath = await _dialogService.ShowImportExcelDialog();
-        //     if (string.IsNullOrEmpty(filePath))
-        //         return; // 如果用户取消选择，则返回
-        //
-        //     // 读取Excel文件并将其内容转换为 Variable 列表
-        //     var importVarDataList = DMS.Infrastructure.Helper.ExcelHelper.ImprotFromTiaVariableTable(filePath);
-        //     if (importVarDataList.Count == 0)
-        //         return; // 如果没有读取到数据，则返回
-        //
-        //     // 显示处理中的对话框
-        //     processingDialog = _dialogService.ShowProcessingDialog("正在处理...", "正在导入变量,请稍等片刻....");
-        //
-        //     List<Variable> newVariables = new List<Variable>();
-        //     List<string> importedVariableNames = new List<string>();
-        //     List<string> existingVariableNames = new List<string>();
-        //
-        //     foreach (var variableData in importVarDataList)
-        //     {
-        //         // 判断是否存在重复变量
-        //         // 判断是否存在重复变量，仅在当前 VariableTable 的 Variables 中查找
-        //         bool isDuplicate = Variables.Any(existingVar =>
-        //                                                  (existingVar.Name == variableData.Name) ||
-        //                                                  (!string.IsNullOrEmpty(variableData.NodeId) &&
-        //                                                   existingVar.NodeId == variableData.NodeId) ||
-        //                                                  (!string.IsNullOrEmpty(variableData.S7Address) &&
-        //                                                   existingVar.S7Address == variableData.S7Address)
-        //         );
-        //
-        //         if (isDuplicate)
-        //         {
-        //             existingVariableNames.Add(variableData.Name);
-        //         }
-        //         else
-        //         {
-        //             variableData.CreateTime = DateTime.Now;
-        //             variableData.IsActive = true;
-        //             variableData.VariableTableId = VariableTable.Id;
-        //             newVariables.Add(variableData);
-        //             importedVariableNames.Add(variableData.Name);
-        //         }
-        //     }
-        //
-        //     if (newVariables.Any())
-        //     {
-        //         // 批量插入新变量数据到数据库
-        //         var resVarDataCount = await _varDataRepository.AddAsync(newVariables);
-        //         NlogHelper.Info($"成功导入变量：{resVarDataCount}个。");
-        //     }
-        //
-        //     // 更新界面显示的数据：重新从数据库加载所有变量数据
-        //     await RefreshDataView();
-        //
-        //     processingDialog?.Hide(); // 隐藏处理中的对话框
-        //
-        //     // 显示导入结果对话框
-        //     await _dialogService.ShowImportResultDialog(importedVariableNames, existingVariableNames);
-        // }
-        // catch (Exception e)
-        // {
-        //     // 捕获并显示错误通知
-        //     NotificationHelper.ShowError($"从TIA导入变量的过程中发生了不可预期的错误：{e.Message}", e);
-        // }
-        // finally
-        // {
-        //     processingDialog?.Hide(); // 确保在任何情况下都隐藏对话框
-        // }
+            var existList = await _variableAppService.FindExistingVariablesAsync(improtVariableDtos);
+            if (existList.Count > 0)
+            {
+                // // 拼接要删除的变量名称，用于确认提示
+                var existNames = string.Join("、", existList.Select(v => v.Name));
+                var confrimDialogViewModel
+                    = new ConfrimDialogViewModel("存在已经添加的变量", $"变量名称:{existNames}，已经存在，是否跳过继续添加其他的变量。取消则不添加任何变量", "继续");
+                var res = await _dialogService.ShowDialogAsync(confrimDialogViewModel);
+                if (!res) return;
+                // 从导入列表中删除已经存在的变量
+                improtVariableDtos.RemoveAll(variableDto => existList.Contains(variableDto));
+            }
+
+            if (improtVariableDtos.Count != 0)
+            {
+                var isSuccess = await _variableAppService.BatchImportVariablesAsync(improtVariableDtos);
+                if (isSuccess)
+                {
+                    NotificationHelper.ShowSuccess($"从Excel导入变量成功，共导入变量：{improtVariableDtos.Count}个");
+                }
+            }
+            else
+            {
+                NotificationHelper.ShowSuccess($"列表中没有要添加的变量了。 ");
+            }
+        }
+        catch (Exception e)
+        {
+            NotificationHelper.ShowError($"从TIA导入变量的过程中发生了不可预期的错误：{e.Message}", e);
+        }
     }
 
     /// <summary>
@@ -904,8 +879,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             {
                 IsOpcUaProtocolSelected = true;
             }
-
         }
-
     }
 }

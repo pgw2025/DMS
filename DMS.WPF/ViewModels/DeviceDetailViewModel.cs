@@ -125,13 +125,10 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            ConfrimDialogViewModel viewModel = new ConfrimDialogViewModel();
-            viewModel.Message = $"确认要删除变量表名为:{SelectedVariableTable.Name} \n\n此操作将同时删除该变量表下的所有变量数据，且无法恢复！";
-            viewModel.Title = "删除变量表";
-            viewModel.PrimaryButContent = "删除";
-
-            var resViewModel = await _dialogService.ShowDialogAsync(viewModel);
-            if (resViewModel.IsPrimaryButton)
+            string message = $"确认要删除变量表名为:{SelectedVariableTable.Name} \n\n此操作将同时删除该变量表下的所有变量数据，且无法恢复！";
+            ConfrimDialogViewModel viewModel = new ConfrimDialogViewModel("删除变量表",message,"删除");
+            var res = await _dialogService.ShowDialogAsync(viewModel);
+            if (res)
             {
                 var isDel = await _variableTableAppService.DeleteVariableTableAsync(SelectedVariableTable.Id);
                 if (isDel)

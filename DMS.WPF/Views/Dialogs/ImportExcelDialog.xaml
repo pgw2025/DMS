@@ -56,7 +56,7 @@
 
         <DataGrid Grid.Row="1"
                   Margin="0,10,0,0"
-                  ItemsSource="{Binding Variables}"
+                  ItemsSource="{Binding VariableItemViewModels}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False">
             <i:Interaction.Behaviors>
@@ -66,7 +66,7 @@
                 <Style BasedOn="{StaticResource {x:Type DataGrid}}"
                        TargetType="DataGrid">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Variables.Count}"
+                        <DataTrigger Binding="{Binding VariableItemViewModels.Count}"
                                      Value="0">
                             <Setter Property="Visibility"
                                     Value="Collapsed" />
@@ -77,6 +77,8 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="名称"
                                     Binding="{Binding Name}" />
+                <DataGridTextColumn Header="描述"
+                                    Binding="{Binding Description}" />
                 <DataGridTextColumn Header="数据类型"
                                     Binding="{Binding CSharpDataType}" />
                 <DataGridTextColumn Header="S7地址"

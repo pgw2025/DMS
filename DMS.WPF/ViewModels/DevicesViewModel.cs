@@ -155,13 +155,8 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            ConfrimDialogViewModel viewModel = new ConfrimDialogViewModel();
-            viewModel.Message = $"确认要删除设备名为:{SelectedDevice.Name}";
-            viewModel.Title = "删除设备";
-            viewModel.PrimaryButContent = "删除";
 
-            var resViewModel = await _dialogService.ShowDialogAsync(viewModel);
-            if (resViewModel.IsPrimaryButton)
+            if (await _dialogService.ShowDialogAsync(new ConfrimDialogViewModel("删除设备",$"确认要删除设备名为:{SelectedDevice.Name}","删除设备")))
             {
                 var isDel = await _deviceAppService.DeleteDeviceByIdAsync(SelectedDevice.Id);
                 if (isDel)

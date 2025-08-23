@@ -18,7 +18,7 @@
                   mc:Ignorable="d">
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="PrimaryButtonClick">
-            <i:InvokeCommandAction Command="{Binding ParimaryButtonCommand}" />
+            <i:InvokeCommandAction Command="{Binding PrimaryButtonCommand}" />
         </i:EventTrigger>
         <i:EventTrigger EventName="CloseButtonClick">
             <i:InvokeCommandAction Command="{Binding CancleButtonCommand}" />

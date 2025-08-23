@@ -13,6 +13,7 @@ namespace DMS.WPF.ViewModels.Dialogs;
 
 public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Variable>>
 {
+    private readonly IMapper _mapper;
     private readonly IExcelService _excelService;
 
     [ObservableProperty]
@@ -20,13 +21,18 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
 
     [ObservableProperty]
     private List<Variable> _variables = new();
+    
+    [ObservableProperty]
+    private ObservableCollection<VariableItemViewModel> _variableItemViewModels ;
 
     [ObservableProperty]
     private IList _selectedVariables = new ArrayList();
 
-    public ImportExcelDialogViewModel(IExcelService excelService)
+    public ImportExcelDialogViewModel(IMapper mapper,IExcelService excelService)
     {
+        _mapper = mapper;
         _excelService = excelService;
+        VariableItemViewModels = new();
     }
 
     partial void OnFilePathChanged(string? value)
@@ -39,6 +45,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
         try
         {
            Variables = _excelService.ImprotFromTiaVariableTable(value);
+           VariableItemViewModels=new ObservableCollection<VariableItemViewModel>(_mapper.Map<List<VariableItemViewModel>>(Variables));
         }
         catch (System.Exception ex)
         {
@@ -55,8 +62,8 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
     [RelayCommand]
     private void ImportSelected()
     {
-        var selected = SelectedVariables.Cast<Variable>().ToList();
-        Close(selected);
+        var selected = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+        Close(_mapper.Map<List<Variable>>(selected));
     }
 
     [RelayCommand]

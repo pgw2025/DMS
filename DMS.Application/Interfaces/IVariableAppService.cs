@@ -36,4 +36,11 @@ public interface IVariableAppService
     /// 异步批量导入变量。
     /// </summary>
     Task<bool> BatchImportVariablesAsync(List<VariableDto> variables);
+
+    /// <summary>
+    /// 检测一组变量是否已存在。
+    /// </summary>
+    /// <param name="variablesToCheck">要检查的变量列表。</param>
+    /// <returns>返回输入列表中已存在的变量。</returns>
+    Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck);
 }

@@ -3,6 +3,8 @@ using DMS.Core.Interfaces;
 using DMS.Core.Models;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DMS.Application.Services;
 
@@ -137,5 +139,41 @@ public class VariableAppService : IVariableAppService
         {
             throw new ApplicationException($"批量导入变量时发生错误,错误信息:{ex.Message}", ex);
         }
+    }
+
+    public async Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck)
+    {
+        if (variablesToCheck == null || !variablesToCheck.Any())
+        {
+            return new List<VariableDto>();
+        }
+
+        var names = variablesToCheck.Select(v => v.Name).Where(n => !string.IsNullOrEmpty(n)).Distinct().ToList();
+        var s7Addresses = variablesToCheck.Select(v => v.S7Address).Where(a => !string.IsNullOrEmpty(a)).Distinct().ToList();
+        var opcUaNodeIds = variablesToCheck.Select(v => v.OpcUaNodeId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+
+        var allVariables = await _repoManager.Variables.GetAllAsync();
+        var existingVariablesFromDb = allVariables.Where(v =>
+            (names.Any() && !string.IsNullOrEmpty(v.Name) && names.Contains(v.Name)) ||
+            (s7Addresses.Any() && !string.IsNullOrEmpty(v.S7Address) && s7Addresses.Contains(v.S7Address)) ||
+            (opcUaNodeIds.Any() && !string.IsNullOrEmpty(v.OpcUaNodeId) && opcUaNodeIds.Contains(v.OpcUaNodeId)))
+            .ToList();
+
+        if (existingVariablesFromDb == null || !existingVariablesFromDb.Any())
+        {
+            return new List<VariableDto>();
+        }
+
+        var existingNames = new HashSet<string>(existingVariablesFromDb.Select(v => v.Name).Where(n => !string.IsNullOrEmpty(n)));
+        var existingS7Addresses = new HashSet<string>(existingVariablesFromDb.Select(v => v.S7Address).Where(a => !string.IsNullOrEmpty(a)));
+        var existingOpcUaNodeIds = new HashSet<string>(existingVariablesFromDb.Select(v => v.OpcUaNodeId).Where(id => !string.IsNullOrEmpty(id)));
+
+        var result = variablesToCheck.Where(v =>
+            (!string.IsNullOrEmpty(v.Name) && existingNames.Contains(v.Name)) ||
+            (!string.IsNullOrEmpty(v.S7Address) && existingS7Addresses.Contains(v.S7Address)) ||
+            (!string.IsNullOrEmpty(v.OpcUaNodeId) && existingOpcUaNodeIds.Contains(v.OpcUaNodeId)))
+            .ToList();
+
+        return result;
     }
 }

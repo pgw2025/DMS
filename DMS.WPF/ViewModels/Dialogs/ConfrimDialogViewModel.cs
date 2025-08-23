@@ -3,25 +3,28 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class ConfrimDialogViewModel : DialogViewModelBase<ConfrimDialogViewModel>
+public partial class ConfrimDialogViewModel : DialogViewModelBase<Boolean>
 {
-    public bool IsPrimaryButton { get; set; }
     
     [ObservableProperty]
-    private string message;
-    
+    private string _message;
+
+    public ConfrimDialogViewModel(string title,string message,string primaryButText)
+    {
+        Message = message;
+        Title = title;
+        PrimaryButContent = primaryButText;
+    }
 
 
     [RelayCommand]
-    public void ParimaryButton()
+    private void PrimaryButton()
     {
-        IsPrimaryButton=true;
-        Close(this);
+        Close(true);
     }
     [RelayCommand]
-    public void CancleButton()
+    private void CancleButton()
     {
-        IsPrimaryButton=false;
-        Close(this);
+        Close(false);
     }
 }
