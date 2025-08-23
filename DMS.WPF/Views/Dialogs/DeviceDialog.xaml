@@ -8,23 +8,15 @@
                   xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
-                  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                   xmlns:vc="clr-namespace:DMS.WPF.ValueConverts"
                   Title="{Binding Title}"
                   CloseButtonText="取消"
                   DefaultButton="Primary"
                   PrimaryButtonText="{Binding PrimaryButText}"
+                  PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
+                   CloseButtonCommand="{Binding CancleButtonCommand}"
                   d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
                   mc:Ignorable="d">
-
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="PrimaryButtonClick">
-            <i:InvokeCommandAction Command="{Binding SaveCommand}" />
-        </i:EventTrigger>
-        <i:EventTrigger EventName="CloseButtonClick">
-            <i:InvokeCommandAction Command="{Binding CancelCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
 
     <ui:ContentDialog.Resources>
         <ex:EnumBindingSource x:Key="DeviceType"
@@ -114,7 +106,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            
+
             <StackPanel  Background="LightGray">
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
@@ -131,9 +123,9 @@
                            HorizontalAlignment="Left"
                            Style="{StaticResource TextBlockSubTitle}" />
                 <TextBox Text="{Binding Device.OpcUaServerUrl}"/>
-                </StackPanel>
-            
-            
+            </StackPanel>
+
+
             <!-- S7 Specific Properties -->
             <StackPanel x:Name="S7PropertiesPanel" Background="LightGray">
                 <StackPanel.Style>

@@ -29,14 +29,13 @@ public partial class DeviceDialogViewModel : DialogViewModelBase<DeviceItemViewM
     }
 
     [RelayCommand]
-    private async Task Save()
+    private async Task PrimaryButton()
     {
-        // Here you can add validation logic before closing.
         await Close(Device);
     }
 
     [RelayCommand]
-    private async Task Cancel()
+    private async Task CancleButton()
     {
         await Close(null);
     }
