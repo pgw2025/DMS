@@ -13,6 +13,8 @@ namespace DMS.WPF.Profiles
                 .ReverseMap();
             CreateMap<Variable, VariableItemViewModel>()
                 .ReverseMap();
+            CreateMap<VariableItemViewModel, VariableItemViewModel>();
+                
 
             CreateMap<MenuBeanDto, MenuItemViewModel>()
                 .ForMember(dest => dest.Children, opt => opt.Ignore())

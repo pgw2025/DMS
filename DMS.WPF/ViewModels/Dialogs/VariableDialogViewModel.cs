@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Core.Enums;
 using DMS.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
@@ -16,6 +17,9 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
 
     [ObservableProperty]
     private string _errorMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool _isAddModel = true;
 
     [ObservableProperty]
     private bool _hasError;
@@ -75,10 +79,20 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
             return false;
         }
         //检查变量是否存在
-        var existVariable = _dataServices.Variables.FirstOrDefault(v => v.Name == Variable.Name || v.S7Address == Variable.S7Address || v.OpcUaNodeId == Variable.OpcUaNodeId);
+        var existVariables = _dataServices.Variables.Where(v => v.Name == Variable.Name || (v.Protocol == ProtocolType.S7 && v.S7Address == Variable.S7Address) || (v.Protocol == ProtocolType.OpcUa && v.OpcUaNodeId == Variable.OpcUaNodeId)).ToList();
+        VariableItemViewModel existVariable = null;
+        if (IsAddModel)
+        {
+            existVariable = existVariables.FirstOrDefault();
+        }
+        else
+        {
+            existVariable = existVariables.FirstOrDefault(v => v.Id != Variable.Id);
+        }
+
         if (existVariable != null)
         {
-            
+
             if (Variable.Name == existVariable.Name)
             {
                 ErrorMessage = $"变量名称:{existVariable.Name}已经存在。";

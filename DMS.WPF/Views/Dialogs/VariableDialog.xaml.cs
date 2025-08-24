@@ -9,6 +9,7 @@ public partial class VariableDialog
 {
     private const int ContentAreaMaxWidth = 1200;
     private const int ContentAreaMaxHeight = 900;
+
     
     public VariableDialog()
     {

@@ -53,7 +53,7 @@
                 </ui:AppBarButton>
 
                 <ui:AppBarButton
-                    Command="{Binding EditVarDataCommand}"
+                    Command="{Binding UpdateVariableCommand}"
                     CommandParameter="{Binding VariableTable}"
                     Label="编辑变量">
                     <ui:AppBarButton.Icon>

@@ -252,36 +252,56 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="variableTable">当前操作的变量表，用于更新其内部的变量数据。</param>
     [RelayCommand]
-    private async void UpdateVariable(VariableTable variableTable)
+    private async void UpdateVariable()
     {
-        // try
-        // {
-        //     // 显示编辑变量数据的对话框，并传入当前选中的变量数据
-        //     var varData = await _dialogService.ShowEditVarDataDialog(SelectedVariable);
-        //
-        //     // 如果用户取消或对话框未返回数据，则直接返回
-        //     if (varData == null)
-        //         return;
-        //
-        //     // 设置变量数据的所属变量表ID
-        //     varData.VariableTableId = variableTable.Id;
-        //
-        //     // 更新数据库中的变量数据
-        //     await _varDataRepository.UpdateAsync(varData);
-        //
-        //     // 更新当前页面显示的数据：找到原数据在集合中的索引并替换
-        //     var index = variableTable.Variables.IndexOf(SelectedVariable);
-        //     if (index >= 0 && index < variableTable.Variables.Count)
-        //         variableTable.Variables[index] = varData; // 替换为编辑后的数据
-        //
-        //     // 显示成功通知
-        //     NotificationHelper.ShowSuccess($"编辑变量成功:{varData?.Name}");
-        // }
-        // catch (Exception e)
-        // {
-        //     // 捕获并显示错误通知
-        //     NotificationHelper.ShowError($"编辑变量的过程中发生了不可预期的错误：{e.Message}", e);
-        // }
+        try
+        {
+            // 检查是否有变量被选中
+            if (SelectedVariable == null)
+            {
+                NotificationHelper.ShowInfo("请选择要编辑的变量");
+                return;
+            }
+
+            // 显示编辑变量数据的对话框，并传入当前选中的变量数据
+            VariableDialogViewModel variableDialogViewModel = App.Current.Services.GetRequiredService<VariableDialogViewModel>();
+            variableDialogViewModel.Title = "编辑变量";
+            variableDialogViewModel.PrimaryButText = "保存修改";
+            variableDialogViewModel.IsAddModel = false;
+            // 创建一个副本用于编辑，避免直接修改原数据
+            var variableToEdit = new VariableItemViewModel();
+            _mapper.Map(SelectedVariable, variableToEdit);
+            variableDialogViewModel.Variable = variableToEdit;
+
+            var editedVariable = await _dialogService.ShowDialogAsync(variableDialogViewModel);
+
+            // 如果用户取消或对话框未返回数据，则直接返回
+            if (editedVariable == null)
+                return;
+
+            // 更新时间戳
+            editedVariable.UpdatedAt = DateTime.Now;
+
+            // 更新数据库中的变量数据
+            var updateResult = await _variableAppService.UpdateVariableAsync(_mapper.Map<VariableDto>(editedVariable));
+
+            if (updateResult > 0)
+            {
+                // 更新当前页面显示的数据：找到原数据在集合中的索引并替换
+                _mapper.Map(editedVariable, SelectedVariable); // 更新选中项的属性
+                // 显示成功通知
+                NotificationHelper.ShowSuccess($"编辑变量成功:{editedVariable.Name}");
+            }
+            else
+            {
+                NotificationHelper.ShowError("编辑变量失败");
+            }
+        }
+        catch (Exception e)
+        {
+            // 捕获并显示错误通知
+            NotificationHelper.ShowError($"编辑变量的过程中发生了不可预期的错误：{e.Message}", e);
+        }
     }
 
     /// <summary>
@@ -492,15 +512,15 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         try
         {
             // 显示添加变量数据的对话框
-            VariableDialogViewModel variableDialogViewModel=App.Current.Services.GetRequiredService<VariableDialogViewModel>();
-            VariableItemViewModel  variableItem=new VariableItemViewModel();
-            variableItem.Protocol=CurrentVariableTable.Protocol;
+            VariableDialogViewModel variableDialogViewModel = App.Current.Services.GetRequiredService<VariableDialogViewModel>();
+            VariableItemViewModel variableItem = new VariableItemViewModel();
+            variableItem.Protocol = CurrentVariableTable.Protocol;
             variableDialogViewModel.Title = "添加变量";
             variableDialogViewModel.PrimaryButText = "添加变量";
             variableDialogViewModel.Variable = variableItem;
 
             var variableItemViewModel = await _dialogService.ShowDialogAsync(variableDialogViewModel);
-        
+
             // 如果用户取消或对话框未返回数据，则直接返回
             if (variableItemViewModel == null)
                 return;
@@ -512,14 +532,14 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
 
             // // 添加变量数据到数据库
-           var addVariable= await _variableAppService.CreateVariableAsync(_mapper.Map<VariableDto>(variableItemViewModel));
+            var addVariable = await _variableAppService.CreateVariableAsync(_mapper.Map<VariableDto>(variableItemViewModel));
             _mapper.Map(addVariable, variableItemViewModel);
             // // 更新当前页面显示的数据：将新变量添加到集合中
             _variableItemList.Add(variableItemViewModel);
             _dataServices.AddVariable(variableItemViewModel);
             //
             // // 显示成功通知
-             NotificationHelper.ShowSuccess($"添加变量成功:{variableItemViewModel.Name}");
+            NotificationHelper.ShowSuccess($"添加变量成功:{variableItemViewModel.Name}");
         }
         catch (Exception e)
         {
