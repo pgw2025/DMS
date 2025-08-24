@@ -50,8 +50,8 @@
             ToolTipText="设备管理系统">
             <taskbarNotification:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Command="{Binding ShowWindowCommand}" Header="显示窗口" />
-                    <MenuItem Command="{Binding ExitApplicationCommand}" Header="退出" />
+                    <MenuItem x:Name="ShowWindowMenuItem" Header="显示窗口" />
+                    <MenuItem x:Name="ExitApplicationMenuItem" Header="退出" />
                 </ContextMenu>
             </taskbarNotification:TaskbarIcon.ContextMenu>
         </taskbarNotification:TaskbarIcon>

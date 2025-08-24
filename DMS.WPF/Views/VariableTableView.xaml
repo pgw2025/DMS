@@ -54,10 +54,7 @@
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
 
-                <ui:AppBarButton
-                    Command="{Binding UpdateVariableCommand}"
-                    CommandParameter="{Binding VariableTable}"
-                    Label="编辑变量">
+                <ui:AppBarButton Command="{Binding UpdateVariableCommand}" Label="编辑变量">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                     </ui:AppBarButton.Icon>
@@ -138,8 +135,9 @@
             x:Name="BasicGridView"
             Margin="10"
             AutoGenerateColumns="False"
-            CanUserSortColumns="True"
-            CellEditEnding="DataGrid_OnCellEditEnding"
+            CanUserDeleteRows="False"
+            CanUserSortColumns="False"
+            IsReadOnly="True"
             ItemsSource="{Binding VariableItemListView}"
             SelectedItem="{Binding SelectedVariable}"
             SelectionMode="Extended"
@@ -150,18 +148,12 @@
 
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem
-                        Command="{Binding AddVarDataCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext.VariableTable}"
-                        Header="添加变量">
+                    <MenuItem Command="{Binding AddVarDataCommand}" Header="添加变量">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem
-                        Command="{Binding UpdateVariableCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext.VariableTable}"
-                        Header="编辑变量">
+                    <MenuItem Command="{Binding UpdateVariableCommand}" Header="编辑变量">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
@@ -248,9 +240,6 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Name}" Header="名称" />
                 <DataGridTextColumn Binding="{Binding Description}" Header="描述" />
-                <!--  <DataGridTextColumn IsReadOnly="True"  -->
-                <!--  Header="节点ID"  -->
-                <!--  Binding="{Binding NodeId}" />  -->
                 <DataGridTextColumn
                     Binding="{Binding S7Address}"
                     Header="S7地址"

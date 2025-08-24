@@ -71,10 +71,10 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void ShowWindow()
     {
-        // if (Application.Current.MainWindow is MainView mainWindow)
-        // {
-        //     mainWindow.ShowApplication();
-        // }
+        if (App.Current.MainWindow is MainView mainWindow)
+        {
+            mainWindow.ShowApplication();
+        }
     }
 
     /// <summary>

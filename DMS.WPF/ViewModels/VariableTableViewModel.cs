@@ -3,25 +3,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
-using DMS.Application.Services;
 using DMS.Core.Enums;
-using DMS.Core.Interfaces;
 using DMS.Core.Models;
 using DMS.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
-using DMS.WPF.Views;
-using HandyControl.Controls;
-using HandyControl.Data;
-using HandyControl.Tools.Extension;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
 using System.Collections;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Data;
 
 namespace DMS.WPF.ViewModels;
 
@@ -42,13 +32,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     [ObservableProperty]
     private VariableTableItemViewModel currentVariableTable;
-
-    /// <summary>
-    /// 存储当前变量表中的所有变量数据的集合。
-    /// 通过 ObservableProperty 自动生成 Variables 属性和 OnVariablesChanged 方法。
-    /// </summary>
-    [ObservableProperty]
-    private ObservableCollection<VariableItemViewModel> _variables;
 
     /// <summary>
     /// 当前选中的变量数据。
@@ -75,11 +58,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     public bool IsLoadCompletion { get; set; } = false;
 
-
-    /// <summary>
-    /// 原始变量数据的深拷贝备份，用于在用户取消保存时还原数据。
-    /// </summary>
-    private ObservableCollection<VariableItemViewModel>? _originalVariables;
 
     /// <summary>
     /// 指示当前变量表是否使用S7协议。
@@ -114,7 +92,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         _variableAppService = variableAppService;
         _dataServices = dataServices;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
-        _variables = new ObservableCollection<VariableItemViewModel>(); // 初始化集合
 
 
         _variableItemList = new ObservableList<VariableItemViewModel>();
@@ -463,7 +440,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 {
                     _variableItemList.Remove(variable);
                     _dataServices.DeleteVariableById(variable.Id);
-                } 
+                }
                 // 显示成功通知
                 NotificationHelper.ShowSuccess($"成功删除 {variablesToDelete.Count} 个变量");
             }

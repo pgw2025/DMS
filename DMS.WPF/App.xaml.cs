@@ -176,7 +176,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<SettingViewModel>();
         services.AddSingleton<DataTransformViewModel>();
-        services.AddSingleton<VariableTableViewModel>();
+        services.AddTransient<VariableTableViewModel>();
         //services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddSingleton<MqttsViewModel>();
