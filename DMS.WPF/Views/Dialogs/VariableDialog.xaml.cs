@@ -7,8 +7,8 @@ namespace DMS.WPF.Views.Dialogs;
 
 public partial class VariableDialog 
 {
-    private const int ContentAreaMaxWidth = 1000;
-    private const int ContentAreaMaxHeight = 800;
+    private const int ContentAreaMaxWidth = 1200;
+    private const int ContentAreaMaxHeight = 900;
     public VariableDialog()
     {
         InitializeComponent();
@@ -17,7 +17,6 @@ public partial class VariableDialog
 
     private void OnOpened(ContentDialog sender, ContentDialogOpenedEventArgs args)
     {
-        //修改对话框内容的最大宽度和最大高度
         var backgroundElementBorder = VisualTreeFinder.FindVisualChildByName<Border>(this, "BackgroundElement");
         backgroundElementBorder.MaxWidth = ContentAreaMaxWidth;
         backgroundElementBorder.MaxWidth = ContentAreaMaxHeight;

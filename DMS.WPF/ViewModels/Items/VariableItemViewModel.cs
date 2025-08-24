@@ -66,14 +66,14 @@ public partial class VariableItemViewModel : ObservableObject
     /// 获取或设置变量的信号类型 (如：AI, DI, AO, DO)。
     /// </summary>
     [ObservableProperty]
-    private SignalType _signalType ;
+    private SignalType _signalType =SignalType.OtherASignal;
 
     /// <summary>
     /// 获取或设置变量的轮询等级。
     /// 用于决定数据采集的频率（如：高、中、低）。
     /// </summary>
     [ObservableProperty]
-    private PollLevelType _pollLevel;
+    private PollLevelType _pollLevel=PollLevelType.ThirtySeconds;
 
     /// <summary>
     /// 获取或设置一个值，该值指示此变量是否被激活。
