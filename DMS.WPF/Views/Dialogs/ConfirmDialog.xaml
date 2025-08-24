@@ -1,38 +1,28 @@
-<ui:ContentDialog x:Class="DMS.WPF.Views.Dialogs.ConfirmDialog"
-                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                  xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-                  xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-                  xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                  xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-                  xmlns:ex="clr-namespace:DMS.Extensions"
-                  xmlns:en="clr-namespace:DMS.Core.Enums"
-                  Title="{Binding Title}"
-                  CloseButtonText="取消"
-                  DefaultButton="Primary"
-                  PrimaryButtonText="{Binding PrimaryButText}"
-                  Background="#fff"
-                  d:DataContext="{d:DesignInstance vmd:ConfrimDialogViewModel}"
-                  mc:Ignorable="d">
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="PrimaryButtonClick">
-            <i:InvokeCommandAction Command="{Binding PrimaryButtonCommand}" />
-        </i:EventTrigger>
-        <i:EventTrigger EventName="CloseButtonClick">
-            <i:InvokeCommandAction Command="{Binding CancleButtonCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
+<ui:ContentDialog
+    x:Class="DMS.WPF.Views.Dialogs.ConfirmDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+    Title="{Binding Title}"
+    d:DataContext="{d:DesignInstance vmd:ConfirmDialogViewModel}"
+    Background="#fff"
+    CloseButtonCommand="{Binding CancleButtonCommand}"
+    CloseButtonText="取消"
+    DefaultButton="Primary"
+    PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
+    PrimaryButtonText="{Binding PrimaryButText}"
+    mc:Ignorable="d">
 
-    <Grid Width="360"
-          Margin="10">
-        <TextBlock Margin="20"
-                   FontSize="14"
-                   TextWrapping="Wrap"
-                   FontWeight="Bold"
-                   Text="{Binding Message}">
-        </TextBlock>
+    <Grid Width="360" Margin="10">
+        <TextBlock
+            Margin="20"
+            FontSize="14"
+            FontWeight="Bold"
+            Text="{Binding Message}"
+            TextWrapping="Wrap" />
     </Grid>
 
 </ui:ContentDialog>

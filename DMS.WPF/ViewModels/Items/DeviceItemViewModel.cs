@@ -27,10 +27,10 @@ public partial class DeviceItemViewModel : ObservableObject
     private string _ipAddress;
 
     [ObservableProperty]
-    private int _port;
+    private int _port=102;
 
     [ObservableProperty]
-    private int _rack;
+    private int _rack=1;
 
     [ObservableProperty]
     private int _slot;
@@ -45,7 +45,7 @@ public partial class DeviceItemViewModel : ObservableObject
     private string _opcUaServerUrl;
 
     [ObservableProperty]
-    private bool _isActive;
+    private bool _isActive =true;
 
     [ObservableProperty]
     private bool _isRunning;
@@ -54,7 +54,7 @@ public partial class DeviceItemViewModel : ObservableObject
     private string _status;
     
     [ObservableProperty]
-    private bool _isAddDefVarTable;
+    private bool _isAddDefVarTable=true;
 
     partial void OnIpAddressChanged(string newIpAddress)
     {

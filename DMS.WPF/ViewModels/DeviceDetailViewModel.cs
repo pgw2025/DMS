@@ -126,7 +126,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
             }
 
             string message = $"确认要删除变量表名为:{SelectedVariableTable.Name} \n\n此操作将同时删除该变量表下的所有变量数据，且无法恢复！";
-            ConfrimDialogViewModel viewModel = new ConfrimDialogViewModel("删除变量表",message,"删除");
+            ConfirmDialogViewModel viewModel = new ConfirmDialogViewModel("删除变量表",message,"删除");
             var res = await _dialogService.ShowDialogAsync(viewModel);
             if (res)
             {

@@ -16,7 +16,6 @@ using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Helper;
 using DMS.WPF.Views;
-using DMS.WPF.Views.HandyDialogs;
 using HandyControl.Controls;
 using HandyControl.Data;
 using HandyControl.Tools.Extension;
@@ -314,7 +313,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 // // 拼接要删除的变量名称，用于确认提示
                 var existNames = string.Join("、", existList.Select(v => v.Name));
                 var confrimDialogViewModel
-                    = new ConfrimDialogViewModel("存在已经添加的变量", $"变量名称:{existNames}，已经存在，是否跳过继续添加其他的变量。取消则不添加任何变量", "继续");
+                    = new ConfirmDialogViewModel("存在已经添加的变量", $"变量名称:{existNames}，已经存在，是否跳过继续添加其他的变量。取消则不添加任何变量", "继续");
                 var res = await _dialogService.ShowDialogAsync(confrimDialogViewModel);
                 if (!res) return;
                 // 从导入列表中删除已经存在的变量

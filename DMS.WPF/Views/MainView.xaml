@@ -1,27 +1,28 @@
-﻿<Window x:Class="DMS.WPF.Views.MainView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:local="clr-namespace:DMS.WPF.Views"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
-        xmlns:mo="clr-namespace:DMS.Core.Models;assembly=DMS.Core"
-        xmlns:hc="https://handyorg.github.io/handycontrol"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:tb="http://hardcodet.net/taskbar"
-        xmlns:taskbarNotification="http://www.hardcodet.net/taskbar"
-        Title="设备管理系统"
-        Width="1080"
-        Height="800"
-        WindowStartupLocation="CenterScreen"
-        WindowState="Maximized"
-        Loaded="MainView_OnLoaded"
-        Closing="Window_Closing"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ui:WindowHelper.SystemBackdropType="Mica"
-        d:DataContext="{d:DesignInstance vm:MainViewModel}"
-        mc:Ignorable="d">
+﻿<Window
+    x:Class="DMS.WPF.Views.MainView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:DMS.WPF.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mo="clr-namespace:DMS.Core.Models;assembly=DMS.Core"
+    xmlns:taskbarNotification="http://www.hardcodet.net/taskbar"
+    xmlns:tb="http://hardcodet.net/taskbar"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
+    Title="设备管理系统"
+    Width="1080"
+    Height="800"
+    d:DataContext="{d:DesignInstance vm:MainViewModel}"
+    ui:WindowHelper.SystemBackdropType="Mica"
+    ui:WindowHelper.UseModernWindowStyle="True"
+    Closing="Window_Closing"
+    Loaded="MainView_OnLoaded"
+    WindowStartupLocation="CenterScreen"
+    WindowState="Maximized"
+    mc:Ignorable="d">
     <Window.Resources>
 
         <ContextMenu x:Key="MyMenuItemContextMenu">
@@ -30,11 +31,11 @@
             <Separator />
             <MenuItem Header="删除" />
         </ContextMenu>
-        <DataTemplate x:Key="NavigationViewMenuItem"
-                      DataType="{x:Type mo:MenuBean}">
-            <ui:NavigationViewItem Content="{Binding Header}"
-                                   Tag="{Binding }"
-                                   MenuItemsSource="{Binding Children }">
+        <DataTemplate x:Key="NavigationViewMenuItem" DataType="{x:Type mo:MenuBean}">
+            <ui:NavigationViewItem
+                Content="{Binding Header}"
+                MenuItemsSource="{Binding Children}"
+                Tag="{Binding}">
                 <ui:NavigationViewItem.Icon>
                     <ui:FontIcon Glyph="{Binding Icon}" />
                 </ui:NavigationViewItem.Icon>
@@ -42,31 +43,33 @@
         </DataTemplate>
     </Window.Resources>
     <Grid>
-        <taskbarNotification:TaskbarIcon x:Name="MyNotifyIcon"
-                        ToolTipText="设备管理系统"
-                        IconSource="/Assets/AppIcon2.ico"
-                        DoubleClickCommand="{Binding ShowWindowCommand}">
+        <taskbarNotification:TaskbarIcon
+            x:Name="MyNotifyIcon"
+            DoubleClickCommand="{Binding ShowWindowCommand}"
+            IconSource="/Assets/AppIcon2.ico"
+            ToolTipText="设备管理系统">
             <taskbarNotification:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="显示窗口" Command="{Binding ShowWindowCommand}" />
-                    <MenuItem Header="退出" Command="{Binding ExitApplicationCommand}" />
+                    <MenuItem Command="{Binding ShowWindowCommand}" Header="显示窗口" />
+                    <MenuItem Command="{Binding ExitApplicationCommand}" Header="退出" />
                 </ContextMenu>
             </taskbarNotification:TaskbarIcon.ContextMenu>
         </taskbarNotification:TaskbarIcon>
-        <ui:NavigationView ExpandedModeThresholdWidth="500"
-                           IsTabStop="False"
-                           PaneDisplayMode="Left"
-                           PaneTitle="设备管理系统"
-                           IsSettingsVisible="False"
-                           AlwaysShowHeader="True"
-                           IsBackButtonVisible="Collapsed"
-                           IsBackEnabled="False"
-                           SelectionFollowsFocus="Disabled"
-                           SelectionChanged="NavigationView_SelectionChanged"
-                           MenuItemsSource="{Binding DataServices.MenuTrees}"
-                           MenuItemTemplate="{StaticResource NavigationViewMenuItem}">
+        <ui:NavigationView
+            AlwaysShowHeader="True"
+            ExpandedModeThresholdWidth="500"
+            IsBackButtonVisible="Collapsed"
+            IsBackEnabled="False"
+            IsSettingsVisible="False"
+            IsTabStop="False"
+            MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
+            MenuItemsSource="{Binding DataServices.MenuTrees}"
+            PaneDisplayMode="Left"
+            PaneTitle="设备管理系统"
+            SelectionChanged="NavigationView_SelectionChanged"
+            SelectionFollowsFocus="Disabled">
 
-     
+
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox AutomationProperties.Name="Search">
@@ -78,49 +81,49 @@
 
 
             <Grid>
-                <!-- 数据模版绑定不同的View显示 -->
+                <!--  数据模版绑定不同的View显示  -->
                 <ContentControl Content="{Binding CurrentViewModel}">
                     <ContentControl.Resources>
-                        <!-- 主页 -->
+                        <!--  主页  -->
                         <DataTemplate DataType="{x:Type vm:HomeViewModel}">
                             <local:HomeView />
                         </DataTemplate>
-                        <!-- 设备列表页 -->
+                        <!--  设备列表页  -->
                         <DataTemplate DataType="{x:Type vm:DevicesViewModel}">
                             <local:DevicesView />
                         </DataTemplate>
-                        <!-- 数据转换页 -->
+                        <!--  数据转换页  -->
                         <DataTemplate DataType="{x:Type vm:DataTransformViewModel}">
                             <local:DataTransformView />
                         </DataTemplate>
-                        <!-- Mqtt服务器页 -->
+                        <!--  Mqtt服务器页  -->
                         <DataTemplate DataType="{x:Type vm:MqttsViewModel}">
                             <local:MqttsView />
                         </DataTemplate>
-                        <!-- 设置页 -->
+                        <!--  设置页  -->
                         <DataTemplate DataType="{x:Type vm:SettingViewModel}">
                             <local:SettingView />
                         </DataTemplate>
-                        <!-- 设备详情页 -->
+                        <!--  设备详情页  -->
                         <DataTemplate DataType="{x:Type vm:DeviceDetailViewModel}">
-                            <local:DeviceDetailView  />
+                            <local:DeviceDetailView />
                         </DataTemplate>
-                        <!-- 设备变量页 -->
+                        <!--  设备变量页  -->
                         <DataTemplate DataType="{x:Type vm:VariableTableViewModel}">
-                            <local:VariableTableView DataContext="{Binding }"/>
+                            <local:VariableTableView DataContext="{Binding}" />
                         </DataTemplate>
-                        <!-- Mqtt服务器详情页 -->
+                        <!--  Mqtt服务器详情页  -->
                         <!-- <DataTemplate DataType="{x:Type vm:MqttServerDetailViewModel}"> -->
                         <!--     <local:MqttServerDetailView DataContext="{Binding }"/> -->
                         <!-- </DataTemplate> -->
                     </ContentControl.Resources>
                 </ContentControl>
 
-                <ScrollViewer VerticalScrollBarVisibility="Hidden"
-                              HorizontalAlignment="Right">
-                    <StackPanel hc:Growl.GrowlParent="True"
-                                VerticalAlignment="Top"
-                                Margin="0,10,10,10" />
+                <ScrollViewer HorizontalAlignment="Right" VerticalScrollBarVisibility="Hidden">
+                    <StackPanel
+                        Margin="0,10,10,10"
+                        VerticalAlignment="Top"
+                        hc:Growl.GrowlParent="True" />
                 </ScrollViewer>
             </Grid>
 

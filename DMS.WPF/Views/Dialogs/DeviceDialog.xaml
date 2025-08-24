@@ -1,23 +1,23 @@
-<ui:ContentDialog x:Class="DMS.WPF.Views.Dialogs.DeviceDialog"
-                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                  xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-                  xmlns:hc="https://handyorg.github.io/handycontrol"
-                  xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                  xmlns:ex="clr-namespace:DMS.Extensions"
-                  xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
-                  xmlns:vc="clr-namespace:DMS.WPF.ValueConverts"
-                  Title="{Binding Title}"
-                  CloseButtonText="取消"
-                  DefaultButton="Primary"
-                  PrimaryButtonText="{Binding PrimaryButText}"
-                  PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
-                  CloseButtonCommand="{Binding CancleButtonCommand}"
-                  d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
-                  mc:Ignorable="d"
-                  >
+<ui:ContentDialog
+    x:Class="DMS.WPF.Views.Dialogs.DeviceDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
+    xmlns:ex="clr-namespace:DMS.Extensions"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:vc="clr-namespace:DMS.WPF.ValueConverts"
+    xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+    Title="{Binding Title}"
+    d:DataContext="{d:DesignInstance vmd:DeviceDialogViewModel}"
+    CloseButtonCommand="{Binding CancleButtonCommand}"
+    CloseButtonText="取消"
+    DefaultButton="Primary"
+    PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
+    PrimaryButtonText="{Binding PrimaryButText}"
+    mc:Ignorable="d">
 
     <ui:ContentDialog.Resources>
         <ex:EnumBindingSource x:Key="DeviceType" EnumType="{x:Type enums:DeviceType}" />
@@ -26,45 +26,64 @@
         <vc:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
         <vc:EnumToStringConverter x:Key="EnumToStringConverter" />
 
-        <!-- 统一定义输入控件的下边距 -->
-        <Style TargetType="hc:TextBox" BasedOn="{StaticResource {x:Type hc:TextBox}}">
-            <Setter Property="Margin" Value="0,0,0,15"/>
-        </Style>
-        <Style TargetType="hc:ComboBox" BasedOn="{StaticResource {x:Type hc:ComboBox}}">
-            <Setter Property="Margin" Value="0,0,0,15"/>
-        </Style>
-        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
-            <Setter Property="Margin" Value="0,10,0,0"/>
-        </Style>
-        <Style x:Key="ConditionalPanelStyle" TargetType="Border">
-            <Setter Property="Padding" Value="10"/>
-            <Setter Property="Margin" Value="0,0,0,15"/>
-            <Setter Property="Background" Value="{DynamicResource RegionBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Visibility" Value="Collapsed"/>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,10,0" />
         </Style>
     </ui:ContentDialog.Resources>
 
-    <Grid Margin="10">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
+    <StackPanel Margin="16">
+        <!--  主设置项  -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <!-- 左边列 -->
-        <StackPanel Grid.Column="0" MinWidth="220" Margin="0,0,10,0">
-            <hc:TextBox hc:InfoElement.Title="设备名称"
-                        Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
+            <!--  Row 0  -->
+            <hc:TextBox
+                Grid.Row="0"
+                Grid.Column="0"
+                hc:InfoElement.Title="设备名称:"
+                Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
 
-            <hc:TextBox hc:InfoElement.Title="设备IP地址"
-                        Text="{Binding Device.IpAddress, UpdateSourceTrigger=PropertyChanged}" />
+            <hc:TextBox
+                Grid.Row="0"
+                Grid.Column="2"
+                hc:InfoElement.Title="设备描述:"
+                Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
 
-            <hc:ComboBox hc:InfoElement.Title="设备类型"
-                         IsEnabled="{Binding IsAddMode}"
-                         ItemsSource="{Binding Source={StaticResource DeviceType}}"
-                         SelectedItem="{Binding Device.DeviceType}">
+            <!--  Row 1  -->
+            <hc:TextBox
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="IP 地址:"
+                Text="{Binding Device.IpAddress, UpdateSourceTrigger=PropertyChanged}" />
+
+            <hc:TextBox
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="端口:"
+                Text="{Binding Device.Port, UpdateSourceTrigger=PropertyChanged}" />
+
+            <hc:ComboBox
+                Grid.Row="2"
+                Grid.Column="0"
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="设备类型:"
+                IsEnabled="{Binding IsAddMode}"
+                ItemsSource="{Binding Source={StaticResource DeviceType}}"
+                SelectedItem="{Binding Device.DeviceType}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -72,24 +91,15 @@
                 </ComboBox.ItemTemplate>
             </hc:ComboBox>
 
-            <CheckBox Content="是否添加默认变量表"
-                         IsChecked="{Binding Device.IsAddDefVarTable}" />
-        </StackPanel>
-
-        <!-- 右边列 -->
-        <StackPanel Grid.Column="1" MinWidth="220" Margin="10,0,0,0">
-            <hc:TextBox hc:InfoElement.Title="设备描述"
-                        Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
-
-            <TextBlock Margin="8,0,0,5" Text="设备端口"/>
-            <hc:NumericUpDown 
-                        Value="{Binding Device.Port, UpdateSourceTrigger=PropertyChanged}" />
-
-            <hc:ComboBox x:Name="ProtocolComboBox"
-                         hc:InfoElement.Title="设备通信协议"
-                         IsEnabled="{Binding IsAddMode}"
-                         ItemsSource="{Binding Source={StaticResource ProtocolType}}"
-                         SelectedItem="{Binding Device.Protocol}">
+            <hc:ComboBox
+                x:Name="ProtocolComboBox"
+                Grid.Row="2"
+                Grid.Column="4"
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="通讯协议:"
+                IsEnabled="{Binding IsAddMode}"
+                ItemsSource="{Binding Source={StaticResource ProtocolType}}"
+                SelectedItem="{Binding Device.Protocol}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
@@ -97,50 +107,92 @@
                 </ComboBox.ItemTemplate>
             </hc:ComboBox>
 
-            <!-- OpcUa Specific Properties -->
-            <Border x:Name="OpcUaPanel">
-                <Border.Style>
-                    <Style TargetType="Border" BasedOn="{StaticResource ConditionalPanelStyle}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}" Value="OpcUa">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <StackPanel>
-                    <hc:TextBox hc:InfoElement.Title="OpcUa服务器地址"
-                                Text="{Binding Device.OpcUaServerUrl}"/>
-                </StackPanel>
-            </Border>
+            <!--  Row 3  -->
+            <CheckBox
+                Grid.Row="3"
+                Grid.Column="0"
+                Margin="0,20,0,0"
+                Content="是否添加默认变量表"
+                IsChecked="{Binding Device.IsAddDefVarTable}" />
+            <CheckBox
+                Grid.Row="3"
+                Grid.Column="4"
+                Margin="0,20,0,0"
+                Content="是否启用"
+                IsChecked="{Binding Device.IsActive}" />
 
-            <!-- S7 Specific Properties -->
-            <Border x:Name="S7PropertiesPanel">
-                <Border.Style>
-                    <Style TargetType="Border" BasedOn="{StaticResource ConditionalPanelStyle}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}" Value="S7">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <StackPanel>
-                    <hc:ComboBox hc:InfoElement.Title="CPU 类型"
-                                 ItemsSource="{Binding Source={StaticResource CpuType}}"
-                                 SelectedItem="{Binding Device.CpuType}" />
-                    <TextBlock Margin="8,0,0,5" Text="机架号"/>
-                    <hc:NumericUpDown 
-                                Value="{Binding Device.Rack, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Margin="8,0,0,5" Text="槽号"/>
-                    <hc:NumericUpDown 
-                                Value="{Binding Device.Slot, UpdateSourceTrigger=PropertyChanged}" />
-                </StackPanel>
-            </Border>
+        </Grid>
 
-            <CheckBox Content="是否启用"
-                         IsChecked="{Binding Device.IsActive}" />
-        </StackPanel>
-    </Grid>
+        <!--  OpcUa Specific Properties  -->
+        <GroupBox Margin="0,15,0,0" Header="OpcUa 协议设置">
+            <GroupBox.Style>
+                <Style BasedOn="{StaticResource {x:Type GroupBox}}" TargetType="GroupBox">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}" Value="OpcUa">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GroupBox.Style>
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <hc:TextBox
+                    Grid.Column="1"
+                    MinWidth="400"
+                    hc:InfoElement.Title="OpcUa服务器地址:"
+                    Text="{Binding Device.OpcUaServerUrl}" />
+            </Grid>
+        </GroupBox>
 
+        <!--  S7 Specific Properties  -->
+        <GroupBox Margin="0,10,0,0" Header="S7 协议设置">
+            <GroupBox.Style>
+                <Style BasedOn="{StaticResource {x:Type GroupBox}}" TargetType="GroupBox">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=ProtocolComboBox, Path=SelectedItem, Converter={StaticResource EnumToStringConverter}}" Value="S7">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GroupBox.Style>
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Grid.Column="0"
+                    Style="{StaticResource LabelStyle}"
+                    Text="CPU 类型:" />
+                <hc:ComboBox
+                    Grid.Column="1"
+                    ItemsSource="{Binding Source={StaticResource CpuType}}"
+                    SelectedItem="{Binding Device.CpuType}" />
+
+                <TextBlock
+                    Grid.Column="3"
+                    Style="{StaticResource LabelStyle}"
+                    Text="机架号:" />
+                <hc:TextBox Grid.Column="4" Text="{Binding Device.Rack, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock
+                    Grid.Column="6"
+                    Style="{StaticResource LabelStyle}"
+                    Text="槽号:" />
+                <hc:TextBox Grid.Column="7" Text="{Binding Device.Slot, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+        </GroupBox>
+
+    </StackPanel>
 </ui:ContentDialog>

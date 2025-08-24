@@ -85,12 +85,12 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     {
         try
         {
-            DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel()
-                                                          {
-                                                              PrimaryButText = "添加设备"
-                                                          };
             // 1. 显示添加设备对话框
-            DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
+            DeviceItemViewModel device = await _dialogService.ShowDialogAsync(new DeviceDialogViewModel()
+            {
+                Title = "添加设备",
+                PrimaryButText = "添加设备"
+            });
             // 如果用户取消或对话框未返回设备，则直接返回
             if (device == null)
             {
@@ -156,7 +156,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             }
 
 
-            if (await _dialogService.ShowDialogAsync(new ConfrimDialogViewModel("删除设备",$"确认要删除设备名为:{SelectedDevice.Name}","删除设备")))
+            if (await _dialogService.ShowDialogAsync(new ConfirmDialogViewModel("删除设备",$"确认要删除设备名为:{SelectedDevice.Name}","删除设备")))
             {
                 var isDel = await _deviceAppService.DeleteDeviceByIdAsync(SelectedDevice.Id);
                 if (isDel)

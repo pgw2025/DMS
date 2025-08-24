@@ -3,13 +3,13 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class ConfrimDialogViewModel : DialogViewModelBase<Boolean>
+public partial class ConfirmDialogViewModel : DialogViewModelBase<Boolean>
 {
     
     [ObservableProperty]
     private string _message;
 
-    public ConfrimDialogViewModel(string title,string message,string primaryButText)
+    public ConfirmDialogViewModel(string title,string message,string primaryButText)
     {
         Message = message;
         Title = title;
