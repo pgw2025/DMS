@@ -53,9 +53,9 @@ public class VariableAppService : IVariableAppService
     /// 异步创建一个新变量（事务性操作）。
     /// </summary>
     /// <param name="variableDto">要创建的变量数据传输对象。</param>
-    /// <returns>新创建变量的ID。</returns>
+    /// <returns>新创建的变量数据传输对象。</returns>
     /// <exception cref="ApplicationException">如果创建变量时发生错误。</exception>
-    public async Task<int> CreateVariableAsync(VariableDto variableDto)
+    public async Task<VariableDto> CreateVariableAsync(VariableDto variableDto)
     {
         try
         {
@@ -63,7 +63,7 @@ public class VariableAppService : IVariableAppService
             var variable = _mapper.Map<Variable>(variableDto);
             var addedVariable = await _repoManager.Variables.AddAsync(variable);
             await _repoManager.CommitAsync();
-            return addedVariable.Id;
+            return _mapper.Map<VariableDto>(addedVariable);
         }
         catch (Exception ex)
         {

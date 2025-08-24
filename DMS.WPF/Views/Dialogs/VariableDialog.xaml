@@ -119,6 +119,7 @@
                         Grid.Column="0"
                         Margin="0,15,0,0"
                         hc:InfoElement.Title="协议类型:"
+                        IsEnabled="False"
                         ItemsSource="{Binding Source={StaticResource ProtocolType}}"
                         SelectedItem="{Binding Variable.Protocol, UpdateSourceTrigger=PropertyChanged}">
                         <ComboBox.ItemTemplate>

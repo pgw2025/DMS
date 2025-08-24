@@ -1,19 +1,20 @@
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
-using DMS.Core.Helper;
 using DMS.Core.Enums;
+using DMS.Core.Helper;
 using DMS.Core.Models;
 using DMS.Helper;
+using DMS.Infrastructure.Entities;
 using DMS.Message;
 using DMS.WPF.Helper;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 
 
 namespace DMS.WPF.Services;
@@ -495,6 +496,22 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             device.VariableTables.Add(variableTableItemViewModel);
             VariableTables.Add(variableTableItemViewModel);
         }
+    }
+
+    public void AddVariable(VariableItemViewModel variableItem)
+    {
+        if (variableItem==null)
+        {
+            return;
+        }
+
+        var variableTable = VariableTables.FirstOrDefault(d => d.Id == variableItem.VariableTableId);
+        if (variableTable != null)
+        {
+            variableTable.Variables.Add(variableItem);
+            Variables.Add(variableItem);
+        }
+
     }
 
     public void DeleteMenuItem(MenuItemViewModel menuItemViewModel)

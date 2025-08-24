@@ -20,7 +20,7 @@ public interface IVariableAppService
     /// <summary>
     /// 异步创建一个新变量。
     /// </summary>
-    Task<int> CreateVariableAsync(VariableDto variableDto);
+    Task<VariableDto> CreateVariableAsync(VariableDto variableDto);
 
     /// <summary>
     /// 异步更新一个已存在的变量。

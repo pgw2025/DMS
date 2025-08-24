@@ -493,8 +493,11 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         {
             // 显示添加变量数据的对话框
             VariableDialogViewModel variableDialogViewModel=App.Current.Services.GetRequiredService<VariableDialogViewModel>();
+            VariableItemViewModel  variableItem=new VariableItemViewModel();
+            variableItem.Protocol=CurrentVariableTable.Protocol;
             variableDialogViewModel.Title = "添加变量";
             variableDialogViewModel.PrimaryButText = "添加变量";
+            variableDialogViewModel.Variable = variableItem;
 
             var variableItemViewModel = await _dialogService.ShowDialogAsync(variableDialogViewModel);
         
@@ -504,22 +507,19 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             // // 设置新变量的所属变量表ID
             variableItemViewModel.VariableTableId = CurrentVariableTable.Id;
+            variableItemViewModel.CreatedAt = DateTime.Now;
+            variableItemViewModel.UpdatedAt = DateTime.Now;
 
-            
-            //
+
             // // 添加变量数据到数据库
-            // var resVarData = await _varDataRepository.AddAsync(varData);
-            // if (resVarData == null)
-            // {
-            //     NotificationHelper.ShowError($"添加变量失败了:{varData?.Name}");
-            //     return;
-            // }
-            //
+           var addVariable= await _variableAppService.CreateVariableAsync(_mapper.Map<VariableDto>(variableItemViewModel));
+            _mapper.Map(addVariable, variableItemViewModel);
             // // 更新当前页面显示的数据：将新变量添加到集合中
-            // Variables.Add(resVarData);
+            _variableItemList.Add(variableItemViewModel);
+            _dataServices.AddVariable(variableItemViewModel);
             //
             // // 显示成功通知
-            // NotificationHelper.ShowSuccess($"添加变量成功:{varData?.Name}");
+             NotificationHelper.ShowSuccess($"添加变量成功:{variableItemViewModel.Name}");
         }
         catch (Exception e)
         {
