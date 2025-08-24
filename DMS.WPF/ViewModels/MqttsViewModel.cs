@@ -57,13 +57,13 @@ public partial class MqttsViewModel : ViewModelBase
         _dialogService = dialogService;
         _dataServices = dataServices;
 
-        // if (dataServices.Mqtts == null || dataServices.Mqtts.Count == 0)
+        // if (_dataServices.Mqtts == null || _dataServices.Mqtts.Count == 0)
         // {
         //     MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
         // }
         // else
         // {
-        //     Mqtts = new ObservableCollection<Mqtt>(dataServices.Mqtts);
+        //     Mqtts = new ObservableCollection<Mqtt>(_dataServices.Mqtts);
         // }
         //
         //

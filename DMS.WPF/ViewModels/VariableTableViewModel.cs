@@ -483,65 +483,29 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     //
     /// <summary>
     /// 添加新的变量数据。
-    /// 此命令通常绑定到UI中的“添加”按钮。
     /// </summary>
+    /// 此命令通常绑定到UI中的“添加”按钮。
     /// <param name="variableTable">当前操作的变量表，用于设置新变量的所属ID。</param>
     [RelayCommand]
-    private async void AddVariable(VariableTable variableTable)
+    private async void AddVariable()
     {
         try
         {
             // 显示添加变量数据的对话框
-            VariableDialogViewModel variableDialogViewModel=new VariableDialogViewModel("添加变量","添加变量");
-
+            VariableDialogViewModel variableDialogViewModel=App.Current.Services.GetRequiredService<VariableDialogViewModel>();
+            variableDialogViewModel.Title = "添加变量";
+            variableDialogViewModel.PrimaryButText = "添加变量";
 
             var variableItemViewModel = await _dialogService.ShowDialogAsync(variableDialogViewModel);
         
             // 如果用户取消或对话框未返回数据，则直接返回
             if (variableItemViewModel == null)
                 return;
-        
+
             // // 设置新变量的所属变量表ID
-            // varData.VariableTableId = variableTable.Id;
-            //
-            // // --- 重复性检查逻辑开始 ---
-            // bool isDuplicate = false;
-            // string duplicateReason = string.Empty;
-            //
-            // // 检查名称是否重复
-            // if (Variables.Any(v => v.Name == varData.Name))
-            // {
-            //     isDuplicate = true;
-            //     duplicateReason = $"名称 '{varData.Name}' 已存在。";
-            // }
-            // else
-            // {
-            //     // 根据协议类型检查S7地址或NodeId是否重复
-            //     if (variableTable.ProtocolType == ProtocolType.S7)
-            //     {
-            //         if (!string.IsNullOrEmpty(varData.S7Address) &&
-            //             Variables.Any(v => v.S7Address == varData.S7Address))
-            //         {
-            //             isDuplicate = true;
-            //             duplicateReason = $"S7地址 '{varData.S7Address}' 已存在。";
-            //         }
-            //     }
-            //     else if (variableTable.ProtocolType == ProtocolType.OpcUA)
-            //     {
-            //         if (!string.IsNullOrEmpty(varData.NodeId) && Variables.Any(v => v.NodeId == varData.NodeId))
-            //         {
-            //             isDuplicate = true;
-            //             duplicateReason = $"OPC UA NodeId '{varData.NodeId}' 已存在。";
-            //         }
-            //     }
-            // }
-            //
-            // if (isDuplicate)
-            // {
-            //     NotificationHelper.ShowError($"添加变量失败：{duplicateReason}");
-            //     return;
-            // }
-            // // --- 重复性检查逻辑结束 ---
+            variableItemViewModel.VariableTableId = CurrentVariableTable.Id;
+
+            
             //
             // // 添加变量数据到数据库
             // var resVarData = await _varDataRepository.AddAsync(varData);

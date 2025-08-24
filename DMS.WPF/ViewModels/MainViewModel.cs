@@ -62,7 +62,7 @@ public partial class MainViewModel : ViewModelBase
         // 发送消息加载数据
         MessageHelper.SendLoadMessage(LoadTypes.All);
         // 当菜单加载成功后，在前台显示菜单
-        // dataServices.OnMenuTreeListChanged += (menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
+        // _dataServices.OnMenuTreeListChanged += (menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
     }
 
     /// <summary>

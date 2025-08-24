@@ -182,6 +182,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<MqttsViewModel>();
         // 注册对话框模型
         services.AddTransient<ImportExcelDialogViewModel>();
+        services.AddTransient<VariableDialogViewModel>();
         // 注册对话框
         services.AddSingleton<DevicesView>();
         //注册View视图

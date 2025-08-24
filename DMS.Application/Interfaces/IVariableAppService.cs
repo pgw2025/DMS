@@ -43,4 +43,11 @@ public interface IVariableAppService
     /// <param name="variablesToCheck">要检查的变量列表。</param>
     /// <returns>返回输入列表中已存在的变量。</returns>
     Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck);
+
+    /// <summary>
+    /// 检测单个变量是否已存在。
+    /// </summary>
+    /// <param name="variableToCheck">要检查的变量。</param>
+    /// <returns>如果变量已存在则返回该变量，否则返回null。</returns>
+    Task<VariableDto?> FindExistingVariableAsync(VariableDto variableToCheck);
 }

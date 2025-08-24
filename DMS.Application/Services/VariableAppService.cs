@@ -176,4 +176,19 @@ public class VariableAppService : IVariableAppService
 
         return result;
     }
+
+    public async Task<VariableDto?> FindExistingVariableAsync(VariableDto variableToCheck)
+    {
+        if (variableToCheck == null)
+        {
+            return null;
+        }
+
+        // 创建一个包含单个元素的列表以便复用现有的逻辑
+        var variablesToCheck = new List<VariableDto> { variableToCheck };
+        var existingVariables = await FindExistingVariablesAsync(variablesToCheck);
+
+        // 如果找到了匹配的变量，返回第一个（也是唯一一个）
+        return existingVariables.FirstOrDefault();
+    }
 }

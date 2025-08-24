@@ -13,9 +13,9 @@ public partial class MqttSelectionDialogViewModel : ObservableObject
     // [ObservableProperty]
     // private Mqtt? selectedMqtt;
     //
-    // public MqttSelectionDialogViewModel(DataServices dataServices)
+    // public MqttSelectionDialogViewModel(DataServices _dataServices)
     // {
-    //     Mqtts = new ObservableCollection<Mqtt>(dataServices.Mqtts);
+    //     Mqtts = new ObservableCollection<Mqtt>(_dataServices.Mqtts);
     // }
 
 

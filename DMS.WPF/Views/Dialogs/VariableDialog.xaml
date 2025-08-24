@@ -15,8 +15,7 @@
     d:DataContext="{d:DesignInstance vmd:VariableDialogViewModel}"
     CloseButtonCommand="{Binding CancleButtonCommand}"
     CloseButtonText="取消"
-    DefaultButton="Primary"
-    PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     PrimaryButtonText="{Binding PrimaryButText}"
     mc:Ignorable="d">
 
@@ -26,10 +25,34 @@
         <ex:EnumBindingSource x:Key="ProtocolType" EnumType="{x:Type en:ProtocolType}" />
         <ex:EnumBindingSource x:Key="SignalType" EnumType="{x:Type enums:SignalType}" />
         <ex:EnumBindingSource x:Key="PollLevelType" EnumType="{x:Type enums:PollLevelType}" />
+        <ex:EnumBindingSource x:Key="CSharpDataType" EnumType="{x:Type enums:CSharpDataType}" />
     </ui:ContentDialog.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="16">
+            <!--  错误信息显示区域  -->
+            <Border
+                Margin="0,0,0,15"
+                Padding="10"
+                Background="#FFF0F0"
+                BorderBrush="#FF8080"
+                BorderThickness="1"
+                CornerRadius="4"
+                Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <ui:FontIcon
+                        Margin="0,0,10,0"
+                        VerticalAlignment="Center"
+                        Foreground="#C50500"
+                        Glyph="&#xE783;" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="#C50500"
+                        Text="{Binding ErrorMessage}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
             <!--  基本信息  -->
             <GroupBox Margin="0,0,0,15" Header="基本信息">
                 <Grid Margin="10">
@@ -53,7 +76,7 @@
                         hc:InfoElement.Title="变量名称:"
                         Text="{Binding Variable.Name, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <!-- S7 Address Field - Visible when Protocol is S7 -->
+                    <!--  S7 Address Field - Visible when Protocol is S7  -->
                     <hc:TextBox
                         Grid.Row="0"
                         Grid.Column="2"
@@ -61,7 +84,7 @@
                         hc:InfoElement.Title="S7地址:"
                         Text="{Binding Variable.S7Address, UpdateSourceTrigger=PropertyChanged}">
                         <hc:TextBox.Style>
-                            <Style TargetType="hc:TextBox" BasedOn="{StaticResource {x:Type hc:TextBox}}">
+                            <Style BasedOn="{StaticResource {x:Type hc:TextBox}}" TargetType="hc:TextBox">
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Variable.Protocol, Converter={StaticResource EnumToStringConverter}}" Value="S7">
@@ -72,7 +95,7 @@
                         </hc:TextBox.Style>
                     </hc:TextBox>
 
-                    <!-- OPC UA Node ID Field - Visible when Protocol is OpcUa -->
+                    <!--  OPC UA Node ID Field - Visible when Protocol is OpcUa  -->
                     <hc:TextBox
                         Grid.Row="0"
                         Grid.Column="2"
@@ -80,7 +103,7 @@
                         hc:InfoElement.Title="OpcUa节点ID:"
                         Text="{Binding Variable.OpcUaNodeId, UpdateSourceTrigger=PropertyChanged}">
                         <hc:TextBox.Style>
-                            <Style TargetType="hc:TextBox" BasedOn="{StaticResource {x:Type hc:TextBox}}">
+                            <Style BasedOn="{StaticResource {x:Type hc:TextBox}}" TargetType="hc:TextBox">
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Variable.Protocol, Converter={StaticResource EnumToStringConverter}}" Value="OpcUa">
@@ -133,12 +156,19 @@
                         </ComboBox.ItemTemplate>
                     </hc:ComboBox>
 
-                    <hc:TextBox
+                    <hc:ComboBox
                         Grid.Row="2"
                         Grid.Column="2"
                         Margin="0,15,0,0"
                         hc:InfoElement.Title="数据类型:"
-                        Text="{Binding Variable.CSharpDataType, UpdateSourceTrigger=PropertyChanged}" />
+                        ItemsSource="{Binding Source={StaticResource CSharpDataType}}"
+                        SelectedItem="{Binding Variable.CSharpDataType, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </hc:ComboBox>
 
                     <hc:TextBox
                         Grid.Row="3"
