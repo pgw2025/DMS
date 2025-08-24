@@ -22,6 +22,7 @@
 
     <ui:ContentDialog.Resources>
         <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <valueConverts:EnumToStringConverter x:Key="EnumToStringConverter" />
         <ex:EnumBindingSource x:Key="ProtocolType" EnumType="{x:Type en:ProtocolType}" />
         <ex:EnumBindingSource x:Key="SignalType" EnumType="{x:Type enums:SignalType}" />
         <ex:EnumBindingSource x:Key="PollLevelType" EnumType="{x:Type enums:PollLevelType}" />
@@ -52,12 +53,43 @@
                         hc:InfoElement.Title="变量名称:"
                         Text="{Binding Variable.Name, UpdateSourceTrigger=PropertyChanged}" />
 
+                    <!-- S7 Address Field - Visible when Protocol is S7 -->
                     <hc:TextBox
                         Grid.Row="0"
                         Grid.Column="2"
                         MinWidth="150"
-                        hc:InfoElement.Title="节点ID:"
-                        Text="{Binding Variable.OpcUaNodeId, UpdateSourceTrigger=PropertyChanged}" />
+                        hc:InfoElement.Title="S7地址:"
+                        Text="{Binding Variable.S7Address, UpdateSourceTrigger=PropertyChanged}">
+                        <hc:TextBox.Style>
+                            <Style TargetType="hc:TextBox" BasedOn="{StaticResource {x:Type hc:TextBox}}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Variable.Protocol, Converter={StaticResource EnumToStringConverter}}" Value="S7">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </hc:TextBox.Style>
+                    </hc:TextBox>
+
+                    <!-- OPC UA Node ID Field - Visible when Protocol is OpcUa -->
+                    <hc:TextBox
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        MinWidth="150"
+                        hc:InfoElement.Title="OpcUa节点ID:"
+                        Text="{Binding Variable.OpcUaNodeId, UpdateSourceTrigger=PropertyChanged}">
+                        <hc:TextBox.Style>
+                            <Style TargetType="hc:TextBox" BasedOn="{StaticResource {x:Type hc:TextBox}}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Variable.Protocol, Converter={StaticResource EnumToStringConverter}}" Value="OpcUa">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </hc:TextBox.Style>
+                    </hc:TextBox>
 
                     <hc:ComboBox
                         Grid.Row="1"
