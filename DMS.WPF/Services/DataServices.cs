@@ -368,10 +368,10 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
             {
                 // 这是一个新变量表，添加到集合中
                 var newItem = _mapper.Map<VariableTableItemViewModel>(dto);
-                var device=Devices.FirstOrDefault(d=>d.Id==dto.DeviceId);
-                if (device!=null)
+                var device = Devices.FirstOrDefault(d => d.Id == dto.DeviceId);
+                if (device != null)
                 {
-                    newItem.Device=device;
+                    newItem.Device = device;
                 }
                 VariableTables.Add(newItem);
             }
@@ -500,7 +500,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
 
     public void AddVariable(VariableItemViewModel variableItem)
     {
-        if (variableItem==null)
+        if (variableItem == null)
         {
             return;
         }
@@ -611,5 +611,22 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 DeleteMenuItem(variableTableMenu);
             }
         }
+    }
+
+    public void DeleteVariableById(int id)
+    {
+        var variableItem = Variables.FirstOrDefault(v => v.Id == id);
+        if (variableItem == null)
+        {
+            return;
+        }
+
+        var variableTable = VariableTables.FirstOrDefault(vt => vt.Id == variableItem.VariableTableId);
+
+        variableTable.Variables.Remove(variableItem);
+
+        Variables.Remove(variableItem);
+
+
     }
 }

@@ -117,6 +117,23 @@ public abstract class BaseRepository<TEntity>
     }
 
     /// <summary>
+    /// 异步根据主键 ID 列表批量删除实体。
+    /// </summary>
+    /// <param name="ids">要删除的实体主键 ID 列表。</param>
+    /// <returns>返回受影响的行数。</returns>
+    public virtual async Task<int> DeleteByIdsAsync(List<int> ids)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Deleteable<TEntity>()
+                             .In(ids)
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        NlogHelper.Info($"DeleteByIds {typeof(TEntity).Name}, Count: {ids.Count}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
+
+    /// <summary>
     /// 异步根据指定条件获取单个实体。
     /// </summary>
     /// <param name="expression">查询条件的 Lambda 表达式。</param>

@@ -1,26 +1,27 @@
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Core.Enums;
-using DMS.Core.Interfaces;
-using DMS.Core.Models;
-using DMS.WPF.Services;
-using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Data;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Services;
+using DMS.Core.Enums;
+using DMS.Core.Interfaces;
+using DMS.Core.Models;
 using DMS.Helper;
+using DMS.WPF.Services;
+using DMS.WPF.ViewModels.Dialogs;
+using DMS.WPF.ViewModels.Items;
 using DMS.WPF.Views;
 using HandyControl.Controls;
 using HandyControl.Data;
 using HandyControl.Tools.Extension;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Data;
 
 namespace DMS.WPF.ViewModels;
 
@@ -55,6 +56,10 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     [ObservableProperty]
     private VariableItemViewModel _selectedVariable;
+
+
+    [ObservableProperty]
+    private IList _selectedVariables = new ArrayList();
 
     /// <summary>
     /// 用于过滤变量数据的搜索文本。
@@ -168,83 +173,9 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     public override void OnLoaded()
     {
         _variableItemList.AddRange(CurrentVariableTable.Variables);
-        //
-        //     // 创建原始数据的深拷贝备份，用于在取消保存时还原
-        //     var settings = new JsonSerializerSettings
-        //     {
-        //         ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        //     };
-        //     var serialized = JsonConvert.SerializeObject(Variables, settings);
-        //     _originalVariables = JsonConvert.DeserializeObject<ObservableCollection<Variable>>(serialized);
-        //
-        //     // 在数据加载完成后，将所有变量的 IsModified 状态重置为 false
-        //     foreach (var variable in Variables)
-        //     {
-        //         variable.IsModified = false;
-        //     }
-
-        // 标记加载完成
-        IsLoadCompletion = true;
     }
 
-    /// <summary>
-    /// 当用户尝试退出当前视图时异步调用。
-    /// 检查是否有未保存的修改，并提示用户是否保存或放弃更改。
-    /// </summary>
-    /// <returns>如果可以安全退出则为 true，否则为 false。</returns>
-    public override async Task<bool> OnExitAsync()
-    {
-        // 查找所有已修改的变量数据
-        var modifiedDatas = Variables.Where(d => d.IsModified == true)
-                                     .ToList();
-        // 如果没有修改，则直接允许退出
-        if (modifiedDatas.Count == 0)
-            return true;
 
-        // 提示用户有未保存的数据，询问是否离开
-        // var isExit = await _dialogService.ShowConfrimeDialog(
-        //     "数据未保存", $"你有{modifiedDatas.Count}个修改的变量没有保存，离开后这些数据就可能丢失了确认要离开吗？", "离开");
-
-        // // 如果用户选择不离开（即不保存），则还原数据
-        // if (!isExit)
-        // {
-        //     // 遍历所有已修改的数据，从原始备份中还原
-        //     foreach (var modifiedData in modifiedDatas)
-        //     {
-        //         var oldData = _originalVariables.First(od => od.Id == modifiedData.Id);
-        //         // 将原始数据复制回当前数据
-        //         _mapper.Map(oldData, modifiedData);
-        //         modifiedData.IsModified = false; // 重置修改状态
-        //     }
-        //
-        //     return false; // 不允许退出
-        // }
-
-        return true; // 允许退出
-    }
-
-    /// <summary>
-    /// 保存所有已修改的变量数据到数据库。
-    /// 此命令通常绑定到UI中的“保存”按钮。
-    /// </summary>
-    [RelayCommand]
-    private async void SaveModifiedVarData()
-    {
-        // // 查找所有已标记为修改的变量数据
-        // var modifiedDatas = Variables.Where(d => d.IsModified == true)
-        //                                  .ToList();
-        // // 更新数据库中的这些数据
-        // await _varDataRepository.UpdateAsync(modifiedDatas);
-        //
-        // // 还原所有已保存数据的修改状态
-        // foreach (var modifiedData in modifiedDatas)
-        // {
-        //     modifiedData.IsModified = false;
-        // }
-        //
-        // // 显示成功通知
-        // NotificationHelper.ShowSuccess($"修改的{modifiedDatas.Count}变量保存成功.");
-    }
 
     /// <summary>
     /// 编辑选定的变量数据。
@@ -447,58 +378,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         // }
     }
 
-    /// <summary>
-    /// 刷新数据列表，高效地同步UI显示数据与数据库最新数据。
-    /// </summary>
-    private async Task RefreshDataView()
-    {
-        // // 从数据库加载最新的变量数据
-        // var latestVariables = await _varDataRepository.GetByVariableTableIdAsync(VariableTable.Id);
-        //
-        // // 将最新数据转换为字典，以便快速查找
-        // var latestVariablesDict = latestVariables.ToDictionary(v => v.Id);
-        //
-        // // 用于存储需要从 Variables 中移除的项
-        // var itemsToRemove = new List<Variable>();
-        //
-        // // 遍历当前 Variables 集合，处理删除和更新
-        // for (int i = Variables.Count - 1; i >= 0; i--)
-        // {
-        //     var currentVariable = Variables[i];
-        //     if (latestVariablesDict.TryGetValue(currentVariable.Id, out var newVariable))
-        //     {
-        //         // 如果存在于最新数据中，检查是否需要更新
-        //         if (!currentVariable.Equals(newVariable))
-        //         {
-        //             // 使用 AutoMapper 更新现有对象的属性，保持对象引用不变
-        //             _mapper.Map(newVariable, currentVariable);
-        //         }
-        //
-        //         // 从字典中移除已处理的项，剩余的将是新增项
-        //         latestVariablesDict.Remove(currentVariable.Id);
-        //     }
-        //     else
-        //     {
-        //         // 如果不存在于最新数据中，则标记为删除
-        //         itemsToRemove.Add(currentVariable);
-        //     }
-        // }
-        //
-        // // 移除已标记的项
-        // foreach (var item in itemsToRemove)
-        // {
-        //     Variables.Remove(item);
-        // }
-        //
-        // // 添加所有剩余在 latestVariablesDict 中的项（这些是新增项）
-        // foreach (var newVariable in latestVariablesDict.Values)
-        // {
-        //     Variables.Add(newVariable);
-        // }
-        //
-        // // 刷新视图以应用所有更改
-        // VariableView.Refresh();
-    }
 
     //
     /// <summary>
@@ -554,48 +433,51 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="variablesToDelete">要删除的变量数据列表。</param>
     [RelayCommand]
-    public async Task DeleteVarData(List<Variable> variablesToDelete)
+    public async Task DeleteVariable()
     {
-        // // 检查是否有变量被选中
-        // if (variablesToDelete == null || !variablesToDelete.Any())
-        // {
-        //     NotificationHelper.ShowInfo("请选择要删除的变量");
-        //     return;
-        // }
-        //
-        // // 拼接要删除的变量名称，用于确认提示
-        // var names = string.Join("、", variablesToDelete.Select(v => v.Name));
-        //
-        // // 显示确认删除对话框
-        // var confirm = await _dialogService.ShowConfrimeDialog(
-        //     "删除确认",
-        //     $"确定要删除选中的 {variablesToDelete.Count} 个变量吗？\n\n{names}",
-        //     "删除");
-        //
-        // if (!confirm)
-        //     return; // 如果用户取消删除，则返回
-        //
-        // try
-        // {
-        //     // 从数据库中删除变量数据
-        //     var result = await _varDataRepository.DeleteAsync(variablesToDelete);
-        //     if (result > 0)
-        //     {
-        //         await RefreshDataView();
-        //         // 显示成功通知
-        //         NotificationHelper.ShowSuccess($"成功删除 {result} 个变量");
-        //     }
-        //     else
-        //     {
-        //         // 显示删除失败通知
-        //         NotificationHelper.ShowError("删除变量失败");
-        //     }
-        // }
-        // catch (Exception e)
-        // {
-        //     // 捕获并显示错误通知
-        //     NotificationHelper.ShowError($"删除变量的过程中发生了不可预期的错误：{e.Message}", e);
-        // }
+        try
+        {
+            List<VariableItemViewModel> variablesToDelete = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+            // 检查是否有变量被选中
+            if (variablesToDelete == null || !variablesToDelete.Any())
+            {
+                NotificationHelper.ShowInfo("请选择要删除的变量");
+                return;
+            }
+
+            // 拼接要删除的变量名称，用于确认提示
+            var names = string.Join("、", variablesToDelete.Select(v => v.Name));
+
+            // 显示确认删除对话框
+            ConfirmDialogViewModel confirmDialogViewModel = new ConfirmDialogViewModel("删除变量", $"确认要删除变量：{names},删除后不可恢复，确认要删除吗？", "删除变量");
+            var isDel = await _dialogService.ShowDialogAsync(confirmDialogViewModel);
+
+            if (!isDel)
+                return; // 如果用户取消删除，则返回
+
+            // 从数据库中删除变量数据
+            var result = await _variableAppService.DeleteVariablesAsync(variablesToDelete.Select(v => v.Id).ToList());
+            if (result)
+            {
+                foreach (var variable in variablesToDelete)
+                {
+                    _variableItemList.Remove(variable);
+                    _dataServices.DeleteVariableById(variable.Id);
+                } 
+                // 显示成功通知
+                NotificationHelper.ShowSuccess($"成功删除 {variablesToDelete.Count} 个变量");
+            }
+            else
+            {
+                // 显示删除失败通知
+                NotificationHelper.ShowError("删除变量失败");
+            }
+        }
+        catch (Exception e)
+        {
+            // 捕获并显示错误通知
+            NotificationHelper.ShowError($"删除变量的过程中发生了不可预期的错误：{e.Message}", e);
+        }
     }
 
     /// <summary>

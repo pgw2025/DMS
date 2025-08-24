@@ -174,6 +174,23 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     }
     
     /// <summary>
+    /// 异步根据ID列表批量删除变量。
+    /// </summary>
+    /// <param name="ids">要删除变量的唯一标识符列表。</param>
+    /// <returns>受影响的行数。</returns>
+    public async Task<int> DeleteByIdsAsync(List<int> ids)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Deleteable<DbVariable>()
+                             .In(ids)
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        NlogHelper.Info($"Delete {typeof(DbVariable)},Count={ids.Count},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
+    
+    /// <summary>
     /// 异步获取指定数量的变量。
     /// </summary>
     /// <param name="number">要获取的变量数量。</param>

@@ -127,6 +127,43 @@ public class VariableAppService : IVariableAppService
         }
     }
 
+    /// <summary>
+    /// 异步批量删除变量（事务性操作）。
+    /// </summary>
+    /// <param name="ids">要删除的变量ID列表。</param>
+    /// <returns>如果删除成功则为 true，否则为 false。</returns>
+    /// <exception cref="ArgumentException">如果ID列表为空或null。</exception>
+    /// <exception cref="ApplicationException">如果删除变量时发生错误。</exception>
+    public async Task<bool> DeleteVariablesAsync(List<int> ids)
+    {
+        if (ids == null || !ids.Any())
+        {
+            throw new ArgumentException("变量ID列表不能为空", nameof(ids));
+        }
+
+        try
+        {
+            await _repoManager.BeginTranAsync();
+            
+            // 批量删除变量
+            var deletedCount = await _repoManager.Variables.DeleteByIdsAsync(ids);
+            
+            // 检查是否所有变量都被成功删除
+            if (deletedCount != ids.Count)
+            {
+                throw new InvalidOperationException($"删除变量失败：请求删除 {ids.Count} 个变量，实际删除 {deletedCount} 个变量");
+            }
+            
+            await _repoManager.CommitAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException($"批量删除变量时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
+        }
+    }
+
     public async Task<bool> BatchImportVariablesAsync(List<VariableDto> variables)
     {
         try

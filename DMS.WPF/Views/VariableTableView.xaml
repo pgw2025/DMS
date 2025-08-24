@@ -6,6 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
     xmlns:ex="clr-namespace:DMS.Extensions"
+    xmlns:helper="clr-namespace:DMS.WPF.Helper"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
@@ -61,19 +63,12 @@
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
 
-                <ui:AppBarButton Click="DeleteVarData_Click" Label="删除变量">
+                <ui:AppBarButton Command="{Binding DeleteVariableCommand}" Label="删除变量">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
                     </ui:AppBarButton.Icon>
                 </ui:AppBarButton>
 
-
-                <ui:AppBarButton Command="{Binding SaveModifiedVarDataCommand}" Label="保存变量">
-                    <ui:AppBarButton.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" />
-                    </ui:AppBarButton.Icon>
-
-                </ui:AppBarButton>
                 <ui:AppBarButton
                     Command="{Binding ImprotFromTiaVarTableCommand}"
                     Label="从TIA变量表导入"
@@ -149,6 +144,10 @@
             SelectedItem="{Binding SelectedVariable}"
             SelectionMode="Extended"
             Style="{StaticResource DataGridBaseStyle}">
+            <i:Interaction.Behaviors>
+                <helper:SelectedItemsBehavior SelectedItems="{Binding SelectedVariables}" />
+            </i:Interaction.Behaviors>
+
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem
@@ -167,14 +166,9 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Click="DeleteVarData_Click" Header="删除变量">
+                    <MenuItem Command="{Binding DeleteVariableCommand}" Header="删除变量">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Command="{Binding SaveModifiedVarDataCommand}" Header="保存变量">
-                        <MenuItem.Icon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" />
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem
