@@ -7,6 +7,7 @@ using Opc.Ua.Client;
 using Microsoft.Extensions.Logging;
 using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
+using DMS.Infrastructure.Helper;
 
 namespace DMS.Infrastructure.Services;
 

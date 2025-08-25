@@ -26,6 +26,8 @@ using DMS.WPF.ViewModels.Dialogs;
 using DataProcessingService = DMS.Services.DataProcessingService;
 using IDataProcessingService = DMS.Services.IDataProcessingService;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using DMS.Core.Interfaces.Services;
+using DMS.Infrastructure.Interfaces.Services;
 
 namespace DMS;
 
@@ -156,6 +158,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IInitializeRepository, InitializeRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IExcelService, ExcelService>();
+
+        services.AddSingleton<IOpcUaService, OpcUaService>();
         
         
         // 注册App服务
@@ -182,6 +186,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<MqttsViewModel>();
         // 注册对话框模型
         services.AddTransient<ImportExcelDialogViewModel>();
+        services.AddTransient<ImportOpcUaDialogViewModel>();
         services.AddTransient<VariableDialogViewModel>();
         // 注册对话框
         services.AddSingleton<DevicesView>();

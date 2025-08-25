@@ -6,17 +6,17 @@ using iNKORE.UI.WPF.Modern.Controls;
 namespace DMS.WPF.Views.Dialogs;
 
 /// <summary>
-/// OpcUaImportDialog.xaml 的交互逻辑
+/// ImportOpcUaDialog.xaml 的交互逻辑
 /// </summary>
-public partial class OpcUaImportDialog : ContentDialog
+public partial class ImportOpcUaDialog : ContentDialog
 {
-    public OpcUaImportDialogViewModel ViewModel
+    public ImportOpcUaDialogViewModel ViewModel
     {
-        get => (OpcUaImportDialogViewModel)DataContext;
+        get => (ImportOpcUaDialogViewModel)DataContext;
         set => DataContext = value;
     }
 
-    public OpcUaImportDialog(OpcUaImportDialogViewModel viewModel)
+    public ImportOpcUaDialog(ImportOpcUaDialogViewModel viewModel)
     {
         InitializeComponent();
         ViewModel = viewModel;

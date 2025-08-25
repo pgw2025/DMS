@@ -364,4 +364,6 @@ FodyWeavers.xsd
 
 # Rider/JetBrains IDEs
 .idea/
-/OpcUaTestApp/OpcUaTestApp.csproj
+/OpcUaTestApp/
+/OpcUaExample/
+.gitignore

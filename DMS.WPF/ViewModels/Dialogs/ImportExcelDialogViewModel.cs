@@ -4,7 +4,7 @@ using System.Linq;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Core.Interfaces;
+using DMS.Core.Interfaces.Services;
 using DMS.Core.Models;
 using DMS.Helper;
 using DMS.WPF.ViewModels.Items;

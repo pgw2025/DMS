@@ -66,7 +66,7 @@
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="Views\Dialogs\OpcUaImportDialog.xaml">
+    <Page Update="Views\Dialogs\ImportOpcUaDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
