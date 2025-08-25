@@ -15,6 +15,7 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -22,9 +23,31 @@
             <ColumnDefinition Width="2*" />
         </Grid.ColumnDefinitions>
 
+        <!--  连接区域  -->
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="0,0,0,10"
+            Orientation="Horizontal">
+            <TextBox
+                x:Name="EndpointUrlTextBox"
+                Width="300"
+                Margin="0,0,10,0"
+                VerticalAlignment="Center"
+                IsEnabled="False"
+                Text="{Binding EndpointUrl, UpdateSourceTrigger=PropertyChanged}" />
+            <Button
+                x:Name="ConnectButton"
+                Command="{Binding ConnectCommand}"
+                Content="{Binding ConnectButtonText}"
+                IsEnabled="{Binding IsConnectButtonEnabled}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+
         <!--  节点树  -->
         <TreeView
-            Grid.Row="0"
+            Grid.Row="1"
             Grid.Column="0"
             Margin="0,0,10,0"
             ItemsSource="{Binding OpcUaNodes}"
@@ -48,7 +71,7 @@
 
         <!--  变量列表  -->
         <DataGrid
-            Grid.Row="0"
+            Grid.Row="1"
             Grid.Column="1"
             AutoGenerateColumns="False"
             IsReadOnly="True"

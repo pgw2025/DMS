@@ -1,14 +1,15 @@
 // 文件: DMS.WPF/Services/NavigationService.cs
 
+using DMS.Helper;
+using DMS.ViewModels;
 using DMS.WPF.ViewModels;
+using DMS.WPF.ViewModels.Items;
+using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
-using DMS.ViewModels;
-using DMS.WPF.ViewModels.Items;
-using DMS.WPF.Views;
 
 namespace DMS.WPF.Services;
 
@@ -39,6 +40,13 @@ public class NavigationService : INavigationService
 
         var mainViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
         var viewModel = GetViewModelByKey(menu.TargetViewKey);
+        if (viewModel == null)
+        {
+
+            NotificationHelper.ShowError($"切换界面失败，没有找到界面：{menu.TargetViewKey}");
+            return;
+        }
+
 
         if (viewModel is INavigatable navigatableViewModel)
         {
@@ -70,7 +78,7 @@ public class NavigationService : INavigationService
             case "SettingView":
                 return App.Current.Services.GetRequiredService<SettingViewModel>();
             default:
-                throw new KeyNotFoundException($"未找到与键 '{key}' 关联的视图模型类型。请检查 NavigationService 的映射配置。");
+                return null;
         }
     }
 }

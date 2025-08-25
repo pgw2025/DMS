@@ -17,7 +17,6 @@ public partial class MqttsViewModel : ViewModelBase
     private readonly DataServices _dataServices;
     private readonly IDialogService _dialogService;
     private readonly ILogger<MqttsViewModel> _logger;
-    private readonly NavgatorServices _navgatorServices;
     [ObservableProperty]
     private ObservableCollection<MqttServerItemViewModel> _mqtts;
 

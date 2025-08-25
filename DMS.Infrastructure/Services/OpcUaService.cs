@@ -14,7 +14,7 @@ namespace DMS.Infrastructure.Services
     public class OpcUaService : IOpcUaService
     {
         private Session? _session;
-        private string? _serverUrl;
+        private string _serverUrl;
 
         /// <summary>
         /// 创建 OPC UA 会话
@@ -22,17 +22,14 @@ namespace DMS.Infrastructure.Services
         /// <param name="opcUaServerUrl">OPC UA 服务器地址</param>
         /// <param name="stoppingToken">取消令牌</param>
         /// <returns></returns>
-        public async Task CreateSession(string opcUaServerUrl, CancellationToken stoppingToken = default)
+        public async Task CreateSession( CancellationToken stoppingToken = default)
         {
-            if (string.IsNullOrEmpty(opcUaServerUrl))
-            {
-                throw new ArgumentException("OPC UA server URL cannot be null or empty.", nameof(opcUaServerUrl));
-            }
+          
 
             try
             {
-                _session = await OpcUaHelper.CreateOpcUaSessionAsync(opcUaServerUrl, stoppingToken);
-                _serverUrl = opcUaServerUrl;
+                _session = await OpcUaHelper.CreateOpcUaSessionAsync(_serverUrl, stoppingToken);
+                
             }
             catch (Exception ex)
             {
@@ -43,13 +40,18 @@ namespace DMS.Infrastructure.Services
         /// <summary>
         /// 连接到 OPC UA 服务器
         /// </summary>
-        public async Task ConnectAsync(CancellationToken stoppingToken = default)
+        public async Task ConnectAsync(string opcUaServerUrl, CancellationToken stoppingToken = default)
         {
+            _serverUrl = opcUaServerUrl;
+            if (string.IsNullOrEmpty(opcUaServerUrl))
+            {
+                throw new ArgumentException("OPC UA server URL cannot be null or empty.", nameof(opcUaServerUrl));
+            }
             if (string.IsNullOrEmpty(_serverUrl))
             {
                 throw new InvalidOperationException("Server URL is not set. Please call CreateSession first.");
             }
-
+            
             // 如果已经连接，直接返回
             if (_session?.Connected == true)
             {
@@ -57,43 +59,10 @@ namespace DMS.Infrastructure.Services
             }
 
             // 重新创建会话
-            await CreateSession(_serverUrl, stoppingToken);
+            await CreateSession( stoppingToken);
         }
 
-        /// <summary>
-        /// 连接到 OPC UA 服务器（同步版本，用于向后兼容）
-        /// </summary>
-        public void Connect()
-        {
-            if (string.IsNullOrEmpty(_serverUrl))
-            {
-                throw new InvalidOperationException("Server URL is not set. Please call CreateSession first.");
-            }
-
-            // 如果已经连接，直接返回
-            if (_session?.Connected == true)
-            {
-                return;
-            }
-
-            // 检查会话是否存在但未连接
-            if (_session != null)
-            {
-                // 尝试重新激活会话
-                try
-                {
-                    _session.Reconnect();
-                    return;
-                }
-                catch
-                {
-                    // 如果重新连接失败，继续到重新创建会话的步骤
-                }
-            }
-
-            // 如果没有会话或重新连接失败，抛出异常提示需要调用 CreateSession
-            throw new InvalidOperationException("Session is not created or connection lost. Please call CreateSession first.");
-        }
+       
 
         /// <summary>
         /// 断开 OPC UA 服务器连接

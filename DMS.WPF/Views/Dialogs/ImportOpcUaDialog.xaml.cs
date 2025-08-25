@@ -10,16 +10,10 @@ namespace DMS.WPF.Views.Dialogs;
 /// </summary>
 public partial class ImportOpcUaDialog : ContentDialog
 {
-    public ImportOpcUaDialogViewModel ViewModel
-    {
-        get => (ImportOpcUaDialogViewModel)DataContext;
-        set => DataContext = value;
-    }
 
-    public ImportOpcUaDialog(ImportOpcUaDialogViewModel viewModel)
+    public ImportOpcUaDialog()
     {
         InitializeComponent();
-        ViewModel = viewModel;
     }
 
     private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)

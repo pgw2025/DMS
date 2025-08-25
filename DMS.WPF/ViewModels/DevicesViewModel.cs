@@ -106,8 +106,8 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                              {
                                  Header = device.Name,
                                  Icon = SegoeFluentIcons.Devices2.Glyph,
-                                 TargetViewKey = "DevicesView"
-                             };
+                                 TargetViewKey = "DeviceDetailView"
+            };
             if (device.IsAddDefVarTable)
             {
                 dto.VariableTable = new VariableTableDto()

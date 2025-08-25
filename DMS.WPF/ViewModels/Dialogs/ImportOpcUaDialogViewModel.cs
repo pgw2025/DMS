@@ -2,7 +2,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Models;
 using DMS.Helper;
+using DMS.Infrastructure.Interfaces.Services;
 using DMS.WPF.ViewModels.Items;
+using Opc.Ua;
 using Opc.Ua.Client;
 using System.Collections.ObjectModel;
 
@@ -27,14 +29,25 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     [ObservableProperty]
     private bool _isConnected;
 
+    [ObservableProperty]
+    private string _connectButtonText="连接服务器";
+
+    [ObservableProperty]
+    private bool _isConnectButtonEnabled = true;
+
     private Session _session;
 
-    public ImportOpcUaDialogViewModel()
+    private readonly IOpcUaService _opcUaService;
+
+    private CancellationTokenSource _cancellationTokenSource;
+
+    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService)
     {
         //OpcUaNodes = new ObservableCollection<OpcUaNode>();
         SelectedNodeVariables = new ObservableCollection<Variable>();
-        // Automatically connect when the ViewModel is created
-        //ConnectC.Execute(null);
+        this._opcUaService = opcUaService;
+
+        _cancellationTokenSource=new CancellationTokenSource();
 
     }
 
@@ -44,27 +57,29 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         try
         {
             // 断开现有连接
-            if (_session != null && _session.Connected)
+            if (!_opcUaService.IsConnected())
             {
-                await _session.CloseAsync();
-                _session.Dispose();
-                _session = null;
+               await _opcUaService.ConnectAsync(EndpointUrl, _cancellationTokenSource.Token);
             }
 
-            IsConnected = false;
-            SelectedNodeVariables.Clear();
+            IsConnected= _opcUaService.IsConnected();
+            if (IsConnected)
+            {
+                ConnectButtonText = "已连接";
+                IsConnectButtonEnabled = false;
+            }
 
-            //_session = await ServiceHelper.CreateOpcUaSessionAsync(EndpointUrl);
-
-            NotificationHelper.ShowSuccess($"已连接到 OPC UA 服务器: {EndpointUrl}");
-            IsConnected = true;
 
             // 浏览根节点
+            var rootNodeId = new NodeId(ObjectIds.ObjectsFolder);
+            var list=_opcUaService.BrowseNodes(rootNodeId);
             //await BrowseNodes(OpcUaNodes, ObjectIds.ObjectsFolder);
         }
         catch (Exception ex)
         {
             IsConnected = false;
+            IsConnectButtonEnabled = false;
+            ConnectButtonText = "连接服务器";
             NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
         }
     }

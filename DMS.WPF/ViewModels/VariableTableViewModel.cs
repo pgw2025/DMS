@@ -286,7 +286,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             }
 
             // 显示OPC UA导入对话框，让用户选择要导入的变量
-            ImportOpcUaDialogViewModel importOpcUaDialogViewModel = new ImportOpcUaDialogViewModel();
+            ImportOpcUaDialogViewModel importOpcUaDialogViewModel = App.Current.Services.GetRequiredService<ImportOpcUaDialogViewModel>() ;
             var importedVariables = await _dialogService.ShowDialogAsync(importOpcUaDialogViewModel);
             if (importedVariables == null || !importedVariables.Any())
             {

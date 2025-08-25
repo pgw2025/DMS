@@ -9,25 +9,15 @@ namespace DMS.Infrastructure.Interfaces.Services
 {
     public interface IOpcUaService
     {
-        /// <summary>
-        /// 创建 OPC UA 会话
-        /// </summary>
-        /// <param name="opcUaServerUrl">OPC UA 服务器地址</param>
-        /// <param name="stoppingToken">取消令牌</param>
-        /// <returns></returns>
-        public Task CreateSession(string opcUaServerUrl, CancellationToken stoppingToken = default);
 
         /// <summary>
         /// 连接到 OPC UA 服务器（异步）
         /// </summary>
         /// <param name="stoppingToken">取消令牌</param>
         /// <returns></returns>
-        public Task ConnectAsync(CancellationToken stoppingToken = default);
+        public Task ConnectAsync(string opcUaServerUrl,CancellationToken stoppingToken = default);
 
-        /// <summary>
-        /// 连接到 OPC UA 服务器（同步）
-        /// </summary>
-        public void Connect();
+
 
         /// <summary>
         /// 断开 OPC UA 服务器连接
