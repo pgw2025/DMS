@@ -50,7 +50,7 @@
             Grid.Row="1"
             Grid.Column="0"
             Margin="0,0,10,0"
-            ItemsSource="{Binding OpcUaNodes}"
+            ItemsSource="{Binding RootOpcUaNode.Children}"
             SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.Style>
                 <Style BasedOn="{StaticResource {x:Type TreeView}}" TargetType="TreeView">

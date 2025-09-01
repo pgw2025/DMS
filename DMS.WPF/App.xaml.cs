@@ -159,7 +159,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IExcelService, ExcelService>();
 
-        services.AddSingleton<IOpcUaService, OpcUaService>();
+        services.AddTransient<IOpcUaService, OpcUaService>();
         
         
         // 注册App服务

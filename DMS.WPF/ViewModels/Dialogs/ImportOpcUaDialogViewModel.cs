@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Models;
 using DMS.Helper;
 using DMS.Infrastructure.Interfaces.Services;
+using DMS.Infrastructure.Models;
 using DMS.WPF.ViewModels.Items;
 using Opc.Ua;
 using Opc.Ua.Client;
@@ -15,8 +16,8 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     [ObservableProperty]
     private string _endpointUrl = "opc.tcp://127.0.0.1:4855"; // 默认值
 
-    //[ObservableProperty]
-    //private ObservableCollection<OpcUaNode> _opcUaNodes;
+    [ObservableProperty]
+    private OpcUaNode _rootOpcUaNode;
 
     [ObservableProperty]
     private ObservableCollection<Variable> _selectedNodeVariables;
@@ -30,7 +31,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     private bool _isConnected;
 
     [ObservableProperty]
-    private string _connectButtonText="连接服务器";
+    private string _connectButtonText = "连接服务器";
 
     [ObservableProperty]
     private bool _isConnectButtonEnabled = true;
@@ -46,8 +47,8 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         //OpcUaNodes = new ObservableCollection<OpcUaNode>();
         SelectedNodeVariables = new ObservableCollection<Variable>();
         this._opcUaService = opcUaService;
-
-        _cancellationTokenSource=new CancellationTokenSource();
+        RootOpcUaNode = new OpcUaNode() { DisplayName = "根节点", NodeId = Objects.ObjectsFolder };
+        _cancellationTokenSource = new CancellationTokenSource();
 
     }
 
@@ -57,13 +58,12 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         try
         {
             // 断开现有连接
-            if (!_opcUaService.IsConnected())
+            if (!_opcUaService.IsConnected)
             {
-               await _opcUaService.ConnectAsync(EndpointUrl, _cancellationTokenSource.Token);
+                await _opcUaService.ConnectAsync(EndpointUrl);
             }
 
-            IsConnected= _opcUaService.IsConnected();
-            if (IsConnected)
+            if (_opcUaService.IsConnected)
             {
                 ConnectButtonText = "已连接";
                 IsConnectButtonEnabled = false;
@@ -71,9 +71,10 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
 
             // 浏览根节点
-            var rootNodeId = new NodeId(ObjectIds.ObjectsFolder);
-            var list=_opcUaService.BrowseNodes(rootNodeId);
-            //await BrowseNodes(OpcUaNodes, ObjectIds.ObjectsFolder);
+
+            await _opcUaService.BrowseNode(RootOpcUaNode);
+
+
         }
         catch (Exception ex)
         {
