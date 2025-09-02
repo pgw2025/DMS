@@ -101,6 +101,41 @@ public class VariableAppService : IVariableAppService
     }
 
     /// <summary>
+    /// 异步批量更新变量（事务性操作）。
+    /// </summary>
+    /// <param name="variableDtos">要更新的变量数据传输对象列表。</param>
+    /// <returns>受影响的行数。</returns>
+    /// <exception cref="ApplicationException">如果更新变量时发生错误。</exception>
+    public async Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos)
+    {
+        try
+        {
+            await _repoManager.BeginTranAsync();
+            int totalAffected = 0;
+            
+            foreach (var variableDto in variableDtos)
+            {
+                var variable = await _repoManager.Variables.GetByIdAsync(variableDto.Id);
+                if (variable == null)
+                {
+                    throw new ApplicationException($"Variable with ID {variableDto.Id} not found.");
+                }
+                _mapper.Map(variableDto, variable);
+                int res = await _repoManager.Variables.UpdateAsync(variable);
+                totalAffected += res;
+            }
+            
+            await _repoManager.CommitAsync();
+            return totalAffected;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException($"批量更新变量时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
     /// 异步删除一个变量（事务性操作）。
     /// </summary>
     /// <param name="id">要删除变量的ID。</param>

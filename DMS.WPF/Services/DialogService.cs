@@ -20,6 +20,7 @@ namespace DMS.WPF.Services
             { typeof(ImportExcelDialogViewModel), typeof(ImportExcelDialog) },
             { typeof(ImportOpcUaDialogViewModel), typeof(ImportOpcUaDialog) },
             { typeof(VariableDialogViewModel), typeof(VariableDialog) },
+            { typeof(PollLevelDialogViewModel), typeof(PollLevelDialog) },
             // { typeof(MqttDialogViewModel), typeof(MqttDialog) }, // Add other mappings here
             // ... other dialogs
         };

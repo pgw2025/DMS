@@ -5,10 +5,9 @@ namespace DMS.WPF.Views.Dialogs
 {
     public partial class PollLevelDialog : ContentDialog
     {
-        public PollLevelDialog(PollLevelDialogViewModel viewModel)
+        public PollLevelDialog()
         {
             InitializeComponent();
-            DataContext = viewModel;
         }
     }
 }

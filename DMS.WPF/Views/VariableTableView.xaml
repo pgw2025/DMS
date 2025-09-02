@@ -148,7 +148,7 @@
 
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Command="{Binding AddVarDataCommand}" Header="添加变量">
+                    <MenuItem Command="{Binding AddVariableCommand}" Header="添加变量">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                         </MenuItem.Icon>

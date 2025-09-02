@@ -277,7 +277,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         try
         {
-            if (CurrentVariableTable.Device==null)
+            if (CurrentVariableTable.Device == null)
             {
                 NotificationHelper.ShowError("当前变量表的Device对象为空，请检查。");
                 return;
@@ -454,37 +454,44 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="variablesToChange">要修改轮询频率的变量数据列表。</param>
     [RelayCommand]
-    public async Task ChangePollLevel(IList<object> variablesToChange)
+    public async Task ChangePollLevel()
     {
-        // var validVariables = variablesToChange?.OfType<Variable>()
-        //                                       .ToList();
-        //
-        // // 检查是否有变量被选中
-        // if (validVariables == null || !validVariables.Any())
-        // {
-        //     NotificationHelper.ShowInfo("请选择要修改轮询频率的变量");
-        //     return;
-        // }
-        //
-        // // 显示轮询频率选择对话框，并传入第一个变量的当前轮询频率作为默认值
-        // var newPollLevelType = await _dialogService.ShowPollLevelDialog(validVariables.First()
-        //                                                                     .PollLevelType);
-        // if (newPollLevelType.HasValue)
-        // {
-        //     // 更新所有选定变量的轮询频率和修改状态
-        //     foreach (var variable in validVariables)
-        //     {
-        //         variable.PollLevelType = newPollLevelType.Value;
-        //         variable.IsModified = false; // 标记为未修改，因为已保存到数据库
-        //     }
-        //
-        //     // 批量更新数据库中的变量数据
-        //     await _varDataRepository.UpdateAsync(validVariables);
-        //
-        //     await RefreshDataView();
-        //     // 显示成功通知
-        //     NotificationHelper.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询频率");
-        // }
+        // 检查是否有变量被选中
+        if (SelectedVariables.Count == 0)
+        {
+            NotificationHelper.ShowInfo("请选择要修改轮询频率的变量");
+            return;
+        }
+
+        // 获取选中的变量列表
+        var validVariables = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+
+        // 显示轮询频率选择对话框，并传入第一个变量的当前轮询频率作为默认值
+        PollLevelDialogViewModel viewModel = new PollLevelDialogViewModel(validVariables.First().PollLevel);
+        var newPollLevelType = await _dialogService.ShowDialogAsync(viewModel);
+        if (newPollLevelType.HasValue)
+        {
+            // 更新所有选定变量的轮询频率和修改状态
+            foreach (var variable in validVariables)
+            {
+                variable.PollLevel = newPollLevelType.Value;
+                variable.UpdatedAt = DateTime.Now;
+            }
+
+            // 批量更新数据库中的变量数据
+            var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
+            var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
+            
+            if (result > 0)
+            {
+                // 显示成功通知
+                NotificationHelper.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询频率");
+            }
+            else
+            {
+                NotificationHelper.ShowError("更新轮询频率失败");
+            }
+        }
     }
 
     /// <summary>
