@@ -147,7 +147,7 @@ public class DataCenterService : IDataCenterService
     {
         if (Devices.TryAdd(deviceDto.Id, deviceDto))
         {
-            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Added, deviceDto.Id, deviceDto.Name));
+            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Added, deviceDto));
         }
     }
 
@@ -157,7 +157,7 @@ public class DataCenterService : IDataCenterService
     public void UpdateDeviceInMemory(DeviceDto deviceDto)
     {
         Devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
-        OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto.Id, deviceDto.Name));
+        OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class DataCenterService : IDataCenterService
     {
         if (Devices.TryRemove(deviceId, out var deviceDto))
         {
-            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Deleted, deviceId, deviceDto?.Name ?? ""));
+            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
         }
     }
 
@@ -220,13 +220,18 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddVariableTableToMemory(VariableTableDto variableTableDto)
     {
+        DeviceDto deviceDto = null;
+        if (Devices.TryGetValue(variableTableDto.DeviceId, out var device))
+        {
+            deviceDto = device;
+        }
+
         if (VariableTables.TryAdd(variableTableDto.Id, variableTableDto))
         {
             OnVariableTableChanged(new VariableTableChangedEventArgs(
                 DataChangeType.Added, 
-                variableTableDto.Id, 
-                variableTableDto.Name, 
-                variableTableDto.DeviceId));
+                variableTableDto,
+                deviceDto));
         }
     }
 
@@ -235,12 +240,17 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateVariableTableInMemory(VariableTableDto variableTableDto)
     {
+        DeviceDto deviceDto = null;
+        if (Devices.TryGetValue(variableTableDto.DeviceId, out var device))
+        {
+            deviceDto = device;
+        }
+
         VariableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
         OnVariableTableChanged(new VariableTableChangedEventArgs(
             DataChangeType.Updated, 
-            variableTableDto.Id, 
-            variableTableDto.Name, 
-            variableTableDto.DeviceId));
+            variableTableDto,
+            deviceDto));
     }
 
     /// <summary>
@@ -250,11 +260,16 @@ public class DataCenterService : IDataCenterService
     {
         if (VariableTables.TryRemove(variableTableId, out var variableTableDto))
         {
+            DeviceDto deviceDto = null;
+            if (variableTableDto != null && Devices.TryGetValue(variableTableDto.DeviceId, out var device))
+            {
+                deviceDto = device;
+            }
+
             OnVariableTableChanged(new VariableTableChangedEventArgs(
                 DataChangeType.Deleted, 
-                variableTableId, 
-                variableTableDto?.Name ?? "", 
-                variableTableDto?.DeviceId ?? 0));
+                variableTableDto,
+                deviceDto));
         }
     }
 
@@ -347,13 +362,18 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddVariableToMemory(VariableDto variableDto)
     {
+        VariableTableDto variableTableDto = null;
+        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+        {
+            variableTableDto = variableTable;
+        }
+
         if (Variables.TryAdd(variableDto.Id, variableDto))
         {
             OnVariableChanged(new VariableChangedEventArgs(
                 DataChangeType.Added, 
-                variableDto.Id, 
-                variableDto.Name, 
-                variableDto.VariableTableId));
+                variableDto,
+                variableTableDto));
         }
     }
 
@@ -362,12 +382,17 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateVariableInMemory(VariableDto variableDto)
     {
+        VariableTableDto variableTableDto = null;
+        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+        {
+            variableTableDto = variableTable;
+        }
+
         Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
         OnVariableChanged(new VariableChangedEventArgs(
             DataChangeType.Updated, 
-            variableDto.Id, 
-            variableDto.Name, 
-            variableDto.VariableTableId));
+            variableDto,
+            variableTableDto));
     }
 
     /// <summary>
@@ -377,11 +402,16 @@ public class DataCenterService : IDataCenterService
     {
         if (Variables.TryRemove(variableId, out var variableDto))
         {
+            VariableTableDto variableTableDto = null;
+            if (variableDto != null && VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+            {
+                variableTableDto = variableTable;
+            }
+
             OnVariableChanged(new VariableChangedEventArgs(
                 DataChangeType.Deleted, 
-                variableId, 
-                variableDto?.Name ?? "", 
-                variableDto?.VariableTableId ?? 0));
+                variableDto,
+                variableTableDto));
         }
     }
 
@@ -392,13 +422,18 @@ public class DataCenterService : IDataCenterService
     {
         foreach (var variable in variables)
         {
+            VariableTableDto variableTableDto = null;
+            if (VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
+            {
+                variableTableDto = variableTable;
+            }
+
             if (Variables.TryAdd(variable.Id, variable))
             {
                 OnVariableChanged(new VariableChangedEventArgs(
                     DataChangeType.Added, 
-                    variable.Id, 
-                    variable.Name, 
-                    variable.VariableTableId));
+                    variable,
+                    variableTableDto));
             }
         }
         OnDataChanged(new DataChangedEventArgs(DataChangeType.BatchOperation));
@@ -411,12 +446,17 @@ public class DataCenterService : IDataCenterService
     {
         foreach (var variable in variables)
         {
+            VariableTableDto variableTableDto = null;
+            if (VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
+            {
+                variableTableDto = variableTable;
+            }
+
             Variables.AddOrUpdate(variable.Id, variable, (key, oldValue) => variable);
             OnVariableChanged(new VariableChangedEventArgs(
                 DataChangeType.Updated, 
-                variable.Id, 
-                variable.Name, 
-                variable.VariableTableId));
+                variable,
+                variableTableDto));
         }
         OnDataChanged(new DataChangedEventArgs(DataChangeType.BatchOperation));
     }
@@ -430,11 +470,16 @@ public class DataCenterService : IDataCenterService
         {
             if (Variables.TryRemove(variableId, out var variableDto))
             {
+                VariableTableDto variableTableDto = null;
+                if (variableDto != null && VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                {
+                    variableTableDto = variableTable;
+                }
+
                 OnVariableChanged(new VariableChangedEventArgs(
                     DataChangeType.Deleted, 
-                    variableId, 
-                    variableDto?.Name ?? "", 
-                    variableDto?.VariableTableId ?? 0));
+                    variableDto,
+                    variableTableDto));
             }
         }
         OnDataChanged(new DataChangedEventArgs(DataChangeType.BatchOperation));
@@ -551,15 +596,20 @@ public class DataCenterService : IDataCenterService
 
             // 触发数据加载完成事件
             OnDataLoadCompleted(new DataLoadCompletedEventArgs(
-                deviceDtos.Count, 
-                variableTableDtos.Count, 
-                variableDtos.Count, 
+                deviceDtos, 
+                variableTableDtos, 
+                variableDtos, 
                 true));
         }
         catch (Exception ex)
         {
             // 触发数据加载失败事件
-            OnDataLoadCompleted(new DataLoadCompletedEventArgs(0, 0, 0, false, ex.Message));
+            OnDataLoadCompleted(new DataLoadCompletedEventArgs(
+                new List<DeviceDto>(), 
+                new List<VariableTableDto>(), 
+                new List<VariableDto>(), 
+                false, 
+                ex.Message));
             throw new ApplicationException($"加载所有数据到内存时发生错误,错误信息:{ex.Message}", ex);
         }
     }

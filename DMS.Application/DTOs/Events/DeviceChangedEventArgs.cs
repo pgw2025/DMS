@@ -13,14 +13,9 @@ namespace DMS.Application.DTOs.Events
         public DataChangeType ChangeType { get; }
 
         /// <summary>
-        /// 设备ID
+        /// 设备DTO
         /// </summary>
-        public int DeviceId { get; }
-
-        /// <summary>
-        /// 设备名称
-        /// </summary>
-        public string DeviceName { get; }
+        public DeviceDto Device { get; }
 
         /// <summary>
         /// 变更时间
@@ -31,13 +26,11 @@ namespace DMS.Application.DTOs.Events
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
-        /// <param name="deviceId">设备ID</param>
-        /// <param name="deviceName">设备名称</param>
-        public DeviceChangedEventArgs(DataChangeType changeType, int deviceId, string deviceName)
+        /// <param name="device">设备DTO</param>
+        public DeviceChangedEventArgs(DataChangeType changeType, DeviceDto device)
         {
             ChangeType = changeType;
-            DeviceId = deviceId;
-            DeviceName = deviceName;
+            Device = device;
             ChangeTime = DateTime.Now;
         }
     }

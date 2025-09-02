@@ -13,19 +13,14 @@ namespace DMS.Application.DTOs.Events
         public DataChangeType ChangeType { get; }
 
         /// <summary>
-        /// 变量ID
+        /// 变量DTO
         /// </summary>
-        public int VariableId { get; }
+        public VariableDto Variable { get; }
 
         /// <summary>
-        /// 变量名称
+        /// 关联的变量表DTO
         /// </summary>
-        public string VariableName { get; }
-
-        /// <summary>
-        /// 关联的变量表ID
-        /// </summary>
-        public int VariableTableId { get; }
+        public VariableTableDto VariableTable { get; }
 
         /// <summary>
         /// 变更时间
@@ -36,15 +31,13 @@ namespace DMS.Application.DTOs.Events
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
-        /// <param name="variableId">变量ID</param>
-        /// <param name="variableName">变量名称</param>
-        /// <param name="variableTableId">关联的变量表ID</param>
-        public VariableChangedEventArgs(DataChangeType changeType, int variableId, string variableName, int variableTableId)
+        /// <param name="variable">变量DTO</param>
+        /// <param name="variableTable">关联的变量表DTO</param>
+        public VariableChangedEventArgs(DataChangeType changeType, VariableDto variable, VariableTableDto variableTable)
         {
             ChangeType = changeType;
-            VariableId = variableId;
-            VariableName = variableName;
-            VariableTableId = variableTableId;
+            Variable = variable;
+            VariableTable = variableTable;
             ChangeTime = DateTime.Now;
         }
     }

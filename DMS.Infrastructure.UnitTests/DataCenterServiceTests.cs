@@ -17,7 +17,6 @@ namespace DMS.Infrastructure.UnitTests
         {
             // Arrange
             var mockRepositoryManager = new Mock<IRepositoryManager>();
-            var mockMapper = new Mock<IMapper>();
             var mockDeviceAppService = new Mock<IDeviceAppService>();
             var mockVariableTableAppService = new Mock<IVariableTableAppService>();
             var mockVariableAppService = new Mock<IVariableAppService>();
@@ -25,7 +24,7 @@ namespace DMS.Infrastructure.UnitTests
             // Act
             var dataCenterService = new DataCenterService(
                 mockRepositoryManager.Object,
-                mockMapper.Object,
+                null, // 在测试中不会使用到mapper
                 mockDeviceAppService.Object,
                 mockVariableTableAppService.Object,
                 mockVariableAppService.Object);
@@ -39,7 +38,6 @@ namespace DMS.Infrastructure.UnitTests
         {
             // Arrange
             var mockRepositoryManager = new Mock<IRepositoryManager>();
-            var mockMapper = new Mock<IMapper>();
             var mockDeviceAppService = new Mock<IDeviceAppService>();
             var mockVariableTableAppService = new Mock<IVariableTableAppService>();
             var mockVariableAppService = new Mock<IVariableAppService>();
@@ -47,7 +45,7 @@ namespace DMS.Infrastructure.UnitTests
             // Act
             var dataCenterService = new DataCenterService(
                 mockRepositoryManager.Object,
-                mockMapper.Object,
+                null, // 在测试中不会使用到mapper
                 mockDeviceAppService.Object,
                 mockVariableTableAppService.Object,
                 mockVariableAppService.Object);
@@ -169,8 +167,7 @@ namespace DMS.Infrastructure.UnitTests
             // Assert
             Assert.NotNull(eventArgs);
             Assert.Equal(DataChangeType.Added, eventArgs.ChangeType);
-            Assert.Equal(1, eventArgs.DeviceId);
-            Assert.Equal("Test Device", eventArgs.DeviceName);
+            Assert.Equal(deviceDto, eventArgs.Device);
         }
     }
 }

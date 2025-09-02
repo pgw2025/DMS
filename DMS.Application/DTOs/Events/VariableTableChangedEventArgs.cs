@@ -13,19 +13,14 @@ namespace DMS.Application.DTOs.Events
         public DataChangeType ChangeType { get; }
 
         /// <summary>
-        /// 变量表ID
+        /// 变量表DTO
         /// </summary>
-        public int VariableTableId { get; }
+        public VariableTableDto VariableTable { get; }
 
         /// <summary>
-        /// 变量表名称
+        /// 关联的设备DTO
         /// </summary>
-        public string VariableTableName { get; }
-
-        /// <summary>
-        /// 关联的设备ID
-        /// </summary>
-        public int DeviceId { get; }
+        public DeviceDto Device { get; }
 
         /// <summary>
         /// 变更时间
@@ -36,15 +31,13 @@ namespace DMS.Application.DTOs.Events
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
-        /// <param name="variableTableId">变量表ID</param>
-        /// <param name="variableTableName">变量表名称</param>
-        /// <param name="deviceId">关联的设备ID</param>
-        public VariableTableChangedEventArgs(DataChangeType changeType, int variableTableId, string variableTableName, int deviceId)
+        /// <param name="variableTable">变量表DTO</param>
+        /// <param name="device">关联的设备DTO</param>
+        public VariableTableChangedEventArgs(DataChangeType changeType, VariableTableDto variableTable, DeviceDto device)
         {
             ChangeType = changeType;
-            VariableTableId = variableTableId;
-            VariableTableName = variableTableName;
-            DeviceId = deviceId;
+            VariableTable = variableTable;
+            Device = device;
             ChangeTime = DateTime.Now;
         }
     }
