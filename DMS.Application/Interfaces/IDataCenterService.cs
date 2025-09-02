@@ -1,5 +1,7 @@
 using DMS.Application.DTOs;
+using DMS.Application.DTOs.Events;
 using DMS.Core.Models;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,6 +13,34 @@ namespace DMS.Application.Interfaces;
 /// </summary>
 public interface IDataCenterService
 {
+    #region 事件定义
+
+    /// <summary>
+    /// 当数据加载完成时触发
+    /// </summary>
+    event EventHandler<DataLoadCompletedEventArgs> DataLoadCompleted;
+
+    /// <summary>
+    /// 当设备数据发生变化时触发
+    /// </summary>
+    event EventHandler<DeviceChangedEventArgs> DeviceChanged;
+
+    /// <summary>
+    /// 当变量表数据发生变化时触发
+    /// </summary>
+    event EventHandler<VariableTableChangedEventArgs> VariableTableChanged;
+
+    /// <summary>
+    /// 当变量数据发生变化时触发
+    /// </summary>
+    event EventHandler<VariableChangedEventArgs> VariableChanged;
+
+    /// <summary>
+    /// 当数据发生任何变化时触发
+    /// </summary>
+    event EventHandler<DataChangedEventArgs> DataChanged;
+
+    #endregion
     #region 设备管理
 
     /// <summary>

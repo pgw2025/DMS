@@ -1,8 +1,10 @@
 using DMS.Application.DTOs;
+using DMS.Application.DTOs.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Core.Interfaces;
 using Moq;
+using System;
 using System.Collections.Concurrent;
 using Xunit;
 
@@ -138,6 +140,37 @@ namespace DMS.Infrastructure.UnitTests
 
             // Assert
             Assert.False(dataCenterService.Devices.ContainsKey(1));
+        }
+
+        [Fact]
+        public void DataCenterService_Should_Raise_DeviceChanged_Event_On_Add()
+        {
+            // Arrange
+            var mockRepositoryManager = new Mock<IRepositoryManager>();
+            var mockMapper = new Mock<IMapper>();
+            var mockDeviceAppService = new Mock<IDeviceAppService>();
+            var mockVariableTableAppService = new Mock<IVariableTableAppService>();
+            var mockVariableAppService = new Mock<IVariableAppService>();
+            var dataCenterService = new DataCenterService(
+                mockRepositoryManager.Object,
+                mockMapper.Object,
+                mockDeviceAppService.Object,
+                mockVariableTableAppService.Object,
+                mockVariableAppService.Object);
+
+            DeviceChangedEventArgs eventArgs = null;
+            dataCenterService.DeviceChanged += (sender, args) => eventArgs = args;
+
+            var deviceDto = new DeviceDto { Id = 1, Name = "Test Device" };
+
+            // Act
+            dataCenterService.AddDeviceToMemory(deviceDto);
+
+            // Assert
+            Assert.NotNull(eventArgs);
+            Assert.Equal(DataChangeType.Added, eventArgs.ChangeType);
+            Assert.Equal(1, eventArgs.DeviceId);
+            Assert.Equal("Test Device", eventArgs.DeviceName);
         }
     }
 }
