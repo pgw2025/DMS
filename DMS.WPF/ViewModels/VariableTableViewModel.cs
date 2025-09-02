@@ -12,6 +12,8 @@ using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DMS.WPF.ViewModels;
 
@@ -638,43 +640,44 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="variablesToChange">要修改启用状态的变量数据列表。</param>
     [RelayCommand]
-    public async Task ModifyIsActive(IList<object> variablesToChange)
+    public async Task ChangeIsActive()
     {
-        // var validVariables = variablesToChange?.OfType<Variable>()
-        //                                       .ToList();
-        //
-        // if (validVariables == null || !validVariables.Any())
-        // {
-        //     NotificationHelper.ShowInfo("请选择要修改启用状态的变量");
-        //     return;
-        // }
-        //
-        // // 假设所有选中的变量都应该被设置为相同的状态，取第一个变量的当前状态的反值
-        // var currentIsActive = validVariables.First()
-        //                                     .IsActive;
-        // var newIsActive = !currentIsActive;
-        //
-        // var confirm = await _dialogService.ShowIsActiveDialog(newIsActive);
-        //
-        // if (confirm.HasValue && confirm.Value == newIsActive)
-        // {
-        //     foreach (var variable in validVariables)
-        //     {
-        //         variable.IsActive = newIsActive;
-        //     }
-        //
-        //     await _varDataRepository.UpdateAsync(validVariables);
-        //
-        //     // 更新界面
-        //     await RefreshDataView();
-        //
-        //
-        //     NotificationHelper.ShowSuccess($"已成功将 {validVariables.Count} 个变量的启用状态修改为 {newIsActive}");
-        // }
-        // else
-        // {
-        //     NotificationHelper.ShowInfo("操作已取消或状态未改变。");
-        // }
+        // 检查是否有变量被选中
+        if (SelectedVariables.Count == 0)
+        {
+            NotificationHelper.ShowInfo("请选择要修改启用状态的变量");
+            return;
+        }
+
+        // 获取选中的变量列表
+        var validVariables = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+
+        // 显示启用状态选择对话框，并传入第一个变量的当前启用状态作为默认值
+        IsActiveDialogViewModel viewModel = new IsActiveDialogViewModel(validVariables.First().IsActive);
+        var newIsActive = await _dialogService.ShowDialogAsync(viewModel);
+        if (newIsActive.HasValue)
+        {
+            // 更新所有选定变量的启用状态和修改状态
+            foreach (var variable in validVariables)
+            {
+                variable.IsActive = newIsActive.Value;
+                variable.UpdatedAt = DateTime.Now;
+            }
+
+            // 批量更新数据库中的变量数据
+            var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
+            var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
+            
+            if (result > 0)
+            {
+                // 显示成功通知
+                NotificationHelper.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的启用状态");
+            }
+            else
+            {
+                NotificationHelper.ShowError("更新启用状态失败");
+            }
+        }
     }
 
     /// <summary>

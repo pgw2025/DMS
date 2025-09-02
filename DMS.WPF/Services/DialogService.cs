@@ -21,6 +21,7 @@ namespace DMS.WPF.Services
             { typeof(ImportOpcUaDialogViewModel), typeof(ImportOpcUaDialog) },
             { typeof(VariableDialogViewModel), typeof(VariableDialog) },
             { typeof(PollLevelDialogViewModel), typeof(PollLevelDialog) },
+            { typeof(IsActiveDialogViewModel), typeof(IsActiveDialog) },
             // { typeof(MqttDialogViewModel), typeof(MqttDialog) }, // Add other mappings here
             // ... other dialogs
         };

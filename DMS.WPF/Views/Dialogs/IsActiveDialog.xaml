@@ -1,28 +1,37 @@
-<controls:ContentDialog x:Class="DMS.WPF.Views.Dialogs.IsActiveDialog"
-                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                        xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
-                        xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                        xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
-                        mc:Ignorable="d"
-                        d:DataContext="{d:DesignInstance vm:IsActiveDialogViewModel}"
-                        Title="修改激活状态"
-                        PrimaryButtonText="确定"
-                        SecondaryButtonText="取消"
-                        PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
-                        SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+<controls:ContentDialog
+    x:Class="DMS.WPF.Views.Dialogs.IsActiveDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+    Title="{Binding Title}"
+    d:DataContext="{d:DesignInstance vm:IsActiveDialogViewModel}"
+    CloseButtonCommand="{Binding CancleButtonCommand}"
+    CloseButtonText="取消"
+    PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
+    PrimaryButtonText="{Binding PrimaryButText}"
+    mc:Ignorable="d">
     <controls:ContentDialog.Resources>
         <valueConverts:NullableBooleanConverter x:Key="NullableBooleanConverter" />
     </controls:ContentDialog.Resources>
     <Grid>
-        <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Margin="10" Orientation="Vertical">
             <StackPanel Orientation="Horizontal">
-                <RadioButton FontSize="16" Content="启用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=True}" Command="{Binding SelectIsActiveCommand}" CommandParameter="True" Margin="10 5"/>
-                <RadioButton FontSize="16" Content="停用" IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=False}" Command="{Binding SelectIsActiveCommand}" CommandParameter="False" Margin="10 5"/>
+                <RadioButton
+                    Margin="10,5"
+                    Content="启用"
+                    FontSize="16"
+                    IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=True}" />
+                <RadioButton
+                    Margin="10,5"
+                    Content="停用"
+                    FontSize="16"
+                    IsChecked="{Binding SelectedIsActive, Mode=TwoWay, Converter={StaticResource NullableBooleanConverter}, ConverterParameter=False}" />
             </StackPanel>
-           
+
         </StackPanel>
     </Grid>
 </controls:ContentDialog>

@@ -196,10 +196,7 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem
-                        Command="{Binding ModifyIsActiveCommand}"
-                        CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                        Header="修改启用状态">
+                    <MenuItem Command="{Binding ChangeIsActiveCommand}" Header="修改启用状态">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Switch}" />
                         </MenuItem.Icon>
