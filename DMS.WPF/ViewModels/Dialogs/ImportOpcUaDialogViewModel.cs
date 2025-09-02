@@ -12,6 +12,7 @@ using Opc.Ua;
 using Opc.Ua.Client;
 using System.Collections;
 using System.Collections.ObjectModel;
+using static Dm.net.buffer.ByteArrayBuffer;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
@@ -24,7 +25,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     private OpcUaNodeItemViewModel _rootOpcUaNode;
 
     [ObservableProperty]
-    private ObservableCollection<VariableItemViewModel> _opcUaNodeVariables=new ObservableCollection<VariableItemViewModel>();
+    private ObservableCollection<VariableItemViewModel> _opcUaNodeVariables = new ObservableCollection<VariableItemViewModel>();
 
     [ObservableProperty]
     private IList _selectedVariables = new ArrayList();
@@ -40,13 +41,16 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     [ObservableProperty]
     private bool _isConnectButtonEnabled = true;
 
+    [ObservableProperty]
+    private OpcUaNodeItemViewModel _currentOpcUaNodeItem;
+
     private Session _session;
 
     private readonly IOpcUaService _opcUaService;
     private readonly IMapper _mapper;
     private CancellationTokenSource _cancellationTokenSource;
 
-    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService,IMapper mapper)
+    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService, IMapper mapper)
     {
         this._opcUaService = opcUaService;
         this._mapper = mapper;
@@ -68,7 +72,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
             if (_opcUaService.IsConnected)
             {
-                IsConnected=true;
+                IsConnected = true;
                 ConnectButtonText = "已连接";
                 IsConnectButtonEnabled = false;
             }
@@ -76,7 +80,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
             // 浏览根节点
 
-           var childrens= await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(RootOpcUaNode));
+            var childrens = await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(RootOpcUaNode));
             RootOpcUaNode.Children = _mapper.Map<ObservableCollection<OpcUaNodeItemViewModel>>(childrens);
 
 
@@ -126,10 +130,10 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
 
 
-    
+
     public async Task LoadNodeVariables(OpcUaNodeItemViewModel node)
     {
-        
+
         try
         {
             OpcUaNodeVariables.Clear();
@@ -137,34 +141,69 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
             // 加载节点的子项
             node.IsExpanded = true;
             node.IsSelected = true;
-            
-            var childrens = await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(node));
-            foreach (var children in childrens)
-            {
-                var opcNodeItem = _mapper.Map<OpcUaNodeItemViewModel>(children);
-                if (children.NodeClass == NodeClass.Variable)
-                {
-                    OpcUaNodeVariables.Add(new VariableItemViewModel
-                    {
-                        Name = children.DisplayName, // 修正：使用子节点的显示名称
-                        OpcUaNodeId = children.NodeId.ToString(),
-                        Protocol = ProtocolType.OpcUa,
-                        CSharpDataType=children.DataType,
-                        IsActive = true // 默认选中
-                    });
-                }
-                else
-                {
-                    node.Children.Add(opcNodeItem);
-                }
-            }
+            CurrentOpcUaNodeItem = node;
+            await Browse(node);
         }
         catch (Exception ex)
         {
-            NlogHelper.Error($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
             NotificationHelper.ShowError($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
         }
     }
 
+    private async Task Browse(OpcUaNodeItemViewModel node, bool isScan = false)
+    {
+        var childrens = await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(node));
+        foreach (var children in childrens)
+        {
+            var opcNodeItem = _mapper.Map<OpcUaNodeItemViewModel>(children);
+            if (children.NodeClass == NodeClass.Variable)
+            {
+                OpcUaNodeVariables.Add(new VariableItemViewModel
+                {
+                    Name = children.DisplayName, // 修正：使用子节点的显示名称
+                    OpcUaNodeId = children.NodeId.ToString(),
+                    Protocol = ProtocolType.OpcUa,
+                    CSharpDataType = children.DataType,
+                    IsActive = true // 默认选中
+                });
+            }
+            else
+            {
+                if (node.Children.FirstOrDefault(n => n.NodeId == opcNodeItem.NodeId) == null)
+                {
+                    node.Children.Add(opcNodeItem);
+                }
 
+                if (isScan)
+                {
+                    Browse(opcNodeItem);
+                }
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task FindCurrentNodeVariables()
+    {
+        try
+        {
+            if (CurrentOpcUaNodeItem == null)
+            {
+                NotificationHelper.ShowError($"请先选择左边的节点，然后再查找变量。");
+                return;
+            }
+
+            OpcUaNodeVariables.Clear();
+
+            // 加载节点的子项
+            CurrentOpcUaNodeItem.IsExpanded = true;
+            CurrentOpcUaNodeItem.IsSelected = true;
+
+            await Browse(CurrentOpcUaNodeItem, true);
+        }
+        catch (Exception ex)
+        {
+            NotificationHelper.ShowError($"加载 OPC UA 节点变量失败: {CurrentOpcUaNodeItem.NodeId} - {ex.Message}", ex);
+        }
+    }
 }

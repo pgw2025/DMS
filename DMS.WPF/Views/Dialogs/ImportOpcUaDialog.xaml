@@ -47,6 +47,22 @@
                 Content="{Binding ConnectButtonText}"
                 IsEnabled="{Binding IsConnectButtonEnabled}"
                 Style="{StaticResource AccentButtonStyle}" />
+            <Button
+                x:Name="FindVariablesButton"
+                Margin="10,0,0,0"
+                Command="{Binding FindCurrentNodeVariablesCommand}"
+                Content="查找当前节点下的所有变量">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </StackPanel>
 
         <!--  节点树  -->
