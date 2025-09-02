@@ -64,7 +64,7 @@ public class OpcUaBackgroundService : BackgroundService
         { PollLevelType.ThirtyMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtyMinutes) }
     };
 
-    public OpcUaBackgroundService(IDeviceDataService deviceDataService, IDataProcessingService dataProcessingService, ILogger<OpcUaBackgroundService> logger)
+    public OpcUaBackgroundService(IDeviceDataService deviceDataService, IDataCenterService dataCenterService, IDataProcessingService dataProcessingService, ILogger<OpcUaBackgroundService> logger)
     {
         _deviceDataService = deviceDataService;
         _dataProcessingService = dataProcessingService;

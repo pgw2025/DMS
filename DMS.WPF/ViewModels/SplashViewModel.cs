@@ -18,15 +18,17 @@ public partial class SplashViewModel : ObservableObject
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IInitializeService _initializeService;
+    private readonly IDataCenterService _dataCenterService;
     private readonly DataServices _dataServices;
 
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
-    public SplashViewModel(IServiceProvider serviceProvider, IInitializeService initializeService,DataServices dataServices)
+    public SplashViewModel(IServiceProvider serviceProvider, IInitializeService initializeService,IDataCenterService dataCenterService, DataServices dataServices)
     {
         _serviceProvider = serviceProvider;
         _initializeService = initializeService;
+        this._dataCenterService = dataCenterService;
         _dataServices = dataServices;
     }
 
@@ -46,7 +48,9 @@ public partial class SplashViewModel : ObservableObject
             await _dataServices.LoadVariableTables();
             await _dataServices.LoadVariables();
             await _dataServices.LoadMenus();
-            
+
+            await _dataCenterService.LoadAllDataToMemoryAsync();
+
             _dataServices.AssociateVariableTablesToDevices();
             _dataServices.AssociateVariablesToVariableTables();
             
