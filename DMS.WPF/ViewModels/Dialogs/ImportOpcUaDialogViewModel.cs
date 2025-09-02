@@ -1,5 +1,8 @@
+using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DMS.Core.Enums;
+using DMS.Core.Helper;
 using DMS.Core.Models;
 using DMS.Helper;
 using DMS.Infrastructure.Interfaces.Services;
@@ -17,10 +20,10 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     private string _endpointUrl = "opc.tcp://127.0.0.1:4855"; // 默认值
 
     [ObservableProperty]
-    private OpcUaNode _rootOpcUaNode;
+    private OpcUaNodeItemViewModel _rootOpcUaNode;
 
     [ObservableProperty]
-    private ObservableCollection<Variable> _selectedNodeVariables;
+    private ObservableCollection<VariableItemViewModel> _selectedNodeVariables;
 
     public List<Variable> SelectedVariables { get; set; } = new List<Variable>();
 
@@ -39,15 +42,15 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     private Session _session;
 
     private readonly IOpcUaService _opcUaService;
-
+    private readonly IMapper _mapper;
     private CancellationTokenSource _cancellationTokenSource;
 
-    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService)
+    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService,IMapper mapper)
     {
-        //OpcUaNodes = new ObservableCollection<OpcUaNode>();
-        SelectedNodeVariables = new ObservableCollection<Variable>();
+        SelectedNodeVariables = new ObservableCollection<VariableItemViewModel>();
         this._opcUaService = opcUaService;
-        RootOpcUaNode = new OpcUaNode() { DisplayName = "根节点", NodeId = Objects.ObjectsFolder };
+        this._mapper = mapper;
+        RootOpcUaNode = new OpcUaNodeItemViewModel() { DisplayName = "根节点", NodeId = Objects.ObjectsFolder, IsExpanded = true };
         _cancellationTokenSource = new CancellationTokenSource();
 
     }
@@ -65,6 +68,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
             if (_opcUaService.IsConnected)
             {
+                IsConnected=true;
                 ConnectButtonText = "已连接";
                 IsConnectButtonEnabled = false;
             }
@@ -72,7 +76,8 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
             // 浏览根节点
 
-            await _opcUaService.BrowseNode(RootOpcUaNode);
+           var childrens= await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(RootOpcUaNode));
+            RootOpcUaNode.Children = _mapper.Map<ObservableCollection<OpcUaNodeItemViewModel>>(childrens);
 
 
         }
@@ -83,6 +88,18 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
             ConnectButtonText = "连接服务器";
             NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
         }
+    }
+
+    [RelayCommand]
+    private async void PrimaryButton()
+    {
+        await _opcUaService.DisconnectAsync();
+    }
+
+    [RelayCommand]
+    private async void CloseButton()
+    {
+        await _opcUaService.DisconnectAsync();
     }
 
     /// <summary>
@@ -97,176 +114,69 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         }
     }
 
-    //private async Task BrowseNodes(ObservableCollection<OpcUaNode> nodes, NodeId parentNodeId)
-    //{
-    //    try
-    //    {
-    //        Opc.Ua.ReferenceDescriptionCollection references;
-    //        byte[] continuationPoint = null;
 
-    //        _session.Browse(
-    //            null, // RequestHeader
-    //            new ViewDescription(),
-    //            parentNodeId,
-    //            0u,
-    //            BrowseDirection.Forward,
-    //            Opc.Ua.ReferenceTypeIds.HierarchicalReferences,
-    //            true,
-    //            (uint)Opc.Ua.NodeClass.Object | (uint)Opc.Ua.NodeClass.Variable,
-    //            out continuationPoint,
-    //            out references
-    //        );
 
-    //        foreach (var rd in references)
-    //        {
-    //            NodeType nodeType = NodeType.Folder; // 默认是文件夹
-    //            if ((rd.NodeClass & NodeClass.Variable) != 0)
-    //            {
-    //                nodeType = NodeType.Variable;
-    //            }
-    //            else if ((rd.NodeClass & NodeClass.Object) != 0)
-    //            {
-    //                nodeType = NodeType.Object;
-    //            }
-
-    //            var opcUaNode = new OpcUaNode(rd.DisplayName.Text, (NodeId)rd.NodeId, nodeType);
-    //            nodes.Add(opcUaNode);
-
-    //            // 如果是文件夹或对象，添加一个虚拟子节点，用于懒加载
-    //            if (nodeType == NodeType.Folder || nodeType == NodeType.Object)
-    //            {
-    //                opcUaNode.Children.Add(new OpcUaNode("Loading...", NodeId.Null, NodeType.Folder)); // 虚拟节点
-    //            }
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        NlogHelper.Error($"浏览 OPC UA 节点失败: {parentNodeId} - {ex.Message}", ex);
-    //        NotificationHelper.ShowError($"浏览 OPC UA 节点失败: {parentNodeId} - {ex.Message}", ex);
-    //    }
-    //}
-
-    //public async Task LoadNodeVariables(OpcUaNode node)
-    //{
-    //if (node.NodeType == NodeType.Variable)
-    //{
-    //    // 如果是变量节点，直接显示它
-    //    SelectedNodeVariables.Clear();
-    //    SelectedNodeVariables.Add(new Variable
-    //    {
-    //        Name = node.DisplayName,
-    //        NodeId = node.NodeId.ToString(),
-    //        OpcUaNodeId = node.NodeId.ToString(),
-    //        ProtocolType = ProtocolType.OpcUA,
-    //        IsActive = true // 默认选中
-    //    });
-    //    return;
-    //}
-
-    //if (node.IsLoaded || node.IsLoading)
-    //{
-    //    return; // 已经加载或正在加载
-    //}
-
-    //node.IsLoading = true;
-    //node.Children.Clear(); // 清除虚拟节点
-
-    //try
-    //{
-    //    Opc.Ua.ReferenceDescriptionCollection references;
-    //    byte[] continuationPoint = null;
-
-    //    _session.Browse(
-    //        null, // RequestHeader
-    //        new ViewDescription(),
-    //        node.NodeId,
-    //        0u,
-    //        BrowseDirection.Forward,
-    //        Opc.Ua.ReferenceTypeIds.HierarchicalReferences,
-    //        true,
-    //        (uint)Opc.Ua.NodeClass.Object | (uint)Opc.Ua.NodeClass.Variable,
-    //        out continuationPoint,
-    //        out references
-    //    );
-
-    //    foreach (var rd in references)
-    //    {
-    //        NodeType nodeType = NodeType.Folder;
-    //        if ((rd.NodeClass & NodeClass.Variable) != 0)
-    //        {
-    //            nodeType = NodeType.Variable;
-    //        }
-    //        else if ((rd.NodeClass & NodeClass.Object) != 0)
-    //        {
-    //            nodeType = NodeType.Object;
-    //        }
-
-    //        var opcUaNode = new OpcUaNode(rd.DisplayName.Text, (NodeId)rd.NodeId, nodeType);
-    //        node.Children.Add(opcUaNode);
-
-    //        if (nodeType == NodeType.Folder || nodeType == NodeType.Object)
-    //        {
-    //            opcUaNode.Children.Add(new OpcUaNode("Loading...", NodeId.Null, NodeType.Folder)); // 虚拟节点
-    //        }
-
-    //        // 如果是变量，添加到右侧列表
-    //        if (nodeType == NodeType.Variable)
-    //        {
-    //            // Read the DataType attribute
-    //            ReadValueId readValueId = new ReadValueId
-    //            {
-    //                NodeId = opcUaNode.NodeId,
-    //                AttributeId = Attributes.DataType,
-    //                // You might need to specify IndexRange and DataEncoding if dealing with arrays or specific encodings
-    //            };
-
-    //            DataValueCollection results;
-    //            DiagnosticInfoCollection diagnosticInfos;
-
-    //            _session.Read(
-    //                null, // RequestHeader
-    //                0, // MaxAge
-    //                TimestampsToReturn.Source,
-    //                new ReadValueIdCollection { readValueId },
-    //                out results,
-    //                out diagnosticInfos
-    //            );
-
-    //            string dataType = string.Empty;
-
-    //            if (results != null && results.Count > 0 && results[0].Value != null)
-    //            {
-    //                // Convert the NodeId of the DataType to a readable string
-    //                NodeId dataTypeNodeId = (NodeId)results[0].Value;
-    //                dataType = _session.NodeCache.GetDisplayText(dataTypeNodeId);
-    //            }
-
-    //            SelectedNodeVariables.Add(new Variable
-    //            {
-    //                Name = opcUaNode.DisplayName,
-    //                OpcUaNodeId = opcUaNode.NodeId.ToString(),
-    //                ProtocolType = ProtocolType.OpcUA,
-    //                IsActive = true, // Default selected
-    //                DataType = dataType // Assign the read DataType
-    //            });
-    //        }
-    //    }
-
-    //    node.IsLoaded = true;
-    //}
-    //catch (Exception ex)
-    //{
-    //    NlogHelper.Error($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
-    //    NotificationHelper.ShowError($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
-    //}
-    //finally
-    //{
-    //    node.IsLoading = false;
-    //}
-    //}
-
-    public ObservableCollection<Variable> GetSelectedVariables()
+    private bool _isLoadingNodeVariables = false;
+    
+    public async Task LoadNodeVariables(OpcUaNodeItemViewModel node)
     {
-        return new ObservableCollection<Variable>(SelectedVariables);
+        // 防止重复加载
+        if (_isLoadingNodeVariables)
+            return;
+            
+        _isLoadingNodeVariables = true;
+        
+        try
+        {
+            SelectedNodeVariables.Clear();
+
+            if (node.NodeClass == NodeClass.Variable)
+            {
+                // 如果是变量节点，直接显示它
+                SelectedNodeVariables.Add(new VariableItemViewModel
+                {
+                    Name = node.DisplayName,
+                    OpcUaNodeId = node.NodeId.ToString(),
+                    Protocol = ProtocolType.OpcUa,
+                    IsActive = true // 默认选中
+                });
+                return;
+            }
+
+            // 加载节点的子项
+            node.IsExpanded = true;
+            node.IsSelected = true;
+            
+            var childrens = await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(node));
+            foreach (var children in childrens)
+            {
+                var opcNodeItem = _mapper.Map<OpcUaNodeItemViewModel>(children);
+                if (children.NodeClass == NodeClass.Variable)
+                {
+                    SelectedNodeVariables.Add(new VariableItemViewModel
+                    {
+                        Name = children.DisplayName, // 修正：使用子节点的显示名称
+                        OpcUaNodeId = children.NodeId.ToString(),
+                        Protocol = ProtocolType.OpcUa,
+                        IsActive = true // 默认选中
+                    });
+                }
+                else
+                {
+                    node.Children.Add(opcNodeItem);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            NlogHelper.Error($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
+            NotificationHelper.ShowError($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
+        }
+        finally
+        {
+            _isLoadingNodeVariables = false;
+        }
     }
+
+
 }

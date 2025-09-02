@@ -8,10 +8,10 @@
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
     Title="从OPC UA服务器导入变量"
     d:DataContext="{d:DesignInstance vm:ImportOpcUaDialogViewModel}"
-    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    CloseButtonCommand="{Binding CloseButtonCommand}"
+    CloseButtonText="取消"
+    PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
     PrimaryButtonText="导入"
-    SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
-    SecondaryButtonText="取消"
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
@@ -47,6 +47,7 @@
 
         <!--  节点树  -->
         <TreeView
+            Name="treeView"
             Grid.Row="1"
             Grid.Column="0"
             Margin="0,0,10,0"
@@ -67,6 +68,18 @@
                     <TextBlock Text="{Binding DisplayName}" />
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+                <Style BasedOn="{StaticResource {x:Type TreeViewItem}}" TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </TreeView.ItemContainerStyle>
         </TreeView>
 
         <!--  变量列表  -->
