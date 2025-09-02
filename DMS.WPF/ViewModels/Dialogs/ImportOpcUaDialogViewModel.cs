@@ -10,6 +10,7 @@ using DMS.Infrastructure.Models;
 using DMS.WPF.ViewModels.Items;
 using Opc.Ua;
 using Opc.Ua.Client;
+using System.Collections;
 using System.Collections.ObjectModel;
 
 namespace DMS.WPF.ViewModels.Dialogs;
@@ -23,10 +24,10 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     private OpcUaNodeItemViewModel _rootOpcUaNode;
 
     [ObservableProperty]
-    private ObservableCollection<VariableItemViewModel> _selectedNodeVariables;
+    private ObservableCollection<VariableItemViewModel> _opcUaNodeVariables=new ObservableCollection<VariableItemViewModel>();
 
-    public List<Variable> SelectedVariables { get; set; } = new List<Variable>();
-
+    [ObservableProperty]
+    private IList _selectedVariables = new ArrayList();
     [ObservableProperty]
     private bool _selectAllVariables;
 
@@ -47,7 +48,6 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
     public ImportOpcUaDialogViewModel(IOpcUaService opcUaService,IMapper mapper)
     {
-        SelectedNodeVariables = new ObservableCollection<VariableItemViewModel>();
         this._opcUaService = opcUaService;
         this._mapper = mapper;
         RootOpcUaNode = new OpcUaNodeItemViewModel() { DisplayName = "根节点", NodeId = Objects.ObjectsFolder, IsExpanded = true };
@@ -91,9 +91,19 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     }
 
     [RelayCommand]
+    private async void SecondaryButton()
+    {
+        await _opcUaService.DisconnectAsync();
+
+        Close(SelectedVariables.Cast<VariableItemViewModel>().ToList());
+    }
+
+    [RelayCommand]
     private async void PrimaryButton()
     {
         await _opcUaService.DisconnectAsync();
+
+        Close(OpcUaNodeVariables.ToList());
     }
 
     [RelayCommand]
@@ -122,20 +132,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         
         try
         {
-            SelectedNodeVariables.Clear();
-
-            if (node.NodeClass == NodeClass.Variable)
-            {
-                // 如果是变量节点，直接显示它
-                SelectedNodeVariables.Add(new VariableItemViewModel
-                {
-                    Name = node.DisplayName,
-                    OpcUaNodeId = node.NodeId.ToString(),
-                    Protocol = ProtocolType.OpcUa,
-                    IsActive = true // 默认选中
-                });
-                return;
-            }
+            OpcUaNodeVariables.Clear();
 
             // 加载节点的子项
             node.IsExpanded = true;
@@ -147,7 +144,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
                 var opcNodeItem = _mapper.Map<OpcUaNodeItemViewModel>(children);
                 if (children.NodeClass == NodeClass.Variable)
                 {
-                    SelectedNodeVariables.Add(new VariableItemViewModel
+                    OpcUaNodeVariables.Add(new VariableItemViewModel
                     {
                         Name = children.DisplayName, // 修正：使用子节点的显示名称
                         OpcUaNodeId = children.NodeId.ToString(),

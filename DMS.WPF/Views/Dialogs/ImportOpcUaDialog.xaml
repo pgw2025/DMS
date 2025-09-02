@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helper="clr-namespace:DMS.WPF.Helper"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
     Title="从OPC UA服务器导入变量"
@@ -11,7 +13,9 @@
     CloseButtonCommand="{Binding CloseButtonCommand}"
     CloseButtonText="取消"
     PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
-    PrimaryButtonText="导入"
+    PrimaryButtonText="导入全部"
+    SecondaryButtonCommand="{Binding SecondaryButtonCommand}"
+    SecondaryButtonText="导入选择"
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
@@ -88,8 +92,10 @@
             Grid.Column="1"
             AutoGenerateColumns="False"
             IsReadOnly="True"
-            ItemsSource="{Binding SelectedNodeVariables}"
-            SelectionChanged="Selector_OnSelectionChanged">
+            ItemsSource="{Binding OpcUaNodeVariables}">
+            <i:Interaction.Behaviors>
+                <helper:SelectedItemsBehavior SelectedItems="{Binding SelectedVariables}" />
+            </i:Interaction.Behaviors>
             <DataGrid.Style>
                 <Style BasedOn="{StaticResource {x:Type DataGrid}}" TargetType="DataGrid">
                     <Setter Property="Visibility" Value="Collapsed" />
