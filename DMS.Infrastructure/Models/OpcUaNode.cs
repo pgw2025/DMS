@@ -1,3 +1,4 @@
+using DMS.Core.Enums;
 using Opc.Ua;
 
 namespace DMS.Infrastructure.Models
@@ -36,6 +37,10 @@ namespace DMS.Infrastructure.Models
         /// 子节点列表
         /// </summary>
         public List<OpcUaNode> Children { get; set; } = new List<OpcUaNode>();
+        /// <summary>
+        /// 数据类型
+        /// </summary>
+        public CSharpDataType DataType { get;  set; }
 
         /// <summary>
         /// 返回节点的字符串表示形式。

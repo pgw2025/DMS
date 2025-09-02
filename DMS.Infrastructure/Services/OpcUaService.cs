@@ -1,6 +1,6 @@
+using DMS.Core.Enums;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
-using Microsoft.IdentityModel.Tokens;
 using Opc.Ua;
 using Opc.Ua.Client;
 using Opc.Ua.Configuration;
@@ -14,16 +14,15 @@ namespace DMS.Infrastructure.Services
     public class OpcUaService : IOpcUaService
     {
         private readonly ApplicationConfiguration _config;
-        private  string _serverUrl;
-        private Session _session;
-        private Subscription _subscription;
-        private readonly Dictionary<NodeId, OpcUaNode> _subscribedNodes = new Dictionary<NodeId, OpcUaNode>();
+        private string? _serverUrl;
+        private Session? _session;
+        private Subscription? _subscription;
+        private readonly Dictionary<NodeId, OpcUaNode> _subscribedNodes = new();
 
         public bool IsConnected => _session != null && _session.Connected;
 
         public OpcUaService()
         {
-            
             _config = CreateApplicationConfiguration();
         }
 
@@ -31,11 +30,9 @@ namespace DMS.Infrastructure.Services
         {
             try
             {
-                _serverUrl = serverUrl.ToUpper();
-                if (_serverUrl.IsNullOrEmpty() || !(_serverUrl.StartsWith("OPC.TCP://")))
-                {
-                    throw new Exception($"serverUrl服务器地址无效，serverUrl:{_serverUrl}");
-                }
+                // 保存服务器URL
+                _serverUrl = serverUrl;
+                
                 // 验证客户端应用程序配置的有效性。
                 await _config.Validate(ApplicationType.Client);
 
@@ -43,7 +40,10 @@ namespace DMS.Infrastructure.Services
                 // 这在开发和测试中很方便，但在生产环境中应谨慎使用。
                 if (_config.SecurityConfiguration.AutoAcceptUntrustedCertificates)
                 {
-                    _config.CertificateValidator.CertificateValidation += (s, e) => { e.Accept = e.Error.StatusCode == StatusCodes.BadCertificateUntrusted; };
+                    _config.CertificateValidator.CertificateValidation += (s, e) => 
+                    {
+                        e.Accept = e.Error.StatusCode == StatusCodes.BadCertificateUntrusted;
+                    };
                 }
 
                 // 创建一个应用程序实例，它代表了客户端应用程序。
@@ -86,12 +86,19 @@ namespace DMS.Infrastructure.Services
             }
         }
 
-        public async Task<List<OpcUaNode>> BrowseNode(OpcUaNode nodeToBrowse)
+        public async Task<List<OpcUaNode>> BrowseNode(OpcUaNode? nodeToBrowse)
         {
             if (!IsConnected)
             {
                 throw new InvalidOperationException("会话未连接。请在浏览节点前调用ConnectAsync方法。");
             }
+            
+            // 检查节点是否为null
+            if (nodeToBrowse == null)
+            {
+                throw new ArgumentNullException(nameof(nodeToBrowse), "要浏览的节点不能为null。");
+            }
+            
             var nodes = new List<OpcUaNode>();
             try
             {
@@ -113,20 +120,8 @@ namespace DMS.Infrastructure.Services
                     out continuationPoint, // continuationPoint: 输出参数，用于处理分页
                     out references); // references: 输出参数，浏览到的节点引用集合
 
-                if (references != null)
-                {
-                    // 遍历第一次返回的结果
-                    foreach (var rd in references)
-                    {
-                        nodes.Add(new OpcUaNode
-                        {
-                            ParentNode = nodeToBrowse,
-                            NodeId = (NodeId)rd.NodeId,
-                            DisplayName = rd.DisplayName.Text,
-                            NodeClass = rd.NodeClass
-                        });
-                    }
-                }
+                // 处理浏览结果
+                await ProcessBrowseResults(references, nodeToBrowse, nodes);
 
                 // 如果continuationPoint不为null，说明服务器还有数据未返回，需要循环调用BrowseNext获取
                 while (continuationPoint != null)
@@ -134,21 +129,10 @@ namespace DMS.Infrastructure.Services
                     // 调用BrowseNext获取下一批数据
                     _session.BrowseNext(null, false, continuationPoint, out continuationPoint, out references);
 
-                    if (references != null)
-                    {
-                        // 遍历后续批次返回的结果
-                        foreach (var rd in references)
-                        {
-                            nodes.Add(new OpcUaNode
-                            {
-                                ParentNode = nodeToBrowse,
-                                NodeId = (NodeId)rd.NodeId,
-                                DisplayName = rd.DisplayName.Text,
-                                NodeClass = rd.NodeClass
-                            });
-                        }
-                    }
+                    // 处理后续批次的浏览结果
+                    await ProcessBrowseResults(references, nodeToBrowse, nodes);
                 }
+                
                 // 将找到的子节点列表关联到父节点
                 nodeToBrowse.Children = nodes;
             }
@@ -157,6 +141,54 @@ namespace DMS.Infrastructure.Services
                 Console.WriteLine($"浏览节点 '{nodeToBrowse.DisplayName}' 时发生错误: {ex.Message}");
             }
             return nodes;
+        }
+
+        /// <summary>
+        /// 处理浏览结果
+        /// </summary>
+        /// <param name="references">浏览到的节点引用集合</param>
+        /// <param name="parentNode">父节点</param>
+        /// <param name="nodes">节点列表</param>
+        private async Task ProcessBrowseResults(ReferenceDescriptionCollection references, OpcUaNode parentNode, List<OpcUaNode> nodes)
+        {
+            if (references == null)
+                return;
+
+            // 收集所有变量节点，用于批量读取数据类型
+            var variableNodes = new List<OpcUaNode>();
+
+            // 遍历返回的结果
+            foreach (var rd in references)
+            {
+                var node = new OpcUaNode
+                {
+                    ParentNode = parentNode,
+                    NodeId = (NodeId)rd.NodeId,
+                    DisplayName = rd.DisplayName.Text,
+                    NodeClass = rd.NodeClass
+                };
+
+                // 如果是变量节点，添加到列表中稍后批量处理
+                if (rd.NodeClass == NodeClass.Variable)
+                {
+                    variableNodes.Add(node);
+                }
+
+                nodes.Add(node);
+            }
+
+            // 批量读取变量节点的数据类型
+            if (variableNodes.Any())
+            {
+                try
+                {
+                    await ReadNodeDataTypesAsync(variableNodes);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"批量读取节点数据类型时发生错误: {ex.Message}");
+                }
+            }
         }
 
         public void SubscribeToNode(OpcUaNode node, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500)
@@ -171,11 +203,53 @@ namespace DMS.Infrastructure.Services
             {
                 throw new InvalidOperationException("会话未连接。请在订阅节点前调用ConnectAsync方法。");
             }
+            
             // 检查节点列表是否有效
             if (nodes == null || !nodes.Any())
             {
                 return;
             }
+            
+            // 确保订阅对象存在
+            EnsureSubscriptionExists(publishingInterval);
+
+            // 创建一个用于存放待添加监视项的列表
+            var itemsToAdd = new List<MonitoredItem>();
+            
+            // 遍历所有请求订阅的节点
+            foreach (var node in nodes)
+            {
+                // 如果节点已经存在于我们的跟踪列表中，则跳过，避免重复订阅
+                if (_subscribedNodes.ContainsKey(node.NodeId))
+                {
+                    continue;
+                }
+                
+                // 为每个节点创建一个监视项
+                var monitoredItem = CreateMonitoredItem(node, onDataChange, samplingInterval);
+                
+                // 将创建的监视项添加到待添加列表
+                itemsToAdd.Add(monitoredItem);
+                // 将节点添加到我们的跟踪字典中
+                _subscribedNodes[node.NodeId] = node;
+            }
+
+            // 如果有新的监视项要添加
+            if (itemsToAdd.Any())
+            {
+                // 将所有新的监视项批量添加到订阅中
+                _subscription.AddItems(itemsToAdd);
+                // 将所有挂起的更改（包括订阅属性修改和添加新项）应用到服务器
+                _subscription.ApplyChanges();
+            }
+        }
+
+        /// <summary>
+        /// 确保订阅对象存在
+        /// </summary>
+        /// <param name="publishingInterval">发布间隔</param>
+        private void EnsureSubscriptionExists(int publishingInterval)
+        {
             // 如果还没有订阅对象，则基于会话的默认设置创建一个新的订阅
             if (_subscription == null)
             {
@@ -194,56 +268,43 @@ namespace DMS.Infrastructure.Services
             {
                 _subscription.PublishingInterval = publishingInterval;
             }
+        }
 
-            // 创建一个用于存放待添加监视项的列表
-            var itemsToAdd = new List<MonitoredItem>();
-            // 遍历所有请求订阅的节点
-            foreach (var node in nodes)
+        /// <summary>
+        /// 创建监视项
+        /// </summary>
+        /// <param name="node">OPC UA节点</param>
+        /// <param name="onDataChange">数据变化回调</param>
+        /// <param name="samplingInterval">采样间隔</param>
+        /// <returns>监视项</returns>
+        private MonitoredItem CreateMonitoredItem(OpcUaNode node, Action<OpcUaNode> onDataChange, int samplingInterval)
+        {
+            var monitoredItem = new MonitoredItem(_subscription.DefaultItem)
             {
-                // 如果节点已经存在于我们的跟踪列表中，则跳过，避免重复订阅
-                if (_subscribedNodes.ContainsKey(node.NodeId))
+                DisplayName = node.DisplayName,
+                StartNodeId = node.NodeId,
+                AttributeId = Attributes.Value, // 我们关心的是节点的值属性
+                SamplingInterval = samplingInterval // 服务器采样节点值的速率（毫秒）
+            };
+            
+            // 设置数据变化通知的回调函数
+            monitoredItem.Notification += (item, e) =>
+            {
+                // 将通知事件参数转换为MonitoredItemNotification
+                if (e.NotificationValue is MonitoredItemNotification notification)
                 {
-                    continue;
-                }
-                // 为每个节点创建一个监视项
-                var monitoredItem = new MonitoredItem(_subscription.DefaultItem)
-                {
-                    DisplayName = node.DisplayName,
-                    StartNodeId = node.NodeId,
-                    AttributeId = Attributes.Value, // 我们关心的是节点的值属性
-                    SamplingInterval = samplingInterval // 服务器采样节点值的速率（毫秒）
-                };
-                // 设置数据变化通知的回调函数
-                monitoredItem.Notification += (item, e) =>
-                {
-                    // 将通知事件参数转换为MonitoredItemNotification
-                    var notification = e.NotificationValue as MonitoredItemNotification;
-                    if (notification != null)
+                    // 通过StartNodeId从我们的跟踪字典中找到对应的OpcUaNode对象
+                    if (_subscribedNodes.TryGetValue(item.StartNodeId, out var changedNode))
                     {
-                        // 通过StartNodeId从我们的跟踪字典中找到对应的OpcUaNode对象
-                        if (_subscribedNodes.TryGetValue(item.StartNodeId, out var changedNode))
-                        {
-                            // 更新节点对象的值
-                            changedNode.Value = notification.Value.Value;
-                            // 调用用户提供的回调函数，并传入更新后的节点
-                            onDataChange?.Invoke(changedNode);
-                        }
+                        // 更新节点对象的值
+                        changedNode.Value = notification.Value.Value;
+                        // 调用用户提供的回调函数，并传入更新后的节点
+                        onDataChange?.Invoke(changedNode);
                     }
-                };
-                // 将创建的监视项添加到待添加列表
-                itemsToAdd.Add(monitoredItem);
-                // 将节点添加到我们的跟踪字典中
-                _subscribedNodes[node.NodeId] = node;
-            }
-
-            // 如果有新的监视项要添加
-            if (itemsToAdd.Any())
-            {
-                // 将所有新的监视项批量添加到订阅中
-                _subscription.AddItems(itemsToAdd);
-                // 将所有挂起的更改（包括订阅属性修改和添加新项）应用到服务器
-                _subscription.ApplyChanges();
-            }
+                }
+            };
+            
+            return monitoredItem;
         }
 
         public void UnsubscribeFromNode(OpcUaNode node)
@@ -301,15 +362,24 @@ namespace DMS.Infrastructure.Services
                 return;
             }
 
-            // 创建一个用于存放读取请求的集合
-            var nodesToRead = new ReadValueIdCollection();
-            // 创建一个列表，用于在收到响应后按顺序查找对应的OpcUaNode
-            var nodeListForLookup = new List<OpcUaNode>();
-            // 遍历所有请求读取的节点
-            foreach (var node in nodes)
+            // 筛选出变量类型的节点，因为只有变量才有值
+            var variableNodes = nodes.Where(n => n.NodeClass == NodeClass.Variable).ToList();
+            
+            // 如果没有需要读取的变量节点，则直接返回
+            if (!variableNodes.Any())
             {
-                // 只处理变量类型的节点，因为只有变量才有值
-                if (node.NodeClass == NodeClass.Variable)
+                return;
+            }
+
+            try
+            {
+                // 创建一个用于存放读取请求的集合
+                var nodesToRead = new ReadValueIdCollection();
+                // 创建一个列表，用于在收到响应后按顺序查找对应的OpcUaNode
+                var nodeListForLookup = new List<OpcUaNode>();
+                
+                // 为每个变量节点创建读取请求
+                foreach (var node in variableNodes)
                 {
                     // 创建一个ReadValueId，指定要读取的节点ID和属性（值）
                     nodesToRead.Add(new ReadValueId
@@ -320,16 +390,7 @@ namespace DMS.Infrastructure.Services
                     // 将节点添加到查找列表中
                     nodeListForLookup.Add(node);
                 }
-            }
 
-            // 如果没有需要读取的变量节点，则直接返回
-            if (nodesToRead.Count == 0)
-            {
-                return;
-            }
-
-            try
-            {
                 // 异步调用Read方法，批量读取所有节点的值
                 var response = await _session.ReadAsync(
                     null, // RequestHeader, 使用默认值
@@ -385,23 +446,37 @@ namespace DMS.Infrastructure.Services
                 return false;
             }
 
+            // 筛选出变量类型的节点，因为只能向变量类型的节点写入值
+            var variableNodesToWrite = nodesToWrite
+                .Where(entry => entry.Key.NodeClass == NodeClass.Variable)
+                .ToList();
+
+            // 如果没有有效的写入请求，则直接返回
+            if (!variableNodesToWrite.Any())
+            {
+                // 输出非变量节点的警告信息
+                var nonVariableNodes = nodesToWrite
+                    .Where(entry => entry.Key.NodeClass != NodeClass.Variable)
+                    .Select(entry => entry.Key);
+                    
+                foreach (var node in nonVariableNodes)
+                {
+                    Console.WriteLine($"节点 '{node.DisplayName}' 不是变量类型，无法写入。");
+                }
+                
+                return false;
+            }
+
             // 创建一个用于存放写入请求的集合
             var writeValues = new WriteValueCollection();
             // 创建一个列表，用于在收到响应后按顺序查找对应的OpcUaNode，以进行错误报告
             var nodeListForLookup = new List<OpcUaNode>();
 
-            // 遍历所有请求写入的节点和值
-            foreach (var entry in nodesToWrite)
+            // 为每个变量节点创建写入请求
+            foreach (var entry in variableNodesToWrite)
             {
                 var node = entry.Key;
                 var value = entry.Value;
-
-                // 只能向变量类型的节点写入值
-                if (node.NodeClass != NodeClass.Variable)
-                {
-                    Console.WriteLine($"节点 '{node.DisplayName}' 不是变量类型，无法写入。");
-                    continue; // 跳过非变量节点
-                }
 
                 try
                 {
@@ -468,6 +543,125 @@ namespace DMS.Infrastructure.Services
             {
                 Console.WriteLine($"写入节点值时发生错误: {ex.Message}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 批量读取节点的数据类型名称
+        /// </summary>
+        /// <param name="nodes">节点列表</param>
+        private async Task ReadNodeDataTypesAsync(List<OpcUaNode> nodes)
+        {
+            try
+            {
+                // 创建一个用于存放读取请求的集合
+                var nodesToRead = new ReadValueIdCollection();
+                // 创建一个列表，用于在收到响应后按顺序查找对应的OpcUaNode
+                var nodeListForLookup = new List<OpcUaNode>();
+
+                // 为每个节点创建读取数据类型的请求
+                foreach (var node in nodes)
+                {
+                    if (node.NodeId != null)
+                    {
+                        // 创建一个ReadValueId，指定要读取的节点ID和属性（数据类型）
+                        nodesToRead.Add(new ReadValueId
+                        {
+                            NodeId = node.NodeId,
+                            AttributeId = Attributes.DataType
+                        });
+                        // 将节点添加到查找列表中
+                        nodeListForLookup.Add(node);
+                    }
+                }
+
+                // 如果没有需要读取的节点，则直接返回
+                if (nodesToRead.Count == 0)
+                {
+                    return;
+                }
+
+                // 调用Read方法，批量读取节点的数据类型
+                var response = await _session.ReadAsync(
+                    null, // RequestHeader, 使用默认值
+                    0,    // maxAge, 0表示直接从设备读取最新值，而不是从缓存读取
+                    TimestampsToReturn.Neither, // TimestampsToReturn, 表示我们不关心值的时间戳
+                    nodesToRead, // ReadValueIdCollection, 要读取的节点和属性的集合
+                    default // CancellationToken
+                );
+
+                // 获取响应中的结果
+                var results = response.Results;
+
+                // 验证响应，确保请求成功
+                ClientBase.ValidateResponse(results, nodesToRead);
+
+                // 遍历返回的结果
+                for (int i = 0; i < results.Count; i++)
+                {
+                    // 根据索引找到对应的OpcUaNode
+                    var node = nodeListForLookup[i];
+                    
+                    // 检查状态码，确保读取成功
+                    if (StatusCode.IsGood(results[i].StatusCode))
+                    {
+                        // 获取数据类型NodeId
+                        if (results[i].Value is NodeId dataTypeId)
+                        {
+                            // 尝试获取数据类型的友好名称
+                            node.DataType = GetDataTypeName(dataTypeId);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"批量读取节点数据类型时发生错误: {ex.Message}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 获取数据类型的友好名称
+        /// </summary>
+        /// <param name="dataTypeId">数据类型NodeId</param>
+        /// <returns>数据类型的友好名称</returns>
+        private CSharpDataType GetDataTypeName(NodeId dataTypeId)
+        {
+            if (dataTypeId == null)
+                return CSharpDataType.Unknown;
+
+            // 使用OPC UA内置的类型映射
+            switch (dataTypeId.Identifier.ToString())
+            {
+                case "1": return CSharpDataType.Bool;       // Boolean
+                case "2": return CSharpDataType.SByte;      // SByte
+                case "3": return CSharpDataType.Byte;       // Byte
+                case "4": return CSharpDataType.Short;      // Int16
+                case "5": return CSharpDataType.UShort;     // UInt16
+                case "6": return CSharpDataType.Int;        // Int32
+                case "7": return CSharpDataType.UInt;       // UInt32
+                case "8": return CSharpDataType.Long;       // Int64
+                case "9": return CSharpDataType.ULong;      // UInt64
+                case "10": return CSharpDataType.Float;     // Float
+                case "11": return CSharpDataType.Double;    // Double
+                case "12": return CSharpDataType.String;    // String
+                case "13": return CSharpDataType.DateTime;  // DateTime
+                case "14": return CSharpDataType.Guid;      // Guid
+                case "15": return CSharpDataType.ByteArray; // ByteString
+                case "16": return CSharpDataType.Object;    // XmlElement
+                case "17": return CSharpDataType.Object;    // NodeId
+                case "18": return CSharpDataType.Object;    // ExpandedNodeId
+                case "19": return CSharpDataType.Object;    // StatusCode
+                case "20": return CSharpDataType.Object;    // QualifiedName
+                case "21": return CSharpDataType.Object;    // LocalizedText
+                case "22": return CSharpDataType.Object;    // ExtensionObject
+                case "23": return CSharpDataType.Object;    // DataValue
+                case "24": return CSharpDataType.Object;    // Variant
+                case "25": return CSharpDataType.Object;    // DiagnosticInfo
+                default:
+                    // 对于自定义数据类型，返回Unknown
+                    return CSharpDataType.Unknown;
             }
         }
 

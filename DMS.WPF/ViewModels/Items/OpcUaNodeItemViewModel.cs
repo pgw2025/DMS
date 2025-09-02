@@ -24,6 +24,9 @@ namespace DMS.WPF.ViewModels.Items
         private object? _value;
 
         [ObservableProperty]
+        private string? _dataType;
+
+        [ObservableProperty]
         private OpcUaNodeItemViewModel? _parentNode;
 
         [ObservableProperty]

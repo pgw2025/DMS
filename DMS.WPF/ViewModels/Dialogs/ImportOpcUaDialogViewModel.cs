@@ -116,15 +116,9 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
 
 
-    private bool _isLoadingNodeVariables = false;
     
     public async Task LoadNodeVariables(OpcUaNodeItemViewModel node)
     {
-        // 防止重复加载
-        if (_isLoadingNodeVariables)
-            return;
-            
-        _isLoadingNodeVariables = true;
         
         try
         {
@@ -158,6 +152,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
                         Name = children.DisplayName, // 修正：使用子节点的显示名称
                         OpcUaNodeId = children.NodeId.ToString(),
                         Protocol = ProtocolType.OpcUa,
+                        CSharpDataType=children.DataType,
                         IsActive = true // 默认选中
                     });
                 }
@@ -171,10 +166,6 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         {
             NlogHelper.Error($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
             NotificationHelper.ShowError($"加载 OPC UA 节点变量失败: {node.NodeId} - {ex.Message}", ex);
-        }
-        finally
-        {
-            _isLoadingNodeVariables = false;
         }
     }
 

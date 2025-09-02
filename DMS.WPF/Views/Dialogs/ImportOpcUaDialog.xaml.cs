@@ -16,8 +16,8 @@ namespace DMS.WPF.Views.Dialogs;
 /// </summary>
 public partial class ImportOpcUaDialog : ContentDialog
 {
-    private const int ContentAreaMaxWidth = 1200;
-    private const int ContentAreaMaxHeight = 800;
+    private const int ContentAreaMaxWidth = 1300;
+    private const int ContentAreaMaxHeight = 900;
 
 
 

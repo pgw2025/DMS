@@ -101,21 +101,10 @@
                 </Style>
             </DataGrid.Style>
             <DataGrid.Columns>
-                <DataGridTemplateColumn>
-                    <DataGridTemplateColumn.HeaderTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding DataContext.SelectAllVariables, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.HeaderTemplate>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsSelect, UpdateSourceTrigger=PropertyChanged}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding Name}" Header="名称" />
+                <DataGridTextColumn Binding="{Binding CSharpDataType}" Header="数据类型" />
                 <DataGridTextColumn Binding="{Binding OpcUaNodeId}" Header="节点ID" />
-                <DataGridTextColumn Binding="{Binding SignalType}" Header="数据类型" />
+
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

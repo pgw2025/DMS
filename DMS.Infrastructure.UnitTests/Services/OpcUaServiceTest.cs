@@ -82,7 +82,7 @@ namespace DMS.Infrastructure.UnitTests.Services
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
-                await service.ConnectAsync();
+                await service.ConnectAsync("opc.tcp://localhost:4840");
             });
         }
 
