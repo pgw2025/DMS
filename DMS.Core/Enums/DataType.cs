@@ -9,7 +9,7 @@ namespace DMS.Core.Enums
     /// <summary>
     /// 定义了C#中常用的数据类型。
     /// </summary>
-    public enum CSharpDataType
+    public enum DataType
     {
         // 基本数值类型
         Bool,

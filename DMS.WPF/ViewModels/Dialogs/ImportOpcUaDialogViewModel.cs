@@ -331,7 +331,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
                         Name = child.DisplayName,           // 变量名称
                         OpcUaNodeId = child.NodeId.ToString(), // OPC UA节点ID
                         Protocol = ProtocolType.OpcUa,       // 协议类型
-                        CSharpDataType = child.DataType,    // C#数据类型
+                        DataType = child.DataType,    // C#数据类型
                         IsActive = true                      // 默认激活状态
                     });
                 }

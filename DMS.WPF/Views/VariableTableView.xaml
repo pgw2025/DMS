@@ -251,7 +251,7 @@
                     IsReadOnly="True"
                     Visibility="{Binding Source={StaticResource proxy}, Path=Data.IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <DataGridTextColumn
-                    Binding="{Binding CSharpDataType}"
+                    Binding="{Binding DataType}"
                     Header="数据类型"
                     IsReadOnly="True" />
                 <DataGridTemplateColumn Header="信号类型" SortMemberPath="SignalType">

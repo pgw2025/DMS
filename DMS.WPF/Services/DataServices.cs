@@ -287,7 +287,7 @@ public partial class DataServices : ObservableRecipient, IRecipient<LoadMessage>
                 if (existingItem.AlarmMaxValue != dto.AlarmMaxValue) existingItem.AlarmMaxValue = dto.AlarmMaxValue;
                 if (existingItem.AlarmDeadband != dto.AlarmDeadband) existingItem.AlarmDeadband = dto.AlarmDeadband;
                 if (existingItem.Protocol != dto.Protocol) existingItem.Protocol = dto.Protocol;
-                if (existingItem.CSharpDataType != dto.CSharpDataType) existingItem.CSharpDataType = dto.CSharpDataType;
+                if (existingItem.DataType != dto.DataType) existingItem.DataType = dto.DataType;
                 if (existingItem.ConversionFormula != dto.ConversionFormula)
                     existingItem.ConversionFormula = dto.ConversionFormula;
                 if (existingItem.CreatedAt != dto.CreatedAt) existingItem.CreatedAt = dto.CreatedAt;

@@ -277,6 +277,11 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         try
         {
+            if (CurrentVariableTable.Device==null)
+            {
+                NotificationHelper.ShowError("当前变量表的Device对象为空，请检查。");
+                return;
+            }
             // 检查OPC UA Endpoint URL是否已设置
             string opcUaEndpointUrl = CurrentVariableTable.Device.OpcUaServerUrl;
             if (string.IsNullOrEmpty(opcUaEndpointUrl))
@@ -286,48 +291,54 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             }
 
             // 显示OPC UA导入对话框，让用户选择要导入的变量
-            ImportOpcUaDialogViewModel importOpcUaDialogViewModel = App.Current.Services.GetRequiredService<ImportOpcUaDialogViewModel>() ;
+            ImportOpcUaDialogViewModel importOpcUaDialogViewModel = App.Current.Services.GetRequiredService<ImportOpcUaDialogViewModel>();
+            importOpcUaDialogViewModel.EndpointUrl = opcUaEndpointUrl; // 设置Endpoint URL
             var importedVariables = await _dialogService.ShowDialogAsync(importOpcUaDialogViewModel);
             if (importedVariables == null || !importedVariables.Any())
             {
                 return; // 用户取消或没有选择任何变量
             }
 
-            //var importedVariableDtos = _mapper.Map<List<VariableDto>>(importedVariables);
-            //foreach (var variableDto in importedVariableDtos)
-            //{
-            //    variableDto.CreatedAt = DateTime.Now;
-            //    variableDto.UpdatedAt = DateTime.Now;
-            //    variableDto.VariableTableId = CurrentVariableTable.Id;
-            //    variableDto.Protocol = ProtocolType.OpcUa; // 确保协议类型正确
-            //}
+            // 将导入的变量转换为DTO并设置必要的属性
+            var importedVariableDtos = _mapper.Map<List<VariableDto>>(importedVariables);
+            foreach (var variableDto in importedVariableDtos)
+            {
+                variableDto.CreatedAt = DateTime.Now;
+                variableDto.UpdatedAt = DateTime.Now;
+                variableDto.VariableTableId = CurrentVariableTable.Id;
+            }
 
-            //var existList = await _variableAppService.FindExistingVariablesAsync(importedVariableDtos);
-            //if (existList.Count > 0)
-            //{
-            //    // 拼接要删除的变量名称，用于确认提示
-            //    var existNames = string.Join("、", existList.Select(v => v.Name));
-            //    var confrimDialogViewModel
-            //        = new ConfirmDialogViewModel("存在已经添加的变量", $"变量名称:{existNames}，已经存在，是否跳过继续添加其他的变量。取消则不添加任何变量", "继续");
-            //    var res = await _dialogService.ShowDialogAsync(confrimDialogViewModel);
-            //    if (!res) return;
-            //    // 从导入列表中删除已经存在的变量
-            //    importedVariableDtos.RemoveAll(variableDto => existList.Contains(variableDto));
-            //}
+            // 检查是否存在同名变量
+            var existList = await _variableAppService.FindExistingVariablesAsync(importedVariableDtos);
+            if (existList.Count > 0)
+            {
+                // 拼接要删除的变量名称，用于确认提示
+                var existNames = string.Join("、", existList.Select(v => v.Name));
+                var confirmDialogViewModel = new ConfirmDialogViewModel("存在已经添加的变量", $"变量名称:{existNames}，已经存在，是否跳过继续添加其他的变量。取消则不添加任何变量", "继续");
+                var res = await _dialogService.ShowDialogAsync(confirmDialogViewModel);
+                if (!res) return;
+                // 从导入列表中删除已经存在的变量
+                importedVariableDtos.RemoveAll(variableDto => existList.Contains(variableDto));
+            }
 
-            //if (importedVariableDtos.Count != 0)
-            //{
-            //    var isSuccess = await _variableAppService.BatchImportVariablesAsync(importedVariableDtos);
-            //    if (isSuccess)
-            //    {
-            //        _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(importedVariableDtos));
-            //        NotificationHelper.ShowSuccess($"从OPC UA服务器导入变量成功，共导入变量：{importedVariableDtos.Count}个");
-            //    }
-            //}
-            //else
-            //{
-            //    NotificationHelper.ShowSuccess($"列表中没有要添加的变量了。");
-            //}
+            // 如果还有变量需要导入，则执行导入操作
+            if (importedVariableDtos.Count != 0)
+            {
+                var isSuccess = await _variableAppService.BatchImportVariablesAsync(importedVariableDtos);
+                if (isSuccess)
+                {
+                    _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(importedVariableDtos));
+                    NotificationHelper.ShowSuccess($"从OPC UA服务器导入变量成功，共导入变量：{importedVariableDtos.Count}个");
+                }
+                else
+                {
+                    NotificationHelper.ShowError("从OPC UA服务器导入变量失败");
+                }
+            }
+            else
+            {
+                NotificationHelper.ShowSuccess("列表中没有要添加的变量了。");
+            }
         }
         catch (Exception e)
         {

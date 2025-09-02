@@ -250,7 +250,7 @@ public class ExcelService : IExcelService
         {
             DMS.Core.Models.Variable variable = new DMS.Core.Models.Variable();
             variable.Name = dataRow["Name"].ToString();
-            variable.CSharpDataType = (DMS.Core.Enums.CSharpDataType)Enum.Parse(typeof(DMS.Core.Enums.CSharpDataType), SiemensHelper.S7ToCSharpTypeString(dataRow["Data Type"].ToString()), true);
+            variable.DataType = (DMS.Core.Enums.DataType)Enum.Parse(typeof(DMS.Core.Enums.DataType), SiemensHelper.S7ToCSharpTypeString(dataRow["Data Type"].ToString()), true);
             variable.SignalType = SignalType.OtherASignal;
             var exS7Addr = dataRow["Logical Address"].ToString();
             if (exS7Addr.StartsWith("%"))

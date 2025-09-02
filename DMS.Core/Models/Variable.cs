@@ -107,7 +107,7 @@ public class Variable
     /// <summary>
     /// 变量的数据类型。
     /// </summary>
-    public CSharpDataType CSharpDataType { get; set; }
+    public DataType DataType { get; set; }
 
     /// <summary>
     /// 数值转换公式，例如 "+3*5"。

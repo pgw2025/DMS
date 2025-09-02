@@ -25,7 +25,7 @@
         <ex:EnumBindingSource x:Key="ProtocolType" EnumType="{x:Type en:ProtocolType}" />
         <ex:EnumBindingSource x:Key="SignalType" EnumType="{x:Type enums:SignalType}" />
         <ex:EnumBindingSource x:Key="PollLevelType" EnumType="{x:Type enums:PollLevelType}" />
-        <ex:EnumBindingSource x:Key="CSharpDataType" EnumType="{x:Type enums:CSharpDataType}" />
+        <ex:EnumBindingSource x:Key="CSharpDataType" EnumType="{x:Type enums:DataType}" />
     </ui:ContentDialog.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">

@@ -143,7 +143,7 @@ public partial class VariableItemViewModel : ObservableObject
     /// 获取或设置变量在C#中对应的数据类型。
     /// </summary>
     [ObservableProperty]
-    private CSharpDataType _cSharpDataType;
+    private DataType _dataType;
 
     /// <summary>
     /// 获取或设置值的转换公式。

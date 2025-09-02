@@ -40,7 +40,7 @@ namespace DMS.Infrastructure.Models
         /// <summary>
         /// 数据类型
         /// </summary>
-        public CSharpDataType DataType { get;  set; }
+        public DataType DataType { get;  set; }
 
         /// <summary>
         /// 返回节点的字符串表示形式。

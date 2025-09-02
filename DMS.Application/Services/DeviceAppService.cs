@@ -99,6 +99,7 @@ public class DeviceAppService : IDeviceAppService
                     throw new InvalidOperationException($"添加设备变量表失败,设备：{device.Name},变量表：{variableTable.Name}");
                 }
                  _mapper.Map(addVariableTable,dto.VariableTable);
+                dto.VariableTable.Device = dto.Device;
 
                 // 假设有设备菜单
                 if (dto.VariableTableMenu != null)

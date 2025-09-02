@@ -73,7 +73,7 @@ namespace DMS.Infrastructure.UnitTests
             dbVariable.AlarmMaxValue = 100;
             dbVariable.AlarmDeadband = 1;
             dbVariable.Protocol = 0;
-            dbVariable.CSharpDataType = 0;
+            dbVariable.DataType = 0;
             dbVariable.CreatedAt = DateTime.Now;
             dbVariable.UpdatedAt = DateTime.Now;
             dbVariable.IsModified = false;
@@ -156,7 +156,7 @@ namespace DMS.Infrastructure.UnitTests
                               .RuleFor(v => v.AlarmMaxValue, f => f.Random.Double(50.0, 100.0))
                               .RuleFor(v => v.AlarmDeadband, f => f.Random.Double(0.0, 1.0))
                               .RuleFor(v => v.Protocol, f => f.PickRandom<ProtocolType>())
-                              .RuleFor(v => v.CSharpDataType, f => f.PickRandom(Enum.GetValues<CSharpDataType>()))
+                              .RuleFor(v => v.DataType, f => f.PickRandom(Enum.GetValues<DataType>()))
                               .RuleFor(v => v.OpcUaNodeId, f => $"ns=2;s=My.Variable{f.Random.Int(1, 100)}")
                               .RuleFor(v => v.ConversionFormula, f => "x * 1.0")
                               .RuleFor(v => v.UpdatedBy, f => f.Name.FullName())

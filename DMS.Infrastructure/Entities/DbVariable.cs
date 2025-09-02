@@ -1,7 +1,6 @@
 ﻿using DMS.Core.Enums;
 using SqlSugar;
 using SqlSugar.DbConvert;
-using CSharpDataType = SqlSugar.CSharpDataType;
 
 namespace DMS.Infrastructure.Entities;
 
@@ -113,7 +112,7 @@ public class DbVariable
     /// 变量的数据类型。
     /// </summary>
     [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
-    public CSharpDataType CSharpDataType { get; set; }
+    public DataType DataType { get; set; }
 
     /// <summary>
     /// 数值转换公式 (例如: "+3*5")，可以为空。

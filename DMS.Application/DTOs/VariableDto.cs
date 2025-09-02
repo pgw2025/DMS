@@ -27,7 +27,7 @@ public class VariableDto
     public double AlarmMaxValue { get; set; }
     public double AlarmDeadband { get; set; }
     public ProtocolType Protocol { get; set; }
-    public CSharpDataType CSharpDataType { get; set; }
+    public DataType DataType { get; set; }
     public string ConversionFormula { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }

@@ -12,6 +12,7 @@ public class VariableTableDto
     public string Description { get; set; }
     public bool IsActive { get; set; }
     public int DeviceId { get; set; }
+    public DeviceDto Device { get; set; }
     public ProtocolType Protocol { get; set; }
     public List<VariableDto> Variables { get; set; } = new();
 }

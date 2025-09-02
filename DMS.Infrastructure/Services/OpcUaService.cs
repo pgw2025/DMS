@@ -626,42 +626,42 @@ namespace DMS.Infrastructure.Services
         /// </summary>
         /// <param name="dataTypeId">数据类型NodeId</param>
         /// <returns>数据类型的友好名称</returns>
-        private CSharpDataType GetDataTypeName(NodeId dataTypeId)
+        private DataType GetDataTypeName(NodeId dataTypeId)
         {
             if (dataTypeId == null)
-                return CSharpDataType.Unknown;
+                return DataType.Unknown;
 
             // 使用OPC UA内置的类型映射
             switch (dataTypeId.Identifier.ToString())
             {
-                case "1": return CSharpDataType.Bool;       // Boolean
-                case "2": return CSharpDataType.SByte;      // SByte
-                case "3": return CSharpDataType.Byte;       // Byte
-                case "4": return CSharpDataType.Short;      // Int16
-                case "5": return CSharpDataType.UShort;     // UInt16
-                case "6": return CSharpDataType.Int;        // Int32
-                case "7": return CSharpDataType.UInt;       // UInt32
-                case "8": return CSharpDataType.Long;       // Int64
-                case "9": return CSharpDataType.ULong;      // UInt64
-                case "10": return CSharpDataType.Float;     // Float
-                case "11": return CSharpDataType.Double;    // Double
-                case "12": return CSharpDataType.String;    // String
-                case "13": return CSharpDataType.DateTime;  // DateTime
-                case "14": return CSharpDataType.Guid;      // Guid
-                case "15": return CSharpDataType.ByteArray; // ByteString
-                case "16": return CSharpDataType.Object;    // XmlElement
-                case "17": return CSharpDataType.Object;    // NodeId
-                case "18": return CSharpDataType.Object;    // ExpandedNodeId
-                case "19": return CSharpDataType.Object;    // StatusCode
-                case "20": return CSharpDataType.Object;    // QualifiedName
-                case "21": return CSharpDataType.Object;    // LocalizedText
-                case "22": return CSharpDataType.Object;    // ExtensionObject
-                case "23": return CSharpDataType.Object;    // DataValue
-                case "24": return CSharpDataType.Object;    // Variant
-                case "25": return CSharpDataType.Object;    // DiagnosticInfo
+                case "1": return DataType.Bool;       // Boolean
+                case "2": return DataType.SByte;      // SByte
+                case "3": return DataType.Byte;       // Byte
+                case "4": return DataType.Short;      // Int16
+                case "5": return DataType.UShort;     // UInt16
+                case "6": return DataType.Int;        // Int32
+                case "7": return DataType.UInt;       // UInt32
+                case "8": return DataType.Long;       // Int64
+                case "9": return DataType.ULong;      // UInt64
+                case "10": return DataType.Float;     // Float
+                case "11": return DataType.Double;    // Double
+                case "12": return DataType.String;    // String
+                case "13": return DataType.DateTime;  // DateTime
+                case "14": return DataType.Guid;      // Guid
+                case "15": return DataType.ByteArray; // ByteString
+                case "16": return DataType.Object;    // XmlElement
+                case "17": return DataType.Object;    // NodeId
+                case "18": return DataType.Object;    // ExpandedNodeId
+                case "19": return DataType.Object;    // StatusCode
+                case "20": return DataType.Object;    // QualifiedName
+                case "21": return DataType.Object;    // LocalizedText
+                case "22": return DataType.Object;    // ExtensionObject
+                case "23": return DataType.Object;    // DataValue
+                case "24": return DataType.Object;    // Variant
+                case "25": return DataType.Object;    // DiagnosticInfo
                 default:
                     // 对于自定义数据类型，返回Unknown
-                    return CSharpDataType.Unknown;
+                    return DataType.Unknown;
             }
         }
 
