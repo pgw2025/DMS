@@ -180,16 +180,9 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            int res = await _deviceAppService.UpdateDeviceAsync(_mapper.Map<DeviceDto>(device));
-            if (res > 0)
+            if (await DataServices.UpdateDevice(device))
             {
-                var menu = DataServices.Menus.FirstOrDefault(m =>
-                                                                 m.MenuType == MenuType.DeviceMenu &&
-                                                                 m.TargetId == device.Id);
-                if (menu != null)
-                {
-                    menu.Header = device.Name;
-                }
+                NotificationHelper.ShowSuccess($"编辑设备成功：{device.Name}");
             }
         }
         catch (Exception e)

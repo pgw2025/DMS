@@ -159,6 +159,28 @@ public partial class DataServices : ObservableObject
     }
 
 
+    public async Task<bool> UpdateDevice(DeviceItemViewModel device)
+    {
+        if (!_dataCenterService.Devices.TryGetValue(device.Id, out var deviceDto))
+        {
+            return false;
+        }
+
+        _mapper.Map(device, deviceDto);
+        if ( await _dataCenterService.UpdateDeviceAsync(deviceDto)> 0)
+        {
+            var menu = Menus.FirstOrDefault(m =>
+                                                             m.MenuType == MenuType.DeviceMenu &&
+                                                             m.TargetId == device.Id);
+            if (menu != null)
+            {
+                menu.Header = device.Name;
+            }
+        }
+
+        return true;
+    }
+    
     public void DeleteVariableTableById(int id)
     {
         var variableTable = VariableTables.FirstOrDefault(vt => vt.Id == id);
@@ -214,6 +236,8 @@ public partial class DataServices : ObservableObject
         }
     }
 
+    
+    
     public void AddMenuItem(MenuItemViewModel menuItemViewModel)
     {
         if (menuItemViewModel == null)
