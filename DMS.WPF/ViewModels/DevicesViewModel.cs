@@ -64,19 +64,6 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     }
 
 
-    public override Task<bool> OnExitAsync()
-    {
-        // if (_dataServices.Devices!=null && _dataServices.Devices.Count>0)
-        // {
-        //     foreach (var device in Devices)
-        //     {
-        //         device.OnDeviceIsActiveChanged -= HandleDeviceIsActiveChanged;
-        //     }
-        // }
-
-        return Task.FromResult(true);
-    }
-
     /// <summary>
     /// 添加设备命令。
     /// </summary>
@@ -87,10 +74,10 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         {
             // 1. 显示添加设备对话框
             DeviceItemViewModel device = await _dialogService.ShowDialogAsync(new DeviceDialogViewModel()
-            {
-                Title = "添加设备",
-                PrimaryButText = "添加设备"
-            });
+                                                                              {
+                                                                                  Title = "添加设备",
+                                                                                  PrimaryButText = "添加设备"
+                                                                              });
             // 如果用户取消或对话框未返回设备，则直接返回
             if (device == null)
             {
@@ -107,7 +94,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                  Header = device.Name,
                                  Icon = SegoeFluentIcons.Devices2.Glyph,
                                  TargetViewKey = "DeviceDetailView"
-            };
+                             };
             if (device.IsAddDefVarTable)
             {
                 dto.VariableTable = new VariableTableDto()
@@ -124,13 +111,9 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                         };
             }
 
-            var addDto = await _deviceAppService.CreateDeviceWithDetailsAsync(dto);
 
-            // 更新界面
-            DataServices.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
-            DataServices.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
-            DataServices.AddVariableTable(_mapper.Map<VariableTableItemViewModel>(addDto.VariableTable));
-            DataServices.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
+            // 添加设备
+            var addDto = await DataServices.AddDevice(dto);
 
             NotificationHelper.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
         }
@@ -145,7 +128,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 删除设备命令。
     /// </summary>
     [RelayCommand]
-    public async void DeleteDevice()
+    private async Task DeleteDevice()
     {
         try
         {
@@ -155,16 +138,13 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-
-            if (await _dialogService.ShowDialogAsync(new ConfirmDialogViewModel("删除设备",$"确认要删除设备名为:{SelectedDevice.Name}","删除设备")))
+            var viewModel = new ConfirmDialogViewModel("删除设备", $"确认要删除设备名为:{SelectedDevice.Name}", "删除设备");
+            if (await _dialogService.ShowDialogAsync(viewModel))
             {
-                var isDel = await _deviceAppService.DeleteDeviceByIdAsync(SelectedDevice.Id);
-                if (isDel)
+                var deviceName = SelectedDevice.Name;
+                if (await DataServices.DeleteDevice(SelectedDevice))
                 {
-                    // 更新界面
-                    DataServices.DeleteDeviceById(SelectedDevice.Id);
-
-                    NotificationHelper.ShowSuccess($"删除设备成功,设备名：{SelectedDevice.Name}");
+                    NotificationHelper.ShowSuccess($"删除设备成功,设备名：{deviceName}");
                 }
             }
         }
@@ -178,7 +158,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 编辑设备命令。
     /// </summary>
     [RelayCommand]
-    public async void EditDevice()
+    private async Task EditDevice()
     {
         try
         {
@@ -190,7 +170,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
             DeviceDialogViewModel deviceDialogViewModel = new DeviceDialogViewModel(SelectedDevice)
                                                           {
-                PrimaryButText = "编辑设备"
+                                                              PrimaryButText = "编辑设备"
                                                           };
             // 1. 显示设备对话框
             DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
@@ -223,9 +203,10 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     {
         if (SelectedDevice == null) return;
 
-        var menu=DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu && m.TargetId == SelectedDevice.Id);
-        if (menu==null) return;
-        
+        var menu = DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu &&
+                                                          m.TargetId == SelectedDevice.Id);
+        if (menu == null) return;
+
         _navigationService.NavigateToAsync(menu);
     }
 

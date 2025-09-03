@@ -185,8 +185,21 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveDeviceFromMemory(int deviceId)
     {
-        if (Devices.TryRemove(deviceId, out var deviceDto))
+
+        if (Devices.TryGetValue(deviceId, out var deviceDto))
         {
+            foreach (var variableTable in deviceDto.VariableTables)  
+            {
+                foreach (var variable in variableTable.Variables)
+                {
+                    Variables.TryRemove(variable.Id, out _);
+                }
+
+                VariableTables.TryRemove(variableTable.Id, out _);
+            }
+
+            Devices.TryRemove(deviceId, out _);
+            
             OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
         }
     }
@@ -244,7 +257,8 @@ public class DataCenterService : IDataCenterService
         if (Devices.TryGetValue(variableTableDto.DeviceId, out var device))
         {
             deviceDto = device;
-            variableTableDto.Device = deviceDto;
+            device.VariableTables.Add(variableTableDto);
+            variableTableDto.Device = device;
         }
 
         if (VariableTables.TryAdd(variableTableDto.Id, variableTableDto))
@@ -660,26 +674,7 @@ public class DataCenterService : IDataCenterService
                 Menus.TryAdd(menuDto.Id, menuDto);
             }
 
-            // 遍历所有菜单项，构建树形结构
-            foreach (var menu in Menus.Values)
-            {
-                // 检查是否有父ID，并且父ID不为0（通常0或null表示根节点）
-                if (Menus.ContainsKey(menu.ParentId) && menu.ParentId != 0)
-                {
-                    // 尝试从查找表中找到父菜单
-                    if (Menus.TryGetValue(menu.ParentId, out var parentMenu))
-                    {
-                        // 将当前菜单添加到父菜单的Children列表中
-                        parentMenu.Children.Add(menu);
-                    }
-                    // else: 如果找不到父菜单，这可能是一个数据完整性问题，可以根据需要处理
-                }
-                else
-                {
-                    // 如果没有父ID，则这是一个根菜单
-                    MenuTrees.TryAdd(menu.Id, menu);
-                }
-            }
+            BuildMenuTrees();
 
             // 触发数据加载完成事件
             OnDataLoadCompleted(new DataLoadCompletedEventArgs(
@@ -698,6 +693,30 @@ public class DataCenterService : IDataCenterService
                                     false,
                                     ex.Message));
             throw new ApplicationException($"加载所有数据到内存时发生错误,错误信息:{ex.Message}", ex);
+        }
+    }
+
+    private void BuildMenuTrees()
+    {
+        // 遍历所有菜单项，构建树形结构
+        foreach (var menu in Menus.Values)
+        {
+            // 检查是否有父ID，并且父ID不为0（通常0或null表示根节点）
+            if (Menus.ContainsKey(menu.ParentId) && menu.ParentId != 0)
+            {
+                // 尝试从查找表中找到父菜单
+                if (Menus.TryGetValue(menu.ParentId, out var parentMenu))
+                {
+                    // 将当前菜单添加到父菜单的Children列表中
+                    parentMenu.Children.Add(menu);
+                }
+                // else: 如果找不到父菜单，这可能是一个数据完整性问题，可以根据需要处理
+            }
+            else
+            {
+                // 如果没有父ID，则这是一个根菜单
+                MenuTrees.TryAdd(menu.Id, menu);
+            }
         }
     }
 
