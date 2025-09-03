@@ -138,6 +138,8 @@ public partial class App : System.Windows.Application
         });
 
         // 注册数据处理服务和处理器
+
+        services.AddHostedService<OpcUaBackgroundService>();
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
         services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
         services.AddSingleton<CheckValueChangedProcessor>();

@@ -19,7 +19,6 @@ namespace DMS.Infrastructure.Services;
 /// </summary>
 public class MqttBackgroundService : BackgroundService
 {
-    private readonly IDeviceDataService _deviceDataService;
     private readonly IRepositoryManager _repositoryManager;
     private readonly ILogger<MqttBackgroundService> _logger;
 
@@ -33,9 +32,8 @@ public class MqttBackgroundService : BackgroundService
     /// <summary>
     /// 构造函数，注入DataServices。
     /// </summary>
-    public MqttBackgroundService(IDeviceDataService deviceDataService, IRepositoryManager repositoryManager, ILogger<MqttBackgroundService> logger)
+    public MqttBackgroundService(IRepositoryManager repositoryManager, ILogger<MqttBackgroundService> logger)
     {
-        _deviceDataService = deviceDataService;
         _repositoryManager = repositoryManager;
         _logger = logger;
         _mqttClients = new ConcurrentDictionary<int, IMqttClient>();

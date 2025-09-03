@@ -17,8 +17,6 @@ namespace DMS.Infrastructure.Services;
 /// </summary>
 public class S7BackgroundService : BackgroundService
 {
-    // 数据服务实例，用于访问和操作应用程序数据，如设备配置。
-    private readonly IDeviceDataService _deviceDataService;
 
     // 数据处理服务实例，用于将读取到的数据推入处理队列。
     private readonly IDataProcessingService _dataProcessingService;
@@ -69,20 +67,14 @@ public class S7BackgroundService : BackgroundService
     /// <param name="deviceDataService">设备数据服务实例。</param>
     /// <param name="dataProcessingService">数据处理服务实例。</param>
     /// <param name="logger">日志记录器实例。</param>
-    public S7BackgroundService(IDeviceDataService deviceDataService, IDataProcessingService dataProcessingService, ILogger<S7BackgroundService> logger)
+    public S7BackgroundService( IDataProcessingService dataProcessingService, ILogger<S7BackgroundService> logger)
     {
-        _deviceDataService = deviceDataService;
         _dataProcessingService = dataProcessingService;
         _logger = logger;
         _s7Devices = new ConcurrentDictionary<int, Device>();
         _s7PollVariablesByDeviceId = new ConcurrentDictionary<int, List<Variable>>();
         _s7PlcClientsByIp = new ConcurrentDictionary<string, Plc>();
         _s7VariablesById = new();
-
-        // 订阅设备列表变更事件，以便在设备配置更新时重新加载。
-        _deviceDataService.OnDeviceListChanged += HandleDeviceListChanged;
-        // 订阅单个设备IsActive状态变更事件
-        _deviceDataService.OnDeviceIsActiveChanged += HandleDeviceIsActiveChanged;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -101,18 +93,18 @@ public class S7BackgroundService : BackgroundService
                     break;
                 }
 
-                if (_deviceDataService.Devices == null || _deviceDataService.Devices.Count == 0)
-                {
-                    _logger.LogInformation("没有可用的S7设备，等待设备列表更新...");
-                    continue;
-                }
-
-                var isLoaded = LoadVariables();
-                if (!isLoaded)
-                {
-                    _logger.LogInformation("加载变量过程中发生了错误，停止后面的操作。");
-                    continue;
-                }
+                // if (_deviceDataService.Devices == null || _deviceDataService.Devices.Count == 0)
+                // {
+                //     _logger.LogInformation("没有可用的S7设备，等待设备列表更新...");
+                //     continue;
+                // }
+                //
+                // var isLoaded = LoadVariables();
+                // if (!isLoaded)
+                // {
+                //     _logger.LogInformation("加载变量过程中发生了错误，停止后面的操作。");
+                //     continue;
+                // }
 
                 await ConnectS7Service(stoppingToken);
                 _logger.LogInformation("S7后台服务开始轮询变量....");
@@ -391,54 +383,54 @@ public class S7BackgroundService : BackgroundService
     /// <summary>
     /// 加载变量
     /// </summary>
-    private bool LoadVariables()
-    {
-        try
-        {
-            _s7Devices.Clear();
-            _s7PollVariablesByDeviceId.Clear();
-            _s7VariablesById.Clear(); // 确保在重新加载变量时清空此字典
-
-            _logger.LogInformation("开始加载S7变量....");
-            var s7Devices = _deviceDataService
-                             .Devices.Where(d => d.IsActive == true && d.Protocol == ProtocolType.S7)
-                             .ToList(); // 转换为列表，避免多次枚举
-
-            int totalVariableCount = 0;
-            foreach (var device in s7Devices)
-            {
-                // device.IsRuning = true;
-                _s7Devices.AddOrUpdate(device.Id, device, (key, oldValue) => device);
-
-                // 过滤出当前设备和S7协议相关的变量。
-                var deviceS7Variables = device.VariableTables
-                                        .Where(vt => vt.Protocol == ProtocolType.S7 && vt.IsActive && vt.Variables != null)
-                                        .SelectMany(vt => vt.Variables)
-                                        .Where(vd => vd.IsActive == true)
-                                        .ToList(); // 转换为列表，避免多次枚举
-
-                // 将变量存储到字典中，方便以后通过ID快速查找
-                foreach (var s7Variable in deviceS7Variables)
-                    _s7VariablesById[s7Variable.Id] = s7Variable;
-
-                totalVariableCount += deviceS7Variables.Count; // 使用 Count 属性
-                _s7PollVariablesByDeviceId.AddOrUpdate(device.Id, deviceS7Variables, (key, oldValue) => deviceS7Variables);
-            }
-
-            if (totalVariableCount == 0)
-            {
-                return false;
-            }
-
-            _logger.LogInformation($"S7变量加载成功，共加载S7设备：{s7Devices.Count}个，变量数：{totalVariableCount}");
-            return true;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, $"S7后台服务加载变量时发生了错误:{e.Message}");
-            return false;
-        }
-    }
+    // private bool LoadVariables()
+    // {
+    //     // try
+    //     // {
+    //     //     _s7Devices.Clear();
+    //     //     _s7PollVariablesByDeviceId.Clear();
+    //     //     _s7VariablesById.Clear(); // 确保在重新加载变量时清空此字典
+    //     //
+    //     //     _logger.LogInformation("开始加载S7变量....");
+    //     //     var s7Devices = _deviceDataService
+    //     //                      .Devices.Where(d => d.IsActive == true && d.Protocol == ProtocolType.S7)
+    //     //                      .ToList(); // 转换为列表，避免多次枚举
+    //     //
+    //     //     int totalVariableCount = 0;
+    //     //     foreach (var device in s7Devices)
+    //     //     {
+    //     //         // device.IsRuning = true;
+    //     //         _s7Devices.AddOrUpdate(device.Id, device, (key, oldValue) => device);
+    //     //
+    //     //         // 过滤出当前设备和S7协议相关的变量。
+    //     //         var deviceS7Variables = device.VariableTables
+    //     //                                 .Where(vt => vt.Protocol == ProtocolType.S7 && vt.IsActive && vt.Variables != null)
+    //     //                                 .SelectMany(vt => vt.Variables)
+    //     //                                 .Where(vd => vd.IsActive == true)
+    //     //                                 .ToList(); // 转换为列表，避免多次枚举
+    //     //
+    //     //         // 将变量存储到字典中，方便以后通过ID快速查找
+    //     //         foreach (var s7Variable in deviceS7Variables)
+    //     //             _s7VariablesById[s7Variable.Id] = s7Variable;
+    //     //
+    //     //         totalVariableCount += deviceS7Variables.Count; // 使用 Count 属性
+    //     //         _s7PollVariablesByDeviceId.AddOrUpdate(device.Id, deviceS7Variables, (key, oldValue) => deviceS7Variables);
+    //     //     }
+    //     //
+    //     //     if (totalVariableCount == 0)
+    //     //     {
+    //     //         return false;
+    //     //     }
+    //     //
+    //     //     _logger.LogInformation($"S7变量加载成功，共加载S7设备：{s7Devices.Count}个，变量数：{totalVariableCount}");
+    //     //     return true;
+    //     // }
+    //     // catch (Exception e)
+    //     // {
+    //     //     _logger.LogError(e, $"S7后台服务加载变量时发生了错误:{e.Message}");
+    //     //     return false;
+    //     // }
+    // }
 
     /// <summary>
     /// 关闭所有PLC的连接
