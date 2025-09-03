@@ -46,6 +46,11 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public ConcurrentDictionary<int, MenuBeanDto> Menus { get; } = new();
 
+    /// <summary>
+    /// 安全字典，用于存储所有菜单数据
+    /// </summary>
+    public ConcurrentDictionary<int, MenuBeanDto> MenuTrees { get; } = new();
+
     #region 事件定义
 
     /// <summary>
@@ -245,9 +250,9 @@ public class DataCenterService : IDataCenterService
         if (VariableTables.TryAdd(variableTableDto.Id, variableTableDto))
         {
             OnVariableTableChanged(new VariableTableChangedEventArgs(
-                DataChangeType.Added, 
-                variableTableDto,
-                deviceDto));
+                                       DataChangeType.Added,
+                                       variableTableDto,
+                                       deviceDto));
         }
     }
 
@@ -264,9 +269,9 @@ public class DataCenterService : IDataCenterService
 
         VariableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
         OnVariableTableChanged(new VariableTableChangedEventArgs(
-            DataChangeType.Updated, 
-            variableTableDto,
-            deviceDto));
+                                   DataChangeType.Updated,
+                                   variableTableDto,
+                                   deviceDto));
     }
 
     /// <summary>
@@ -283,9 +288,9 @@ public class DataCenterService : IDataCenterService
             }
 
             OnVariableTableChanged(new VariableTableChangedEventArgs(
-                DataChangeType.Deleted, 
-                variableTableDto,
-                deviceDto));
+                                       DataChangeType.Deleted,
+                                       variableTableDto,
+                                       deviceDto));
         }
     }
 
@@ -322,7 +327,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task UpdateMenuAsync(MenuBeanDto menuDto)
     {
-         await _menuService.UpdateMenuAsync(menuDto);
+        await _menuService.UpdateMenuAsync(menuDto);
     }
 
     /// <summary>
@@ -330,7 +335,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task DeleteMenuAsync(int id)
     {
-         await _menuService.DeleteMenuAsync(id);
+        await _menuService.DeleteMenuAsync(id);
     }
 
     /// <summary>
@@ -345,8 +350,6 @@ public class DataCenterService : IDataCenterService
             {
                 parentMenu = parent;
                 parent.Children.Add(menuDto);
-
-
             }
 
             OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Added, menuDto, parentMenu));
@@ -391,7 +394,8 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public List<MenuBeanDto> GetRootMenus()
     {
-        return Menus.Values.Where(m => m.ParentId == 0).ToList();
+        return Menus.Values.Where(m => m.ParentId == 0)
+                    .ToList();
     }
 
     /// <summary>
@@ -401,7 +405,120 @@ public class DataCenterService : IDataCenterService
     /// <returns>子菜单列表</returns>
     public List<MenuBeanDto> GetChildMenus(int parentId)
     {
-        return Menus.Values.Where(m => m.ParentId == parentId).ToList();
+        return Menus.Values.Where(m => m.ParentId == parentId)
+                    .ToList();
+    }
+
+    #endregion
+
+    #region 变量管理
+
+    /// <summary>
+    /// 异步根据ID获取变量DTO。
+    /// </summary>
+    public async Task<VariableDto> GetVariableByIdAsync(int id)
+    {
+        return await _variableAppService.GetVariableByIdAsync(id);
+    }
+
+    /// <summary>
+    /// 异步获取所有变量DTO列表。
+    /// </summary>
+    public async Task<List<VariableDto>> GetAllVariablesAsync()
+    {
+        return await _variableAppService.GetAllVariablesAsync();
+    }
+
+    /// <summary>
+    /// 异步创建一个新变量。
+    /// </summary>
+    public async Task<VariableDto> CreateVariableAsync(VariableDto variableDto)
+    {
+        return await _variableAppService.CreateVariableAsync(variableDto);
+    }
+
+    /// <summary>
+    /// 异步更新一个已存在的变量。
+    /// </summary>
+    public async Task<int> UpdateVariableAsync(VariableDto variableDto)
+    {
+        return await _variableAppService.UpdateVariableAsync(variableDto);
+    }
+
+    /// <summary>
+    /// 异步批量更新变量。
+    /// </summary>
+    public async Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos)
+    {
+        return await _variableAppService.UpdateVariablesAsync(variableDtos);
+    }
+
+    /// <summary>
+    /// 异步删除一个变量。
+    /// </summary>
+    public async Task<bool> DeleteVariableAsync(int id)
+    {
+        return await _variableAppService.DeleteVariableAsync(id);
+    }
+
+    /// <summary>
+    /// 异步批量删除变量。
+    /// </summary>
+    public async Task<bool> DeleteVariablesAsync(List<int> ids)
+    {
+        return await _variableAppService.DeleteVariablesAsync(ids);
+    }
+
+    /// <summary>
+    /// 在内存中添加变量
+    /// </summary>
+    public void AddVariableToMemory(VariableDto variableDto)
+    {
+        VariableTableDto variableTableDto = null;
+        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+        {
+            variableTableDto = variableTable;
+            variableDto.VariableTable = variableTableDto;
+            variableTable.Variables.Add(variableDto);
+        }
+
+        if (Variables.TryAdd(variableDto.Id, variableDto))
+        {
+            OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
+        }
+    }
+
+    /// <summary>
+    /// 在内存中更新变量
+    /// </summary>
+    public void UpdateVariableInMemory(VariableDto variableDto)
+    {
+        VariableTableDto variableTableDto = null;
+        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+        {
+            variableTableDto = variableTable;
+        }
+
+        Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
+        OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
+    }
+
+    /// <summary>
+    /// 在内存中删除变量
+    /// </summary>
+    public void RemoveVariableFromMemory(int variableId)
+    {
+        if (Variables.TryRemove(variableId, out var variableDto))
+        {
+            VariableTableDto variableTableDto = null;
+            if (variableDto != null && VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+            {
+                variableTableDto = variableTable;
+                variableTable.Variables.Remove(variableDto);
+            }
+
+            OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
+        }
     }
 
     #endregion
@@ -483,15 +600,16 @@ public class DataCenterService : IDataCenterService
             VariableTables.Clear();
             Variables.Clear();
             Menus.Clear();
+            MenuTrees.Clear();
 
             // 加载所有设备
             var devices = await _repositoryManager.Devices.GetAllAsync();
             var deviceDtos = _mapper.Map<List<DeviceDto>>(devices);
-            
+
             // 加载所有变量表
             var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
             var variableTableDtos = _mapper.Map<List<VariableTableDto>>(variableTables);
-            
+
             // 加载所有变量
             var variables = await _repositoryManager.Variables.GetAllAsync();
             var variableDtos = _mapper.Map<List<VariableDto>>(variables);
@@ -504,9 +622,9 @@ public class DataCenterService : IDataCenterService
             foreach (var deviceDto in deviceDtos)
             {
                 deviceDto.VariableTables = variableTableDtos
-                    .Where(vt => vt.DeviceId == deviceDto.Id)
-                    .ToList();
-                
+                                           .Where(vt => vt.DeviceId == deviceDto.Id)
+                                           .ToList();
+
                 // 将设备添加到安全字典
                 Devices.TryAdd(deviceDto.Id, deviceDto);
             }
@@ -515,9 +633,13 @@ public class DataCenterService : IDataCenterService
             foreach (var variableTableDto in variableTableDtos)
             {
                 variableTableDto.Variables = variableDtos
-                    .Where(v => v.VariableTableId == variableTableDto.Id)
-                    .ToList();
-                
+                                             .Where(v => v.VariableTableId == variableTableDto.Id)
+                                             .ToList();
+                if (Devices.TryGetValue(variableTableDto.DeviceId, out var deviceDto))
+                {
+                    variableTableDto.Device = deviceDto;
+                }
+
                 // 将变量表添加到安全字典
                 VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
             }
@@ -525,6 +647,10 @@ public class DataCenterService : IDataCenterService
             // 将变量添加到安全字典
             foreach (var variableDto in variableDtos)
             {
+                if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                {
+                    variableDto.VariableTable = variableTable;
+                }
                 Variables.TryAdd(variableDto.Id, variableDto);
             }
 
@@ -534,22 +660,43 @@ public class DataCenterService : IDataCenterService
                 Menus.TryAdd(menuDto.Id, menuDto);
             }
 
+            // 遍历所有菜单项，构建树形结构
+            foreach (var menu in Menus.Values)
+            {
+                // 检查是否有父ID，并且父ID不为0（通常0或null表示根节点）
+                if (Menus.ContainsKey(menu.ParentId) && menu.ParentId != 0)
+                {
+                    // 尝试从查找表中找到父菜单
+                    if (Menus.TryGetValue(menu.ParentId, out var parentMenu))
+                    {
+                        // 将当前菜单添加到父菜单的Children列表中
+                        parentMenu.Children.Add(menu);
+                    }
+                    // else: 如果找不到父菜单，这可能是一个数据完整性问题，可以根据需要处理
+                }
+                else
+                {
+                    // 如果没有父ID，则这是一个根菜单
+                    MenuTrees.TryAdd(menu.Id, menu);
+                }
+            }
+
             // 触发数据加载完成事件
             OnDataLoadCompleted(new DataLoadCompletedEventArgs(
-                deviceDtos, 
-                variableTableDtos, 
-                variableDtos, 
-                true));
+                                    deviceDtos,
+                                    variableTableDtos,
+                                    variableDtos,
+                                    true));
         }
         catch (Exception ex)
         {
             // 触发数据加载失败事件
             OnDataLoadCompleted(new DataLoadCompletedEventArgs(
-                new List<DeviceDto>(), 
-                new List<VariableTableDto>(), 
-                new List<VariableDto>(), 
-                false, 
-                ex.Message));
+                                    new List<DeviceDto>(),
+                                    new List<VariableTableDto>(),
+                                    new List<VariableDto>(),
+                                    false,
+                                    ex.Message));
             throw new ApplicationException($"加载所有数据到内存时发生错误,错误信息:{ex.Message}", ex);
         }
     }
@@ -581,24 +728,26 @@ public class DataCenterService : IDataCenterService
             // 获取所有设备
             var devices = await _repositoryManager.Devices.GetAllAsync();
             var deviceDtos = _mapper.Map<List<DeviceDto>>(devices);
-            
+
             // 为每个设备加载关联的变量表和变量
             foreach (var deviceDto in deviceDtos)
             {
                 // 获取设备的所有变量表
                 var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-                var deviceVariableTables = variableTables.Where(vt => vt.DeviceId == deviceDto.Id).ToList();
+                var deviceVariableTables = variableTables.Where(vt => vt.DeviceId == deviceDto.Id)
+                                                         .ToList();
                 deviceDto.VariableTables = _mapper.Map<List<VariableTableDto>>(deviceVariableTables);
-                
+
                 // 为每个变量表加载关联的变量
                 foreach (var variableTableDto in deviceDto.VariableTables)
                 {
                     var variables = await _repositoryManager.Variables.GetAllAsync();
-                    var tableVariables = variables.Where(v => v.VariableTableId == variableTableDto.Id).ToList();
+                    var tableVariables = variables.Where(v => v.VariableTableId == variableTableDto.Id)
+                                                  .ToList();
                     variableTableDto.Variables = _mapper.Map<List<VariableDto>>(tableVariables);
                 }
             }
-            
+
             return deviceDtos;
         }
         catch (Exception ex)
@@ -617,15 +766,16 @@ public class DataCenterService : IDataCenterService
             // 获取所有变量表
             var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
             var variableTableDtos = _mapper.Map<List<VariableTableDto>>(variableTables);
-            
+
             // 为每个变量表加载关联的变量
             foreach (var variableTableDto in variableTableDtos)
             {
                 var variables = await _repositoryManager.Variables.GetAllAsync();
-                var tableVariables = variables.Where(v => v.VariableTableId == variableTableDto.Id).ToList();
+                var tableVariables = variables.Where(v => v.VariableTableId == variableTableDto.Id)
+                                              .ToList();
                 variableTableDto.Variables = _mapper.Map<List<VariableDto>>(tableVariables);
             }
-            
+
             return variableTableDtos;
         }
         catch (Exception ex)

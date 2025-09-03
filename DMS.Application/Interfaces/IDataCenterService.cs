@@ -1,10 +1,6 @@
+using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
-using DMS.Core.Models;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace DMS.Application.Interfaces;
 
@@ -166,6 +162,60 @@ public interface IDataCenterService
 
     #endregion
 
+    #region 变量管理
+
+    /// <summary>
+    /// 异步根据ID获取变量DTO。
+    /// </summary>
+    Task<VariableDto> GetVariableByIdAsync(int id);
+
+    /// <summary>
+    /// 异步获取所有变量DTO列表。
+    /// </summary>
+    Task<List<VariableDto>> GetAllVariablesAsync();
+
+    /// <summary>
+    /// 异步创建一个新变量。
+    /// </summary>
+    Task<VariableDto> CreateVariableAsync(VariableDto variableDto);
+
+    /// <summary>
+    /// 异步更新一个已存在的变量。
+    /// </summary>
+    Task<int> UpdateVariableAsync(VariableDto variableDto);
+
+    /// <summary>
+    /// 异步批量更新变量。
+    /// </summary>
+    Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos);
+
+    /// <summary>
+    /// 异步删除一个变量。
+    /// </summary>
+    Task<bool> DeleteVariableAsync(int id);
+
+    /// <summary>
+    /// 异步批量删除变量。
+    /// </summary>
+    Task<bool> DeleteVariablesAsync(List<int> ids);
+
+    /// <summary>
+    /// 在内存中添加变量
+    /// </summary>
+    void AddVariableToMemory(VariableDto variableDto);
+
+    /// <summary>
+    /// 在内存中更新变量
+    /// </summary>
+    void UpdateVariableInMemory(VariableDto variableDto);
+
+    /// <summary>
+    /// 在内存中删除变量
+    /// </summary>
+    void RemoveVariableFromMemory(int variableId);
+
+    #endregion
+
     #region 数据存储访问
 
     /// <summary>
@@ -187,6 +237,10 @@ public interface IDataCenterService
     /// 获取所有菜单的安全字典。
     /// </summary>
     ConcurrentDictionary<int, MenuBeanDto> Menus { get; }
+    /// <summary>
+    /// 获取所有菜单树的安全字典。
+    /// </summary>
+    ConcurrentDictionary<int, MenuBeanDto> MenuTrees { get; }
 
     #endregion
 

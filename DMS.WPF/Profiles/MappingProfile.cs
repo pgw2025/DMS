@@ -20,7 +20,6 @@ namespace DMS.WPF.Profiles
                 
 
             CreateMap<MenuBeanDto, MenuItemViewModel>()
-                .ForMember(dest => dest.Children, opt => opt.Ignore())
                 .ReverseMap();
                 
             CreateMap<MqttServerDto, MqttServerItemViewModel>().ReverseMap();

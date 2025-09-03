@@ -1,4 +1,5 @@
 // 文件: DMS.WPF/ViewModels/SplashViewModel.cs
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.Interfaces;
@@ -24,7 +25,8 @@ public partial class SplashViewModel : ObservableObject
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
-    public SplashViewModel(IServiceProvider serviceProvider, IInitializeService initializeService,IDataCenterService dataCenterService, DataServices dataServices)
+    public SplashViewModel(IServiceProvider serviceProvider, IInitializeService initializeService,
+                           IDataCenterService dataCenterService, DataServices dataServices)
     {
         _serviceProvider = serviceProvider;
         _initializeService = initializeService;
@@ -40,20 +42,20 @@ public partial class SplashViewModel : ObservableObject
         try
         {
             LoadingMessage = "正在初始化数据库...";
-             _initializeService.InitializeTables();
-             _initializeService.InitializeMenus();
-
-            LoadingMessage = "正在加载系统配置...";
-            await _dataServices.LoadDevices();
-            await _dataServices.LoadVariableTables();
-            await _dataServices.LoadVariables();
-            await _dataServices.LoadMenus();
-
+            _initializeService.InitializeTables();
+            _initializeService.InitializeMenus();
             await _dataCenterService.LoadAllDataToMemoryAsync();
-
-            _dataServices.AssociateVariableTablesToDevices();
-            _dataServices.AssociateVariablesToVariableTables();
             
+            LoadingMessage = "正在加载系统配置...";
+            await _dataServices.LoadAllDatas();
+            // await _dataServices.LoadVariableTables();
+            // await _dataServices.LoadVariables();
+            // await _dataServices.LoadMenus();
+
+
+            // _dataServices.AssociateVariableTablesToDevices();
+            // _dataServices.AssociateVariablesToVariableTables();
+
             // 可以在这里添加加载配置的逻辑
             await Task.Delay(500); // 模拟耗时
 
