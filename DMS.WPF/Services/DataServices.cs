@@ -106,7 +106,7 @@ public partial class DataServices : ObservableObject
         //更新当前界面
         Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
         AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
-        AddVariableTable(_mapper.Map<VariableTableItemViewModel>(addDto.VariableTable));
+        await AddVariableTable(addDto.VariableTable);
         AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
         //更新数据中心
         _dataCenterService.AddDeviceToMemory(addDto.Device);
@@ -135,16 +135,7 @@ public partial class DataServices : ObservableObject
         foreach (var variableTable in device.VariableTables)
         {
             // 删除与当前变量表关联的所有变量
-            foreach (var variable in variableTable.Variables)
-            {
-                Variables.Remove(variable);
-            }
-
-            var variableTableMenu
-                = Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);
-            DeleteMenuItem(variableTableMenu);
-            // 删除变量表
-            VariableTables.Remove(variableTable);
+            DeleteVariableTable(variableTable);
         }
 
         // 2. 删除设备
@@ -167,11 +158,11 @@ public partial class DataServices : ObservableObject
         }
 
         _mapper.Map(device, deviceDto);
-        if ( await _dataCenterService.UpdateDeviceAsync(deviceDto)> 0)
+        if (await _dataCenterService.UpdateDeviceAsync(deviceDto) > 0)
         {
             var menu = Menus.FirstOrDefault(m =>
-                                                             m.MenuType == MenuType.DeviceMenu &&
-                                                             m.TargetId == device.Id);
+                                                m.MenuType == MenuType.DeviceMenu &&
+                                                m.TargetId == device.Id);
             if (menu != null)
             {
                 menu.Header = device.Name;
@@ -180,35 +171,96 @@ public partial class DataServices : ObservableObject
 
         return true;
     }
+
     
-    public void DeleteVariableTableById(int id)
+    public async Task<bool> AddVariableTable(VariableTableDto variableTableDto,
+                                             MenuBeanDto menuDto = null, bool isAddDb = false)
     {
-        var variableTable = VariableTables.FirstOrDefault(vt => vt.Id == id);
-        if (variableTable != null)
+        if (variableTableDto == null)
+            return false;
+
+        if (isAddDb && menuDto != null)
         {
-            // 删除与当前变量表关联的所有变量
-            var variablesToDelete = Variables.Where(v => v.VariableTableId == variableTable.Id)
-                                             .ToList();
-            foreach (var variable in variablesToDelete)
+            CreateVariableTableWithMenuDto createDto = new CreateVariableTableWithMenuDto();
+            createDto.VariableTable = variableTableDto;
+            createDto.DeviceId = variableTableDto.DeviceId;
+            createDto.Menu = menuDto;
+            var resDto = await _dataCenterService.CreateVariableTableAsync(createDto);
+            _mapper.Map(resDto.VariableTable, variableTableDto);
+            AddMenuItem(_mapper.Map<MenuItemViewModel>(resDto.Menu));
+        }
+        
+        _dataCenterService.AddVariableTableToMemory(variableTableDto);
+
+        var device = Devices.FirstOrDefault(d => d.Id == variableTableDto.DeviceId);
+        if (device != null)
+        {
+            var variableTableItemViewModel = _mapper.Map<VariableTableItemViewModel>(variableTableDto);
+            variableTableItemViewModel.Device = device;
+            device.VariableTables.Add(variableTableItemViewModel);
+            VariableTables.Add(variableTableItemViewModel);
+        }
+
+        return true;
+    }
+
+    public async Task<bool> UpdateVariableTable(VariableTableItemViewModel variableTable)
+    {
+        if (variableTable==null)
+        {
+            return false;
+        }
+
+        var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
+        if (await _dataCenterService.UpdateVariableTableAsync(variableTableDto) > 0)
+        {
+            
+            _dataCenterService.UpdateVariableTableInMemory(variableTableDto);
+            
+            var menu = Menus.FirstOrDefault(m =>
+                                                             m.MenuType == MenuType.VariableTableMenu &&
+                                                             m.TargetId == variableTable.Id);
+            if (menu != null)
             {
-                Variables.Remove(variable);
+                menu.Header = variableTable.Name;
             }
+            
+            return true;
+        }
 
+        return false;
 
-            var device = Devices.FirstOrDefault(d => d.Id == variableTable.DeviceId);
-            if (device != null)
-                device.VariableTables.Remove(variableTable);
-            // 删除变量表
-            VariableTables.Remove(variableTable);
+    }
+    public async Task<bool> DeleteVariableTable(VariableTableItemViewModel variableTable, bool isDeleteDb = false)
+    {
+        if (variableTable == null)
+        {
+            return false;
+        }
 
-            // 删除与变量表关联的菜单项
-            var variableTableMenu
-                = Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);
-            if (variableTableMenu != null)
+        if (isDeleteDb)
+        {
+            if (!await _dataCenterService.DeleteVariableTableAsync(variableTable.Id))
             {
-                DeleteMenuItem(variableTableMenu);
+                return false;
             }
         }
+
+        // 删除与当前变量表关联的所有变量
+        foreach (var variable in variableTable.Variables)
+        {
+            Variables.Remove(variable);
+        }
+        
+        _dataCenterService.RemoveVariableTableFromMemory(variableTable.Id);
+
+        var variableTableMenu
+            = Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);
+        DeleteMenuItem(variableTableMenu);
+        // 删除变量表
+        VariableTables.Remove(variableTable);
+        variableTable.Device.VariableTables.Remove(variableTable);
+        return true;
     }
 
 
@@ -236,8 +288,7 @@ public partial class DataServices : ObservableObject
         }
     }
 
-    
-    
+
     public void AddMenuItem(MenuItemViewModel menuItemViewModel)
     {
         if (menuItemViewModel == null)
@@ -250,19 +301,6 @@ public partial class DataServices : ObservableObject
         {
             deviceMenu.Children.Add(menuItemViewModel);
             Menus.Add(menuItemViewModel);
-        }
-    }
-
-    public void AddVariableTable(VariableTableItemViewModel variableTableItemViewModel)
-    {
-        if (variableTableItemViewModel == null)
-            return;
-
-        var device = Devices.FirstOrDefault(d => d.Id == variableTableItemViewModel.DeviceId);
-        if (device != null)
-        {
-            device.VariableTables.Add(variableTableItemViewModel);
-            VariableTables.Add(variableTableItemViewModel);
         }
     }
 
@@ -281,7 +319,7 @@ public partial class DataServices : ObservableObject
         }
     }
 
-    public void DeleteMenuItem(MenuItemViewModel? menuItemViewModel)
+    private void DeleteMenuItem(MenuItemViewModel? menuItemViewModel)
     {
         if (menuItemViewModel == null)
         {
@@ -306,7 +344,7 @@ public partial class DataServices : ObservableObject
     }
 
 
-    public void DeleteVariableById(int id)
+    public void DeleteVariable(int id)
     {
         var variableItem = Variables.FirstOrDefault(v => v.Id == id);
         if (variableItem == null)

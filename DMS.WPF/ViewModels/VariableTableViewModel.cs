@@ -432,7 +432,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 foreach (var variable in variablesToDelete)
                 {
                     _variableItemList.Remove(variable);
-                    _dataServices.DeleteVariableById(variable.Id);
+                    _dataServices.DeleteVariable(variable.Id);
                 }
                 // 显示成功通知
                 NotificationHelper.ShowSuccess($"成功删除 {variablesToDelete.Count} 个变量");

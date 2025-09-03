@@ -1,6 +1,7 @@
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Dm;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
@@ -18,8 +19,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
-    private readonly IVariableTableAppService _variableTableAppService;
-    public DataServices DataServices { get; set; }
+    public DataServices DataServices { get;  }
 
     [ObservableProperty]
     private DeviceItemViewModel _currentDevice;
@@ -28,12 +28,11 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     private VariableTableItemViewModel _selectedVariableTable;
 
     public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, INavigationService navigationService,
-                                 DataServices dataServices, IVariableTableAppService variableTableAppService)
+                                 DataServices dataServices)
     {
         _mapper = mapper;
         _dialogService = dialogService;
         _navigationService = navigationService;
-        _variableTableAppService = variableTableAppService;
         DataServices = dataServices;
     }
 
@@ -54,18 +53,23 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            CreateVariableTableWithMenuDto createDto = new CreateVariableTableWithMenuDto();
-            createDto.VariableTable = _mapper.Map<VariableTableDto>(variableTableItemViewModel);
-            createDto.DeviceId = CurrentDevice.Id;
-            createDto.Menu = new MenuBeanDto()
+            variableTableItemViewModel.DeviceId = CurrentDevice.Id;
+             var tableMenu = new MenuBeanDto()
                              {
                                  Header = variableTableItemViewModel.Name,
                                  Icon = SegoeFluentIcons.DataSense.Glyph
                              };
-            CreateVariableTableWithMenuDto
-                resCreateDto = await _variableTableAppService.CreateVariableTableAsync(createDto);
-            DataServices.AddVariableTable(_mapper.Map<VariableTableItemViewModel>(resCreateDto.VariableTable));
-            DataServices.AddMenuItem(_mapper.Map<MenuItemViewModel>(resCreateDto.Menu));
+
+             if (await DataServices.AddVariableTable(_mapper.Map<VariableTableDto>(variableTableItemViewModel),
+                                                     tableMenu, true))
+             {
+                 NotificationHelper.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
+             }
+             else
+             {
+                 NotificationHelper.ShowError($"添加变量表失败：{variableTableItemViewModel.Name}！！");
+             }
+
         }
         catch (Exception ex)
         {
@@ -96,16 +100,13 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            int res = await _variableTableAppService.UpdateVariableTableAsync(_mapper.Map<VariableTableDto>(variableTable));
-            if (res > 0)
+            if (await DataServices.UpdateVariableTable(variableTable))
             {
-                var menu = DataServices.Menus.FirstOrDefault(m =>
-                                                                 m.MenuType == MenuType.VariableTableMenu &&
-                                                                 m.TargetId == variableTable.Id);
-                if (menu != null)
-                {
-                    menu.Header = variableTable.Name;
-                }
+                NotificationHelper.ShowSuccess($"编辑变量表成功：{variableTable.Name}");
+            }
+            else
+            {
+                NotificationHelper.ShowError($"编辑变量表失败：{variableTable.Name}");
             }
         }
         catch (Exception e)
@@ -127,17 +128,16 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
 
             string message = $"确认要删除变量表名为:{SelectedVariableTable.Name} \n\n此操作将同时删除该变量表下的所有变量数据，且无法恢复！";
             ConfirmDialogViewModel viewModel = new ConfirmDialogViewModel("删除变量表",message,"删除");
-            var res = await _dialogService.ShowDialogAsync(viewModel);
-            if (res)
+            if (await _dialogService.ShowDialogAsync(viewModel))
             {
-                var isDel = await _variableTableAppService.DeleteVariableTableAsync(SelectedVariableTable.Id);
-                if (isDel)
+                var tableName = SelectedVariableTable.Name;
+                if (await DataServices.DeleteVariableTable(SelectedVariableTable,true))
                 {
-                    var delName = SelectedVariableTable.Name;
-                    // 更新界面
-                    DataServices.DeleteVariableTableById(SelectedVariableTable.Id);
-
-                    NotificationHelper.ShowSuccess($"删除变量表成功,变量表名：{delName}");
+                    NotificationHelper.ShowSuccess($"变量表：{tableName},删除成功。");
+                }
+                else
+                {
+                    NotificationHelper.ShowError($"变量表：{tableName},删除失败!!!");
                 }
             }
         }
@@ -147,22 +147,6 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
         }
     }
 
-    // Placeholder for EditDeviceCommand and DeleteDeviceCommand if they are needed here
-    [RelayCommand]
-    private async Task EditDevice()
-    {
-        // Implement device editing logic, similar to AddDeviceCommand but for existing device
-        //NotificationHelper.ShowInfo("编辑设备功能待实现。");
-        await Task.CompletedTask;
-    }
-
-    [RelayCommand]
-    private async Task DeleteDevice()
-    {
-        // Implement device deletion logic
-        //NotificationHelper.ShowInfo("删除设备功能待实现。");
-        await Task.CompletedTask;
-    }
 
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)

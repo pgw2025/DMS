@@ -299,6 +299,8 @@ public class DataCenterService : IDataCenterService
             if (variableTableDto != null && Devices.TryGetValue(variableTableDto.DeviceId, out var device))
             {
                 deviceDto = device;
+                device.VariableTables.Remove(variableTableDto);
+                
             }
 
             OnVariableTableChanged(new VariableTableChangedEventArgs(
