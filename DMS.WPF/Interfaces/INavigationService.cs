@@ -1,8 +1,8 @@
 // 文件: DMS.WPF/Services/INavigationService.cs
-using System.Threading.Tasks;
+
 using DMS.WPF.ViewModels.Items;
 
-namespace DMS.WPF.Services;
+namespace DMS.WPF.Interfaces;
 
 /// <summary>
 /// 定义了应用程序的导航服务接口。

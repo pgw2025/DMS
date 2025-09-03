@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
 using DMS.Core.Models;
+using DMS.Services;
 
-namespace DMS.Services;
+namespace DMS.WPF.Interfaces;
 
 /// <summary>
 /// 定义了数据处理服务的接口。

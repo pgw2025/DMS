@@ -1,7 +1,6 @@
 using DMS.WPF.ViewModels.Dialogs;
-using System.Threading.Tasks;
 
-namespace DMS.WPF.Services
+namespace DMS.WPF.Interfaces
 {
     public interface IDialogService
     {

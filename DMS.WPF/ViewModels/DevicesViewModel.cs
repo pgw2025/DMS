@@ -10,6 +10,7 @@ using DMS.Core.Models;
 using DMS.Helper;
 using DMS.Services;
 using DMS.WPF.Helper;
+using DMS.WPF.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using DMS.WPF.Services;

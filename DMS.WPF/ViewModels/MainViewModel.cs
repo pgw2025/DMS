@@ -11,6 +11,7 @@ using DMS.Helper;
 using DMS.Services;
 using DMS.ViewModels;
 using DMS.WPF.Helper;
+using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;

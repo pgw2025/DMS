@@ -1,6 +1,7 @@
 using DMS.Core.Helper;
 using DMS.Core.Models;
 using DMS.Helper;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 
 namespace DMS.Services.Processors;

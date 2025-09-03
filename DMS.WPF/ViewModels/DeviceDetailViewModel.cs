@@ -8,6 +8,7 @@ using DMS.Core.Enums;
 using DMS.Helper;
 using DMS.WPF.Services;
 using DMS.Services;
+using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
@@ -57,7 +58,8 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
              var tableMenu = new MenuBeanDto()
                              {
                                  Header = variableTableItemViewModel.Name,
-                                 Icon = SegoeFluentIcons.DataSense.Glyph
+                                 Icon = SegoeFluentIcons.DataSense.Glyph,
+                                 TargetViewKey = "VariableTableView"
                              };
 
              if (await DataServices.AddVariableTable(_mapper.Map<VariableTableDto>(variableTableItemViewModel),

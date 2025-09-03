@@ -14,6 +14,7 @@ using ObservableCollections;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DMS.WPF.Interfaces;
 
 namespace DMS.WPF.ViewModels;
 

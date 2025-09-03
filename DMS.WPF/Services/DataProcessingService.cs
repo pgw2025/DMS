@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using DMS.Core.Helper;
 using DMS.Core.Models;
+using DMS.WPF.Interfaces;
 using Microsoft.Extensions.Hosting;
 
 namespace DMS.Services;

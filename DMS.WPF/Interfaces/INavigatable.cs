@@ -2,7 +2,7 @@
 
 using DMS.WPF.ViewModels.Items;
 
-namespace DMS.WPF.Services;
+namespace DMS.WPF.Interfaces;
 
 /// <summary>
 /// 定义了一个契约，表示ViewModel可以安全地接收导航传入的参数。

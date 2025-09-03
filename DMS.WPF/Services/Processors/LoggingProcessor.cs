@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using DMS.Core.Models;
 using Microsoft.Extensions.Logging;
 using DMS.Helper;
+using DMS.WPF.Interfaces;
 
 namespace DMS.Services.Processors;
 

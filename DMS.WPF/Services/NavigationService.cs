@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
+using DMS.WPF.Interfaces;
 
 namespace DMS.WPF.Services;
 

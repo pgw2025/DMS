@@ -5,6 +5,7 @@ using DMS.Core.Enums;
 using DMS.Helper;
 using DMS.Services;
 using DMS.WPF.Helper;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.Logging;

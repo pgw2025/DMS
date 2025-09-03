@@ -9,6 +9,7 @@ using DMS.Core.Interfaces.Repositories;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Repositories;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;

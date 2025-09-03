@@ -1,6 +1,4 @@
-﻿using DMS.Core.Enums;
-
-namespace DMS.Services;
+﻿namespace DMS.WPF.Interfaces;
 
 public interface INotificationService
 {

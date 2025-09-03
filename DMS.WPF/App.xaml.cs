@@ -24,10 +24,11 @@ using DMS.WPF.Services;
 using DMS.WPF.Services.Processors;
 using DMS.WPF.ViewModels.Dialogs;
 using DataProcessingService = DMS.Services.DataProcessingService;
-using IDataProcessingService = DMS.Services.IDataProcessingService;
+using IDataProcessingService = DMS.WPF.Interfaces.IDataProcessingService;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using DMS.Core.Interfaces.Services;
 using DMS.Infrastructure.Interfaces.Services;
+using DMS.WPF.Interfaces;
 
 namespace DMS;
 

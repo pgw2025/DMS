@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using DMS.Core.Models;
 using DMS.Helper;
 using DMS.Services;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Items;

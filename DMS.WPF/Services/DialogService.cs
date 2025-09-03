@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Views;
 using iNKORE.UI.WPF.Modern.Controls;
 

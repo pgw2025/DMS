@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using DMS.Core.Models;
+using DMS.WPF.Interfaces;
 
 namespace DMS.Services.Processors
 {
