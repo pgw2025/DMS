@@ -13,34 +13,6 @@ namespace DMS.Application.Interfaces;
 /// </summary>
 public interface IDataCenterService
 {
-    #region 事件定义
-
-    /// <summary>
-    /// 当数据加载完成时触发
-    /// </summary>
-    event EventHandler<DataLoadCompletedEventArgs> DataLoadCompleted;
-
-    /// <summary>
-    /// 当设备数据发生变化时触发
-    /// </summary>
-    event EventHandler<DeviceChangedEventArgs> DeviceChanged;
-
-    /// <summary>
-    /// 当变量表数据发生变化时触发
-    /// </summary>
-    event EventHandler<VariableTableChangedEventArgs> VariableTableChanged;
-
-    /// <summary>
-    /// 当变量数据发生变化时触发
-    /// </summary>
-    event EventHandler<VariableChangedEventArgs> VariableChanged;
-
-    /// <summary>
-    /// 当数据发生任何变化时触发
-    /// </summary>
-    event EventHandler<DataChangedEventArgs> DataChanged;
-
-    #endregion
     #region 设备管理
 
     /// <summary>
@@ -138,91 +110,59 @@ public interface IDataCenterService
 
     #endregion
 
-    #region 变量管理
+    #region 菜单管理
 
     /// <summary>
-    /// 异步根据ID获取变量DTO。
+    /// 异步获取所有菜单DTO列表。
     /// </summary>
-    Task<VariableDto> GetVariableByIdAsync(int id);
+    Task<List<MenuBeanDto>> GetAllMenusAsync();
 
     /// <summary>
-    /// 异步获取所有变量DTO列表。
+    /// 异步根据ID获取菜单DTO。
     /// </summary>
-    Task<List<VariableDto>> GetAllVariablesAsync();
+    Task<MenuBeanDto> GetMenuByIdAsync(int id);
 
     /// <summary>
-    /// 异步创建一个新变量（事务性操作）。
+    /// 异步创建一个新菜单。
     /// </summary>
-    Task<VariableDto> CreateVariableAsync(VariableDto variableDto);
+    Task<int> CreateMenuAsync(MenuBeanDto menuDto);
 
     /// <summary>
-    /// 异步更新一个已存在的变量（事务性操作）。
+    /// 异步更新一个已存在的菜单。
     /// </summary>
-    Task<int> UpdateVariableAsync(VariableDto variableDto);
+    Task UpdateMenuAsync(MenuBeanDto menuDto);
 
     /// <summary>
-    /// 异步批量更新变量（事务性操作）。
+    /// 异步删除一个菜单。
     /// </summary>
-    Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos);
+    Task DeleteMenuAsync(int id);
 
     /// <summary>
-    /// 异步删除一个变量（事务性操作）。
+    /// 在内存中添加菜单
     /// </summary>
-    Task<bool> DeleteVariableAsync(int id);
+    void AddMenuToMemory(MenuBeanDto menuDto);
 
     /// <summary>
-    /// 异步批量删除变量（事务性操作）。
+    /// 在内存中更新菜单
     /// </summary>
-    Task<bool> DeleteVariablesAsync(List<int> ids);
+    void UpdateMenuInMemory(MenuBeanDto menuDto);
 
     /// <summary>
-    /// 异步批量导入变量。
+    /// 在内存中删除菜单
     /// </summary>
-    Task<bool> BatchImportVariablesAsync(List<VariableDto> variables);
+    void RemoveMenuFromMemory(int menuId);
 
     /// <summary>
-    /// 检测一组变量是否已存在。
+    /// 获取根菜单列表
     /// </summary>
-    /// <param name="variablesToCheck">要检查的变量列表。</param>
-    /// <returns>返回输入列表中已存在的变量。</returns>
-    Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck);
+    List<MenuBeanDto> GetRootMenus();
 
     /// <summary>
-    /// 检测单个变量是否已存在。
+    /// 根据父级ID获取子菜单列表
     /// </summary>
-    /// <param name="variableToCheck">要检查的变量。</param>
-    /// <returns>如果变量已存在则返回该变量，否则返回null。</returns>
-    Task<VariableDto?> FindExistingVariableAsync(VariableDto variableToCheck);
-
-    /// <summary>
-    /// 在内存中添加变量
-    /// </summary>
-    void AddVariableToMemory(VariableDto variableDto);
-
-    /// <summary>
-    /// 在内存中更新变量
-    /// </summary>
-    void UpdateVariableInMemory(VariableDto variableDto);
-
-    /// <summary>
-    /// 在内存中删除变量
-    /// </summary>
-    void RemoveVariableFromMemory(int variableId);
-
-    /// <summary>
-    /// 批量在内存中添加变量
-    /// </summary>
-    void AddVariablesToMemory(List<VariableDto> variables);
-
-    /// <summary>
-    /// 批量在内存中更新变量
-    /// </summary>
-    void UpdateVariablesInMemory(List<VariableDto> variables);
-
-    /// <summary>
-    /// 批量在内存中删除变量
-    /// </summary>
-    void RemoveVariablesFromMemory(List<int> variableIds);
+    /// <param name="parentId">父级菜单ID</param>
+    /// <returns>子菜单列表</returns>
+    List<MenuBeanDto> GetChildMenus(int parentId);
 
     #endregion
 
@@ -242,6 +182,11 @@ public interface IDataCenterService
     /// 获取所有变量的安全字典。
     /// </summary>
     ConcurrentDictionary<int, VariableDto> Variables { get; }
+
+    /// <summary>
+    /// 获取所有菜单的安全字典。
+    /// </summary>
+    ConcurrentDictionary<int, MenuBeanDto> Menus { get; }
 
     #endregion
 
@@ -266,6 +211,45 @@ public interface IDataCenterService
     /// 异步加载所有变量数据。
     /// </summary>
     Task<List<VariableDto>> LoadAllVariablesAsync();
+
+    /// <summary>
+    /// 异步加载所有菜单数据。
+    /// </summary>
+    Task<List<MenuBeanDto>> LoadAllMenusAsync();
+
+    #endregion
+
+    #region 事件定义
+
+    /// <summary>
+    /// 当数据加载完成时触发
+    /// </summary>
+    event EventHandler<DataLoadCompletedEventArgs> DataLoadCompleted;
+
+    /// <summary>
+    /// 当设备数据发生变化时触发
+    /// </summary>
+    event EventHandler<DeviceChangedEventArgs> DeviceChanged;
+
+    /// <summary>
+    /// 当变量表数据发生变化时触发
+    /// </summary>
+    event EventHandler<VariableTableChangedEventArgs> VariableTableChanged;
+
+    /// <summary>
+    /// 当变量数据发生变化时触发
+    /// </summary>
+    event EventHandler<VariableChangedEventArgs> VariableChanged;
+
+    /// <summary>
+    /// 当菜单数据发生变化时触发
+    /// </summary>
+    event EventHandler<MenuChangedEventArgs> MenuChanged;
+
+    /// <summary>
+    /// 当数据发生任何变化时触发
+    /// </summary>
+    event EventHandler<DataChangedEventArgs> DataChanged;
 
     #endregion
 }

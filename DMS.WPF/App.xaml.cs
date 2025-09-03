@@ -167,9 +167,9 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IDeviceAppService,DeviceAppService>();
         services.AddSingleton<IVariableAppService,VariableAppService>();
         services.AddSingleton<IVariableTableAppService,VariableTableAppService>();
+        services.AddSingleton<IMenuService, MenuService>();
         services.AddSingleton<IDataCenterService, DataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
-        services.AddSingleton<IMenuService, MenuService>();
         services.AddSingleton<IDialogService, DialogService>();
         //注册WPF中的服务
         services.AddSingleton<DataServices>();

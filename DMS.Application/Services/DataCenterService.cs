@@ -14,11 +14,38 @@ using System.Linq;
 namespace DMS.Application.Services;
 
 /// <summary>
-/// 数据中心服务，负责管理所有的数据，包括设备、变量表和变量。
+/// 数据中心服务，负责管理所有的数据，包括设备、变量表、变量和菜单。
 /// 实现 <see cref="IDataCenterService"/> 接口。
 /// </summary>
 public class DataCenterService : IDataCenterService
 {
+    private readonly IRepositoryManager _repositoryManager;
+    private readonly IMapper _mapper;
+    private readonly IDeviceAppService _deviceAppService;
+    private readonly IVariableTableAppService _variableTableAppService;
+    private readonly IVariableAppService _variableAppService;
+    private readonly IMenuService _menuService;
+
+    /// <summary>
+    /// 安全字典，用于存储所有设备数据
+    /// </summary>
+    public ConcurrentDictionary<int, DeviceDto> Devices { get; } = new();
+
+    /// <summary>
+    /// 安全字典，用于存储所有变量表数据
+    /// </summary>
+    public ConcurrentDictionary<int, VariableTableDto> VariableTables { get; } = new();
+
+    /// <summary>
+    /// 安全字典，用于存储所有变量数据
+    /// </summary>
+    public ConcurrentDictionary<int, VariableDto> Variables { get; } = new();
+
+    /// <summary>
+    /// 安全字典，用于存储所有菜单数据
+    /// </summary>
+    public ConcurrentDictionary<int, MenuBeanDto> Menus { get; } = new();
+
     #region 事件定义
 
     /// <summary>
@@ -42,31 +69,16 @@ public class DataCenterService : IDataCenterService
     public event EventHandler<VariableChangedEventArgs> VariableChanged;
 
     /// <summary>
+    /// 当菜单数据发生变化时触发
+    /// </summary>
+    public event EventHandler<MenuChangedEventArgs> MenuChanged;
+
+    /// <summary>
     /// 当数据发生任何变化时触发
     /// </summary>
     public event EventHandler<DataChangedEventArgs> DataChanged;
 
     #endregion
-    private readonly IRepositoryManager _repositoryManager;
-    private readonly IMapper _mapper;
-    private readonly IDeviceAppService _deviceAppService;
-    private readonly IVariableTableAppService _variableTableAppService;
-    private readonly IVariableAppService _variableAppService;
-
-    /// <summary>
-    /// 安全字典，用于存储所有设备数据
-    /// </summary>
-    public ConcurrentDictionary<int, DeviceDto> Devices { get; } = new();
-
-    /// <summary>
-    /// 安全字典，用于存储所有变量表数据
-    /// </summary>
-    public ConcurrentDictionary<int, VariableTableDto> VariableTables { get; } = new();
-
-    /// <summary>
-    /// 安全字典，用于存储所有变量数据
-    /// </summary>
-    public ConcurrentDictionary<int, VariableDto> Variables { get; } = new();
 
     /// <summary>
     /// 构造函数，通过依赖注入获取仓储管理器和相关服务实例。
@@ -76,18 +88,21 @@ public class DataCenterService : IDataCenterService
     /// <param name="deviceAppService">设备应用服务实例。</param>
     /// <param name="variableTableAppService">变量表应用服务实例。</param>
     /// <param name="variableAppService">变量应用服务实例。</param>
+    /// <param name="menuService">菜单服务实例。</param>
     public DataCenterService(
         IRepositoryManager repositoryManager,
         IMapper mapper,
         IDeviceAppService deviceAppService,
         IVariableTableAppService variableTableAppService,
-        IVariableAppService variableAppService)
+        IVariableAppService variableAppService,
+        IMenuService menuService)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
         _deviceAppService = deviceAppService;
         _variableTableAppService = variableTableAppService;
         _variableAppService = variableAppService;
+        _menuService = menuService;
     }
 
     #region 设备管理
@@ -224,6 +239,7 @@ public class DataCenterService : IDataCenterService
         if (Devices.TryGetValue(variableTableDto.DeviceId, out var device))
         {
             deviceDto = device;
+            variableTableDto.Device = deviceDto;
         }
 
         if (VariableTables.TryAdd(variableTableDto.Id, variableTableDto))
@@ -275,214 +291,117 @@ public class DataCenterService : IDataCenterService
 
     #endregion
 
-    #region 变量管理
+    #region 菜单管理
 
     /// <summary>
-    /// 异步根据ID获取变量DTO。
+    /// 异步获取所有菜单DTO列表。
     /// </summary>
-    public async Task<VariableDto> GetVariableByIdAsync(int id)
+    public async Task<List<MenuBeanDto>> GetAllMenusAsync()
     {
-        return await _variableAppService.GetVariableByIdAsync(id);
+        return await _menuService.GetAllMenusAsync();
     }
 
     /// <summary>
-    /// 异步获取所有变量DTO列表。
+    /// 异步根据ID获取菜单DTO。
     /// </summary>
-    public async Task<List<VariableDto>> GetAllVariablesAsync()
+    public async Task<MenuBeanDto> GetMenuByIdAsync(int id)
     {
-        return await _variableAppService.GetAllVariablesAsync();
+        return await _menuService.GetMenuByIdAsync(id);
     }
 
     /// <summary>
-    /// 异步创建一个新变量（事务性操作）。
+    /// 异步创建一个新菜单。
     /// </summary>
-    public async Task<VariableDto> CreateVariableAsync(VariableDto variableDto)
+    public async Task<int> CreateMenuAsync(MenuBeanDto menuDto)
     {
-        return await _variableAppService.CreateVariableAsync(variableDto);
+        return await _menuService.CreateMenuAsync(menuDto);
     }
 
     /// <summary>
-    /// 异步更新一个已存在的变量（事务性操作）。
+    /// 异步更新一个已存在的菜单。
     /// </summary>
-    public async Task<int> UpdateVariableAsync(VariableDto variableDto)
+    public async Task UpdateMenuAsync(MenuBeanDto menuDto)
     {
-        return await _variableAppService.UpdateVariableAsync(variableDto);
+         await _menuService.UpdateMenuAsync(menuDto);
     }
 
     /// <summary>
-    /// 异步批量更新变量（事务性操作）。
+    /// 异步删除一个菜单。
     /// </summary>
-    public async Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos)
+    public async Task DeleteMenuAsync(int id)
     {
-        return await _variableAppService.UpdateVariablesAsync(variableDtos);
+         await _menuService.DeleteMenuAsync(id);
     }
 
     /// <summary>
-    /// 异步删除一个变量（事务性操作）。
+    /// 在内存中添加菜单
     /// </summary>
-    public async Task<bool> DeleteVariableAsync(int id)
+    public void AddMenuToMemory(MenuBeanDto menuDto)
     {
-        return await _variableAppService.DeleteVariableAsync(id);
-    }
-
-    /// <summary>
-    /// 异步批量删除变量（事务性操作）。
-    /// </summary>
-    public async Task<bool> DeleteVariablesAsync(List<int> ids)
-    {
-        return await _variableAppService.DeleteVariablesAsync(ids);
-    }
-
-    /// <summary>
-    /// 异步批量导入变量。
-    /// </summary>
-    public async Task<bool> BatchImportVariablesAsync(List<VariableDto> variables)
-    {
-        return await _variableAppService.BatchImportVariablesAsync(variables);
-    }
-
-    /// <summary>
-    /// 检测一组变量是否已存在。
-    /// </summary>
-    public async Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck)
-    {
-        return await _variableAppService.FindExistingVariablesAsync(variablesToCheck);
-    }
-
-    /// <summary>
-    /// 检测单个变量是否已存在。
-    /// </summary>
-    public async Task<VariableDto?> FindExistingVariableAsync(VariableDto variableToCheck)
-    {
-        return await _variableAppService.FindExistingVariableAsync(variableToCheck);
-    }
-
-    /// <summary>
-    /// 在内存中添加变量
-    /// </summary>
-    public void AddVariableToMemory(VariableDto variableDto)
-    {
-        VariableTableDto variableTableDto = null;
-        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+        if (Menus.TryAdd(menuDto.Id, menuDto))
         {
-            variableTableDto = variableTable;
-        }
-
-        if (Variables.TryAdd(variableDto.Id, variableDto))
-        {
-            OnVariableChanged(new VariableChangedEventArgs(
-                DataChangeType.Added, 
-                variableDto,
-                variableTableDto));
-        }
-    }
-
-    /// <summary>
-    /// 在内存中更新变量
-    /// </summary>
-    public void UpdateVariableInMemory(VariableDto variableDto)
-    {
-        VariableTableDto variableTableDto = null;
-        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-        {
-            variableTableDto = variableTable;
-        }
-
-        Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
-        OnVariableChanged(new VariableChangedEventArgs(
-            DataChangeType.Updated, 
-            variableDto,
-            variableTableDto));
-    }
-
-    /// <summary>
-    /// 在内存中删除变量
-    /// </summary>
-    public void RemoveVariableFromMemory(int variableId)
-    {
-        if (Variables.TryRemove(variableId, out var variableDto))
-        {
-            VariableTableDto variableTableDto = null;
-            if (variableDto != null && VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+            MenuBeanDto parentMenu = null;
+            if (menuDto.ParentId > 0 && Menus.TryGetValue(menuDto.ParentId, out var parent))
             {
-                variableTableDto = variableTable;
+                parentMenu = parent;
+                parent.Children.Add(menuDto);
+
+
             }
 
-            OnVariableChanged(new VariableChangedEventArgs(
-                DataChangeType.Deleted, 
-                variableDto,
-                variableTableDto));
+            OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Added, menuDto, parentMenu));
         }
     }
 
     /// <summary>
-    /// 批量在内存中添加变量
+    /// 在内存中更新菜单
     /// </summary>
-    public void AddVariablesToMemory(List<VariableDto> variables)
+    public void UpdateMenuInMemory(MenuBeanDto menuDto)
     {
-        foreach (var variable in variables)
-        {
-            VariableTableDto variableTableDto = null;
-            if (VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
-            {
-                variableTableDto = variableTable;
-            }
+        Menus.AddOrUpdate(menuDto.Id, menuDto, (key, oldValue) => menuDto);
 
-            if (Variables.TryAdd(variable.Id, variable))
-            {
-                OnVariableChanged(new VariableChangedEventArgs(
-                    DataChangeType.Added, 
-                    variable,
-                    variableTableDto));
-            }
+        MenuBeanDto parentMenu = null;
+        if (menuDto.ParentId > 0 && Menus.TryGetValue(menuDto.ParentId, out var parent))
+        {
+            parentMenu = parent;
         }
-        OnDataChanged(new DataChangedEventArgs(DataChangeType.BatchOperation));
+
+        OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Updated, menuDto, parentMenu));
     }
 
     /// <summary>
-    /// 批量在内存中更新变量
+    /// 在内存中删除菜单
     /// </summary>
-    public void UpdateVariablesInMemory(List<VariableDto> variables)
+    public void RemoveMenuFromMemory(int menuId)
     {
-        foreach (var variable in variables)
+        if (Menus.TryRemove(menuId, out var menuDto))
         {
-            VariableTableDto variableTableDto = null;
-            if (VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
+            MenuBeanDto parentMenu = null;
+            if (menuDto.ParentId > 0 && Menus.TryGetValue(menuDto.ParentId, out var parent))
             {
-                variableTableDto = variableTable;
+                parentMenu = parent;
             }
 
-            Variables.AddOrUpdate(variable.Id, variable, (key, oldValue) => variable);
-            OnVariableChanged(new VariableChangedEventArgs(
-                DataChangeType.Updated, 
-                variable,
-                variableTableDto));
+            OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Deleted, menuDto, parentMenu));
         }
-        OnDataChanged(new DataChangedEventArgs(DataChangeType.BatchOperation));
     }
 
     /// <summary>
-    /// 批量在内存中删除变量
+    /// 获取根菜单列表
     /// </summary>
-    public void RemoveVariablesFromMemory(List<int> variableIds)
+    public List<MenuBeanDto> GetRootMenus()
     {
-        foreach (var variableId in variableIds)
-        {
-            if (Variables.TryRemove(variableId, out var variableDto))
-            {
-                VariableTableDto variableTableDto = null;
-                if (variableDto != null && VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-                {
-                    variableTableDto = variableTable;
-                }
+        return Menus.Values.Where(m => m.ParentId == 0).ToList();
+    }
 
-                OnVariableChanged(new VariableChangedEventArgs(
-                    DataChangeType.Deleted, 
-                    variableDto,
-                    variableTableDto));
-            }
-        }
-        OnDataChanged(new DataChangedEventArgs(DataChangeType.BatchOperation));
+    /// <summary>
+    /// 根据父级ID获取子菜单列表
+    /// </summary>
+    /// <param name="parentId">父级菜单ID</param>
+    /// <returns>子菜单列表</returns>
+    public List<MenuBeanDto> GetChildMenus(int parentId)
+    {
+        return Menus.Values.Where(m => m.ParentId == parentId).ToList();
     }
 
     #endregion
@@ -530,6 +449,16 @@ public class DataCenterService : IDataCenterService
     }
 
     /// <summary>
+    /// 触发菜单变更事件
+    /// </summary>
+    /// <param name="e">事件参数</param>
+    protected virtual void OnMenuChanged(MenuChangedEventArgs e)
+    {
+        MenuChanged?.Invoke(this, e);
+        OnDataChanged(new DataChangedEventArgs(e.ChangeType));
+    }
+
+    /// <summary>
     /// 触发数据变更事件
     /// </summary>
     /// <param name="e">事件参数</param>
@@ -553,6 +482,7 @@ public class DataCenterService : IDataCenterService
             Devices.Clear();
             VariableTables.Clear();
             Variables.Clear();
+            Menus.Clear();
 
             // 加载所有设备
             var devices = await _repositoryManager.Devices.GetAllAsync();
@@ -565,6 +495,10 @@ public class DataCenterService : IDataCenterService
             // 加载所有变量
             var variables = await _repositoryManager.Variables.GetAllAsync();
             var variableDtos = _mapper.Map<List<VariableDto>>(variables);
+
+            // 加载所有菜单
+            var menus = await _repositoryManager.Menus.GetAllAsync();
+            var menuDtos = _mapper.Map<List<MenuBeanDto>>(menus);
 
             // 建立设备与变量表的关联
             foreach (var deviceDto in deviceDtos)
@@ -594,6 +528,12 @@ public class DataCenterService : IDataCenterService
                 Variables.TryAdd(variableDto.Id, variableDto);
             }
 
+            // 将菜单添加到安全字典
+            foreach (var menuDto in menuDtos)
+            {
+                Menus.TryAdd(menuDto.Id, menuDto);
+            }
+
             // 触发数据加载完成事件
             OnDataLoadCompleted(new DataLoadCompletedEventArgs(
                 deviceDtos, 
@@ -611,6 +551,23 @@ public class DataCenterService : IDataCenterService
                 false, 
                 ex.Message));
             throw new ApplicationException($"加载所有数据到内存时发生错误,错误信息:{ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// 异步加载所有菜单数据。
+    /// </summary>
+    public async Task<List<MenuBeanDto>> LoadAllMenusAsync()
+    {
+        try
+        {
+            // 获取所有菜单
+            var menus = await _repositoryManager.Menus.GetAllAsync();
+            return _mapper.Map<List<MenuBeanDto>>(menus);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"加载所有菜单数据时发生错误,错误信息:{ex.Message}", ex);
         }
     }
 
