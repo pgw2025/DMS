@@ -3,31 +3,30 @@ using AutoMapper.Internal;
 using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Application.Services.Processors;
-using DMS.Core.Enums;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
+using DMS.Core.Interfaces.Services;
 using DMS.Helper;
-using DMS.WPF.ViewModels;
-using DMS.WPF.Views;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog;
-using DMS.Extensions;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Repositories;
 using DMS.Infrastructure.Services;
-using Microsoft.Extensions.Hosting;
 using DMS.WPF.Helper;
-using DMS.WPF.Services;
-using DMS.WPF.ViewModels.Dialogs;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-using DMS.Core.Interfaces.Services;
-using DMS.Infrastructure.Interfaces.Services;
 using DMS.WPF.Interfaces;
+using DMS.WPF.Logging;
+using DMS.WPF.Services;
+using DMS.WPF.ViewModels;
+using DMS.WPF.ViewModels.Dialogs;
+using DMS.WPF.Views;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NLog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace DMS;
+namespace DMS.WPF;
 
 /// <summary>
 ///     Interaction logic for App.xaml
@@ -65,10 +64,6 @@ public partial class App : System.Windows.Application
 
         try
         {
-            // var databaseInitializer = Host.Services.GetRequiredService<DatabaseInitializerService>();
-            // databaseInitializer.InitializeDataBase();
-            // await databaseInitializer.InitializeMenu();
-            // Settings = AppSettings.Load();
             Host.Services.GetRequiredService<GrowlNotificationService>();
             
             // 初始化数据处理链
@@ -110,17 +105,14 @@ public partial class App : System.Windows.Application
 
     private void ConfigureServices(IServiceCollection services)
     {
-        // services.AddTransient<IDbContext,SqlSugarDbContext>();
+        // 注册NLogLogger作为Microsoft.Extensions.Logging.ILogger的实现
+        services.AddSingleton<ILogger, NLogLogger>();
+        services.AddSingleton<ILoggerFactory, NLogLoggerFactory>();
         //
-        //
-        // services.AddSingleton<IDeviceDataService, DeviceDataService>();
-        // services.AddSingleton<NavgatorServices>();
-        // //services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<GrowlNotificationService>();
         // services.AddHostedService<S7BackgroundService>();
         // services.AddHostedService<OpcUaBackgroundService>();
         // services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();
-        //
         
         // --- 核心配置 ---
         services.AddAutoMapper(cfg =>
@@ -204,7 +196,7 @@ public partial class App : System.Windows.Application
 
     private void ConfigureLogging(ILoggingBuilder loggingBuilder)
     {
-        LogManager.Setup().LoadConfigurationFromFile("Config/nlog.config");
+        LogManager.Setup().LoadConfigurationFromFile("Configurations/nlog.config");
         loggingBuilder.ClearProviders();
         loggingBuilder.SetMinimumLevel(LogLevel.Trace);
         // loggingBuilder.AddNLog();

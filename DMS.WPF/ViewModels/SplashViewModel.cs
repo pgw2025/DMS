@@ -7,8 +7,10 @@ using DMS.WPF.Services;
 using System;
 using System.Threading.Tasks;
 using DMS.Application.Services;
+using DMS.WPF.Helper;
 using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.WPF.ViewModels;
 
@@ -17,6 +19,7 @@ namespace DMS.WPF.ViewModels;
 /// </summary>
 public partial class SplashViewModel : ObservableObject
 {
+    private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly IInitializeService _initializeService;
     private readonly IDataCenterService _dataCenterService;
@@ -25,9 +28,10 @@ public partial class SplashViewModel : ObservableObject
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
-    public SplashViewModel(IServiceProvider serviceProvider, IInitializeService initializeService,
+    public SplashViewModel( ILogger logger,IServiceProvider serviceProvider, IInitializeService initializeService,
                            IDataCenterService dataCenterService, DataServices dataServices)
     {
+        _logger = logger;
         _serviceProvider = serviceProvider;
         _initializeService = initializeService;
         this._dataCenterService = dataCenterService;
@@ -41,6 +45,8 @@ public partial class SplashViewModel : ObservableObject
     {
         try
         {
+            
+            _logger.LogInformation("正在初始化数据库...");
             LoadingMessage = "正在初始化数据库...";
             _initializeService.InitializeTables();
             _initializeService.InitializeMenus();
