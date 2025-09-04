@@ -1,10 +1,8 @@
-using System.Threading.Tasks;
-using DMS.Core.Models;
-using Microsoft.Extensions.Logging;
-using DMS.Helper;
-using DMS.WPF.Interfaces;
+using DMS.Application.Interfaces;
+using DMS.Application.Models;
 
-namespace DMS.Services.Processors;
+
+namespace DMS.Application.Services.Processors;
 
 /// <summary>
 /// 一个简单的数据处理器实现，用于演示。

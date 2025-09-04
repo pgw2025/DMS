@@ -295,7 +295,7 @@ public class S7BackgroundService : BackgroundService
             variable.UpdatedAt = DateTime.Now;
             // Console.WriteLine($"S7后台服务轮询变量：{variable.Name}，值：{variable.DataValue}");
             // 将更新后的数据推入处理队列。
-            await _dataProcessingService.EnqueueAsync(variable);
+            // await _dataProcessingService.EnqueueAsync(variable);
         }
         catch (Exception ex)
         {

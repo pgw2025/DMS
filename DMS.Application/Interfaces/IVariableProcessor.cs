@@ -1,6 +1,7 @@
+using DMS.Application.Models;
 using DMS.Core.Models;
 
-namespace DMS.WPF.Interfaces;
+namespace DMS.Application.Interfaces;
 
 /// <summary>
 /// 定义了变量数据处理器的通用接口。

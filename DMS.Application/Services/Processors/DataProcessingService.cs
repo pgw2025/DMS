@@ -1,10 +1,14 @@
 using System.Threading.Channels;
+using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
+using DMS.Application.Models;
 using DMS.Core.Helper;
+using DMS.Core.Interfaces;
 using DMS.Core.Models;
-using DMS.WPF.Interfaces;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-namespace DMS.Services;
+namespace DMS.Application.Services.Processors;
 
 /// <summary>
 /// 核心数据处理服务，作为后台服务运行。
@@ -43,7 +47,7 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     /// 将一个变量数据项异步推入处理队列。
     /// </summary>
     /// <param name="data">要入队的变量数据。</param>
-    public async ValueTask EnqueueAsync(Variable data)
+    public async ValueTask EnqueueAsync(VariableDto data)
     {
         if (data == null)
         {
@@ -96,4 +100,4 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
 
         NlogHelper.Info("数据处理服务已停止。");
     }
-}
+}    

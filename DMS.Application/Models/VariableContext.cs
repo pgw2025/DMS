@@ -1,13 +1,14 @@
+using DMS.Application.DTOs;
 using DMS.Core.Models;
 
-namespace DMS.Core.Models
+namespace DMS.Application.Models
 {
     public class VariableContext
     {
-        public Variable Data { get; set; }
+        public VariableDto Data { get; set; }
         public bool IsHandled { get; set; }
 
-        public VariableContext(Variable data)
+        public VariableContext(VariableDto data)
         {
             Data = data;
             IsHandled = false; // 默认未处理

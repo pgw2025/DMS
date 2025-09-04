@@ -17,6 +17,7 @@ namespace DMS.Infrastructure.Services;
 public class OpcUaBackgroundService : BackgroundService
 {
     private readonly IDataCenterService _dataCenterService;
+    private readonly IDataProcessingService _dataProcessingService;
 
     // private readonly IDataProcessingService _dataProcessingService;
     private readonly ILogger<OpcUaBackgroundService> _logger;
@@ -31,7 +32,7 @@ public class OpcUaBackgroundService : BackgroundService
     private readonly ConcurrentDictionary<string, Subscription> _opcUaSubscriptions;
 
     // 存储活动的 OPC UA 变量，键为变量的OpcNodeId
-    private readonly ConcurrentDictionary<string, Variable> _opcUaPollVariablesByNodeId;
+    private readonly ConcurrentDictionary<string, VariableDto> _opcUaVariables;
 
     // 储存所有要轮询更新的变量，键是Device.Id,值是这个设备所有要轮询的变量
     private readonly ConcurrentDictionary<int, List<Variable>> _opcUaPollVariablesByDeviceId;
@@ -72,15 +73,14 @@ public class OpcUaBackgroundService : BackgroundService
               { PollLevelType.ThirtyMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtyMinutes) }
           };
 
-    public OpcUaBackgroundService(IDataCenterService dataCenterService,
-                                  ILogger<OpcUaBackgroundService> logger)
+    public OpcUaBackgroundService(IDataCenterService dataCenterService,IDataProcessingService dataProcessingService, ILogger<OpcUaBackgroundService> logger)
     {
         _dataCenterService = dataCenterService;
-        // _dataProcessingService = dataProcessingService;
+        _dataProcessingService = dataProcessingService;
         _logger = logger;
         _opcUaServices = new ConcurrentDictionary<DeviceDto, OpcUaService>();
         _opcUaSubscriptions = new ConcurrentDictionary<string, Subscription>();
-        _opcUaPollVariablesByNodeId = new ConcurrentDictionary<string, Variable>();
+        _opcUaVariables = new ConcurrentDictionary<string, VariableDto>();
         _opcUaPollVariablesByDeviceId = new ConcurrentDictionary<int, List<Variable>>();
         _opcUaVariablesByDeviceId = new ConcurrentDictionary<int, List<VariableDto>>();
 
@@ -123,12 +123,6 @@ public class OpcUaBackgroundService : BackgroundService
                 await SetupOpcUaSubscriptionAsync(stoppingToken);
                 _logger.LogInformation("OPC UA 后台服务已启动。");
 
-                // // 持续轮询，直到取消请求或需要重新加载
-                // while (!stoppingToken.IsCancellationRequested && _reloadSemaphore.CurrentCount == 0)
-                // {
-                //     await PollOpcUaVariableOnceAsync(stoppingToken);
-                //     await Task.Delay(_opcUaPollIntervalMs, stoppingToken);
-                // }
             }
         }
         catch (OperationCanceledException)
@@ -146,44 +140,6 @@ public class OpcUaBackgroundService : BackgroundService
     }
 
 
-    // private async void HandleDeviceIsActiveChanged(Device device, bool isActive)
-    // {
-    //     if (device.Protocol != ProtocolType.OpcUa)
-    //         return;
-    //
-    //     _logger.LogInformation($"设备 {device.Name} (ID: {device.Id}) 的IsActive状态改变为 {isActive}。");
-    //
-    //     if (!isActive)
-    //     {
-    //         // 设备变为非活动状态，断开连接
-    //         if (_opcUaServices.TryRemove(device.OpcUaServerUrl, out var session))
-    //         {
-    //             try
-    //             {
-    //                 if (_opcUaSubscriptions.TryRemove(device.OpcUaServerUrl, out var subscription))
-    //                 {
-    //                     // 删除订阅。
-    //                     await subscription.DeleteAsync(true);
-    //                     _logger.LogInformation($"已删除设备 {device.Name} ({device.OpcUaServerUrl}) 的订阅。");
-    //                 }
-    //
-    //                 if (session.Connected)
-    //                 {
-    //                     await session.CloseAsync();
-    //                     _logger.LogInformation($"已断开设备 {device.Name} ({device.OpcUaServerUrl}) 的连接。");
-    //                 }
-    //             }
-    //             catch (Exception ex)
-    //             {
-    //                 _logger.LogError(ex, $"断开设备 {device.Name} ({device.OpcUaServerUrl}) 连接时发生错误：{ex.Message}");
-    //             }
-    //         }
-    //     }
-    //
-    //     // 触发重新加载，让LoadVariables和ConnectOpcUaServiceAsync处理设备列表的更新
-    //     _reloadSemaphore.Release();
-    // }
-
     /// <summary>
     /// 从数据库加载所有活动的 OPC UA 变量，并进行相应的连接和订阅管理。
     /// </summary>
@@ -194,7 +150,7 @@ public class OpcUaBackgroundService : BackgroundService
             _opcUaDevices.Clear();
             _opcUaPollVariablesByDeviceId.Clear();
             _opcUaVariablesByDeviceId.Clear();
-            _opcUaPollVariablesByNodeId.Clear();
+            _opcUaVariables.Clear();
 
             _logger.LogInformation("开始加载OPC UA变量....");
             var opcUaDevices = _dataCenterService
@@ -210,6 +166,11 @@ public class OpcUaBackgroundService : BackgroundService
                                               .Where(vd => vd.IsActive == true &&
                                                            vd.Protocol == ProtocolType.OpcUa)
                                               .ToList();
+                foreach (var variableDto in variableDtos)
+                {
+                    _opcUaVariables.TryAdd(variableDto.OpcUaNodeId,variableDto);
+                }
+                
                 totalVariableCount += variableDtos.Count;
                 _opcUaVariablesByDeviceId.AddOrUpdate(opcUaDevice.Id, variableDtos, (key, oldValue) => variableDtos);
             }
@@ -283,128 +244,55 @@ public class OpcUaBackgroundService : BackgroundService
         }
     }
 
-    // private async Task PollOpcUaVariableOnceAsync(CancellationToken stoppingToken)
+    // /// <summary>
+    // /// 读取单个 OPC UA 变量并处理其数据。
+    // /// </summary>
+    // /// <param name="session">OPC UA 会话。</param>
+    // /// <param name="variable">要读取的变量。</param>
+    // /// <param name="stoppingToken">取消令牌。</param>
+    // private async Task ReadAndProcessOpcUaVariableAsync(Session session, Variable variable,
+    //                                                     CancellationToken stoppingToken)
     // {
+    //     var nodesToRead = new ReadValueIdCollection
+    //                       {
+    //                           new ReadValueId
+    //                           {
+    //                               NodeId = new NodeId(variable.OpcUaNodeId),
+    //                               AttributeId = Attributes.Value
+    //                           }
+    //                       };
+    //
     //     try
     //     {
-    //         var deviceIdsToPoll = _opcUaPollVariablesByDeviceId.Keys.ToList();
+    //         var readResponse = await session.ReadAsync(null, 0, TimestampsToReturn.Both, nodesToRead, stoppingToken);
+    //         var result = readResponse.Results?.FirstOrDefault();
+    //         if (result == null) return;
     //
-    //         var pollingTasks = deviceIdsToPoll
-    //                            .Select(deviceId => PollSingleDeviceVariablesAsync(deviceId, stoppingToken))
-    //                            .ToList();
+    //         if (!StatusCode.IsGood(result.StatusCode))
+    //         {
+    //             _logger.LogWarning($"读取 OPC UA 变量 {variable.Name} ({variable.OpcUaNodeId}) 失败: {result.StatusCode}");
+    //             return;
+    //         }
     //
-    //         await Task.WhenAll(pollingTasks);
+    //         await UpdateAndEnqueueVariable(variable, result.Value);
     //     }
-    //     catch (OperationCanceledException)
+    //     catch (ServiceResultException ex) when (ex.StatusCode == StatusCodes.BadSessionIdInvalid)
     //     {
-    //         _logger.LogInformation("OPC UA 后台服务轮询变量被取消。");
+    //         _logger.LogError(ex, $"OPC UA会话ID无效，变量: {variable.Name} ({variable.OpcUaNodeId})。正在尝试重新连接...");
+    //        
     //     }
     //     catch (Exception ex)
     //     {
-    //         _logger.LogError(ex, $"OPC UA 后台服务在轮询变量过程中发生错误：{ex.Message}");
+    //         _logger.LogError(ex, $"轮询OPC UA变量 {variable.Name} ({variable.OpcUaNodeId}) 时发生未知错误: {ex.Message}");
     //     }
     // }
-
-    // /// <summary>
-    // /// 轮询单个设备的所有 OPC UA 变量。
-    // /// </summary>
-    // /// <param name="deviceId">设备的 ID。</param>
-    // /// <param name="stoppingToken">取消令牌。</param>
-    // private async Task PollSingleDeviceVariablesAsync(int deviceId, CancellationToken stoppingToken)
-    // {
-    //     if (stoppingToken.IsCancellationRequested) return;
-    //
-    //     if (!_opcUaDevices.TryGetValue(deviceId, out var device) || device.OpcUaServerUrl == null)
-    //     {
-    //         _logger.LogWarning($"OpcUa轮询变量时，在deviceDic中未找到ID为 {deviceId} 的设备，或其服务器地址为空，请检查！");
-    //         return;
-    //     }
-    //
-    //     if (!device.IsActive) return;
-    //
-    //     if (!_opcUaServices.TryGetValue(device.OpcUaServerUrl, out var session) || !session.Connected)
-    //     {
-    //         if (device.IsActive)
-    //         {
-    //             _logger.LogWarning($"用于 {device.OpcUaServerUrl} 的 OPC UA 会话未连接。正在尝试重新连接...");
-    //             // await ConnectSingleOpcUaDeviceAsync(device, stoppingToken);
-    //         }
-    //
-    //         return;
-    //     }
-    //
-    //     if (!_opcUaPollVariablesByDeviceId.TryGetValue(deviceId, out var variableList) || variableList.Count == 0)
-    //     {
-    //         return;
-    //     }
-    //
-    //     foreach (var variable in variableList)
-    //     {
-    //         if (stoppingToken.IsCancellationRequested) return;
-    //
-    //         if (!PollingIntervals.TryGetValue(variable.PollLevel, out var interval) ||
-    //             (DateTime.Now - variable.UpdatedAt) < interval)
-    //         {
-    //             continue;
-    //         }
-    //
-    //         await ReadAndProcessOpcUaVariableAsync(session, variable, stoppingToken);
-    //     }
-    // }
-
-    /// <summary>
-    /// 读取单个 OPC UA 变量并处理其数据。
-    /// </summary>
-    /// <param name="session">OPC UA 会话。</param>
-    /// <param name="variable">要读取的变量。</param>
-    /// <param name="stoppingToken">取消令牌。</param>
-    private async Task ReadAndProcessOpcUaVariableAsync(Session session, Variable variable,
-                                                        CancellationToken stoppingToken)
-    {
-        var nodesToRead = new ReadValueIdCollection
-                          {
-                              new ReadValueId
-                              {
-                                  NodeId = new NodeId(variable.OpcUaNodeId),
-                                  AttributeId = Attributes.Value
-                              }
-                          };
-
-        try
-        {
-            var readResponse = await session.ReadAsync(null, 0, TimestampsToReturn.Both, nodesToRead, stoppingToken);
-            var result = readResponse.Results?.FirstOrDefault();
-            if (result == null) return;
-
-            if (!StatusCode.IsGood(result.StatusCode))
-            {
-                _logger.LogWarning($"读取 OPC UA 变量 {variable.Name} ({variable.OpcUaNodeId}) 失败: {result.StatusCode}");
-                return;
-            }
-
-            await UpdateAndEnqueueVariable(variable, result.Value);
-        }
-        catch (ServiceResultException ex) when (ex.StatusCode == StatusCodes.BadSessionIdInvalid)
-        {
-            _logger.LogError(ex, $"OPC UA会话ID无效，变量: {variable.Name} ({variable.OpcUaNodeId})。正在尝试重新连接...");
-            // Assuming device can be retrieved from variable or passed as parameter if needed for ConnectSingleOpcUaDeviceAsync
-            // For now, I'll just log and let the outer loop handle reconnection if the session is truly invalid for the device.
-            // If a full device object is needed here, it would need to be passed down from PollSingleDeviceVariablesAsync.
-            // For simplicity, I'll remove the direct reconnection attempt here and rely on the outer loop.
-            // await ConnectSingleOpcUaDeviceAsync(variable.VariableTable.Device, stoppingToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"轮询OPC UA变量 {variable.Name} ({variable.OpcUaNodeId}) 时发生未知错误: {ex.Message}");
-        }
-    }
 
     /// <summary>
     /// 更新变量数据，并将其推送到数据处理队列。
     /// </summary>
     /// <param name="variable">要更新的变量。</param>
     /// <param name="value">读取到的数据值。</param>
-    private async Task UpdateAndEnqueueVariable(Variable variable, object value)
+    private async Task UpdateAndEnqueueVariable(VariableDto variable, object value)
     {
         try
         {
@@ -414,7 +302,7 @@ public class OpcUaBackgroundService : BackgroundService
             variable.UpdatedAt = DateTime.Now;
             // Console.WriteLine($"OpcUa后台服务轮询变量：{variable.Name},值：{variable.DataValue}");
             // 将更新后的数据推入处理队列。
-            // await _dataProcessingService.EnqueueAsync(variable);
+            await _dataProcessingService.EnqueueAsync(variable);
         }
         catch (Exception ex)
         {
@@ -442,36 +330,26 @@ public class OpcUaBackgroundService : BackgroundService
                     var opcUaNodes
                         = vGroup.Select(variableDto => new OpcUaNode() { NodeId = variableDto.OpcUaNodeId })
                                  .ToList();
-                    opcUaService.SubscribeToNode(opcUaNodes,HandleDataChanged);
+
+                    PollingIntervals.TryGetValue(pollLevelType, out var pollLevel);
+                    opcUaService.SubscribeToNode(opcUaNodes,HandleDataChanged,10000,1000);
                 }
             }
         }
     }
 
-    private void HandleDataChanged(OpcUaNode opcUaNode)
+    private async void HandleDataChanged(OpcUaNode opcUaNode)
     {
-        
-    }
-
-    /// <summary>
-    /// 订阅变量变化的通知
-    /// </summary>
-    /// <param name="variable">发生变化的变量。</param>
-    /// <param name="monitoredItem"></param>
-    /// <param name="e"></param>
-    private async void OnSubNotification(Variable variable, MonitoredItem monitoredItem,
-                                         MonitoredItemNotificationEventArgs e)
-    {
-        foreach (var value in monitoredItem.DequeueValues())
+        if (_opcUaVariables.TryGetValue(opcUaNode.NodeId.ToString(), out var variabelDto))
         {
-            _logger.LogInformation(
-                $"[OPC UA 通知] {monitoredItem.DisplayName}: {value.Value} | 时间戳: {value.SourceTimestamp.ToLocalTime()} | 状态: {value.StatusCode}");
-            if (StatusCode.IsGood(value.StatusCode))
+            if (opcUaNode.Value == null)
             {
-                await UpdateAndEnqueueVariable(variable, value.Value);
+                 return;
             }
+            await UpdateAndEnqueueVariable(variabelDto, opcUaNode.Value);
         }
     }
+
 
     /// <summary>
     /// 断开所有 OPC UA 会话。

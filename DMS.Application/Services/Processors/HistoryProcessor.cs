@@ -1,10 +1,9 @@
+using DMS.Application.Interfaces;
+using DMS.Application.Models;
 using DMS.Core.Helper;
 using DMS.Core.Models;
-using DMS.Services;
-using DMS.WPF.Interfaces;
-using Microsoft.Extensions.Logging;
 
-namespace DMS.WPF.Services.Processors;
+namespace DMS.Application.Services.Processors;
 
 public class HistoryProcessor : IVariableProcessor, IDisposable
 {
