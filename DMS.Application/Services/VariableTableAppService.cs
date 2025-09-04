@@ -86,7 +86,6 @@ namespace DMS.Application.Services
                     // 映射菜单实体并设置关联信息
                     var menu = _mapper.Map<MenuBean>(createDto.Menu);
                     menu.ParentId = deviceMenu.Id;
-                    menu.TargetViewKey = "VariableTableMenu";
                     menu.TargetId = createdVariableTable.Id;
                     menu.MenuType = MenuType.VariableTableMenu;
                    var addMenu= await _repositoryManager.Menus.AddAsync(menu);
