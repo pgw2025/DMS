@@ -211,12 +211,31 @@ namespace DMS.Infrastructure.Services
                 _logger.LogInformation("正在为设备 {DeviceName} 设置订阅，变量数: {VariableCount}", 
                     context.Device.Name, context.Variables.Count);
 
-                var opcUaNodes = context.Variables.Values
-                    .Select(v => new OpcUaNode { NodeId = v.OpcUaNodeId })
-                    .ToList();
+                // 按PollLevel对变量进行分组
+                var variablesByPollLevel = context.Variables.Values
+                    .GroupBy(v => v.PollLevel)
+                    .ToDictionary(g => g.Key, g => g.ToList());
 
-                context.OpcUaService.SubscribeToNode(opcUaNodes, HandleDataChanged, 
-                    _options.SubscriptionPublishingIntervalMs, _options.SubscriptionSamplingIntervalMs);
+                // 为每个PollLevel组设置单独的订阅
+                foreach (var group in variablesByPollLevel)
+                {
+                    PollLevelType pollLevel = group.Key;
+                    var variables = group.Value;
+
+                    _logger.LogInformation("为设备 {DeviceName} 设置PollLevel {PollLevel} 的订阅，变量数: {VariableCount}", 
+                        context.Device.Name, pollLevel, variables.Count);
+
+                    // 根据PollLevel计算发布间隔和采样间隔（毫秒）
+                    var publishingInterval = GetPublishingIntervalFromPollLevel(pollLevel);
+                    // var samplingInterval = GetSamplingIntervalFromPollLevel(pollLevel);
+
+                    var opcUaNodes = variables
+                        .Select(v => new OpcUaNode { NodeId = v.OpcUaNodeId })
+                        .ToList();
+
+                    context.OpcUaService.SubscribeToNode(opcUaNodes, HandleDataChanged, 
+                        publishingInterval, publishingInterval);
+                }
 
                 _logger.LogInformation("设备 {DeviceName} 订阅设置完成", context.Device.Name);
             }
@@ -226,6 +245,32 @@ namespace DMS.Infrastructure.Services
                     context.Device.Name, ex.Message);
             }
         }
+
+        /// <summary>
+        /// 根据PollLevel获取发布间隔（毫秒）
+        /// </summary>
+        private int GetPublishingIntervalFromPollLevel(PollLevelType pollLevel)
+        {
+            // 根据PollLevelType枚举值映射到发布间隔
+            return pollLevel switch
+            {
+                PollLevelType.HundredMilliseconds => 100,      // TenMilliseconds -> 100ms发布间隔
+                PollLevelType.FiveHundredMilliseconds => 500,     // HundredMilliseconds -> 500ms发布间隔
+                PollLevelType.OneSecond => 1000,    // FiveHundredMilliseconds -> 1000ms发布间隔
+                PollLevelType.FiveSeconds => 5000,   // OneSecond -> 2000ms发布间隔
+                PollLevelType.TenSeconds => 10000, // TenSeconds -> 10000ms发布间隔
+                PollLevelType.TwentySeconds => 20000, // TwentySeconds -> 20000ms发布间隔
+                PollLevelType.ThirtySeconds => 30000, // ThirtySeconds -> 30000ms发布间隔
+                PollLevelType.OneMinute => 60000, // OneMinute -> 60000ms发布间隔
+                PollLevelType.FiveMinutes => 300000, // ThreeMinutes -> 120000ms发布间隔
+                PollLevelType.TenMinutes => 600000, // FiveMinutes -> 180000ms发布间隔
+                PollLevelType.ThirtyMinutes => 1800000, // TenMinutes -> 300000ms发布间隔
+                PollLevelType.OneHour => 3600000, // ThirtyMinutes -> 600000ms发布间隔
+                _ => _options.SubscriptionPublishingIntervalMs // 默认值
+            };
+        }
+
+       
 
         /// <summary>
         /// 处理数据变化
@@ -279,7 +324,10 @@ namespace DMS.Infrastructure.Services
             
             foreach (var deviceId in deviceIds)
             {
-                connectTasks.Add(ConnectDeviceAsync(deviceId, cancellationToken));
+                if (_deviceContexts.TryGetValue(deviceId, out var context))
+                {
+                    connectTasks.Add(ConnectDeviceAsync(context, cancellationToken));
+                }
             }
             
             await Task.WhenAll(connectTasks);
@@ -305,10 +353,7 @@ namespace DMS.Infrastructure.Services
             
             foreach (var deviceId in deviceIds)
             {
-                if (_deviceContexts.TryGetValue(deviceId, out var context))
-                {
-                    disconnectTasks.Add(DisconnectDeviceAsync(deviceId, cancellationToken));
-                }
+                disconnectTasks.Add(DisconnectDeviceAsync(deviceId, cancellationToken));
             }
             
             await Task.WhenAll(disconnectTasks);

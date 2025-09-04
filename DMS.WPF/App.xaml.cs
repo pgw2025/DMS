@@ -6,6 +6,7 @@ using DMS.Application.Services.Processors;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Interfaces.Services;
+using DMS.Infrastructure.Configuration;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Interfaces.Services;
@@ -109,9 +110,13 @@ public partial class App : System.Windows.Application
         });
 
         // 注册数据处理服务和处理器
-        services.AddHostedService<OpcUaBackgroundService>();
-        services.Configure<DMS.Infrastructure.Configuration.OpcUaServiceOptions>(options => { });
+        // services.AddHostedService<OpcUaBackgroundService>();
+        services.Configure<OpcUaServiceOptions>(options => { });
+        // 注册服务
         services.AddSingleton<IOpcUaServiceManager, OpcUaServiceManager>();
+        // 注册后台服务
+        services.AddHostedService<OptimizedOpcUaBackgroundService>();
+        
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
         services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
         services.AddSingleton<CheckValueChangedProcessor>();
@@ -154,6 +159,10 @@ public partial class App : System.Windows.Application
         
         // 注册WPF中的服务
         services.AddSingleton<DataServices>();
+        
+
+        
+
         
         // 注册视图模型
         services.AddSingleton<SplashViewModel>();
