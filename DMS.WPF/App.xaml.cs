@@ -28,31 +28,28 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 namespace DMS.WPF;
 
 /// <summary>
-///     Interaction logic for App.xaml
+/// Interaction logic for App.xaml
 /// </summary>
 public partial class App : System.Windows.Application
 {
     public IServiceProvider Services { get; }
-    // public AppSettings Settings { get; private set; }
-
+    public new static App Current => (App)System.Windows.Application.Current;
+    public IHost Host { get; }
 
     public App()
     {
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-                        .ConfigureServices((context, services) =>
-                        {
-                            ConfigureServices(services);
-                        })
-                        .ConfigureLogging(loggingBuilder =>
-                        {
-                            ConfigureLogging(loggingBuilder);
-                        })
-                        .Build();
+            .ConfigureServices((context, services) =>
+            {
+                ConfigureServices(services);
+            })
+            .ConfigureLogging(loggingBuilder =>
+            {
+                ConfigureLogging(loggingBuilder);
+            })
+            .Build();
         Services = Host.Services;
     }
-
-    public new static App Current => (App)System.Windows.Application.Current;
-    public IHost Host { get; }
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -81,17 +78,6 @@ public partial class App : System.Windows.Application
         
         var splashWindow = Host.Services.GetRequiredService<SplashWindow>();
         splashWindow.Show();
-
-        // 根据配置启动服务
-        // var connectionSettings = DMS.Config.AppSettings.Load();
-        // if (connectionSettings.EnableMqttService)
-        // {
-        //     Host.Services.GetRequiredService<MqttBackgroundService>().StartService();
-        // }
-        // if (connectionSettings.EnableOpcUaService)
-        // {
-        //     Host.Services.GetRequiredService<OpcUaBackgroundService>().StartService();
-        // }
     }
 
     protected override async void OnExit(ExitEventArgs e)
@@ -107,14 +93,10 @@ public partial class App : System.Windows.Application
     {
         // 注册NLogLogger作为Microsoft.Extensions.Logging.ILogger的实现
         services.AddSingleton<ILoggerFactory, NLogLoggerFactory>();
-        //
         services.AddSingleton<GrowlNotificationService>();
         services.AddSingleton<INotificationService, NotificationService>();
-        // services.AddHostedService<S7BackgroundService>();
-        // services.AddHostedService<OpcUaBackgroundService>();
-        // services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();
         
-        // --- 核心配置 ---
+        // 注册核心服务
         services.AddAutoMapper(cfg =>
         {
             // 最终解决方案：根据异常信息的建议，设置此标记以忽略重复的Profile加载。
@@ -127,8 +109,9 @@ public partial class App : System.Windows.Application
         });
 
         // 注册数据处理服务和处理器
-
         services.AddHostedService<OpcUaBackgroundService>();
+        services.Configure<DMS.Infrastructure.Configuration.OpcUaServiceOptions>(options => { });
+        services.AddSingleton<IOpcUaServiceManager, OpcUaServiceManager>();
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
         services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
         services.AddSingleton<CheckValueChangedProcessor>();
@@ -139,8 +122,6 @@ public partial class App : System.Windows.Application
         
         // 注册Core中的仓库
         services.AddSingleton<AppSettings>();
-        // services.AddSingleton<SqlSugarDbContext>();
-        // 2. 配置数据库上下文 (在测试中通常使用单例)
         services.AddSingleton<SqlSugarDbContext>(_ =>
         {
             var appSettings = new AppSettings { Database = { Database = "dms_test" } };
@@ -161,18 +142,19 @@ public partial class App : System.Windows.Application
 
         services.AddTransient<IOpcUaService, OpcUaService>();
         
-        
         // 注册App服务
-        services.AddSingleton<IInitializeService,InitializeService>();
-        services.AddSingleton<IDeviceAppService,DeviceAppService>();
-        services.AddSingleton<IVariableAppService,VariableAppService>();
-        services.AddSingleton<IVariableTableAppService,VariableTableAppService>();
+        services.AddSingleton<IInitializeService, InitializeService>();
+        services.AddSingleton<IDeviceAppService, DeviceAppService>();
+        services.AddSingleton<IVariableAppService, VariableAppService>();
+        services.AddSingleton<IVariableTableAppService, VariableTableAppService>();
         services.AddSingleton<IMenuService, MenuService>();
         services.AddSingleton<IDataCenterService, DataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
-        //注册WPF中的服务
+        
+        // 注册WPF中的服务
         services.AddSingleton<DataServices>();
+        
         // 注册视图模型
         services.AddSingleton<SplashViewModel>();
         services.AddSingleton<MainViewModel>();
@@ -180,18 +162,16 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DevicesViewModel>();
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<SettingViewModel>();
-        services.AddSingleton<DataTransformViewModel>();
         services.AddTransient<VariableTableViewModel>();
-        //services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddSingleton<MqttsViewModel>();
+        
         // 注册对话框模型
         services.AddTransient<ImportExcelDialogViewModel>();
         services.AddTransient<ImportOpcUaDialogViewModel>();
         services.AddTransient<VariableDialogViewModel>();
-        // 注册对话框
-        services.AddSingleton<DevicesView>();
-        //注册View视图
+        
+        // 注册View视图
         services.AddSingleton<SplashWindow>();
         services.AddSingleton<SettingView>();
         services.AddSingleton<MainView>();
@@ -207,7 +187,6 @@ public partial class App : System.Windows.Application
         LogManager.Setup().LoadConfigurationFromFile("Configurations/nlog.config");
         loggingBuilder.ClearProviders();
         loggingBuilder.SetMinimumLevel(LogLevel.Trace);
-        // loggingBuilder.AddNLog();
 
         // 捕获未处理的异常并记录
         AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
@@ -217,7 +196,7 @@ public partial class App : System.Windows.Application
             {
                 // 可以使用一个专用的 Logger 来记录未处理异常
                 LogManager.GetLogger("UnhandledExceptionLogger")
-                          .Fatal($"应用程序发生未处理的异常:{ex}");
+                    .Fatal($"应用程序发生未处理的异常:{ex}");
             }
         };
 
@@ -225,7 +204,7 @@ public partial class App : System.Windows.Application
         this.DispatcherUnhandledException += (sender, args) =>
         {
             LogManager.GetLogger("DispatcherExceptionLogger")
-                      .Fatal($"UI 线程发生未处理的异常:{args.Exception}");
+                .Fatal($"UI 线程发生未处理的异常:{args.Exception}");
             // 标记为已处理，防止应用程序崩溃 (生产环境慎用，可能掩盖问题)
             // args.Handled = true; 
         };
@@ -235,10 +214,8 @@ public partial class App : System.Windows.Application
         TaskScheduler.UnobservedTaskException += (sender, args) =>
         {
             LogManager.GetLogger("UnobservedTaskExceptionLogger")
-                      .Fatal($"异步任务发生未观察到的异常:{args.Exception}");
+                .Fatal($"异步任务发生未观察到的异常:{args.Exception}");
             // args.SetObserved(); // 标记为已观察，防止进程终止
         };
     }
-
-    
 }

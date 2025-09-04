@@ -244,49 +244,6 @@ public class OpcUaBackgroundService : BackgroundService
         }
     }
 
-    // /// <summary>
-    // /// 读取单个 OPC UA 变量并处理其数据。
-    // /// </summary>
-    // /// <param name="session">OPC UA 会话。</param>
-    // /// <param name="variable">要读取的变量。</param>
-    // /// <param name="stoppingToken">取消令牌。</param>
-    // private async Task ReadAndProcessOpcUaVariableAsync(Session session, Variable variable,
-    //                                                     CancellationToken stoppingToken)
-    // {
-    //     var nodesToRead = new ReadValueIdCollection
-    //                       {
-    //                           new ReadValueId
-    //                           {
-    //                               NodeId = new NodeId(variable.OpcUaNodeId),
-    //                               AttributeId = Attributes.Value
-    //                           }
-    //                       };
-    //
-    //     try
-    //     {
-    //         var readResponse = await session.ReadAsync(null, 0, TimestampsToReturn.Both, nodesToRead, stoppingToken);
-    //         var result = readResponse.Results?.FirstOrDefault();
-    //         if (result == null) return;
-    //
-    //         if (!StatusCode.IsGood(result.StatusCode))
-    //         {
-    //             _logger.LogWarning($"读取 OPC UA 变量 {variable.Name} ({variable.OpcUaNodeId}) 失败: {result.StatusCode}");
-    //             return;
-    //         }
-    //
-    //         await UpdateAndEnqueueVariable(variable, result.Value);
-    //     }
-    //     catch (ServiceResultException ex) when (ex.StatusCode == StatusCodes.BadSessionIdInvalid)
-    //     {
-    //         _logger.LogError(ex, $"OPC UA会话ID无效，变量: {variable.Name} ({variable.OpcUaNodeId})。正在尝试重新连接...");
-    //        
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         _logger.LogError(ex, $"轮询OPC UA变量 {variable.Name} ({variable.OpcUaNodeId}) 时发生未知错误: {ex.Message}");
-    //     }
-    // }
-
     /// <summary>
     /// 更新变量数据，并将其推送到数据处理队列。
     /// </summary>
