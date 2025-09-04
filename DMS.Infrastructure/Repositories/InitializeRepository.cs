@@ -34,7 +34,6 @@ public class InitializeRepository : IInitializeRepository
     public void InitializeTables()
     {
         _db.DbMaintenance.CreateDatabase(); // 创建数据库（如果不存在）
-        _db.CodeFirst.InitTables<DbNlog>();
         _db.CodeFirst.InitTables<DbDevice>();
         _db.CodeFirst.InitTables<DbVariableTable>();
         _db.CodeFirst.InitTables<DbVariable>();
