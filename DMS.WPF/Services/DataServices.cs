@@ -59,10 +59,10 @@ public partial class DataServices : ObservableObject
 
     /// <summary>
     /// DataServices类的构造函数。
-    /// 注入ILogger<DataServices>，并初始化各个数据仓库。
+    /// 初始化各个数据仓库。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="varDataRepository"></param>
+    /// <param name="dataCenterService">数据服务中心实例。</param>
     public DataServices(IMapper mapper, IDataCenterService dataCenterService)
     {
         _mapper = mapper;

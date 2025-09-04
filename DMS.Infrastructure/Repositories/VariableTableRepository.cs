@@ -6,7 +6,7 @@ using DMS.Infrastructure.Entities;
 
 
 using AutoMapper;
-using DMS.Core.Helper;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.Infrastructure.Repositories;
 
@@ -23,8 +23,9 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     /// </summary>
     /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
-    public VariableTableRepository(IMapper mapper, SqlSugarDbContext dbContext)
-        : base(dbContext)
+    /// <param name="logger">日志记录器实例。</param>
+    public VariableTableRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<VariableTableRepository> logger)
+        : base(dbContext, logger)
     {
         _mapper = mapper;
     }
@@ -87,7 +88,7 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
         var result = await Db.Deleteable(new DbVariableTable() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbVariableTable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbVariableTable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     
@@ -122,7 +123,7 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
                              .Where(it => it.DeviceId == deviceId)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete VariableTable by DeviceId={deviceId}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete VariableTable by DeviceId={deviceId}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 }

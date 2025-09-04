@@ -1,9 +1,5 @@
-using System.Windows;
 using System.Windows.Controls;
-using DMS.Core.Helper;
 using DMS.WPF.Helper;
-using DMS.WPF.ViewModels.Dialogs;
-using iNKORE.UI.WPF.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 
 namespace DMS.WPF.Views.Dialogs;
@@ -23,7 +19,7 @@ public partial class DeviceDialog : ContentDialog
 
     private void OnOpened(ContentDialog sender, ContentDialogOpenedEventArgs args)
     {
-        //ÐÞ¸Ä¶Ô»°¿òÄÚÈÝµÄ×î´ó¿í¶ÈºÍ×î´ó¸ß¶È
+        //ï¿½Þ¸Ä¶Ô»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½ï¿½ï¿½Èºï¿½ï¿½ï¿½ï¿½ß¶ï¿½
         var backgroundElementBorder = VisualTreeFinder.FindVisualChildByName<Border>(this, "BackgroundElement");
         backgroundElementBorder.MaxWidth = ContentAreaMaxWidth;
         backgroundElementBorder.MaxWidth = ContentAreaMaxHeight;

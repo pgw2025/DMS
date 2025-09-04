@@ -7,7 +7,7 @@ using DMS.Infrastructure.Entities;
 
 
 using AutoMapper;
-using DMS.Core.Helper;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.Infrastructure.Repositories;
 
@@ -24,8 +24,9 @@ public class UserRepository : BaseRepository<DbUser>, IUserRepository
     /// </summary>
     /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
-    public UserRepository(IMapper mapper, SqlSugarDbContext dbContext)
-        : base(dbContext)
+    /// <param name="logger">日志记录器实例。</param>
+    public UserRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<UserRepository> logger)
+        : base(dbContext, logger)
     {
         _mapper = mapper;
     }
@@ -88,7 +89,7 @@ public class UserRepository : BaseRepository<DbUser>, IUserRepository
         var result = await Db.Deleteable(new DbUser() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbUser)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbUser)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     

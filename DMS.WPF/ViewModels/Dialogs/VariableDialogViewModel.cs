@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
-using DMS.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
 

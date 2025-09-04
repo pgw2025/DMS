@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
-using DMS.Core.Helper;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
+using Microsoft.Extensions.Logging;
 using SqlSugar;
 
 namespace DMS.Infrastructure.Repositories;
@@ -15,15 +15,17 @@ public abstract class BaseRepository<TEntity>
     where TEntity : class, new()
 {
     private readonly SqlSugarDbContext _dbContext;
-
+    protected readonly ILogger<BaseRepository<TEntity>> _logger;
 
     /// <summary>
     /// 初始化 BaseRepository 的新实例。
     /// </summary>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
-    protected BaseRepository(SqlSugarDbContext dbContext)
+    /// <param name="logger">日志记录器实例。</param>
+    protected BaseRepository(SqlSugarDbContext dbContext, ILogger<BaseRepository<TEntity>> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     /// <summary>
@@ -46,7 +48,7 @@ public abstract class BaseRepository<TEntity>
         var result = await Db.Insertable(entity)
                              .ExecuteReturnEntityAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Add {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Add {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -62,7 +64,7 @@ public abstract class BaseRepository<TEntity>
         var result = await Db.Updateable(entity)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Update {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Update {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -78,7 +80,7 @@ public abstract class BaseRepository<TEntity>
         var result = await Db.Deleteable(entity)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     
@@ -94,10 +96,9 @@ public abstract class BaseRepository<TEntity>
         var entities = await Db.Queryable<TEntity>()
                                .ToListAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"GetAll {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"GetAll {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entities;
     }
-
 
     /// <summary>
     /// 异步根据主键 ID 获取单个实体。
@@ -112,7 +113,7 @@ public abstract class BaseRepository<TEntity>
                              .In(id)
                              .FirstAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"GetById {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"GetById {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entity;
     }
 
@@ -129,7 +130,7 @@ public abstract class BaseRepository<TEntity>
                              .In(ids)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"DeleteByIds {typeof(TEntity).Name}, Count: {ids.Count}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"DeleteByIds {typeof(TEntity).Name}, Count: {ids.Count}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -145,7 +146,7 @@ public abstract class BaseRepository<TEntity>
         var entity = await Db.Queryable<TEntity>()
                              .FirstAsync(expression);
         stopwatch.Stop();
-        NlogHelper.Info($"GetByCondition {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"GetByCondition {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entity;
     }
 
@@ -161,7 +162,7 @@ public abstract class BaseRepository<TEntity>
         var result = await Db.Queryable<TEntity>()
                              .AnyAsync(expression);
         stopwatch.Stop();
-        NlogHelper.Info($"Exists {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Exists {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -205,7 +206,7 @@ public abstract class BaseRepository<TEntity>
         var entity = await Db.Queryable<TEntity>().Take(number).ToListAsync();
                             
         stopwatch.Stop();
-        NlogHelper.Info($"TakeAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"TakeAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entity;
     }
 
@@ -215,7 +216,7 @@ public abstract class BaseRepository<TEntity>
         stopwatch.Start();
         var result = await Db.Insertable(entities).ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"AddBatchAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"AddBatchAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result > 0;
     }
 }

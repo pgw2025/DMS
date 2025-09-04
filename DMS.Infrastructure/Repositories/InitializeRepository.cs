@@ -4,6 +4,7 @@ using DMS.Core.Models;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
+using Microsoft.Extensions.Logging;
 using SqlSugar;
 
 namespace DMS.Infrastructure.Repositories;
@@ -16,15 +17,18 @@ public class InitializeRepository : IInitializeRepository
 {
     private readonly SqlSugarDbContext _dbContext;
     private readonly SqlSugarClient _db;
+    private readonly ILogger<InitializeRepository> _logger;
 
     /// <summary>
-    /// 构造函数，注入 SqlSugarDbContext。
+    /// 构造函数，注入 SqlSugarDbContext 和 ILogger。
     /// </summary>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
-    public InitializeRepository(SqlSugarDbContext dbContext)
+    /// <param name="logger">日志记录器实例。</param>
+    public InitializeRepository(SqlSugarDbContext dbContext, ILogger<InitializeRepository> logger)
     {
         _dbContext = dbContext;
         _db = _dbContext.GetInstance();
+        _logger = logger;
     }
 
     /// <summary>

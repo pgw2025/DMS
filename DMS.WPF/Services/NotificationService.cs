@@ -1,21 +1,22 @@
-
 using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Core.Enums;
-using DMS.Core.Helper;
 using DMS.Message;
+using Microsoft.Extensions.Logging;
 
-namespace DMS.Helper;
+namespace DMS.WPF.Services;
 
 /// <summary>
-/// 通知帮助类，用于显示各种类型的通知消息，并集成日志记录功能。
+/// 通知服务类，用于显示各种类型的通知消息，并集成日志记录功能。
 /// 新增了通知节流功能，以防止在短时间内向用户发送大量重复的通知。
 /// </summary>
-public static class NotificationHelper
+public class NotificationService
 {
+    private readonly ILogger<NotificationService> _logger;
+    
     /// <summary>
     /// 内部类，用于存储节流通知的状态信息。
     /// </summary>
@@ -26,22 +27,38 @@ public static class NotificationHelper
         public NotificationType NotificationType;
     }
 
-    private static readonly ConcurrentDictionary<string, ThrottledNotificationInfo> ThrottledNotifications = new ConcurrentDictionary<string, ThrottledNotificationInfo>();
+    private readonly ConcurrentDictionary<string, ThrottledNotificationInfo> _throttledNotifications = new ConcurrentDictionary<string, ThrottledNotificationInfo>();
     private const int ThrottleTimeSeconds = 30;
+
+    public NotificationService(ILogger<NotificationService> logger)
+    {
+        _logger = logger;
+    }
 
     /// <summary>
     /// 内部核心通知发送方法，包含了节流逻辑。
     /// </summary>
-    private static void SendNotificationInternal(string msg, NotificationType notificationType, bool throttle, Exception exception, string callerFilePath, string callerMember, int callerLineNumber)
+    private void SendNotificationInternal(string msg, NotificationType notificationType, bool throttle, Exception exception, string callerFilePath, string callerMember, int callerLineNumber)
     {
-        // 根据通知类型决定日志级别，并使用 NlogHelper 记录日志（利用其自身的节流逻辑）
+        // 根据通知类型决定日志级别，并使用 ILogger 记录日志
         if (notificationType == NotificationType.Error)
         {
-            NlogHelper.Error(msg, exception, throttle, callerFilePath, callerMember, callerLineNumber);
+            _logger.LogError(exception, $"[{callerFilePath}:{callerMember}:{callerLineNumber}] {msg}");
         }
         else
         {
-            NlogHelper.Info(msg, throttle, callerFilePath, callerMember, callerLineNumber);
+            switch (notificationType)
+            {
+                case NotificationType.Info:
+                    _logger.LogInformation($"[{callerFilePath}:{callerMember}:{callerLineNumber}] {msg}");
+                    break;
+                case NotificationType.Success:
+                    _logger.LogInformation($"[{callerFilePath}:{callerMember}:{callerLineNumber}] {msg}");
+                    break;
+                case NotificationType.Warning:
+                    _logger.LogWarning($"[{callerFilePath}:{callerMember}:{callerLineNumber}] {msg}");
+                    break;
+            }
         }
 
         // 如果不启用通知节流，则直接发送通知并返回。
@@ -53,7 +70,7 @@ public static class NotificationHelper
 
         var key = $"{callerFilePath}:{callerLineNumber}:{msg}";
 
-        ThrottledNotifications.AddOrUpdate(
+        _throttledNotifications.AddOrUpdate(
             key,
             // --- 添加逻辑：当通知第一次被节流时执行 ---
             _ =>
@@ -71,7 +88,7 @@ public static class NotificationHelper
                 // 3. 创建并启动计时器。
                 newThrottledNotification.Timer = new Timer(s =>
                 {
-                    if (ThrottledNotifications.TryRemove(key, out var finishedNotification))
+                    if (_throttledNotifications.TryRemove(key, out var finishedNotification))
                     {
                         finishedNotification.Timer.Dispose();
                         if (finishedNotification.Count > 1)
@@ -100,9 +117,9 @@ public static class NotificationHelper
     /// <param name="throttle">是否启用通知节流。</param>
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowMessage(string msg, NotificationType notificationType = NotificationType.Info, bool throttle = true,
-                                   [CallerFilePath] string callerFilePath = "",
-                                   [CallerLineNumber] int callerLineNumber = 0)
+    public void ShowMessage(string msg, NotificationType notificationType = NotificationType.Info, bool throttle = true,
+                           [CallerFilePath] string callerFilePath = "",
+                           [CallerLineNumber] int callerLineNumber = 0)
     {
         SendNotificationInternal(msg, notificationType, throttle, null, callerFilePath, "", callerLineNumber);
     }
@@ -116,10 +133,10 @@ public static class NotificationHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowError(string msg, Exception exception = null, bool throttle = true,
-                                 [CallerFilePath] string callerFilePath = "",
-                                 [CallerMemberName] string callerMember = "",
-                                 [CallerLineNumber] int callerLineNumber = 0)
+    public void ShowError(string msg, Exception exception = null, bool throttle = true,
+                         [CallerFilePath] string callerFilePath = "",
+                         [CallerMemberName] string callerMember = "",
+                         [CallerLineNumber] int callerLineNumber = 0)
     {
         SendNotificationInternal(msg, NotificationType.Error, throttle, exception, callerFilePath, callerMember, callerLineNumber);
     }
@@ -132,10 +149,10 @@ public static class NotificationHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowSuccess(string msg, bool throttle = true,
-                                   [CallerFilePath] string callerFilePath = "",
-                                   [CallerMemberName] string callerMember = "",
-                                   [CallerLineNumber] int callerLineNumber = 0)
+    public void ShowSuccess(string msg, bool throttle = true,
+                           [CallerFilePath] string callerFilePath = "",
+                           [CallerMemberName] string callerMember = "",
+                           [CallerLineNumber] int callerLineNumber = 0)
     {
         SendNotificationInternal(msg, NotificationType.Success, throttle, null, callerFilePath, callerMember, callerLineNumber);
     }
@@ -148,25 +165,26 @@ public static class NotificationHelper
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowInfo(string msg, bool throttle = true,
-                                [CallerFilePath] string callerFilePath = "",
-                                [CallerMemberName] string callerMember = "",
-                                [CallerLineNumber] int callerLineNumber = 0)
+    public void ShowInfo(string msg, bool throttle = true,
+                        [CallerFilePath] string callerFilePath = "",
+                        [CallerMemberName] string callerMember = "",
+                        [CallerLineNumber] int callerLineNumber = 0)
     {
         SendNotificationInternal(msg, NotificationType.Info, throttle, null, callerFilePath, callerMember, callerLineNumber);
     }
+    
     /// <summary>
-    /// 显示一个信息通知消息，并记录信息日志。支持节流。
+    /// 显示一个警告通知消息，并记录警告日志。支持节流。
     /// </summary>
-    /// <param name="msg">信息消息内容。</param>
+    /// <param name="msg">警告消息内容。</param>
     /// <param name="throttle">是否启用通知和日志节流。</param>
     /// <param name="callerFilePath">自动捕获：调用此方法的源文件完整路径。</param>
     /// <param name="callerMember">自动捕获：调用此方法的成员或属性名称。</param>
     /// <param name="callerLineNumber">自动捕获：调用此方法的行号。</param>
-    public static void ShowWarn(string msg, bool throttle = true,
-                                [CallerFilePath] string callerFilePath = "",
-                                [CallerMemberName] string callerMember = "",
-                                [CallerLineNumber] int callerLineNumber = 0)
+    public void ShowWarn(string msg, bool throttle = true,
+                        [CallerFilePath] string callerFilePath = "",
+                        [CallerMemberName] string callerMember = "",
+                        [CallerLineNumber] int callerLineNumber = 0)
     {
         SendNotificationInternal(msg, NotificationType.Warning, throttle, null, callerFilePath, callerMember, callerLineNumber);
     }

@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using DMS.Core.Models;
-using DMS.Helper;
 using DMS.Services;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
@@ -21,6 +20,7 @@ namespace DMS.ViewModels
         private readonly ILogger<MqttServerDetailViewModel> _logger;
         private readonly DataServices _dataServices;
         private readonly IDialogService _dialogService;
+        private readonly NotificationService _notificationService;
 
         /// <summary>
         /// 当前正在编辑的MQTT服务器对象。
@@ -41,12 +41,14 @@ namespace DMS.ViewModels
         /// <param name="logger">日志服务。</param>
         /// <param name="dataServices">数据服务。</param>
         /// <param name="dialogService">对话框服务。</param>
+        /// <param name="notificationService">通知服务。</param>
         public MqttServerDetailViewModel(ILogger<MqttServerDetailViewModel> logger, DataServices dataServices,
-                                         IDialogService dialogService)
+                                         IDialogService dialogService, NotificationService notificationService)
         {
             _logger = logger;
             _dataServices = dataServices;
             _dialogService = dialogService;
+            _notificationService = notificationService;
         }
 
         public override void OnLoaded()
@@ -81,7 +83,7 @@ namespace DMS.ViewModels
             //     await _dataServices.UpdateVariableAsync(variable);
             // }
 
-            NotificationHelper.ShowInfo("MQTT服务器详情保存功能待实现。");
+            _notificationService.ShowInfo("MQTT服务器详情保存功能待实现。");
             _logger.LogInformation("Save changes for MQTT server detail initiated.");
         }
 
@@ -131,7 +133,7 @@ namespace DMS.ViewModels
             // TODO: 实现选择变量的对话框，让用户选择要添加的变量
             // 例如：var selectedVariables = await _dialogService.ShowVariableSelectionDialogAsync();
             // 这里只是一个占位符，实际需要一个UI来选择变量
-            NotificationHelper.ShowInfo("添加变量功能待实现，需要一个变量选择对话框。");
+            _notificationService.ShowInfo("添加变量功能待实现，需要一个变量选择对话框。");
             _logger.LogInformation("AddAsync variables to MQTT server initiated.");
 
             // 假设我们已经通过对话框获取到了一些要添加的变量

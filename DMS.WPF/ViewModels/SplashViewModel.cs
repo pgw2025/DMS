@@ -19,7 +19,7 @@ namespace DMS.WPF.ViewModels;
 /// </summary>
 public partial class SplashViewModel : ObservableObject
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<SplashViewModel> _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly IInitializeService _initializeService;
     private readonly IDataCenterService _dataCenterService;
@@ -28,7 +28,7 @@ public partial class SplashViewModel : ObservableObject
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
-    public SplashViewModel( ILogger logger,IServiceProvider serviceProvider, IInitializeService initializeService,
+    public SplashViewModel(ILogger<SplashViewModel> logger,IServiceProvider serviceProvider, IInitializeService initializeService,
                            IDataCenterService dataCenterService, DataServices dataServices)
     {
         _logger = logger;

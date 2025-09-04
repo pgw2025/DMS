@@ -5,7 +5,6 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Models;
-using DMS.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
@@ -87,13 +86,16 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     private readonly ISynchronizedView<VariableItemViewModel, VariableItemViewModel> _synchronizedView;
     public NotifyCollectionChangedSynchronizedViewList<VariableItemViewModel> VariableItemListView { get; }
 
+    private readonly NotificationService _notificationService;
+
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
-                                  DataServices dataServices)
+                                  DataServices dataServices, NotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
         _variableAppService = variableAppService;
         _dataServices = dataServices;
+        _notificationService = notificationService;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
 
 
@@ -170,7 +172,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 检查是否有变量被选中
             if (SelectedVariable == null)
             {
-                NotificationHelper.ShowInfo("请选择要编辑的变量");
+                _notificationService.ShowInfo("请选择要编辑的变量");
                 return;
             }
 
@@ -201,17 +203,17 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 // 更新当前页面显示的数据：找到原数据在集合中的索引并替换
                 _mapper.Map(editedVariable, SelectedVariable); // 更新选中项的属性
                 // 显示成功通知
-                NotificationHelper.ShowSuccess($"编辑变量成功:{editedVariable.Name}");
+                _notificationService.ShowSuccess($"编辑变量成功:{editedVariable.Name}");
             }
             else
             {
-                NotificationHelper.ShowError("编辑变量失败");
+                _notificationService.ShowError("编辑变量失败");
             }
         }
         catch (Exception e)
         {
             // 捕获并显示错误通知
-            NotificationHelper.ShowError($"编辑变量的过程中发生了不可预期的错误：{e.Message}", e);
+            _notificationService.ShowError($"编辑变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -257,17 +259,17 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 if (isSuccess)
                 {
                     _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(improtVariableDtos));
-                    NotificationHelper.ShowSuccess($"从Excel导入变量成功，共导入变量：{improtVariableDtos.Count}个");
+                    _notificationService.ShowSuccess($"从Excel导入变量成功，共导入变量：{improtVariableDtos.Count}个");
                 }
             }
             else
             {
-                NotificationHelper.ShowSuccess($"列表中没有要添加的变量了。 ");
+                _notificationService.ShowSuccess($"列表中没有要添加的变量了。 ");
             }
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowError($"从TIA导入变量的过程中发生了不可预期的错误：{e.Message}", e);
+            _notificationService.ShowError($"从TIA导入变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -282,14 +284,14 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         {
             if (CurrentVariableTable.Device == null)
             {
-                NotificationHelper.ShowError("当前变量表的Device对象为空，请检查。");
+                _notificationService.ShowError("当前变量表的Device对象为空，请检查。");
                 return;
             }
             // 检查OPC UA Endpoint URL是否已设置
             string opcUaEndpointUrl = CurrentVariableTable.Device.OpcUaServerUrl;
             if (string.IsNullOrEmpty(opcUaEndpointUrl))
             {
-                NotificationHelper.ShowError("OPC UA Endpoint URL 未设置。请在设备详情中配置。");
+                _notificationService.ShowError("OPC UA Endpoint URL 未设置。请在设备详情中配置。");
                 return;
             }
 
@@ -331,21 +333,21 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 if (isSuccess)
                 {
                     _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(importedVariableDtos));
-                    NotificationHelper.ShowSuccess($"从OPC UA服务器导入变量成功，共导入变量：{importedVariableDtos.Count}个");
+                    _notificationService.ShowSuccess($"从OPC UA服务器导入变量成功，共导入变量：{importedVariableDtos.Count}个");
                 }
                 else
                 {
-                    NotificationHelper.ShowError("从OPC UA服务器导入变量失败");
+                    _notificationService.ShowError("从OPC UA服务器导入变量失败");
                 }
             }
             else
             {
-                NotificationHelper.ShowSuccess("列表中没有要添加的变量了。");
+                _notificationService.ShowSuccess("列表中没有要添加的变量了。");
             }
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowError($"从OPC UA服务器导入变量的过程中发生了不可预期的错误：{e.Message}", e);
+            _notificationService.ShowError($"从OPC UA服务器导入变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -389,12 +391,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             _dataServices.AddVariable(variableItemViewModel);
             //
             // // 显示成功通知
-            NotificationHelper.ShowSuccess($"添加变量成功:{variableItemViewModel.Name}");
+            _notificationService.ShowSuccess($"添加变量成功:{variableItemViewModel.Name}");
         }
         catch (Exception e)
         {
             // 捕获并显示错误通知
-            NotificationHelper.ShowError($"添加变量的过程中发生了不可预期的错误：{e.Message}", e);
+            _notificationService.ShowError($"添加变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -412,7 +414,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 检查是否有变量被选中
             if (variablesToDelete == null || !variablesToDelete.Any())
             {
-                NotificationHelper.ShowInfo("请选择要删除的变量");
+                _notificationService.ShowInfo("请选择要删除的变量");
                 return;
             }
 
@@ -436,18 +438,18 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                     _dataServices.DeleteVariable(variable.Id);
                 }
                 // 显示成功通知
-                NotificationHelper.ShowSuccess($"成功删除 {variablesToDelete.Count} 个变量");
+                _notificationService.ShowSuccess($"成功删除 {variablesToDelete.Count} 个变量");
             }
             else
             {
                 // 显示删除失败通知
-                NotificationHelper.ShowError("删除变量失败");
+                _notificationService.ShowError("删除变量失败");
             }
         }
         catch (Exception e)
         {
             // 捕获并显示错误通知
-            NotificationHelper.ShowError($"删除变量的过程中发生了不可预期的错误：{e.Message}", e);
+            _notificationService.ShowError($"删除变量的过程中发生了不可预期的错误：{e.Message}", e);
         }
     }
 
@@ -462,7 +464,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         // 检查是否有变量被选中
         if (SelectedVariables.Count == 0)
         {
-            NotificationHelper.ShowInfo("请选择要修改轮询频率的变量");
+            _notificationService.ShowInfo("请选择要修改轮询频率的变量");
             return;
         }
 
@@ -488,11 +490,11 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             if (result > 0)
             {
                 // 显示成功通知
-                NotificationHelper.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询频率");
+                _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询频率");
             }
             else
             {
-                NotificationHelper.ShowError("更新轮询频率失败");
+                _notificationService.ShowError("更新轮询频率失败");
             }
         }
     }
@@ -646,7 +648,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         // 检查是否有变量被选中
         if (SelectedVariables.Count == 0)
         {
-            NotificationHelper.ShowInfo("请选择要修改启用状态的变量");
+            _notificationService.ShowInfo("请选择要修改启用状态的变量");
             return;
         }
 
@@ -672,11 +674,11 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             if (result > 0)
             {
                 // 显示成功通知
-                NotificationHelper.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的启用状态");
+                _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的启用状态");
             }
             else
             {
-                NotificationHelper.ShowError("更新启用状态失败");
+                _notificationService.ShowError("更新启用状态失败");
             }
         }
     }

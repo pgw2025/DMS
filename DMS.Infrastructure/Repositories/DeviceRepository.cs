@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using AutoMapper;
-using DMS.Core.Helper;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.Infrastructure.Repositories;
 
@@ -21,8 +21,9 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
     /// </summary>
     /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
-    public DeviceRepository(IMapper mapper, SqlSugarDbContext dbContext)
-        : base(dbContext)
+    /// <param name="logger">日志记录器实例。</param>
+    public DeviceRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<DeviceRepository> logger)
+        : base(dbContext, logger)
     {
         _mapper = mapper;
     }
@@ -86,7 +87,7 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
         var result = await Db.Deleteable(new DbDevice() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbDevice)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbDevice)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 

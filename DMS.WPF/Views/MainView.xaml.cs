@@ -1,5 +1,4 @@
 using System.Windows;
-using DMS.Core.Helper;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -23,8 +22,7 @@ public partial class MainView : Window
         InitializeComponent();
         _viewModel = App.Current.Services.GetRequiredService<MainViewModel>();
         DataContext = _viewModel;
-        NlogHelper.Info("主界面加载成功");
-
+        
         // Set the NotifyIcon's DataContext to the ViewModel
         MyNotifyIcon.DataContext = _viewModel;
     }

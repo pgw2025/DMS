@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using AutoMapper;
-using DMS.Core.Helper;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.Infrastructure.Repositories;
 
@@ -21,8 +21,9 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     /// </summary>
     /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
-    public VariableRepository(IMapper mapper, SqlSugarDbContext dbContext)
-        : base(dbContext)
+    /// <param name="logger">日志记录器实例。</param>
+    public VariableRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<VariableRepository> logger)
+        : base(dbContext, logger)
     {
         _mapper = mapper;
     }
@@ -98,13 +99,13 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
             }
 
             await Db.CommitTranAsync();
-            //NlogHelper.Info($"成功为 {variableMqttList.Count()} 个变量请求添加/更新了MQTT服务器关联，实际影响 {affectedCount} 个。");
+            //_logger.LogInformation($"成功为 {variableMqttList.Count()} 个变量请求添加/更新了MQTT服务器关联，实际影响 {affectedCount} 个。");
             return affectedCount;
         }
         catch (Exception ex)
         {
             await Db.RollbackTranAsync();
-            //NlogHelper.Error($"为变量添加MQTT服务器关联时发生错误: {ex.Message}", ex);
+            //_logger.LogError(ex, $"为变量添加MQTT服务器关联时发生错误: {ex.Message}");
             // 根据需要，可以向上层抛出异常
             throw;
         }
@@ -169,7 +170,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
         var result = await Db.Deleteable(new DbVariable() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbVariable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbVariable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     
@@ -186,7 +187,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
                              .In(ids)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbVariable)},Count={ids.Count},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbVariable)},Count={ids.Count},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     

@@ -1,20 +1,13 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Enums;
-using DMS.WPF.Services;
-using DMS.WPF.Views;
-using DMS.Core.Helper;
 using DMS.Core.Models;
-using DMS.Helper;
-using DMS.Services;
-using DMS.ViewModels;
 using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
+using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using Microsoft.Extensions.DependencyInjection;
+using DMS.WPF.Views;
 using Microsoft.Extensions.Logging;
 
 // AddAsync this using directive

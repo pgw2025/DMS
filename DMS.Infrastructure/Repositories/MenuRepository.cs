@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using AutoMapper;
 using DMS.Core.Enums;
-using DMS.Core.Helper;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.Infrastructure.Repositories;
 
@@ -22,8 +22,9 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
     /// </summary>
     /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
-    public MenuRepository(IMapper mapper, SqlSugarDbContext dbContext)
-        : base(dbContext)
+    /// <param name="logger">日志记录器实例。</param>
+    public MenuRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<MenuRepository> logger)
+        : base(dbContext, logger)
     {
         _mapper = mapper;
     }
@@ -39,7 +40,7 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
         var dbMenuTree = await Db.Queryable<DbMenu>()
                                  .ToTreeAsync(dm => dm.Childrens, dm => dm.ParentId, 0);
         stopwatch.Stop();
-        NlogHelper.Info($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
         return _mapper.Map<List<MenuBean>>(dbMenuTree);
     }
 
@@ -101,7 +102,7 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
         var result = await Db.Deleteable(new DbMenu { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
 
@@ -123,7 +124,7 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
                             .Where(m => m.Id == id)
                             .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return delConut;
     }
 
@@ -147,7 +148,7 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
             .Where(m => m.Id == menu.Id)
             .ExecuteCommandAsync();
         stopwatch.Stop();
-        NlogHelper.Info($"Delete {typeof(DbMenu)},TargetId={targetId},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbMenu)},TargetId={targetId},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return delConut;
     }
 

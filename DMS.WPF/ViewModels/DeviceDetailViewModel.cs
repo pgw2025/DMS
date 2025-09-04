@@ -5,7 +5,6 @@ using Dm;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
-using DMS.Helper;
 using DMS.WPF.Services;
 using DMS.Services;
 using DMS.WPF.Interfaces;
@@ -28,12 +27,15 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     [ObservableProperty]
     private VariableTableItemViewModel _selectedVariableTable;
 
+    private readonly NotificationService _notificationService;
+
     public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, INavigationService navigationService,
-                                 DataServices dataServices)
+                                 DataServices dataServices, NotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
         _navigationService = navigationService;
+        _notificationService = notificationService;
         DataServices = dataServices;
     }
 
@@ -65,17 +67,17 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
              if (await DataServices.AddVariableTable(_mapper.Map<VariableTableDto>(variableTableItemViewModel),
                                                      tableMenu, true))
              {
-                 NotificationHelper.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
+                 _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
              }
              else
              {
-                 NotificationHelper.ShowError($"添加变量表失败：{variableTableItemViewModel.Name}！！");
+                 _notificationService.ShowError($"添加变量表失败：{variableTableItemViewModel.Name}！！");
              }
 
         }
         catch (Exception ex)
         {
-            NotificationHelper.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
+            _notificationService.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
         }
     }
 
@@ -86,7 +88,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
         {
             if (SelectedVariableTable == null)
             {
-                NotificationHelper.ShowError("你没有选择任何变量表，请选择变量表后再点击编辑变量表");
+                _notificationService.ShowError("你没有选择任何变量表，请选择变量表后再点击编辑变量表");
                 return;
             }
 
@@ -104,16 +106,16 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
 
             if (await DataServices.UpdateVariableTable(variableTable))
             {
-                NotificationHelper.ShowSuccess($"编辑变量表成功：{variableTable.Name}");
+                _notificationService.ShowSuccess($"编辑变量表成功：{variableTable.Name}");
             }
             else
             {
-                NotificationHelper.ShowError($"编辑变量表失败：{variableTable.Name}");
+                _notificationService.ShowError($"编辑变量表失败：{variableTable.Name}");
             }
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowError($"编辑变量表的过程中发生错误：{e.Message}", e);
+            _notificationService.ShowError($"编辑变量表的过程中发生错误：{e.Message}", e);
         }
     }
 
@@ -124,7 +126,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
         { 
             if (SelectedVariableTable == null)
             {
-                NotificationHelper.ShowError("你没有选择任何变量表，请选择变量表后再点击删除变量表");
+                _notificationService.ShowError("你没有选择任何变量表，请选择变量表后再点击删除变量表");
                 return;
             }
 
@@ -135,17 +137,17 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                 var tableName = SelectedVariableTable.Name;
                 if (await DataServices.DeleteVariableTable(SelectedVariableTable,true))
                 {
-                    NotificationHelper.ShowSuccess($"变量表：{tableName},删除成功。");
+                    _notificationService.ShowSuccess($"变量表：{tableName},删除成功。");
                 }
                 else
                 {
-                    NotificationHelper.ShowError($"变量表：{tableName},删除失败!!!");
+                    _notificationService.ShowError($"变量表：{tableName},删除失败!!!");
                 }
             }
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowError($"删除变量表的过程中发生错误：{e.Message}", e);
+            _notificationService.ShowError($"删除变量表的过程中发生错误：{e.Message}", e);
         }
     }
 

@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Interfaces.Services;
 using DMS.Core.Models;
-using DMS.Helper;
+using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels.Dialogs;
@@ -15,6 +15,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
 {
     private readonly IMapper _mapper;
     private readonly IExcelService _excelService;
+    private readonly NotificationService _notificationService;
 
     [ObservableProperty]
     private string? _filePath;
@@ -28,10 +29,11 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
     [ObservableProperty]
     private IList _selectedVariables = new ArrayList();
 
-    public ImportExcelDialogViewModel(IMapper mapper,IExcelService excelService)
+    public ImportExcelDialogViewModel(IMapper mapper,IExcelService excelService, NotificationService notificationService)
     {
         _mapper = mapper;
         _excelService = excelService;
+        _notificationService = notificationService;
         VariableItemViewModels = new();
     }
 
@@ -49,7 +51,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
         }
         catch (System.Exception ex)
         {
-            NotificationHelper.ShowError($"从Excel文件中读取变量时发生了错误:{ex.Message}",ex);
+            _notificationService.ShowError($"从Excel文件中读取变量时发生了错误:{ex.Message}",ex);
         }
     }
     

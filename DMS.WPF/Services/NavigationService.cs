@@ -1,6 +1,5 @@
 // 文件: DMS.WPF/Services/NavigationService.cs
 
-using DMS.Helper;
 using DMS.ViewModels;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Items;
@@ -11,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using DMS.WPF.Interfaces;
+using DMS.WPF.Services;
 
 namespace DMS.WPF.Services;
 
@@ -43,8 +43,8 @@ public class NavigationService : INavigationService
         var viewModel = GetViewModelByKey(menu.TargetViewKey);
         if (viewModel == null)
         {
-
-            NotificationHelper.ShowError($"切换界面失败，没有找到界面：{menu.TargetViewKey}");
+            var notificationService = App.Current.Services.GetRequiredService<NotificationService>();
+            notificationService.ShowError($"切换界面失败，没有找到界面：{menu.TargetViewKey}");
             return;
         }
 

@@ -5,14 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
-using DMS.Core.Helper;
-using DMS.Core.Models;
-using DMS.Helper;
-using DMS.Services;
-using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
@@ -45,6 +38,8 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     [ObservableProperty]
     private DeviceItemViewModel _selectedDevice;
 
+    private readonly NotificationService _notificationService;
+
     /// <summary>
     /// 初始化 <see cref="DevicesViewModel"/> 类的新实例。
     /// </summary>
@@ -53,13 +48,15 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// <param name="dataServices">数据服务。</param>
     public DevicesViewModel(IMapper mapper,
                             IDialogService dialogService, INavigationService navigationService,
-                            DataServices dataServices, IDeviceAppService deviceAppService)
+                            DataServices dataServices, IDeviceAppService deviceAppService,
+                            NotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
         _navigationService = navigationService;
         DataServices = dataServices;
         _deviceAppService = deviceAppService;
+        _notificationService = notificationService;
         Devices = new ObservableCollection<DeviceItemViewModel>();
         DataServices.OnDeviceListChanged += (devices) => { };
     }
@@ -116,12 +113,12 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             // 添加设备
             var addDto = await DataServices.AddDevice(dto);
 
-            NotificationHelper.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
+            _notificationService.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            NotificationHelper.ShowError($"添加设备的过程中发生错误：{e.Message}", e);
+            _notificationService.ShowError($"添加设备的过程中发生错误：{e.Message}", e);
         }
     }
 
@@ -135,7 +132,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         {
             if (SelectedDevice == null)
             {
-                NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击删除设备");
+                _notificationService.ShowError("你没有选择任何设备，请选择设备后再点击删除设备");
                 return;
             }
 
@@ -145,13 +142,13 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 var deviceName = SelectedDevice.Name;
                 if (await DataServices.DeleteDevice(SelectedDevice))
                 {
-                    NotificationHelper.ShowSuccess($"删除设备成功,设备名：{deviceName}");
+                    _notificationService.ShowSuccess($"删除设备成功,设备名：{deviceName}");
                 }
             }
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowError($"删除设备的过程中发生错误：{e.Message}", e);
+            _notificationService.ShowError($"删除设备的过程中发生错误：{e.Message}", e);
         }
     }
 
@@ -165,7 +162,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         {
             if (SelectedDevice == null)
             {
-                NotificationHelper.ShowError("你没有选择任何设备，请选择设备后再点击编辑设备");
+                _notificationService.ShowError("你没有选择任何设备，请选择设备后再点击编辑设备");
                 return;
             }
 
@@ -183,12 +180,12 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
             if (await DataServices.UpdateDevice(device))
             {
-                NotificationHelper.ShowSuccess($"编辑设备成功：{device.Name}");
+                _notificationService.ShowSuccess($"编辑设备成功：{device.Name}");
             }
         }
         catch (Exception e)
         {
-            NotificationHelper.ShowError($"编辑设备的过程中发生错误：{e.Message}", e);
+            _notificationService.ShowError($"编辑设备的过程中发生错误：{e.Message}", e);
         }
     }
 

@@ -6,7 +6,6 @@ using DMS.Application.Services.Processors;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Interfaces.Services;
-using DMS.Helper;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Interfaces.Services;
@@ -76,7 +75,8 @@ public partial class App : System.Windows.Application
         }
         catch (Exception exception)
         {
-            NotificationHelper.ShowError("加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}", exception);
+            var notificationService = Host.Services.GetRequiredService<NotificationService>();
+            notificationService.ShowError($"加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}", exception);
         }
         
         var splashWindow = Host.Services.GetRequiredService<SplashWindow>();
@@ -106,10 +106,10 @@ public partial class App : System.Windows.Application
     private void ConfigureServices(IServiceCollection services)
     {
         // 注册NLogLogger作为Microsoft.Extensions.Logging.ILogger的实现
-        services.AddSingleton<ILogger, NLogLogger>();
         services.AddSingleton<ILoggerFactory, NLogLoggerFactory>();
         //
         services.AddSingleton<GrowlNotificationService>();
+        services.AddSingleton<NotificationService>();
         // services.AddHostedService<S7BackgroundService>();
         // services.AddHostedService<OpcUaBackgroundService>();
         // services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();
@@ -148,6 +148,14 @@ public partial class App : System.Windows.Application
         });
         
         services.AddSingleton<IInitializeRepository, InitializeRepository>();
+        services.AddSingleton<IDeviceRepository, DeviceRepository>();
+        services.AddSingleton<IVariableTableRepository, VariableTableRepository>();
+        services.AddSingleton<IVariableRepository, VariableRepository>();
+        services.AddSingleton<IMqttServerRepository, MqttServerRepository>();
+        services.AddSingleton<IVariableMqttAliasRepository, VariableMqttAliasRepository>();
+        services.AddSingleton<IMenuRepository, MenuRepository>();
+        services.AddSingleton<IVariableHistoryRepository, VariableHistoryRepository>();
+        services.AddSingleton<IUserRepository, UserRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IExcelService, ExcelService>();
 

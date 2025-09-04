@@ -2,7 +2,6 @@ using System.Threading.Channels;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
-using DMS.Core.Helper;
 using DMS.Core.Interfaces;
 using DMS.Core.Models;
 using Microsoft.Extensions.Hosting;
@@ -21,16 +20,20 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
 
     // 存储数据处理器的链表
     private readonly List<IVariableProcessor> _processors;
+    
+    // 日志记录器
+    private readonly ILogger<DataProcessingService> _logger;
 
     /// <summary>
     /// 构造函数，注入日志记录器。
     /// </summary>
     /// <param name="logger">日志记录器实例。</param>
-    public DataProcessingService()
+    public DataProcessingService(ILogger<DataProcessingService> logger)
     {
         // 创建一个无边界的 Channel，允许生产者快速写入而不会被阻塞。
         _queue = Channel.CreateUnbounded<VariableContext>();
         _processors = new List<IVariableProcessor>();
+        _logger = logger;
     }
 
     /// <summary>
@@ -66,7 +69,7 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     /// <param name="stoppingToken">用于通知服务停止的取消令牌。</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        NlogHelper.Info("数据处理服务已启动。");
+        _logger.LogInformation("数据处理服务已启动。");
 
         // 当服务未被请求停止时，持续循环
         while (!stoppingToken.IsCancellationRequested)
@@ -81,7 +84,7 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
                 {
                     if (context.IsHandled)
                     {
-                        // NlogHelper.Info($"{context.Data.Name}的数据处理已短路，跳过后续处理器。");
+                        // _logger.LogInformation($"{context.Data.Name}的数据处理已短路，跳过后续处理器。");
                         break; // 短路，跳过后续处理器
                     }
 
@@ -94,10 +97,10 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
             }
             catch (Exception ex)
             {
-                NlogHelper.Error($"处理变量数据时发生错误:{ex.Message}", ex);
+                _logger.LogError(ex, $"处理变量数据时发生错误:{ex.Message}");
             }
         }
 
-        NlogHelper.Info("数据处理服务已停止。");
+        _logger.LogInformation("数据处理服务已停止。");
     }
 }    

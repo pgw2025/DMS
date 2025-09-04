@@ -1,6 +1,6 @@
-using DMS.Helper;
 using DMS.Services;
 using DMS.WPF.Helper;
+using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.Views.Dialogs;
 
@@ -18,6 +19,8 @@ public partial class ImportOpcUaDialog : ContentDialog
 {
     private const int ContentAreaMaxWidth = 1300;
     private const int ContentAreaMaxHeight = 900;
+
+
 
 
 
@@ -49,7 +52,8 @@ public partial class ImportOpcUaDialog : ContentDialog
         }
         catch (Exception ex)
         {
-            NotificationHelper.ShowError($"选择节点时发生了错误：{ex.Message}");
+            var notificationService = App.Current.Services.GetRequiredService<NotificationService>();
+            notificationService.ShowError($"选择节点时发生了错误：{ex.Message}");
         }
 
 

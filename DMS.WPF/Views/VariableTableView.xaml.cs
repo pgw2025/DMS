@@ -2,8 +2,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using DMS.Helper;
 using DMS.WPF.ViewModels;
+using DMS.WPF.Services;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,7 +39,8 @@ public partial class VariableTableView : UserControl
         }
         catch (Exception exception)
         {
-            NotificationHelper.ShowError($"修改变量表启用，停用时发生了错误：{exception.Message}", exception);
+            var notificationService = App.Current.Services.GetRequiredService<NotificationService>();
+            notificationService.ShowError($"修改变量表启用，停用时发生了错误：{exception.Message}", exception);
         }
     }
 
@@ -47,6 +48,5 @@ public partial class VariableTableView : UserControl
     {
         IsLoadCompletion = true;
     }
-
     
 }

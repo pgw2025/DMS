@@ -1,16 +1,15 @@
+using System.Collections;
+using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Enums;
-using DMS.Core.Helper;
-using DMS.Helper;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
+using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
 using Opc.Ua;
 using Opc.Ua.Client;
-using System.Collections;
-using System.Collections.ObjectModel;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
@@ -89,6 +88,11 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// 取消令牌源，用于取消长时间运行的操作
     /// </summary>
     private readonly CancellationTokenSource _cancellationTokenSource;
+    
+    /// <summary>
+    /// 通知服务实例
+    /// </summary>
+    private readonly NotificationService _notificationService;
 
     /// <summary>
     /// 构造函数
@@ -96,10 +100,12 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// </summary>
     /// <param name="opcUaService">OPC UA服务接口实例</param>
     /// <param name="mapper">对象映射器实例</param>
-    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService, IMapper mapper)
+    /// <param name="notificationService">通知服务实例</param>
+    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService, IMapper mapper, NotificationService notificationService)
     {
         _opcUaService = opcUaService;
         _mapper = mapper;
+        _notificationService = notificationService;
         // 初始化根节点
         RootOpcUaNode = new OpcUaNodeItemViewModel() { DisplayName = "根节点", NodeId = Objects.ObjectsFolder, IsExpanded = true };
         // 初始化取消令牌源
@@ -143,15 +149,15 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         // 处理特定异常类型提供更友好的用户提示
         catch (UnauthorizedAccessException ex)
         {
-            NotificationHelper.ShowError($"连接被拒绝，请检查用户名和密码: {ex.Message}");
+            _notificationService.ShowError($"连接被拒绝，请检查用户名和密码: {ex.Message}");
         }
         catch (TimeoutException ex)
         {
-            NotificationHelper.ShowError($"连接超时，请检查服务器地址和网络连接: {ex.Message}");
+            _notificationService.ShowError($"连接超时，请检查服务器地址和网络连接: {ex.Message}");
         }
         catch (Exception ex)
         {
-            NotificationHelper.ShowError($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
+            _notificationService.ShowError($"连接 OPC UA 服务器失败: {EndpointUrl} - {ex.Message}", ex);
         }
         finally
         {
@@ -181,7 +187,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         }
         catch (Exception ex)
         {
-            NotificationHelper.ShowError($"断开连接时发生错误: {ex.Message}", ex);
+            _notificationService.ShowError($"断开连接时发生错误: {ex.Message}", ex);
         }
     }
 
@@ -201,7 +207,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         }
         catch (Exception ex)
         {
-            NotificationHelper.ShowError($"断开连接时发生错误: {ex.Message}", ex);
+            _notificationService.ShowError($"断开连接时发生错误: {ex.Message}", ex);
         }
     }
 
@@ -219,7 +225,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         }
         catch (Exception ex)
         {
-            NotificationHelper.ShowError($"断开连接时发生错误: {ex.Message}", ex);
+            _notificationService.ShowError($"断开连接时发生错误: {ex.Message}", ex);
         }
     }
 
@@ -235,7 +241,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
             // 检查是否有选中的节点
             if (SelectedNode == null)
             {
-                NotificationHelper.ShowError("请先选择左边的节点，然后再查找变量。");
+                _notificationService.ShowError("请先选择左边的节点，然后再查找变量。");
                 return;
             }
 
@@ -252,12 +258,12 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         catch (OperationCanceledException)
         {
             // 处理用户取消操作的情况
-            NotificationHelper.ShowInfo("操作已被取消");
+            _notificationService.ShowInfo("操作已被取消");
         }
         catch (Exception ex)
         {
             // 处理其他异常情况
-            NotificationHelper.ShowError($"加载 OPC UA 节点变量失败: {SelectedNode?.NodeId} - {ex.Message}", ex);
+            _notificationService.ShowError($"加载 OPC UA 节点变量失败: {SelectedNode?.NodeId} - {ex.Message}", ex);
         }
     }
 
@@ -285,12 +291,12 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         catch (OperationCanceledException)
         {
             // 处理用户取消操作的情况
-            NotificationHelper.ShowInfo("操作已被取消");
+            _notificationService.ShowInfo("操作已被取消");
         }
         catch (Exception ex)
         {
             // 处理其他异常情况
-            NotificationHelper.ShowError($"加载 OPC UA 节点变量失败: {node?.NodeId} - {ex.Message}", ex);
+            _notificationService.ShowError($"加载 OPC UA 节点变量失败: {node?.NodeId} - {ex.Message}", ex);
         }
     }
 
@@ -355,13 +361,13 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         catch (OperationCanceledException)
         {
             // 处理取消操作
-            NlogHelper.Info("节点浏览操作已被取消");
+            _notificationService.ShowInfo("节点浏览操作已被取消");
             throw; // 重新抛出异常以保持调用链
         }
         catch (Exception ex)
         {
             // 记录浏览节点失败的日志
-            NlogHelper.Error($"浏览节点失败: {node.NodeId} - {ex.Message}", ex);
+            _notificationService.ShowError($"浏览节点失败: {node.NodeId} - {ex.Message}", ex);
             throw; // 重新抛出异常以保持调用链
         }
     }
