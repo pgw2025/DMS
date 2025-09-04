@@ -20,7 +20,7 @@ namespace DMS.ViewModels
         private readonly ILogger<MqttServerDetailViewModel> _logger;
         private readonly DataServices _dataServices;
         private readonly IDialogService _dialogService;
-        private readonly NotificationService _notificationService;
+        private readonly INotificationService _notificationService;
 
         /// <summary>
         /// 当前正在编辑的MQTT服务器对象。
@@ -43,7 +43,7 @@ namespace DMS.ViewModels
         /// <param name="dialogService">对话框服务。</param>
         /// <param name="notificationService">通知服务。</param>
         public MqttServerDetailViewModel(ILogger<MqttServerDetailViewModel> logger, DataServices dataServices,
-                                         IDialogService dialogService, NotificationService notificationService)
+                                         IDialogService dialogService, INotificationService notificationService)
         {
             _logger = logger;
             _dataServices = dataServices;

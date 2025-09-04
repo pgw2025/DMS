@@ -75,7 +75,7 @@ public partial class App : System.Windows.Application
         }
         catch (Exception exception)
         {
-            var notificationService = Host.Services.GetRequiredService<NotificationService>();
+            var notificationService = Host.Services.GetRequiredService<INotificationService>();
             notificationService.ShowError($"加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}", exception);
         }
         
@@ -109,7 +109,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ILoggerFactory, NLogLoggerFactory>();
         //
         services.AddSingleton<GrowlNotificationService>();
-        services.AddSingleton<NotificationService>();
+        services.AddSingleton<INotificationService, NotificationService>();
         // services.AddHostedService<S7BackgroundService>();
         // services.AddHostedService<OpcUaBackgroundService>();
         // services.AddHostedService<DMS.Infrastructure.Services.MqttBackgroundService>();

@@ -5,6 +5,7 @@ using System.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Core.Enums;
 using DMS.Message;
+using DMS.WPF.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace DMS.WPF.Services;
@@ -13,7 +14,7 @@ namespace DMS.WPF.Services;
 /// 通知服务类，用于显示各种类型的通知消息，并集成日志记录功能。
 /// 新增了通知节流功能，以防止在短时间内向用户发送大量重复的通知。
 /// </summary>
-public class NotificationService
+public class NotificationService : INotificationService
 {
     private readonly ILogger<NotificationService> _logger;
     

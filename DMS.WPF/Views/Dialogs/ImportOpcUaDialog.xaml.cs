@@ -1,5 +1,6 @@
 using DMS.Services;
 using DMS.WPF.Helper;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
@@ -52,7 +53,7 @@ public partial class ImportOpcUaDialog : ContentDialog
         }
         catch (Exception ex)
         {
-            var notificationService = App.Current.Services.GetRequiredService<NotificationService>();
+            var notificationService = App.Current.Services.GetRequiredService<INotificationService>();
             notificationService.ShowError($"选择节点时发生了错误：{ex.Message}");
         }
 

@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using DMS.WPF.ViewModels;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +40,7 @@ public partial class VariableTableView : UserControl
         }
         catch (Exception exception)
         {
-            var notificationService = App.Current.Services.GetRequiredService<NotificationService>();
+            var notificationService = App.Current.Services.GetRequiredService<INotificationService>();
             notificationService.ShowError($"修改变量表启用，停用时发生了错误：{exception.Message}", exception);
         }
     }

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Interfaces.Services;
 using DMS.Core.Models;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
 
@@ -15,7 +16,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
 {
     private readonly IMapper _mapper;
     private readonly IExcelService _excelService;
-    private readonly NotificationService _notificationService;
+    private readonly INotificationService _notificationService;
 
     [ObservableProperty]
     private string? _filePath;
@@ -29,7 +30,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
     [ObservableProperty]
     private IList _selectedVariables = new ArrayList();
 
-    public ImportExcelDialogViewModel(IMapper mapper,IExcelService excelService, NotificationService notificationService)
+    public ImportExcelDialogViewModel(IMapper mapper,IExcelService excelService, INotificationService notificationService)
     {
         _mapper = mapper;
         _excelService = excelService;

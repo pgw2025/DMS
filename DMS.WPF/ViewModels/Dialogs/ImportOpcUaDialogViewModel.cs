@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Enums;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
 using Opc.Ua;
@@ -92,7 +93,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// <summary>
     /// 通知服务实例
     /// </summary>
-    private readonly NotificationService _notificationService;
+    private readonly INotificationService _notificationService;
 
     /// <summary>
     /// 构造函数
@@ -101,7 +102,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// <param name="opcUaService">OPC UA服务接口实例</param>
     /// <param name="mapper">对象映射器实例</param>
     /// <param name="notificationService">通知服务实例</param>
-    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService, IMapper mapper, NotificationService notificationService)
+    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService, IMapper mapper, INotificationService notificationService)
     {
         _opcUaService = opcUaService;
         _mapper = mapper;

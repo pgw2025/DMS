@@ -5,6 +5,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Models;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
@@ -13,7 +14,6 @@ using ObservableCollections;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using DMS.WPF.Interfaces;
 
 namespace DMS.WPF.ViewModels;
 
@@ -86,10 +86,10 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     private readonly ISynchronizedView<VariableItemViewModel, VariableItemViewModel> _synchronizedView;
     public NotifyCollectionChangedSynchronizedViewList<VariableItemViewModel> VariableItemListView { get; }
 
-    private readonly NotificationService _notificationService;
+    private readonly INotificationService _notificationService;
 
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
-                                  DataServices dataServices, NotificationService notificationService)
+                                  DataServices dataServices, INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
@@ -197,6 +197,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             // 更新数据库中的变量数据
             var updateResult = await _variableAppService.UpdateVariableAsync(_mapper.Map<VariableDto>(editedVariable));
+
 
             if (updateResult > 0)
             {

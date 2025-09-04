@@ -38,7 +38,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     [ObservableProperty]
     private DeviceItemViewModel _selectedDevice;
 
-    private readonly NotificationService _notificationService;
+    private readonly INotificationService _notificationService;
 
     /// <summary>
     /// 初始化 <see cref="DevicesViewModel"/> 类的新实例。
@@ -49,7 +49,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     public DevicesViewModel(IMapper mapper,
                             IDialogService dialogService, INavigationService navigationService,
                             DataServices dataServices, IDeviceAppService deviceAppService,
-                            NotificationService notificationService)
+                            INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;

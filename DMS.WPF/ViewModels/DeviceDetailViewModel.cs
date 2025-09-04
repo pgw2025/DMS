@@ -27,10 +27,10 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     [ObservableProperty]
     private VariableTableItemViewModel _selectedVariableTable;
 
-    private readonly NotificationService _notificationService;
+    private readonly INotificationService _notificationService;
 
     public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, INavigationService navigationService,
-                                 DataServices dataServices, NotificationService notificationService)
+                                 DataServices dataServices, INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
