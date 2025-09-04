@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Models;
@@ -13,7 +15,7 @@ namespace DMS.WPF.Services;
 /// 数据服务类，负责从数据库加载和管理各种数据，并提供数据变更通知。
 /// 继承自ObservableRecipient，可以接收消息；实现IRecipient<LoadMessage>，处理加载消息。
 /// </summary>
-public partial class DataServices : ObservableObject
+public partial class DataServices : ObservableObject, IDisposable
 {
     private readonly IMapper _mapper;
     private readonly IDataCenterService _dataCenterService;
@@ -53,8 +55,24 @@ public partial class DataServices : ObservableObject
     // MQTT列表变更事件，当MQTT配置数据更新时触发。
     // public event Action<List<Mqtt>> OnMqttListChanged;
 
-    // 设备IsActive状态变更事件，当单个设备的IsActive状态改变时触发。
-    public event Action<Device, bool> OnDeviceIsActiveChanged;
+    /// <summary>
+    /// 处理变量值变更事件
+    /// </summary>
+    private void OnVariableValueChanged(object sender, VariableValueChangedEventArgs e)
+    {
+        // 在UI线程上更新变量值
+        App.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            // 查找并更新对应的变量
+            var variableToUpdate = Variables.FirstOrDefault(v => v.Id == e.VariableId);
+            if (variableToUpdate != null)
+            {
+                variableToUpdate.DataValue = e.NewValue;
+                variableToUpdate.DisplayValue = e.NewValue;
+                variableToUpdate.UpdatedAt = e.UpdateTime;
+            }
+        }));
+    }
 
 
     /// <summary>
@@ -73,6 +91,9 @@ public partial class DataServices : ObservableObject
         Menus = new ObservableCollection<MenuItemViewModel>();
         MenuTrees = new ObservableCollection<MenuItemViewModel>();
         // AllVariables = new ConcurrentDictionary<int, Variable>();
+        
+        // 监听变量值变更事件
+        _dataCenterService.VariableValueChanged += OnVariableValueChanged;
     }
 
 
@@ -357,5 +378,17 @@ public partial class DataServices : ObservableObject
         variableTable.Variables.Remove(variableItem);
 
         Variables.Remove(variableItem);
+    }
+
+    /// <summary>
+    /// 释放资源
+    /// </summary>
+    public void Dispose()
+    {
+        // 取消事件订阅
+        if (_dataCenterService != null)
+        {
+            _dataCenterService.VariableValueChanged -= OnVariableValueChanged;
+        }
     }
 }

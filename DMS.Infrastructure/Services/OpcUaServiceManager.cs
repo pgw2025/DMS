@@ -3,6 +3,7 @@ using System.Diagnostics;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.Infrastructure.Configuration;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
@@ -18,6 +19,7 @@ namespace DMS.Infrastructure.Services
     {
         private readonly ILogger<OpcUaServiceManager> _logger;
         private readonly IDataProcessingService _dataProcessingService;
+        private readonly IDataCenterService _dataCenterService;
         private readonly OpcUaServiceOptions _options;
         private readonly ConcurrentDictionary<int, DeviceContext> _deviceContexts;
         private readonly SemaphoreSlim _semaphore;
@@ -26,10 +28,12 @@ namespace DMS.Infrastructure.Services
         public OpcUaServiceManager(
             ILogger<OpcUaServiceManager> logger,
             IDataProcessingService dataProcessingService,
+            IDataCenterService dataCenterService,
             IOptions<OpcUaServiceOptions> options)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
+            _dataCenterService = dataCenterService ?? throw new ArgumentNullException(nameof(dataCenterService));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _deviceContexts = new ConcurrentDictionary<int, DeviceContext>();
             _semaphore = new SemaphoreSlim(_options.MaxConcurrentConnections, _options.MaxConcurrentConnections);
@@ -287,10 +291,24 @@ namespace DMS.Infrastructure.Services
                 {
                     if (context.Variables.TryGetValue(opcUaNode.NodeId.ToString(), out var variable))
                     {
+                        // 保存旧值
+                        var oldValue = variable.DataValue;
+                        var newValue = opcUaNode.Value.ToString();
+                        
                         // 更新变量值
-                        variable.DataValue = opcUaNode.Value.ToString();
-                        variable.DisplayValue = opcUaNode.Value.ToString();
+                        variable.DataValue = newValue;
+                        variable.DisplayValue = newValue;
                         variable.UpdatedAt = DateTime.Now;
+
+                        // 触发变量值变更事件
+                        var eventArgs = new VariableValueChangedEventArgs(
+                            variable.Id,
+                            variable.Name,
+                            oldValue,
+                            newValue,
+                            variable.UpdatedAt);
+                        
+                        _dataCenterService.OnVariableValueChanged( eventArgs);
 
                         // 推送到数据处理队列
                         await _dataProcessingService.EnqueueAsync(variable);

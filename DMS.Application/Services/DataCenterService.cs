@@ -1,6 +1,7 @@
 using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
+using DMS.Core.Models;
 using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
 using DMS.Core.Models;
@@ -82,6 +83,11 @@ public class DataCenterService : IDataCenterService
     /// 当数据发生任何变化时触发
     /// </summary>
     public event EventHandler<DataChangedEventArgs> DataChanged;
+
+    /// <summary>
+    /// 当变量值发生变化时触发
+    /// </summary>
+    public event EventHandler<VariableValueChangedEventArgs> VariableValueChanged;
 
     #endregion
 
@@ -820,6 +826,18 @@ public class DataCenterService : IDataCenterService
         {
             throw new ApplicationException($"加载所有变量数据时发生错误,错误信息:{ex.Message}", ex);
         }
+    }
+
+    #endregion
+
+    #region 事件触发方法
+
+    /// <summary>
+    /// 触发变量值变更事件
+    /// </summary>
+    public virtual void OnVariableValueChanged(VariableValueChangedEventArgs e)
+    {
+        VariableValueChanged?.Invoke(this, e);
     }
 
     #endregion

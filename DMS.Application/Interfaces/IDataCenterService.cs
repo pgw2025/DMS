@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
+using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces;
 
@@ -304,6 +305,14 @@ public interface IDataCenterService
     /// 当数据发生任何变化时触发
     /// </summary>
     event EventHandler<DataChangedEventArgs> DataChanged;
+
+    /// <summary>
+    /// 当变量值发生变化时触发
+    /// </summary>
+    event EventHandler<VariableValueChangedEventArgs> VariableValueChanged;
+
+    void OnVariableValueChanged(VariableValueChangedEventArgs e);
+
 
     #endregion
 }
