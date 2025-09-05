@@ -223,7 +223,7 @@ namespace DMS.Infrastructure.Services
                 // 为每个PollLevel组设置单独的订阅
                 foreach (var group in variablesByPollLevel)
                 {
-                    PollLevelType pollLevel = group.Key;
+                    int pollLevel = group.Key;
                     var variables = group.Value;
 
                     _logger.LogInformation("为设备 {DeviceName} 设置PollLevel {PollLevel} 的订阅，变量数: {VariableCount}", 
@@ -253,23 +253,23 @@ namespace DMS.Infrastructure.Services
         /// <summary>
         /// 根据PollLevel获取发布间隔（毫秒）
         /// </summary>
-        private int GetPublishingIntervalFromPollLevel(PollLevelType pollLevel)
+        private int GetPublishingIntervalFromPollLevel(int pollLevel)
         {
-            // 根据PollLevelType枚举值映射到发布间隔
+            // 根据轮询级别值映射到发布间隔
             return pollLevel switch
             {
-                PollLevelType.HundredMilliseconds => 100,      // TenMilliseconds -> 100ms发布间隔
-                PollLevelType.FiveHundredMilliseconds => 500,     // HundredMilliseconds -> 500ms发布间隔
-                PollLevelType.OneSecond => 1000,    // FiveHundredMilliseconds -> 1000ms发布间隔
-                PollLevelType.FiveSeconds => 5000,   // OneSecond -> 2000ms发布间隔
-                PollLevelType.TenSeconds => 10000, // TenSeconds -> 10000ms发布间隔
-                PollLevelType.TwentySeconds => 20000, // TwentySeconds -> 20000ms发布间隔
-                PollLevelType.ThirtySeconds => 30000, // ThirtySeconds -> 30000ms发布间隔
-                PollLevelType.OneMinute => 60000, // OneMinute -> 60000ms发布间隔
-                PollLevelType.FiveMinutes => 300000, // ThreeMinutes -> 120000ms发布间隔
-                PollLevelType.TenMinutes => 600000, // FiveMinutes -> 180000ms发布间隔
-                PollLevelType.ThirtyMinutes => 1800000, // TenMinutes -> 300000ms发布间隔
-                PollLevelType.OneHour => 3600000, // ThirtyMinutes -> 600000ms发布间隔
+                100 => 100,      // HundredMilliseconds -> 100ms发布间隔
+                500 => 500,     // FiveHundredMilliseconds -> 500ms发布间隔
+                1000 => 1000,    // OneSecond -> 1000ms发布间隔
+                5000 => 5000,   // FiveSeconds -> 5000ms发布间隔
+                10000 => 10000, // TenSeconds -> 10000ms发布间隔
+                20000 => 20000, // TwentySeconds -> 20000ms发布间隔
+                30000 => 30000, // ThirtySeconds -> 30000ms发布间隔
+                60000 => 60000, // OneMinute -> 60000ms发布间隔
+                300000 => 300000, // FiveMinutes -> 300000ms发布间隔
+                600000 => 600000, // TenMinutes -> 600000ms发布间隔
+                1800000 => 1800000, // ThirtyMinutes -> 1800000ms发布间隔
+                3600000 => 3600000, // OneHour -> 3600000ms发布间隔
                 _ => _options.SubscriptionPublishingIntervalMs // 默认值
             };
         }

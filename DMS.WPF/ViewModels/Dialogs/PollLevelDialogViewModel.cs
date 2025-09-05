@@ -3,20 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Core.Enums;
 
 namespace DMS.WPF.ViewModels.Dialogs
 {
-    public partial class PollLevelDialogViewModel : DialogViewModelBase<PollLevelType?>
+    public partial class PollLevelDialogViewModel : DialogViewModelBase<int?>
     {
         [ObservableProperty]
-        private PollLevelType _selectedPollLevelType;
+        private int _selectedPollLevelType;
 
-        public List<PollLevelType> PollLevelTypes { get; }
+        public List<int> PollLevelTypes { get; }
 
-        public PollLevelDialogViewModel(PollLevelType currentPollLevelType)
+        public PollLevelDialogViewModel(int currentPollLevelType)
         {
-            PollLevelTypes = Enum.GetValues(typeof(PollLevelType)).Cast<PollLevelType>().ToList();
+            PollLevelTypes = new List<int> { 10, 100, 500, 1000, 5000, 10000, 20000, 30000, 60000, 180000, 300000, 600000, 1800000, 3600000 };
             SelectedPollLevelType = currentPollLevelType;
             Title = "修改轮询频率";
             PrimaryButText = "确定";

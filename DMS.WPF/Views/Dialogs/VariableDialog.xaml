@@ -24,7 +24,6 @@
         <valueConverts:EnumToStringConverter x:Key="EnumToStringConverter" />
         <ex:EnumBindingSource x:Key="ProtocolType" EnumType="{x:Type en:ProtocolType}" />
         <ex:EnumBindingSource x:Key="SignalType" EnumType="{x:Type enums:SignalType}" />
-        <ex:EnumBindingSource x:Key="PollLevelType" EnumType="{x:Type enums:PollLevelType}" />
         <ex:EnumBindingSource x:Key="CSharpDataType" EnumType="{x:Type enums:DataType}" />
     </ui:ContentDialog.Resources>
 
@@ -145,19 +144,15 @@
                         </ComboBox.ItemTemplate>
                     </hc:ComboBox>
 
-                    <hc:ComboBox
+                    <hc:TextBox
                         Grid.Row="2"
                         Grid.Column="0"
                         Margin="0,15,0,0"
                         hc:InfoElement.Title="轮询级别:"
-                        ItemsSource="{Binding Source={StaticResource PollLevelType}}"
-                        SelectedItem="{Binding Variable.PollLevel, UpdateSourceTrigger=PropertyChanged}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </hc:ComboBox>
+                        Text="{Binding  PollLevel}"
+                        >
+                       
+                    </hc:TextBox>
 
                     <hc:ComboBox
                         Grid.Row="2"

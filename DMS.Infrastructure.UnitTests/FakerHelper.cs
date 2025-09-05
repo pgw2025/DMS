@@ -147,7 +147,7 @@ namespace DMS.Infrastructure.UnitTests
                               .RuleFor(v => v.Name, f => f.Commerce.ProductName())
                               .RuleFor(v => v.S7Address, f => $"DB1.DBD{f.Random.Int(0, 1000)}")
                               .RuleFor(v => v.SignalType, f => f.PickRandom<SignalType>())
-                              .RuleFor(v => v.PollLevel, f => f.PickRandom<PollLevelType>())
+                              .RuleFor(v => v.PollLevel, f => f.Random.Int(10, 1800000))
                               .RuleFor(v => v.IsActive, f => f.Random.Bool())
                               .RuleFor(v => v.IsHistoryEnabled, f => f.Random.Bool())
                               .RuleFor(v => v.HistoryDeadband, f => f.Random.Double(0.0, 1.0))

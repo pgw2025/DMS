@@ -22,7 +22,6 @@
         <ex:BindingProxy x:Key="proxy" Data="{Binding}" />
         <ex:EnumBindingSource x:Key="signalType" EnumType="{x:Type enums:SignalType}" />
         <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
-        <ex:EnumBindingSource x:Key="pollLevelType" EnumType="{x:Type enums:PollLevelType}" />
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <!--  标签字体的样式  -->
@@ -269,23 +268,12 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="轮询频率" SortMemberPath="PollLevelType">
+                <DataGridTemplateColumn Header="轮询频率" SortMemberPath="PollLevel">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding PollLevel, Converter={StaticResource EnumDescriptionConverter}}" />
+                            <TextBlock Text="{Binding PollLevel}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox ItemsSource="{Binding Source={StaticResource pollLevelType}}" SelectedItem="{Binding PollLevel}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <DataGridTextColumn

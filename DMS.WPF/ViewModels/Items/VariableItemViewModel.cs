@@ -73,7 +73,7 @@ public partial class VariableItemViewModel : ObservableObject
     /// 用于决定数据采集的频率（如：高、中、低）。
     /// </summary>
     [ObservableProperty]
-    private PollLevelType _pollLevel=PollLevelType.ThirtySeconds;
+    private int _pollLevel = 30000; // ThirtySeconds
 
     /// <summary>
     /// 获取或设置一个值，该值指示此变量是否被激活。

@@ -52,25 +52,22 @@ public class OpcUaBackgroundService : BackgroundService
     private readonly int _opcUaSubscriptionSamplingIntervalMs = 1000;
 
     // 模拟 PollingIntervals，实际应用中可能从配置或数据库加载
-    private static readonly Dictionary<PollLevelType, TimeSpan> PollingIntervals
-        = new Dictionary<PollLevelType, TimeSpan>
+    private static readonly Dictionary<int, TimeSpan> PollingIntervals
+        = new Dictionary<int, TimeSpan>
           {
-              { PollLevelType.TenMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenMilliseconds) },
-              { PollLevelType.HundredMilliseconds, TimeSpan.FromMilliseconds((int)PollLevelType.HundredMilliseconds) },
-              {
-                  PollLevelType.FiveHundredMilliseconds,
-                  TimeSpan.FromMilliseconds((int)PollLevelType.FiveHundredMilliseconds)
-              },
-              { PollLevelType.OneSecond, TimeSpan.FromMilliseconds((int)PollLevelType.OneSecond) },
-              { PollLevelType.FiveSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.FiveSeconds) },
-              { PollLevelType.TenSeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TenSeconds) },
-              { PollLevelType.TwentySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.TwentySeconds) },
-              { PollLevelType.ThirtySeconds, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtySeconds) },
-              { PollLevelType.OneMinute, TimeSpan.FromMilliseconds((int)PollLevelType.OneMinute) },
-              { PollLevelType.ThreeMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThreeMinutes) },
-              { PollLevelType.FiveMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.FiveMinutes) },
-              { PollLevelType.TenMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.TenMinutes) },
-              { PollLevelType.ThirtyMinutes, TimeSpan.FromMilliseconds((int)PollLevelType.ThirtyMinutes) }
+              { 10, TimeSpan.FromMilliseconds(10) }, // TenMilliseconds
+              { 100, TimeSpan.FromMilliseconds(100) }, // HundredMilliseconds
+              { 500, TimeSpan.FromMilliseconds(500) }, // FiveHundredMilliseconds
+              { 1000, TimeSpan.FromMilliseconds(1000) }, // OneSecond
+              { 5000, TimeSpan.FromMilliseconds(5000) }, // FiveSeconds
+              { 10000, TimeSpan.FromMilliseconds(10000) }, // TenSeconds
+              { 20000, TimeSpan.FromMilliseconds(20000) }, // TwentySeconds
+              { 30000, TimeSpan.FromMilliseconds(30000) }, // ThirtySeconds
+              { 60000, TimeSpan.FromMilliseconds(60000) }, // OneMinute
+              { 180000, TimeSpan.FromMilliseconds(180000) }, // ThreeMinutes
+              { 300000, TimeSpan.FromMilliseconds(300000) }, // FiveMinutes
+              { 600000, TimeSpan.FromMilliseconds(600000) }, // TenMinutes
+              { 1800000, TimeSpan.FromMilliseconds(1800000) } // ThirtyMinutes
           };
 
     public OpcUaBackgroundService(IDataCenterService dataCenterService,IDataProcessingService dataProcessingService, ILogger<OpcUaBackgroundService> logger)
@@ -283,12 +280,12 @@ public class OpcUaBackgroundService : BackgroundService
                 var variableGroup = opcUaVariables.GroupBy(variable => variable.PollLevel);
                 foreach (var vGroup in variableGroup)
                 {
-                    var pollLevelType = vGroup.Key;
+                    var pollLevel = vGroup.Key;
                     var opcUaNodes
                         = vGroup.Select(variableDto => new OpcUaNode() { NodeId = variableDto.OpcUaNodeId })
                                  .ToList();
 
-                    PollingIntervals.TryGetValue(pollLevelType, out var pollLevel);
+                    PollingIntervals.TryGetValue(pollLevel, out var interval);
                     opcUaService.SubscribeToNode(opcUaNodes,HandleDataChanged,10000,1000);
                 }
             }

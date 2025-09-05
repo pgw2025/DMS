@@ -16,7 +16,7 @@ public class VariableDto
     public VariableTableDto? VariableTable { get; set; }
     public List<VariableMqttAliasDto>? MqttAliases { get; set; }
     public SignalType SignalType { get; set; }
-    public PollLevelType PollLevel { get; set; }
+    public int PollLevel { get; set; }
     public bool IsActive { get; set; }
     public int VariableTableId { get; set; }
     public string OpcUaNodeId { get; set; }

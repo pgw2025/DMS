@@ -26,8 +26,8 @@ namespace DMS.Infrastructure.Services
         private readonly ILogger<S7DeviceAgent> _logger;
         private Plc _plc;
         private bool _isConnected;
-        private readonly Dictionary<PollLevelType, List<Variable>> _variablesByPollLevel;
-        private readonly Dictionary<PollLevelType, DateTime> _lastPollTimes;
+        private readonly Dictionary<int, List<Variable>> _variablesByPollLevel;
+        private readonly Dictionary<int, DateTime> _lastPollTimes;
 
         public S7DeviceAgent(Device device, IChannelBus channelBus, IMessenger messenger, ILogger<S7DeviceAgent> logger)
         {
@@ -36,8 +36,8 @@ namespace DMS.Infrastructure.Services
             _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
-            _variablesByPollLevel = new Dictionary<PollLevelType, List<Variable>>();
-            _lastPollTimes = new Dictionary<PollLevelType, DateTime>();
+            _variablesByPollLevel = new Dictionary<int, List<Variable>>();
+            _lastPollTimes = new Dictionary<int, DateTime>();
             
             InitializePlc();
         }
@@ -175,7 +175,7 @@ namespace DMS.Infrastructure.Services
             }
         }
 
-        private bool ShouldPoll(PollLevelType pollLevel)
+        private bool ShouldPoll(int pollLevel)
         {
             // 获取轮询间隔
             var interval = GetPollingInterval(pollLevel);
@@ -189,28 +189,28 @@ namespace DMS.Infrastructure.Services
             return true;
         }
 
-        private TimeSpan GetPollingInterval(PollLevelType pollLevel)
+        private TimeSpan GetPollingInterval(int pollLevel)
         {
             return pollLevel switch
             {
-                PollLevelType.TenMilliseconds => TimeSpan.FromMilliseconds(10),
-                PollLevelType.HundredMilliseconds => TimeSpan.FromMilliseconds(100),
-                PollLevelType.FiveHundredMilliseconds => TimeSpan.FromMilliseconds(500),
-                PollLevelType.OneSecond => TimeSpan.FromMilliseconds(1000),
-                PollLevelType.FiveSeconds => TimeSpan.FromMilliseconds(5000),
-                PollLevelType.TenSeconds => TimeSpan.FromMilliseconds(10000),
-                PollLevelType.TwentySeconds => TimeSpan.FromMilliseconds(20000),
-                PollLevelType.ThirtySeconds => TimeSpan.FromMilliseconds(30000),
-                PollLevelType.OneMinute => TimeSpan.FromMinutes(1),
-                PollLevelType.ThreeMinutes => TimeSpan.FromMinutes(3),
-                PollLevelType.FiveMinutes => TimeSpan.FromMinutes(5),
-                PollLevelType.TenMinutes => TimeSpan.FromMinutes(10),
-                PollLevelType.ThirtyMinutes => TimeSpan.FromMinutes(30),
+                10 => TimeSpan.FromMilliseconds(10), // TenMilliseconds
+                100 => TimeSpan.FromMilliseconds(100), // HundredMilliseconds
+                500 => TimeSpan.FromMilliseconds(500), // FiveHundredMilliseconds
+                1000 => TimeSpan.FromMilliseconds(1000), // OneSecond
+                5000 => TimeSpan.FromMilliseconds(5000), // FiveSeconds
+                10000 => TimeSpan.FromMilliseconds(10000), // TenSeconds
+                20000 => TimeSpan.FromMilliseconds(20000), // TwentySeconds
+                30000 => TimeSpan.FromMilliseconds(30000), // ThirtySeconds
+                60000 => TimeSpan.FromMilliseconds(60000), // OneMinute
+                180000 => TimeSpan.FromMilliseconds(180000), // ThreeMinutes
+                300000 => TimeSpan.FromMilliseconds(300000), // FiveMinutes
+                600000 => TimeSpan.FromMilliseconds(600000), // TenMinutes
+                1800000 => TimeSpan.FromMilliseconds(1800000), // ThirtyMinutes
                 _ => TimeSpan.FromMilliseconds(1000)
             };
         }
 
-        private async Task PollVariablesByLevelAsync(List<Variable> variables, PollLevelType pollLevel)
+        private async Task PollVariablesByLevelAsync(List<Variable> variables, int pollLevel)
         {
             // 批量读取变量
             var dataItems = new List<DataItem>();

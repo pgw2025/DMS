@@ -35,8 +35,7 @@ public class DbVariable
     /// <summary>
     /// 变量的轮询级别，决定数据采集频率。
     /// </summary>
-    [SugarColumn(ColumnDataType="varchar(20)",SqlParameterDbType=typeof(EnumToStringConvert))]
-    public PollLevelType PollLevel { get; set; }
+    public int PollLevel { get; set; }
 
     /// <summary>
     /// 指示此变量是否处于激活状态。
