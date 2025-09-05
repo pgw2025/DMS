@@ -9,6 +9,7 @@ using DMS.Core.Interfaces.Services;
 using DMS.Infrastructure.Configuration;
 using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Interfaces;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Repositories;
 using DMS.Infrastructure.Services;
@@ -111,11 +112,17 @@ public partial class App : System.Windows.Application
 
         // 注册数据处理服务和处理器
         // services.AddHostedService<OpcUaBackgroundService>();
+        //注册OpcUa相关的服务
         services.Configure<OpcUaServiceOptions>(options => { });
-        // 注册服务
         services.AddSingleton<IOpcUaServiceManager, OpcUaServiceManager>();
-        // 注册后台服务
         services.AddHostedService<OptimizedOpcUaBackgroundService>();
+        // 注册S7相关的服务
+        services.AddSingleton<IS7ServiceFactory, S7ServiceFactory>();
+        services.AddSingleton<IS7ServiceManager, S7ServiceManager>();
+        services.AddSingleton<IChannelBus, ChannelBus>();
+        services.AddSingleton<IMessenger, Messenger>();
+        services.AddHostedService<OptimizedS7BackgroundService>();
+        
         
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
         services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());

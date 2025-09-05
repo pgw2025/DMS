@@ -10,6 +10,8 @@ public enum CpuType
     S71500,
     [Description("S7-300")]
     S7300,
+    [Description("S7-300")]
+    S7200,
     [Description("S7-400")]
     S7400
 }

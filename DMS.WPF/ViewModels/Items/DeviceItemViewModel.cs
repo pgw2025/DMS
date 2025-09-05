@@ -30,10 +30,10 @@ public partial class DeviceItemViewModel : ObservableObject
     private int _port=102;
 
     [ObservableProperty]
-    private int _rack=1;
+    private int _rack;
 
     [ObservableProperty]
-    private int _slot;
+    private int _slot=1;
 
     [ObservableProperty]
     private CpuType _cpuType;
