@@ -13,6 +13,16 @@ public interface IVariableAppService
     Task<VariableDto> GetVariableByIdAsync(int id);
 
     /// <summary>
+    /// 异步根据OPC UA NodeId获取变量DTO。
+    /// </summary>
+    Task<VariableDto?> GetVariableByOpcUaNodeIdAsync(string opcUaNodeId);
+
+    /// <summary>
+    /// 异步根据OPC UA NodeId列表获取变量DTO列表。
+    /// </summary>
+    Task<List<VariableDto>> GetVariableByOpcUaNodeIdsAsync(List<string> opcUaNodeIds);
+
+    /// <summary>
     /// 异步获取所有变量DTO列表。
     /// </summary>
     Task<List<VariableDto>> GetAllVariablesAsync();

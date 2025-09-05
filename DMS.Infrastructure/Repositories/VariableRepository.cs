@@ -208,4 +208,30 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
         var dbEntities = _mapper.Map<List<DbVariable>>(entities);
         return base.AddBatchAsync(dbEntities);
     }
+
+    /// <summary>
+    /// 异步根据OPC UA NodeId获取单个变量实体。
+    /// </summary>
+    /// <param name="opcUaNodeId">OPC UA NodeId。</param>
+    /// <returns>找到的变量实体，如果不存在则返回null。</returns>
+    public async Task<Variable?> GetByOpcUaNodeIdAsync(string opcUaNodeId)
+    {
+        var dbVariable = await Db.Queryable<DbVariable>()
+                                 .Where(v => v.OpcUaNodeId == opcUaNodeId)
+                                 .FirstAsync();
+        return dbVariable == null ? null : _mapper.Map<Variable>(dbVariable);
+    }
+
+    /// <summary>
+    /// 异步根据OPC UA NodeId列表获取变量实体列表。
+    /// </summary>
+    /// <param name="opcUaNodeIds">OPC UA NodeId列表。</param>
+    /// <returns>找到的变量实体列表。</returns>
+    public async Task<List<Variable>> GetByOpcUaNodeIdsAsync(List<string> opcUaNodeIds)
+    {
+        var dbVariables = await Db.Queryable<DbVariable>()
+                                  .Where(v => opcUaNodeIds.Contains(v.OpcUaNodeId))
+                                  .ToListAsync();
+        return _mapper.Map<List<Variable>>(dbVariables);
+    }
 }

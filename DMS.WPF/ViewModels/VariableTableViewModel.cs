@@ -158,7 +158,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     }
 
 
-
     /// <summary>
     /// 编辑选定的变量数据。
     /// 此命令通常绑定到UI中的“编辑”按钮或双击事件。
@@ -177,7 +176,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             }
 
             // 显示编辑变量数据的对话框，并传入当前选中的变量数据
-            VariableDialogViewModel variableDialogViewModel = App.Current.Services.GetRequiredService<VariableDialogViewModel>();
+            VariableDialogViewModel variableDialogViewModel
+                = App.Current.Services.GetRequiredService<VariableDialogViewModel>();
             variableDialogViewModel.Title = "编辑变量";
             variableDialogViewModel.PrimaryButText = "保存修改";
             variableDialogViewModel.IsAddModel = false;
@@ -288,6 +288,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 _notificationService.ShowError("当前变量表的Device对象为空，请检查。");
                 return;
             }
+
             // 检查OPC UA Endpoint URL是否已设置
             string opcUaEndpointUrl = CurrentVariableTable.Device.OpcUaServerUrl;
             if (string.IsNullOrEmpty(opcUaEndpointUrl))
@@ -297,7 +298,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             }
 
             // 显示OPC UA导入对话框，让用户选择要导入的变量
-            ImportOpcUaDialogViewModel importOpcUaDialogViewModel = App.Current.Services.GetRequiredService<ImportOpcUaDialogViewModel>();
+            ImportOpcUaDialogViewModel importOpcUaDialogViewModel
+                = App.Current.Services.GetRequiredService<ImportOpcUaDialogViewModel>();
             importOpcUaDialogViewModel.EndpointUrl = opcUaEndpointUrl; // 设置Endpoint URL
             var importedVariables = await _dialogService.ShowDialogAsync(importOpcUaDialogViewModel);
             if (importedVariables == null || !importedVariables.Any())
@@ -320,7 +322,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             {
                 // 拼接要删除的变量名称，用于确认提示
                 var existNames = string.Join("、", existList.Select(v => v.Name));
-                var confirmDialogViewModel = new ConfirmDialogViewModel("存在已经添加的变量", $"变量名称:{existNames}，已经存在，是否跳过继续添加其他的变量。取消则不添加任何变量", "继续");
+                var confirmDialogViewModel
+                    = new ConfirmDialogViewModel("存在已经添加的变量", $"变量名称:{existNames}，已经存在，是否跳过继续添加其他的变量。取消则不添加任何变量", "继续");
                 var res = await _dialogService.ShowDialogAsync(confirmDialogViewModel);
                 if (!res) return;
                 // 从导入列表中删除已经存在的变量
@@ -333,7 +336,10 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 var isSuccess = await _variableAppService.BatchImportVariablesAsync(importedVariableDtos);
                 if (isSuccess)
                 {
-                    _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(importedVariableDtos));
+                    var addVariableDtos = await _variableAppService.GetVariableByOpcUaNodeIdsAsync(
+                        importedVariableDtos.Select(v => v.OpcUaNodeId)
+                                            .ToList());
+                    _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(addVariableDtos));
                     _notificationService.ShowSuccess($"从OPC UA服务器导入变量成功，共导入变量：{importedVariableDtos.Count}个");
                 }
                 else
@@ -365,7 +371,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         try
         {
             // 显示添加变量数据的对话框
-            VariableDialogViewModel variableDialogViewModel = App.Current.Services.GetRequiredService<VariableDialogViewModel>();
+            VariableDialogViewModel variableDialogViewModel
+                = App.Current.Services.GetRequiredService<VariableDialogViewModel>();
             VariableItemViewModel variableItem = new VariableItemViewModel();
             variableItem.Protocol = CurrentVariableTable.Protocol;
             variableDialogViewModel.Title = "添加变量";
@@ -385,7 +392,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
 
             // // 添加变量数据到数据库
-            var addVariable = await _variableAppService.CreateVariableAsync(_mapper.Map<VariableDto>(variableItemViewModel));
+            var addVariable
+                = await _variableAppService.CreateVariableAsync(_mapper.Map<VariableDto>(variableItemViewModel));
             _mapper.Map(addVariable, variableItemViewModel);
             // // 更新当前页面显示的数据：将新变量添加到集合中
             _variableItemList.Add(variableItemViewModel);
@@ -411,7 +419,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         try
         {
-            List<VariableItemViewModel> variablesToDelete = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+            List<VariableItemViewModel> variablesToDelete = SelectedVariables.Cast<VariableItemViewModel>()
+                                                                             .ToList();
             // 检查是否有变量被选中
             if (variablesToDelete == null || !variablesToDelete.Any())
             {
@@ -423,14 +432,16 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             var names = string.Join("、", variablesToDelete.Select(v => v.Name));
 
             // 显示确认删除对话框
-            ConfirmDialogViewModel confirmDialogViewModel = new ConfirmDialogViewModel("删除变量", $"确认要删除变量：{names},删除后不可恢复，确认要删除吗？", "删除变量");
+            ConfirmDialogViewModel confirmDialogViewModel
+                = new ConfirmDialogViewModel("删除变量", $"确认要删除变量：{names},删除后不可恢复，确认要删除吗？", "删除变量");
             var isDel = await _dialogService.ShowDialogAsync(confirmDialogViewModel);
 
             if (!isDel)
                 return; // 如果用户取消删除，则返回
 
             // 从数据库中删除变量数据
-            var result = await _variableAppService.DeleteVariablesAsync(variablesToDelete.Select(v => v.Id).ToList());
+            var result = await _variableAppService.DeleteVariablesAsync(variablesToDelete.Select(v => v.Id)
+                                                                            .ToList());
             if (result)
             {
                 foreach (var variable in variablesToDelete)
@@ -438,6 +449,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                     _variableItemList.Remove(variable);
                     _dataServices.DeleteVariable(variable.Id);
                 }
+
                 // 显示成功通知
                 _notificationService.ShowSuccess($"成功删除 {variablesToDelete.Count} 个变量");
             }
@@ -470,10 +482,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
 
         // 获取选中的变量列表
-        var validVariables = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+        var validVariables = SelectedVariables.Cast<VariableItemViewModel>()
+                                              .ToList();
 
         // 显示轮询频率选择对话框，并传入第一个变量的当前轮询频率作为默认值
-        PollLevelDialogViewModel viewModel = new PollLevelDialogViewModel(validVariables.First().PollLevel);
+        PollLevelDialogViewModel viewModel = new PollLevelDialogViewModel(validVariables.First()
+                                                                              .PollLevel);
         var newPollLevelType = await _dialogService.ShowDialogAsync(viewModel);
         if (newPollLevelType.HasValue)
         {
@@ -487,7 +501,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
             var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
-            
+
             if (result > 0)
             {
                 // 显示成功通知
@@ -654,10 +668,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
 
         // 获取选中的变量列表
-        var validVariables = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+        var validVariables = SelectedVariables.Cast<VariableItemViewModel>()
+                                              .ToList();
 
         // 显示启用状态选择对话框，并传入第一个变量的当前启用状态作为默认值
-        IsActiveDialogViewModel viewModel = new IsActiveDialogViewModel(validVariables.First().IsActive);
+        IsActiveDialogViewModel viewModel = new IsActiveDialogViewModel(validVariables.First()
+                                                                            .IsActive);
         var newIsActive = await _dialogService.ShowDialogAsync(viewModel);
         if (newIsActive.HasValue)
         {
@@ -671,7 +687,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
             var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
-            
+
             if (result > 0)
             {
                 // 显示成功通知

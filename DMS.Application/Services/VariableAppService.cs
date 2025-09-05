@@ -40,6 +40,28 @@ public class VariableAppService : IVariableAppService
     }
 
     /// <summary>
+    /// 异步根据OPC UA NodeId获取变量数据传输对象。
+    /// </summary>
+    /// <param name="opcUaNodeId">OPC UA NodeId。</param>
+    /// <returns>变量数据传输对象。</returns>
+    public async Task<VariableDto?> GetVariableByOpcUaNodeIdAsync(string opcUaNodeId)
+    {
+        var variable = await _repoManager.Variables.GetByOpcUaNodeIdAsync(opcUaNodeId);
+        return variable == null ? null : _mapper.Map<VariableDto>(variable);
+    }
+
+    /// <summary>
+    /// 异步根据OPC UA NodeId列表获取变量数据传输对象列表。
+    /// </summary>
+    /// <param name="opcUaNodeIds">OPC UA NodeId列表。</param>
+    /// <returns>变量数据传输对象列表。</returns>
+    public async Task<List<VariableDto>> GetVariableByOpcUaNodeIdsAsync(List<string> opcUaNodeIds)
+    {
+        var variables = await _repoManager.Variables.GetByOpcUaNodeIdsAsync(opcUaNodeIds);
+        return _mapper.Map<List<VariableDto>>(variables);
+    }
+
+    /// <summary>
     /// 异步获取所有变量数据传输对象列表。
     /// </summary>
     /// <returns>变量数据传输对象列表。</returns>
