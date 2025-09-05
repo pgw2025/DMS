@@ -472,12 +472,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="variablesToChange">要修改轮询频率的变量数据列表。</param>
     [RelayCommand]
-    public async Task ChangePollLevel()
+    public async Task ChangePollingInterval()
     {
         // 检查是否有变量被选中
         if (SelectedVariables.Count == 0)
         {
-            _notificationService.ShowInfo("请选择要修改轮询频率的变量");
+            _notificationService.ShowInfo("请选择要修改轮询间隔的变量");
             return;
         }
 
@@ -485,16 +485,16 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         var validVariables = SelectedVariables.Cast<VariableItemViewModel>()
                                               .ToList();
 
-        // 显示轮询频率选择对话框，并传入第一个变量的当前轮询频率作为默认值
+        // 显示轮询间隔选择对话框，并传入第一个变量的当前轮询间隔作为默认值
         PollLevelDialogViewModel viewModel = new PollLevelDialogViewModel(validVariables.First()
-                                                                              .PollLevel);
-        var newPollLevelType = await _dialogService.ShowDialogAsync(viewModel);
-        if (newPollLevelType.HasValue)
+                                                                              .PollingInterval);
+        var newPollingInterval = await _dialogService.ShowDialogAsync(viewModel);
+        if (newPollingInterval.HasValue)
         {
-            // 更新所有选定变量的轮询频率和修改状态
+            // 更新所有选定变量的轮询间隔和修改状态
             foreach (var variable in validVariables)
             {
-                variable.PollLevel = newPollLevelType.Value;
+                variable.PollingInterval = newPollingInterval.Value;
                 variable.UpdatedAt = DateTime.Now;
             }
 
@@ -505,11 +505,11 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             if (result > 0)
             {
                 // 显示成功通知
-                _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询频率");
+                _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的轮询间隔");
             }
             else
             {
-                _notificationService.ShowError("更新轮询频率失败");
+                _notificationService.ShowError("更新轮询间隔失败");
             }
         }
     }

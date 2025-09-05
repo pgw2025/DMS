@@ -78,8 +78,6 @@
     </Page>
     <Page Update="Views\Dialogs\PollLevelDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
-      <XamlRuntime>Wpf</XamlRuntime>
-      <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Dialogs\ProcessingDialog.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -29,8 +29,8 @@ public class OptimizedS7BackgroundService : BackgroundService
     // S7轮询一遍后的等待时间
     private readonly int _s7PollOnceSleepTimeMs = 50;
 
-    // 存储每个设备的变量按轮询级别分组
-    private readonly ConcurrentDictionary<int, Dictionary<int, List<VariableDto>>> _variablesByPollLevel = new();
+    // 存储每个设备的变量按轮询间隔分组
+    private readonly ConcurrentDictionary<int, Dictionary<int, List<VariableDto>>> _variablesByPollingInterval = new();
 
     // 模拟 PollingIntervals，实际应用中可能从配置或数据库加载
     private static readonly Dictionary<int, TimeSpan> PollingIntervals = new Dictionary<int, TimeSpan>
@@ -105,7 +105,7 @@ public class OptimizedS7BackgroundService : BackgroundService
                 // 持续轮询，直到取消请求或需要重新加载
                 while (!stoppingToken.IsCancellationRequested && _reloadSemaphore.CurrentCount == 0)
                 {
-                    await PollS7VariablesByPollLevelAsync(stoppingToken);
+                    await PollS7VariablesByPollingIntervalAsync(stoppingToken);
                     await Task.Delay(_s7PollOnceSleepTimeMs, stoppingToken);
                 }
             }
@@ -131,7 +131,7 @@ public class OptimizedS7BackgroundService : BackgroundService
     {
         try
         {
-            _variablesByPollLevel.Clear();
+            _variablesByPollingInterval.Clear();
             _logger.LogInformation("开始加载S7变量....");
             
             var s7Devices = _dataCenterService
@@ -149,12 +149,12 @@ public class OptimizedS7BackgroundService : BackgroundService
                                           
                 _s7ServiceManager.UpdateVariables(s7Device.Id, variables);
                 
-                // 按轮询级别分组变量
-                var variablesByPollLevel = variables
-                    .GroupBy(v => v.PollLevel)
+                // 按轮询间隔分组变量
+                var variablesByPollingInterval = variables
+                    .GroupBy(v => v.PollingInterval)
                     .ToDictionary(g => g.Key, g => g.ToList());
                     
-                _variablesByPollLevel.AddOrUpdate(s7Device.Id, variablesByPollLevel, (key, oldValue) => variablesByPollLevel);
+                _variablesByPollingInterval.AddOrUpdate(s7Device.Id, variablesByPollingInterval, (key, oldValue) => variablesByPollingInterval);
             }
 
             _logger.LogInformation($"S7 变量加载成功，共加载S7设备：{s7Devices.Count}个");
@@ -184,28 +184,28 @@ public class OptimizedS7BackgroundService : BackgroundService
     }
 
     /// <summary>
-    /// 按轮询级别轮询S7变量
+    /// 按轮询间隔轮询S7变量
     /// </summary>
-    private async Task PollS7VariablesByPollLevelAsync(CancellationToken stoppingToken)
+    private async Task PollS7VariablesByPollingIntervalAsync(CancellationToken stoppingToken)
     {
         try
         {
             var pollTasks = new List<Task>();
             
             // 为每个设备创建轮询任务
-            foreach (var deviceEntry in _variablesByPollLevel)
+            foreach (var deviceEntry in _variablesByPollingInterval)
             {
                 var deviceId = deviceEntry.Key;
-                var variablesByPollLevel = deviceEntry.Value;
+                var variablesByPollingInterval = deviceEntry.Value;
                 
-                // 为每个轮询级别创建轮询任务
-                foreach (var pollLevelEntry in variablesByPollLevel)
+                // 为每个轮询间隔创建轮询任务
+                foreach (var pollingIntervalEntry in variablesByPollingInterval)
                 {
-                    var pollLevel = pollLevelEntry.Key;
-                    var variables = pollLevelEntry.Value;
+                    var pollingInterval = pollingIntervalEntry.Key;
+                    var variables = pollingIntervalEntry.Value;
                     
                     // 检查是否达到轮询时间
-                    if (ShouldPollVariables(variables, pollLevel))
+                    if (ShouldPollVariables(variables, pollingInterval))
                     {
                         pollTasks.Add(PollVariablesForDeviceAsync(deviceId, variables, stoppingToken));
                     }
@@ -216,16 +216,16 @@ public class OptimizedS7BackgroundService : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"按轮询级别轮询S7变量时发生错误：{ex.Message}");
+            _logger.LogError(ex, $"按轮询间隔轮询S7变量时发生错误：{ex.Message}");
         }
     }
     
     /// <summary>
     /// 检查是否应该轮询变量
     /// </summary>
-    private bool ShouldPollVariables(List<VariableDto> variables, int pollLevel)
+    private bool ShouldPollVariables(List<VariableDto> variables, int pollingInterval)
     {
-        if (!PollingIntervals.TryGetValue(pollLevel, out var interval))
+        if (!PollingIntervals.TryGetValue(pollingInterval, out var interval))
             return false;
             
         // 检查是否有任何一个变量需要轮询

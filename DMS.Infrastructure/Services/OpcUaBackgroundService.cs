@@ -277,15 +277,15 @@ public class OpcUaBackgroundService : BackgroundService
 
             if (_opcUaVariablesByDeviceId.TryGetValue(device.Id, out var opcUaVariables))
             {
-                var variableGroup = opcUaVariables.GroupBy(variable => variable.PollLevel);
+                var variableGroup = opcUaVariables.GroupBy(variable => variable.PollingInterval);
                 foreach (var vGroup in variableGroup)
                 {
-                    var pollLevel = vGroup.Key;
+                    var pollingInterval = vGroup.Key;
                     var opcUaNodes
                         = vGroup.Select(variableDto => new OpcUaNode() { NodeId = variableDto.OpcUaNodeId })
                                  .ToList();
 
-                    PollingIntervals.TryGetValue(pollLevel, out var interval);
+                    PollingIntervals.TryGetValue(pollingInterval, out var interval);
                     opcUaService.SubscribeToNode(opcUaNodes,HandleDataChanged,10000,1000);
                 }
             }

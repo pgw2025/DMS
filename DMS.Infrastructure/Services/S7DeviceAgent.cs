@@ -26,7 +26,7 @@ namespace DMS.Infrastructure.Services
         private readonly ILogger<S7DeviceAgent> _logger;
         private Plc _plc;
         private bool _isConnected;
-        private readonly Dictionary<int, List<Variable>> _variablesByPollLevel;
+        private readonly Dictionary<int, List<Variable>> _variablesByPollingInterval;
         private readonly Dictionary<int, DateTime> _lastPollTimes;
 
         public S7DeviceAgent(Device device, IChannelBus channelBus, IMessenger messenger, ILogger<S7DeviceAgent> logger)
@@ -36,7 +36,7 @@ namespace DMS.Infrastructure.Services
             _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             
-            _variablesByPollLevel = new Dictionary<int, List<Variable>>();
+            _variablesByPollingInterval = new Dictionary<int, List<Variable>>();
             _lastPollTimes = new Dictionary<int, DateTime>();
             
             InitializePlc();
@@ -125,18 +125,18 @@ namespace DMS.Infrastructure.Services
         public void UpdateVariables(List<Variable> variables)
         {
             // 清空现有的变量分组
-            _variablesByPollLevel.Clear();
+            _variablesByPollingInterval.Clear();
             _lastPollTimes.Clear();
 
-            // 按轮询级别分组变量
+            // 按轮询间隔分组变量
             foreach (var variable in variables)
             {
-                if (!_variablesByPollLevel.ContainsKey(variable.PollLevel))
+                if (!_variablesByPollingInterval.ContainsKey(variable.PollingInterval))
                 {
-                    _variablesByPollLevel[variable.PollLevel] = new List<Variable>();
-                    _lastPollTimes[variable.PollLevel] = DateTime.MinValue;
+                    _variablesByPollingInterval[variable.PollingInterval] = new List<Variable>();
+                    _lastPollTimes[variable.PollingInterval] = DateTime.MinValue;
                 }
-                _variablesByPollLevel[variable.PollLevel].Add(variable);
+                _variablesByPollingInterval[variable.PollingInterval].Add(variable);
             }
 
             _logger.LogInformation($"S7DeviceAgent: 更新设备 {_deviceConfig.Name} 的变量配置，共 {variables.Count} 个变量");
@@ -155,17 +155,17 @@ namespace DMS.Infrastructure.Services
 
             try
             {
-                // 按轮询级别依次轮询
-                foreach (var kvp in _variablesByPollLevel)
+                // 按轮询间隔依次轮询
+                foreach (var kvp in _variablesByPollingInterval)
                 {
-                    var pollLevel = kvp.Key;
+                    var pollingInterval = kvp.Key;
                     var variables = kvp.Value;
 
                     // 检查是否到了轮询时间
-                    if (ShouldPoll(pollLevel))
+                    if (ShouldPoll(pollingInterval))
                     {
-                        await PollVariablesByLevelAsync(variables, pollLevel);
-                        _lastPollTimes[pollLevel] = DateTime.Now;
+                        await PollVariablesByLevelAsync(variables, pollingInterval);
+                        _lastPollTimes[pollingInterval] = DateTime.Now;
                     }
                 }
             }
@@ -175,23 +175,22 @@ namespace DMS.Infrastructure.Services
             }
         }
 
-        private bool ShouldPoll(int pollLevel)
+        private bool ShouldPoll(int PollingInterval)
         {
             // 获取轮询间隔
-            var interval = GetPollingInterval(pollLevel);
+            var interval = GetPollingInterval(PollingInterval);
             
             // 检查是否到了轮询时间
-            if (_lastPollTimes.TryGetValue(pollLevel, out var lastPollTime))
+            if (_lastPollTimes.TryGetValue(PollingInterval, out var lastPollTime))
             {
                 return DateTime.Now - lastPollTime >= interval;
             }
             
             return true;
         }
-
-        private TimeSpan GetPollingInterval(int pollLevel)
+        private TimeSpan GetPollingInterval(int pollingInterval)
         {
-            return pollLevel switch
+            return pollingInterval switch
             {
                 10 => TimeSpan.FromMilliseconds(10), // TenMilliseconds
                 100 => TimeSpan.FromMilliseconds(100), // HundredMilliseconds
@@ -210,7 +209,7 @@ namespace DMS.Infrastructure.Services
             };
         }
 
-        private async Task PollVariablesByLevelAsync(List<Variable> variables, int pollLevel)
+        private async Task PollVariablesByLevelAsync(List<Variable> variables, int pollingInterval)
         {
             // 批量读取变量
             var dataItems = new List<DataItem>();
@@ -259,7 +258,7 @@ namespace DMS.Infrastructure.Services
                                 S7Address = variable.S7Address,
                                 DataValue = variable.DataValue,
                                 DisplayValue = variable.DisplayValue,
-                                PollLevel = variable.PollLevel,
+                                PollingInterval = variable.PollingInterval,
                                 Protocol = variable.Protocol,
                                 UpdatedAt = variable.UpdatedAt
                                 // 可以根据需要添加其他属性
@@ -274,7 +273,7 @@ namespace DMS.Infrastructure.Services
                     }
                 }
 
-                _logger.LogDebug($"S7DeviceAgent: 设备 {_deviceConfig.Name} 完成 {pollLevel} 级别轮询，共处理 {dataItems.Count} 个变量");
+                _logger.LogDebug($"S7DeviceAgent: 设备 {_deviceConfig.Name} 完成 {pollingInterval} 毫秒轮询间隔，共处理 {dataItems.Count} 个变量");
             }
             catch (Exception ex)
             {

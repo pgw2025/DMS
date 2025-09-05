@@ -215,22 +215,22 @@ namespace DMS.Infrastructure.Services
                 _logger.LogInformation("正在为设备 {DeviceName} 设置订阅，变量数: {VariableCount}", 
                     context.Device.Name, context.Variables.Count);
 
-                // 按PollLevel对变量进行分组
-                var variablesByPollLevel = context.Variables.Values
-                    .GroupBy(v => v.PollLevel)
+                // 按PollingInterval对变量进行分组
+                var variablesByPollingInterval = context.Variables.Values
+                    .GroupBy(v => v.PollingInterval)
                     .ToDictionary(g => g.Key, g => g.ToList());
 
-                // 为每个PollLevel组设置单独的订阅
-                foreach (var group in variablesByPollLevel)
+                // 为每个PollingInterval组设置单独的订阅
+                foreach (var group in variablesByPollingInterval)
                 {
-                    int pollLevel = group.Key;
+                    int pollingInterval = group.Key;
                     var variables = group.Value;
 
-                    _logger.LogInformation("为设备 {DeviceName} 设置PollLevel {PollLevel} 的订阅，变量数: {VariableCount}", 
-                        context.Device.Name, pollLevel, variables.Count);
+                    _logger.LogInformation("为设备 {DeviceName} 设置PollingInterval {PollingInterval} 的订阅，变量数: {VariableCount}", 
+                        context.Device.Name, pollingInterval, variables.Count);
 
-                    // 根据PollLevel计算发布间隔和采样间隔（毫秒）
-                    var publishingInterval = GetPublishingIntervalFromPollLevel(pollLevel);
+                    // 根据PollingInterval计算发布间隔和采样间隔（毫秒）
+                    var publishingInterval = GetPublishingIntervalFromPollLevel(pollingInterval);
                     // var samplingInterval = GetSamplingIntervalFromPollLevel(pollLevel);
 
                     var opcUaNodes = variables
@@ -251,12 +251,12 @@ namespace DMS.Infrastructure.Services
         }
 
         /// <summary>
-        /// 根据PollLevel获取发布间隔（毫秒）
+        /// 根据PollingInterval获取发布间隔（毫秒）
         /// </summary>
-        private int GetPublishingIntervalFromPollLevel(int pollLevel)
+        private int GetPublishingIntervalFromPollLevel(int pollingInterval)
         {
-            // 根据轮询级别值映射到发布间隔
-            return pollLevel switch
+            // 根据轮询间隔值映射到发布间隔
+            return pollingInterval switch
             {
                 100 => 100,      // HundredMilliseconds -> 100ms发布间隔
                 500 => 500,     // FiveHundredMilliseconds -> 500ms发布间隔

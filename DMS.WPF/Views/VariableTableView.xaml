@@ -179,9 +179,9 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem
-                        Command="{Binding ChangePollLevelCommand}"
+                        Command="{Binding ChangePollingIntervalCommand}"
                         CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                        Header="修改轮询频率">
+                        Header="修改轮询间隔">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
@@ -268,10 +268,10 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="轮询频率" SortMemberPath="PollLevel">
+                <DataGridTemplateColumn Header="轮询间隔(毫秒)" SortMemberPath="PollingInterval">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding PollLevel}" />
+                            <TextBlock Text="{Binding PollingInterval}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

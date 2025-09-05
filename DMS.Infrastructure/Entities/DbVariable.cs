@@ -33,9 +33,9 @@ public class DbVariable
     public SignalType SignalType { get; set; }
 
     /// <summary>
-    /// 变量的轮询级别，决定数据采集频率。
+    /// 变量的轮询间隔（毫秒），决定数据采集频率。
     /// </summary>
-    public int PollLevel { get; set; }
+    public int PollingInterval { get; set; }
 
     /// <summary>
     /// 指示此变量是否处于激活状态。

@@ -9,22 +9,22 @@ namespace DMS.WPF.ViewModels.Dialogs
     public partial class PollLevelDialogViewModel : DialogViewModelBase<int?>
     {
         [ObservableProperty]
-        private int _selectedPollLevelType;
+        private int _selectedPollingInterval;
 
-        public List<int> PollLevelTypes { get; }
+        public List<int> PollingIntervals { get; }
 
-        public PollLevelDialogViewModel(int currentPollLevelType)
+        public PollLevelDialogViewModel(int currentPollingInterval)
         {
-            PollLevelTypes = new List<int> { 10, 100, 500, 1000, 5000, 10000, 20000, 30000, 60000, 180000, 300000, 600000, 1800000, 3600000 };
-            SelectedPollLevelType = currentPollLevelType;
-            Title = "修改轮询频率";
+            PollingIntervals = new List<int> { 10, 100, 500, 1000, 5000, 10000, 20000, 30000, 60000, 180000, 300000, 600000, 1800000, 3600000 };
+            SelectedPollingInterval = currentPollingInterval;
+            Title = "修改轮询间隔";
             PrimaryButText = "确定";
         }
 
         [RelayCommand]
         private void PrimaryButton()
         {
-            Close(SelectedPollLevelType);
+            Close(SelectedPollingInterval);
         }
 
         [RelayCommand]

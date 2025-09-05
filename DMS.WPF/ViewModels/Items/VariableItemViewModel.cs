@@ -69,11 +69,11 @@ public partial class VariableItemViewModel : ObservableObject
     private SignalType _signalType =SignalType.OtherASignal;
 
     /// <summary>
-    /// 获取或设置变量的轮询等级。
-    /// 用于决定数据采集的频率（如：高、中、低）。
+    /// 获取或设置变量的轮询间隔（毫秒）。
+    /// 用于决定数据采集的频率。
     /// </summary>
     [ObservableProperty]
-    private int _pollLevel = 30000; // ThirtySeconds
+    private int _pollingInterval = 30000; // ThirtySeconds
 
     /// <summary>
     /// 获取或设置一个值，该值指示此变量是否被激活。

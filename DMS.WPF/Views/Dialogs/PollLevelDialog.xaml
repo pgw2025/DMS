@@ -20,8 +20,8 @@
     <Grid>
         <ComboBox
             Margin="20"
-            ItemsSource="{Binding PollLevelTypes}"
-            SelectedItem="{Binding SelectedPollLevelType}">
+            ItemsSource="{Binding PollingIntervals}"
+            SelectedItem="{Binding SelectedPollingInterval}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding}" />

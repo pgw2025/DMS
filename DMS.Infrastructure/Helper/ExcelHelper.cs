@@ -263,7 +263,7 @@ public static class ExcelHelper
 
             variable.OpcUaNodeId = "";
             variable.Protocol = ProtocolType.S7;
-            variable.PollLevel = 30000; // ThirtySeconds
+            variable.PollingInterval = 30000; // ThirtySeconds
             variableDatas.Add(variable);
         }
 

@@ -148,8 +148,8 @@
                         Grid.Row="2"
                         Grid.Column="0"
                         Margin="0,15,0,0"
-                        hc:InfoElement.Title="轮询级别:"
-                        Text="{Binding  PollLevel}"
+                        hc:InfoElement.Title="轮询间隔(毫秒):"
+                        Text="{Binding  PollingInterval}"
                         >
                        
                     </hc:TextBox>
