@@ -24,6 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
+using NLog.Web;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -94,6 +95,7 @@ public partial class App : System.Windows.Application
     private void ConfigureServices(IServiceCollection services)
     {
         // 注册NLogLogger作为Microsoft.Extensions.Logging.ILogger的实现
+        services.AddSingleton<ILogger, NLogLogger>();
         services.AddSingleton<ILoggerFactory, NLogLoggerFactory>();
         services.AddSingleton<GrowlNotificationService>();
         services.AddSingleton<INotificationService, NotificationService>();
@@ -203,6 +205,7 @@ public partial class App : System.Windows.Application
         LogManager.Setup().LoadConfigurationFromFile("Configurations/nlog.config");
         loggingBuilder.ClearProviders();
         loggingBuilder.SetMinimumLevel(LogLevel.Trace);
+        // loggingBuilder.addn; // 添加NLog作为日志提供者
 
         // 捕获未处理的异常并记录
         AppDomain.CurrentDomain.UnhandledException += (sender, args) =>

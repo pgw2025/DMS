@@ -15,9 +15,9 @@ namespace DMS.WPF.Logging;
 public class NLogLogger : ILogger
 {
     /// <summary>
-    /// 获取当前类的 NLog 日志实例。
+    /// 获取指定名称的 NLog 日志实例。
     /// </summary>
-    private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    private readonly NLog.Logger _logger;
     
     /// <summary>
     /// 日志记录器名称
@@ -27,11 +27,13 @@ public class NLogLogger : ILogger
     public NLogLogger()
     {
         _name = nameof(NLogLogger);
+        _logger = NLog.LogManager.GetCurrentClassLogger();
     }
 
     public NLogLogger(string name)
     {
         _name = name;
+        _logger = NLog.LogManager.GetLogger(name);
     }
 
     /// <summary>
@@ -75,7 +77,7 @@ public class NLogLogger : ILogger
         // 如果不启用节流，则直接记录日志并返回。
         if (!throttle)
         {
-            Logger.Log(level, exception, msg);
+            _logger.Log(level, exception, msg);
             return;
         }
 
@@ -90,7 +92,7 @@ public class NLogLogger : ILogger
             _ =>
             {
                 // 1. 首次出现，立即记录一次原始日志。
-                Logger.Log(level, exception, msg);
+                _logger.Log(level, exception, msg);
 
                 // 2. 创建一个新的节流信息对象。
                 var newThrottledLog = new ThrottledLogInfo
@@ -111,7 +113,7 @@ public class NLogLogger : ILogger
                         if (finishedLog.Count > 1)
                         {
                             var summaryMsg = $"日志 '{msg}' 在过去 {ThrottleTimeSeconds} 秒内被调用 {finishedLog.Count} 次。";
-                            Logger.Log(level, summaryMsg);
+                            _logger.Log(level, summaryMsg);
                         }
                     }
                 }, null, ThrottleTimeSeconds * 1000, Timeout.Infinite); // 设置30秒后触发，且不重复。
@@ -134,7 +136,7 @@ public class NLogLogger : ILogger
 
     public bool IsEnabled(LogLevel logLevel)
     {
-        return Logger.IsEnabled(ToNLogLevel(logLevel));
+        return _logger.IsEnabled(ToNLogLevel(logLevel));
     }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
