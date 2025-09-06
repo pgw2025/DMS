@@ -39,6 +39,7 @@ public partial class App : System.Windows.Application
     public IServiceProvider Services { get; }
     public new static App Current => (App)System.Windows.Application.Current;
     public IHost Host { get; }
+    private readonly ILogger<App> _logger;
 
     public App()
     {
@@ -53,6 +54,7 @@ public partial class App : System.Windows.Application
             })
             .Build();
         Services = Host.Services;
+        _logger = Host.Services.GetRequiredService<ILogger<App>>();
     }
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -86,10 +88,60 @@ public partial class App : System.Windows.Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
-        // 停止服务
-        await Host.StopAsync();
-        Host.Dispose();
-        LogManager.Shutdown();
+        _logger.LogInformation("应用程序正在关闭，开始清理资源...");
+
+        try
+        {
+            // 获取服务管理器
+            var opcUaServiceManager = Host.Services.GetService<IOpcUaServiceManager>();
+            var s7ServiceManager = Host.Services.GetService<IS7ServiceManager>();
+            var mqttServiceManager = Host.Services.GetService<IMqttServiceManager>();
+
+            // 优雅地关闭OPC UA服务
+            if (opcUaServiceManager != null)
+            {
+                _logger.LogInformation("正在关闭OPC UA服务...");
+                opcUaServiceManager.Dispose();
+                _logger.LogInformation("OPC UA服务已关闭");
+            }
+
+            // 优雅地关闭S7服务
+            if (s7ServiceManager != null)
+            {
+                _logger.LogInformation("正在关闭S7服务...");
+                s7ServiceManager.Dispose();
+                _logger.LogInformation("S7服务已关闭");
+            }
+
+            // 优雅地关闭MQTT服务
+            if (mqttServiceManager != null)
+            {
+                _logger.LogInformation("正在关闭MQTT服务...");
+                mqttServiceManager.Dispose();
+                _logger.LogInformation("MQTT服务已关闭");
+            }
+
+            // 停止后台服务
+            _logger.LogInformation("正在停止后台服务...");
+            await Host.StopAsync();
+            _logger.LogInformation("后台服务已停止");
+
+            // 释放Host资源
+            _logger.LogInformation("正在释放Host资源...");
+            Host.Dispose();
+            _logger.LogInformation("Host资源已释放");
+
+            // 关闭NLog
+            _logger.LogInformation("正在关闭NLog...");
+            LogManager.Shutdown();
+            _logger.LogInformation("NLog已关闭");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "关闭应用程序时发生错误: {ErrorMessage}", ex.Message);
+        }
+
+        _logger.LogInformation("应用程序已完全关闭");
         base.OnExit(e);
     }
 

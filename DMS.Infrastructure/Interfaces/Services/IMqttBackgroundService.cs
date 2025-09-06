@@ -9,7 +9,7 @@ namespace DMS.Infrastructure.Interfaces.Services
     /// <summary>
     /// MQTT后台服务接口，负责管理MQTT连接和数据传输
     /// </summary>
-    public interface IMqttBackgroundService
+    public interface IMqttBackgroundService : IDisposable
     {
         /// <summary>
         /// 启动MQTT后台服务

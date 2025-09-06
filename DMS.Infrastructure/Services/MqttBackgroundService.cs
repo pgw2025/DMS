@@ -243,5 +243,20 @@ namespace DMS.Infrastructure.Services
             _logger.LogInformation("MQTT列表发生了变化，正在重新加载数据...");
             _reloadSemaphore.Release();
         }
+
+        /// <summary>
+        /// 释放资源
+        /// </summary>
+        public override void Dispose()
+        {
+            _logger.LogInformation("正在释放MQTT后台服务资源...");
+            
+            _dataCenterService.OnLoadDataCompleted -= OnLoadDataCompleted;
+            _reloadSemaphore?.Dispose();
+            
+            base.Dispose();
+            
+            _logger.LogInformation("MQTT后台服务资源已释放");
+        }
     }
 }

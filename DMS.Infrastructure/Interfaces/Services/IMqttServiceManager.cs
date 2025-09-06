@@ -9,7 +9,7 @@ namespace DMS.Infrastructure.Interfaces.Services
     /// <summary>
     /// MQTT服务管理器接口，负责管理MQTT连接和变量监控
     /// </summary>
-    public interface IMqttServiceManager
+    public interface IMqttServiceManager : IDisposable
     {
         /// <summary>
         /// 初始化服务管理器
