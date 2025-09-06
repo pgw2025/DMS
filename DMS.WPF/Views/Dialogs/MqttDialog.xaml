@@ -63,6 +63,7 @@
                 Grid.Row="1"
                 Grid.Column="0"
                 Margin="0,15,0,0"
+                hc:InfoElement.Title="服务器地址:"
                 Text="{Binding MqttServer.ServerUrl, UpdateSourceTrigger=PropertyChanged}" />
 
             <hc:TextBox

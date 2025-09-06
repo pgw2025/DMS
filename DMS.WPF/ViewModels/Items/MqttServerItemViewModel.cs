@@ -27,6 +27,9 @@ public partial class MqttServerItemViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isActive;
+    
+    [ObservableProperty]
+    private bool _isConnect;
 
     [ObservableProperty]
     private string _subscribeTopic;

@@ -4,12 +4,14 @@ using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Application.DTOs;
+using DMS.Application.DTOs.Events;
 using DMS.Core.Models;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Models;
 using DMS.Message;
 using DMS.WPF.ViewModels.Items;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace DMS.WPF.Services;
 
@@ -99,9 +101,19 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         
         // 监听变量值变更事件
         _dataCenterService.VariableValueChanged += OnVariableValueChanged;
-        
+        _dataCenterService.DataLoadCompleted += OnDataLoadCompleted;
+
         // 注册消息接收
         // WeakReferenceMessenger.Register<LoadMessage>(this, (r, m) => r.Receive(m));
+    }
+
+    private  void OnDataLoadCompleted(object? sender, DataLoadCompletedEventArgs e)
+    {
+        if (e.IsSuccess)
+        {
+            LoadAllDatas();
+        }
+        
     }
 
 
@@ -109,7 +121,7 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
     /// 异步加载设备数据，并以高效的方式更新UI集合。
     /// 此方法会比较新旧数据，只对有变化的设备进行更新、添加或删除，避免不必要的UI刷新。
     /// </summary>
-    public async Task LoadAllDatas()
+    private void LoadAllDatas()
     {
         Devices = _mapper.Map<ObservableCollection<DeviceItemViewModel>>(_dataCenterService.Devices.Values);
         foreach (var device in Devices)
@@ -125,6 +137,9 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         }
 
         Menus = _mapper.Map<ObservableCollection<MenuItemViewModel>>(_dataCenterService.Menus.Values);
+        
+        // 加载MQTT服务器数据
+        MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(_dataCenterService.MqttServers.Values);
 
         BuildMenuTrees();
     }

@@ -26,6 +26,7 @@ public class DataCenterService : IDataCenterService
     private readonly IVariableTableAppService _variableTableAppService;
     private readonly IVariableAppService _variableAppService;
     private readonly IMenuService _menuService;
+    private readonly IMqttAppService _mqttAppService;
 
     /// <summary>
     /// 安全字典，用于存储所有设备数据
@@ -51,6 +52,11 @@ public class DataCenterService : IDataCenterService
     /// 安全字典，用于存储所有菜单数据
     /// </summary>
     public ConcurrentDictionary<int, MenuBeanDto> MenuTrees { get; } = new();
+
+    /// <summary>
+    /// 安全字典，用于存储所有MQTT服务器数据
+    /// </summary>
+    public ConcurrentDictionary<int, MqttServerDto> MqttServers { get; } = new();
 
     #region 事件定义
 
@@ -80,9 +86,11 @@ public class DataCenterService : IDataCenterService
     public event EventHandler<MenuChangedEventArgs> MenuChanged;
 
     /// <summary>
-    /// 当数据发生任何变化时触发
+    /// 当MQTT服务器数据发生变化时触发
     /// </summary>
-    public event EventHandler<DataChangedEventArgs> DataChanged;
+    public event EventHandler<MqttServerChangedEventArgs> MqttServerChanged;
+
+ 
 
     /// <summary>
     /// 当变量值发生变化时触发
@@ -100,13 +108,15 @@ public class DataCenterService : IDataCenterService
     /// <param name="variableTableAppService">变量表应用服务实例。</param>
     /// <param name="variableAppService">变量应用服务实例。</param>
     /// <param name="menuService">菜单服务实例。</param>
+    /// <param name="mqttAppService">MQTT应用服务实例。</param>
     public DataCenterService(
         IRepositoryManager repositoryManager,
         IMapper mapper,
         IDeviceAppService deviceAppService,
         IVariableTableAppService variableTableAppService,
         IVariableAppService variableAppService,
-        IMenuService menuService)
+        IMenuService menuService,
+        IMqttAppService mqttAppService)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
@@ -114,6 +124,7 @@ public class DataCenterService : IDataCenterService
         _variableTableAppService = variableTableAppService;
         _variableAppService = variableAppService;
         _menuService = menuService;
+        _mqttAppService = mqttAppService;
     }
 
     #region 设备管理
@@ -545,65 +556,77 @@ public class DataCenterService : IDataCenterService
 
     #endregion
 
-    #region 事件触发方法
+    #region MQTT服务器管理
 
     /// <summary>
-    /// 触发数据加载完成事件
+    /// 异步根据ID获取MQTT服务器DTO。
     /// </summary>
-    /// <param name="e">事件参数</param>
-    protected virtual void OnDataLoadCompleted(DataLoadCompletedEventArgs e)
+    public async Task<MqttServerDto> GetMqttServerByIdAsync(int id)
     {
-        DataLoadCompleted?.Invoke(this, e);
-        OnDataChanged(new DataChangedEventArgs(DataChangeType.Loaded));
+        return await _mqttAppService.GetMqttServerByIdAsync(id);
     }
 
     /// <summary>
-    /// 触发设备变更事件
+    /// 异步获取所有MQTT服务器DTO列表。
     /// </summary>
-    /// <param name="e">事件参数</param>
-    protected virtual void OnDeviceChanged(DeviceChangedEventArgs e)
+    public async Task<List<MqttServerDto>> GetAllMqttServersAsync()
     {
-        DeviceChanged?.Invoke(this, e);
-        OnDataChanged(new DataChangedEventArgs(e.ChangeType));
+        return await _mqttAppService.GetAllMqttServersAsync();
     }
 
     /// <summary>
-    /// 触发变量表变更事件
+    /// 异步创建一个新的MQTT服务器。
     /// </summary>
-    /// <param name="e">事件参数</param>
-    protected virtual void OnVariableTableChanged(VariableTableChangedEventArgs e)
+    public async Task<int> CreateMqttServerAsync(MqttServerDto mqttServerDto)
     {
-        VariableTableChanged?.Invoke(this, e);
-        OnDataChanged(new DataChangedEventArgs(e.ChangeType));
+        return await _mqttAppService.CreateMqttServerAsync(mqttServerDto);
     }
 
     /// <summary>
-    /// 触发变量变更事件
+    /// 异步更新一个已存在的MQTT服务器。
     /// </summary>
-    /// <param name="e">事件参数</param>
-    protected virtual void OnVariableChanged(VariableChangedEventArgs e)
+    public async Task UpdateMqttServerAsync(MqttServerDto mqttServerDto)
     {
-        VariableChanged?.Invoke(this, e);
-        OnDataChanged(new DataChangedEventArgs(e.ChangeType));
+        await _mqttAppService.UpdateMqttServerAsync(mqttServerDto);
     }
 
     /// <summary>
-    /// 触发菜单变更事件
+    /// 异步删除一个MQTT服务器。
     /// </summary>
-    /// <param name="e">事件参数</param>
-    protected virtual void OnMenuChanged(MenuChangedEventArgs e)
+    public async Task DeleteMqttServerAsync(int id)
     {
-        MenuChanged?.Invoke(this, e);
-        OnDataChanged(new DataChangedEventArgs(e.ChangeType));
+        await _mqttAppService.DeleteMqttServerAsync(id);
     }
 
     /// <summary>
-    /// 触发数据变更事件
+    /// 在内存中添加MQTT服务器
     /// </summary>
-    /// <param name="e">事件参数</param>
-    protected virtual void OnDataChanged(DataChangedEventArgs e)
+    public void AddMqttServerToMemory(MqttServerDto mqttServerDto)
     {
-        DataChanged?.Invoke(this, e);
+        if (MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto))
+        {
+            OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Added, mqttServerDto));
+        }
+    }
+
+    /// <summary>
+    /// 在内存中更新MQTT服务器
+    /// </summary>
+    public void UpdateMqttServerInMemory(MqttServerDto mqttServerDto)
+    {
+        MqttServers.AddOrUpdate(mqttServerDto.Id, mqttServerDto, (key, oldValue) => mqttServerDto);
+        OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Updated, mqttServerDto));
+    }
+
+    /// <summary>
+    /// 在内存中删除MQTT服务器
+    /// </summary>
+    public void RemoveMqttServerFromMemory(int mqttServerId)
+    {
+        if (MqttServers.TryRemove(mqttServerId, out var mqttServerDto))
+        {
+            OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Deleted, mqttServerDto));
+        }
     }
 
     #endregion
@@ -623,125 +646,55 @@ public class DataCenterService : IDataCenterService
             Variables.Clear();
             Menus.Clear();
             MenuTrees.Clear();
+            MqttServers.Clear();
 
-            // 加载所有设备
-            var devices = await _repositoryManager.Devices.GetAllAsync();
-            var deviceDtos = _mapper.Map<List<DeviceDto>>(devices);
+            // 顺序加载所有数据，避免数据库连接并发问题
+            var devices = await LoadAllDevicesAsync();
+            var variableTables = await LoadAllVariableTablesAsync();
+            var variables = await LoadAllVariablesAsync();
+            var menus = await LoadAllMenusAsync();
+            var mqttServers = await LoadAllMqttServersAsync();
 
-            // 加载所有变量表
-            var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-            var variableTableDtos = _mapper.Map<List<VariableTableDto>>(variableTables);
-
-            // 加载所有变量
-            var variables = await _repositoryManager.Variables.GetAllAsync();
-            var variableDtos = _mapper.Map<List<VariableDto>>(variables);
-
-            // 加载所有菜单
-            var menus = await _repositoryManager.Menus.GetAllAsync();
-            var menuDtos = _mapper.Map<List<MenuBeanDto>>(menus);
-
-            // 建立设备与变量表的关联
-            foreach (var deviceDto in deviceDtos)
+            // 加载设备数据到内存
+            foreach (var device in devices)
             {
-                deviceDto.VariableTables = variableTableDtos
-                                           .Where(vt => vt.DeviceId == deviceDto.Id)
-                                           .ToList();
-
-                // 将设备添加到安全字典
-                Devices.TryAdd(deviceDto.Id, deviceDto);
+                Devices.TryAdd(device.Id, device);
             }
 
-            // 建立变量表与变量的关联
-            foreach (var variableTableDto in variableTableDtos)
+            // 加载变量表数据到内存
+            foreach (var variableTable in variableTables)
             {
-                variableTableDto.Variables = variableDtos
-                                             .Where(v => v.VariableTableId == variableTableDto.Id)
-                                             .ToList();
-                if (Devices.TryGetValue(variableTableDto.DeviceId, out var deviceDto))
-                {
-                    variableTableDto.Device = deviceDto;
-                }
-
-                // 将变量表添加到安全字典
-                VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
+                VariableTables.TryAdd(variableTable.Id, variableTable);
             }
 
-            // 将变量添加到安全字典
-            foreach (var variableDto in variableDtos)
+            // 加载变量数据到内存
+            foreach (var variable in variables)
             {
-                if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-                {
-                    variableDto.VariableTable = variableTable;
-                }
-                Variables.TryAdd(variableDto.Id, variableDto);
+                Variables.TryAdd(variable.Id, variable);
             }
 
-            // 将菜单添加到安全字典
-            foreach (var menuDto in menuDtos)
+            // 加载菜单数据到内存
+            foreach (var menu in menus)
             {
-                Menus.TryAdd(menuDto.Id, menuDto);
+                Menus.TryAdd(menu.Id, menu);
             }
 
-            BuildMenuTrees();
+            // 加载MQTT服务器数据到内存
+            foreach (var mqttServer in mqttServers)
+            {
+                MqttServers.TryAdd(mqttServer.Id, mqttServer);
+            }
+
+            // 构建菜单树
+            BuildMenuTree();
 
             // 触发数据加载完成事件
-            OnDataLoadCompleted(new DataLoadCompletedEventArgs(
-                                    deviceDtos,
-                                    variableTableDtos,
-                                    variableDtos,
-                                    true));
+            OnDataLoadCompleted(new DataLoadCompletedEventArgs(true, "数据加载完成"));
         }
         catch (Exception ex)
         {
-            // 触发数据加载失败事件
-            OnDataLoadCompleted(new DataLoadCompletedEventArgs(
-                                    new List<DeviceDto>(),
-                                    new List<VariableTableDto>(),
-                                    new List<VariableDto>(),
-                                    false,
-                                    ex.Message));
-            throw new ApplicationException($"加载所有数据到内存时发生错误,错误信息:{ex.Message}", ex);
-        }
-    }
-
-    private void BuildMenuTrees()
-    {
-        // 遍历所有菜单项，构建树形结构
-        foreach (var menu in Menus.Values)
-        {
-            // 检查是否有父ID，并且父ID不为0（通常0或null表示根节点）
-            if (Menus.ContainsKey(menu.ParentId) && menu.ParentId != 0)
-            {
-                // 尝试从查找表中找到父菜单
-                if (Menus.TryGetValue(menu.ParentId, out var parentMenu))
-                {
-                    // 将当前菜单添加到父菜单的Children列表中
-                    parentMenu.Children.Add(menu);
-                }
-                // else: 如果找不到父菜单，这可能是一个数据完整性问题，可以根据需要处理
-            }
-            else
-            {
-                // 如果没有父ID，则这是一个根菜单
-                MenuTrees.TryAdd(menu.Id, menu);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 异步加载所有菜单数据。
-    /// </summary>
-    public async Task<List<MenuBeanDto>> LoadAllMenusAsync()
-    {
-        try
-        {
-            // 获取所有菜单
-            var menus = await _repositoryManager.Menus.GetAllAsync();
-            return _mapper.Map<List<MenuBeanDto>>(menus);
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException($"加载所有菜单数据时发生错误,错误信息:{ex.Message}", ex);
+            OnDataLoadCompleted(new DataLoadCompletedEventArgs(false, $"数据加载失败: {ex.Message}"));
+            throw;
         }
     }
 
@@ -750,37 +703,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<DeviceDto>> LoadAllDevicesAsync()
     {
-        try
-        {
-            // 获取所有设备
-            var devices = await _repositoryManager.Devices.GetAllAsync();
-            var deviceDtos = _mapper.Map<List<DeviceDto>>(devices);
-
-            // 为每个设备加载关联的变量表和变量
-            foreach (var deviceDto in deviceDtos)
-            {
-                // 获取设备的所有变量表
-                var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-                var deviceVariableTables = variableTables.Where(vt => vt.DeviceId == deviceDto.Id)
-                                                         .ToList();
-                deviceDto.VariableTables = _mapper.Map<List<VariableTableDto>>(deviceVariableTables);
-
-                // 为每个变量表加载关联的变量
-                foreach (var variableTableDto in deviceDto.VariableTables)
-                {
-                    var variables = await _repositoryManager.Variables.GetAllAsync();
-                    var tableVariables = variables.Where(v => v.VariableTableId == variableTableDto.Id)
-                                                  .ToList();
-                    variableTableDto.Variables = _mapper.Map<List<VariableDto>>(tableVariables);
-                }
-            }
-
-            return deviceDtos;
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException($"加载所有设备数据时发生错误,错误信息:{ex.Message}", ex);
-        }
+        return await _deviceAppService.GetAllDevicesAsync();
     }
 
     /// <summary>
@@ -788,27 +711,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableTableDto>> LoadAllVariableTablesAsync()
     {
-        try
-        {
-            // 获取所有变量表
-            var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-            var variableTableDtos = _mapper.Map<List<VariableTableDto>>(variableTables);
-
-            // 为每个变量表加载关联的变量
-            foreach (var variableTableDto in variableTableDtos)
-            {
-                var variables = await _repositoryManager.Variables.GetAllAsync();
-                var tableVariables = variables.Where(v => v.VariableTableId == variableTableDto.Id)
-                                              .ToList();
-                variableTableDto.Variables = _mapper.Map<List<VariableDto>>(tableVariables);
-            }
-
-            return variableTableDtos;
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException($"加载所有变量表数据时发生错误,错误信息:{ex.Message}", ex);
-        }
+        return await _variableTableAppService.GetAllVariableTablesAsync();
     }
 
     /// <summary>
@@ -816,16 +719,23 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableDto>> LoadAllVariablesAsync()
     {
-        try
-        {
-            // 获取所有变量
-            var variables = await _repositoryManager.Variables.GetAllAsync();
-            return _mapper.Map<List<VariableDto>>(variables);
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException($"加载所有变量数据时发生错误,错误信息:{ex.Message}", ex);
-        }
+        return await _variableAppService.GetAllVariablesAsync();
+    }
+
+    /// <summary>
+    /// 异步加载所有菜单数据。
+    /// </summary>
+    public async Task<List<MenuBeanDto>> LoadAllMenusAsync()
+    {
+        return await _menuService.GetAllMenusAsync();
+    }
+
+    /// <summary>
+    /// 异步加载所有MQTT服务器数据。
+    /// </summary>
+    public async Task<List<MqttServerDto>> LoadAllMqttServersAsync()
+    {
+        return await _mqttAppService.GetAllMqttServersAsync();
     }
 
     #endregion
@@ -833,11 +743,82 @@ public class DataCenterService : IDataCenterService
     #region 事件触发方法
 
     /// <summary>
+    /// 触发数据加载完成事件
+    /// </summary>
+    protected virtual void OnDataLoadCompleted(DataLoadCompletedEventArgs e)
+    {
+        DataLoadCompleted?.Invoke(this, e);
+    }
+
+    /// <summary>
+    /// 触发设备变更事件
+    /// </summary>
+    protected virtual void OnDeviceChanged(DeviceChangedEventArgs e)
+    {
+        DeviceChanged?.Invoke(this, e);
+    }
+
+    /// <summary>
+    /// 触发变量表变更事件
+    /// </summary>
+    protected virtual void OnVariableTableChanged(VariableTableChangedEventArgs e)
+    {
+        VariableTableChanged?.Invoke(this, e);
+    }
+
+    /// <summary>
+    /// 触发变量变更事件
+    /// </summary>
+    protected virtual void OnVariableChanged(VariableChangedEventArgs e)
+    {
+        VariableChanged?.Invoke(this, e);
+    }
+
+    /// <summary>
+    /// 触发菜单变更事件
+    /// </summary>
+    protected virtual void OnMenuChanged(MenuChangedEventArgs e)
+    {
+        MenuChanged?.Invoke(this, e);
+    }
+
+    /// <summary>
+    /// 触发MQTT服务器变更事件
+    /// </summary>
+    protected virtual void OnMqttServerChanged(MqttServerChangedEventArgs e)
+    {
+        MqttServerChanged?.Invoke(this, e);
+    }
+
+
+    /// <summary>
     /// 触发变量值变更事件
     /// </summary>
-    public virtual void OnVariableValueChanged(VariableValueChangedEventArgs e)
+    public void OnVariableValueChanged(VariableValueChangedEventArgs e)
     {
         VariableValueChanged?.Invoke(this, e);
+    }
+
+    #endregion
+
+    #region 私有辅助方法
+
+    /// <summary>
+    /// 构建菜单树结构
+    /// </summary>
+    private void BuildMenuTree()
+    {
+        // 清空现有菜单树
+        MenuTrees.Clear();
+
+        // 获取所有根菜单
+        var rootMenus = GetRootMenus();
+
+        // 将根菜单添加到菜单树中
+        foreach (var rootMenu in rootMenus)
+        {
+            MenuTrees.TryAdd(rootMenu.Id, rootMenu);
+        }
     }
 
     #endregion

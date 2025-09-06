@@ -21,7 +21,7 @@
                     <Style TargetType="Border">
                         <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                            <DataTrigger Binding="{Binding IsConnect}" Value="True">
                                 <Setter Property="Background" Value="LightGreen" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -47,7 +47,7 @@
                                          IsOn="{Binding IsActive}"
                                          OffContent="停止"
                                          OnContent="启动" />
-                        <TextBlock Text="{Binding Name}"
+                        <TextBlock Text="{Binding ServerName}"
                                    FontSize="20"
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center" />
@@ -62,7 +62,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding Remark}"
+                            <TextBlock Text="{Binding MessageFormat}"
                                        Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                                        TextTrimming="CharacterEllipsis" />
                         </StackPanel>
@@ -73,7 +73,7 @@
                                          Margin="0,0,8,0"
                                          FontSize="14" />
                             <TextBlock>
-                                <Run Text="{Binding Host, FallbackValue='127.0.0.1'}" />
+                                <Run Text="{Binding ServerUrl, FallbackValue='127.0.0.1'}" />
                                 <Run Text=":" />
                                 <Run Text="{Binding Port, FallbackValue='1883'}" />
                             </TextBlock>
@@ -85,7 +85,7 @@
                                          Margin="0,0,8,0"
                                          FontSize="14" />
                             <TextBlock>
-                                <Run Text="{Binding Platform, FallbackValue='EMQX'}" />
+                                <Run Text="未指定平台" />
                             </TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
@@ -94,7 +94,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding ClientID}" />
+                            <TextBlock Text="{Binding ClientId}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
@@ -102,7 +102,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding UserName}" />
+                            <TextBlock Text="{Binding Username}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
@@ -110,7 +110,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding PassWord}" />
+                            <TextBlock Text="{Binding Password}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
@@ -126,7 +126,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding SubTopic}" />
+                            <TextBlock Text="{Binding SubscribeTopic}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
@@ -134,7 +134,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding ConnTime}" />
+                            <TextBlock Text="{Binding ConnectedAt}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
@@ -142,7 +142,7 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding ConnectMessage}" />
+                            <TextBlock Text="{Binding MessageFormat}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     Margin="0,2">
@@ -150,7 +150,8 @@
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"
                                          FontSize="14" />
-                            <TextBlock Text="{Binding IsDefault}" />
+                            <!-- IsDefault 属性未在 ViewModel 中定义，已移除绑定 -->
+                            <TextBlock Text="未设置默认" />
                         </StackPanel>
                     </StackPanel>
                 </Grid>

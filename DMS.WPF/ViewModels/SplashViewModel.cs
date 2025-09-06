@@ -50,17 +50,8 @@ public partial class SplashViewModel : ObservableObject
             LoadingMessage = "正在初始化数据库...";
             _initializeService.InitializeTables();
             _initializeService.InitializeMenus();
-            await _dataCenterService.LoadAllDataToMemoryAsync();
-            
             LoadingMessage = "正在加载系统配置...";
-            await _dataServices.LoadAllDatas();
-            // await _dataServices.LoadVariableTables();
-            // await _dataServices.LoadVariables();
-            // await _dataServices.LoadMenus();
-
-
-            // _dataServices.AssociateVariableTablesToDevices();
-            // _dataServices.AssociateVariablesToVariableTables();
+            await _dataCenterService.LoadAllDataToMemoryAsync();
 
             // 可以在这里添加加载配置的逻辑
             await Task.Delay(500); // 模拟耗时
@@ -83,7 +74,7 @@ public partial class SplashViewModel : ObservableObject
         {
             // 处理初始化过程中的异常
             LoadingMessage = $"初始化失败: {ex.Message}";
-            Console.WriteLine($"初始化失败: {ex}");
+            _logger.LogError(ex,$"初始化失败: {ex}");
             // 在此可以记录日志或显示错误对话框
             return false;
         }
