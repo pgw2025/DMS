@@ -57,11 +57,17 @@ public class MqttAliasAppService : IMqttAliasAppService
             else
             {
                 // 如果不存在，则创建新的关联
+                // 获取关联的Variable和MqttServer实体
+                var variable = await _repoManager.Variables.GetByIdAsync(variableId);
+                var mqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServerId);
+                
                 var newAlias = new VariableMqttAlias
                 {
                     VariableId = variableId,
                     MqttServerId = mqttServerId,
-                    Alias = alias
+                    Alias = alias,
+                    Variable = variable,
+                    MqttServer = mqttServer
                 };
                 await _repoManager.VariableMqttAliases.AddAsync(newAlias);
             }

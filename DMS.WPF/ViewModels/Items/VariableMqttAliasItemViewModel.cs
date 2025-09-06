@@ -21,4 +21,7 @@ public partial class VariableMqttAliasItemViewModel : ObservableObject
     
     [ObservableProperty]
     private MqttServerItemViewModel _mqttServer;
+    
+    [ObservableProperty]
+    private VariableItemViewModel _variable;
 }

@@ -36,7 +36,7 @@ public class MappingProfile : Profile
 
         // VariableMqttAlias 映射
         CreateMap<VariableMqttAlias, VariableMqttAliasDto>()
-            .ForMember(dest => dest.MqttServerName, opt => opt.Ignore())
+            .ForMember(dest => dest.MqttServerName, opt => opt.MapFrom(src => src.MqttServer.ServerName))
             .ReverseMap();
 
         // VariableHistory 映射

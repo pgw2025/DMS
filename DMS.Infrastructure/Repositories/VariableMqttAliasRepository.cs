@@ -116,10 +116,43 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// </summary>
     public async Task<List<VariableMqttAlias>> GetAliasesForVariableAsync(int variableId)
     {
+        // 查询别名关联，并包含关联的Variable和MqttServer信息
         var dbList = await Db.Queryable<DbVariableMqttAlias>()
             .Where(x => x.VariableId == variableId)
             .ToListAsync();
-        return _mapper.Map<List<VariableMqttAlias>>(dbList);
+        
+        // 手动加载关联的Variable和MqttServer实体
+        var variableIds = dbList.Select(x => x.VariableId).Distinct().ToList();
+        var mqttServerIds = dbList.Select(x => x.MqttServerId).Distinct().ToList();
+        
+        var variables = await Db.Queryable<DbVariable>()
+            .In(x => x.Id, variableIds)
+            .ToListAsync();
+            
+        var mqttServers = await Db.Queryable<DbMqttServer>()
+            .In(x => x.Id, mqttServerIds)
+            .ToListAsync();
+            
+        // 将关联实体映射到领域模型
+        var variableDict = variables.ToDictionary(v => v.Id, v => _mapper.Map<Variable>(v));
+        var mqttServerDict = mqttServers.ToDictionary(m => m.Id, m => _mapper.Map<MqttServer>(m));
+        
+        // 映射主实体并设置导航属性
+        var result = _mapper.Map<List<VariableMqttAlias>>(dbList);
+        foreach (var alias in result)
+        {
+            if (variableDict.TryGetValue(alias.VariableId, out var variable))
+            {
+                alias.Variable = variable;
+            }
+            
+            if (mqttServerDict.TryGetValue(alias.MqttServerId, out var mqttServer))
+            {
+                alias.MqttServer = mqttServer;
+            }
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -130,6 +163,24 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
         var dbAlias = await Db.Queryable<DbVariableMqttAlias>()
             .Where(x => x.VariableId == variableId && x.MqttServerId == mqttServerId)
             .FirstAsync();
-        return _mapper.Map<VariableMqttAlias>(dbAlias);
+            
+        if (dbAlias == null)
+            return null;
+            
+        // 手动加载关联的Variable和MqttServer实体
+        var variable = await Db.Queryable<DbVariable>()
+            .Where(x => x.Id == variableId)
+            .FirstAsync();
+            
+        var mqttServer = await Db.Queryable<DbMqttServer>()
+            .Where(x => x.Id == mqttServerId)
+            .FirstAsync();
+            
+        // 映射主实体并设置导航属性
+        var result = _mapper.Map<VariableMqttAlias>(dbAlias);
+        result.Variable = _mapper.Map<Variable>(variable);
+        result.MqttServer = _mapper.Map<MqttServer>(mqttServer);
+        
+        return result;
     }
 }

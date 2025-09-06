@@ -30,8 +30,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.VariableAliases, opt => opt.Ignore())
             .ReverseMap();
         CreateMap<DbVariableMqttAlias, VariableMqttAlias>()
-            .ForMember(dest => dest.Variable, opt => opt.Ignore())
-            .ForMember(dest => dest.MqttServer, opt => opt.Ignore())
             .ReverseMap();
         
         CreateMap<DbMenu, MenuBean>().ReverseMap();

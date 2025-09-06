@@ -33,6 +33,7 @@
             <TextBlock Text="MQTT服务器：" VerticalAlignment="Center" />
             <TextBlock Text="{Binding SelectedMqttServer.ServerName}" 
                        FontWeight="Bold" 
+                       FontSize="16"
                        Margin="5,0,0,0" 
                        VerticalAlignment="Center" />
         </StackPanel>
@@ -47,7 +48,7 @@
                   MaxHeight="500">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="变量名称" 
-                                    Binding="{Binding VariableId}" 
+                                    Binding="{Binding Variable.Name}" 
                                     IsReadOnly="True"
                                     Width="*" />
                 <DataGridTextColumn Header="别名" 

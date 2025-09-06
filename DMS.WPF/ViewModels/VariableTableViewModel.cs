@@ -626,7 +626,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                         VariableId = originalVariable.Id,
                         MqttServerId = selectedMqtt.Id,
                         Alias = editedVariableMqtt.Alias,
-                        MqttServer = selectedMqtt
+                        MqttServer = selectedMqtt,
+                        Variable = originalVariable
                     };
                     // originalVariable.MqttAliases.Add(variableMqtt);
                 }

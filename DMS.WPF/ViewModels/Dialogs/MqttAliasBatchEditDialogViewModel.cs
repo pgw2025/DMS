@@ -47,6 +47,7 @@ namespace DMS.WPF.ViewModels.Dialogs
                     MqttServerId = SelectedMqttServer.Id,
                     MqttServerName = SelectedMqttServer.ServerName,
                     MqttServer = SelectedMqttServer,
+                    Variable = variable,
                     Alias = existingAlias?.Alias ?? GenerateDefaultAlias(variable)
                 };
 
@@ -60,7 +61,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         private string GenerateDefaultAlias(VariableItemViewModel variable)
         {
             // 可以根据需要自定义默认别名生成逻辑
-            return $"{variable.Name}_{Guid.NewGuid().ToString("N")[..8]}";
+            return $"{variable.Name}";
         }
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace DMS.WPF.ViewModels.Dialogs
 
             foreach (var alias in VariableMqttAliases)
             {
-                alias.Alias = $"{prefix}_{alias.VariableId}";
+                alias.Alias = $"{prefix}_{alias.Variable.Name}";
             }
         }
     }
