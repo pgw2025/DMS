@@ -40,22 +40,22 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="名称:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CurrentMqtt.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CurrentMqtt.ServerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
 
                 <TextBlock Grid.Row="0" Grid.Column="2" Text="主机:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding CurrentMqtt.Host, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding CurrentMqtt.ServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="端口:" Margin="0,0,5,0" VerticalAlignment="Center"/>
                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMqtt.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
 
                 <TextBlock Grid.Row="1" Grid.Column="2" Text="客户端ID:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding CurrentMqtt.ClientID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding CurrentMqtt.ClientId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="用户名:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMqtt.UserName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMqtt.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
 
                 <TextBlock Grid.Row="2" Grid.Column="2" Text="密码:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding CurrentMqtt.PassWord, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding CurrentMqtt.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="发布主题:" Margin="0,0,5,0" VerticalAlignment="Center"/>
                 <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CurrentMqtt.PublishTopic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
@@ -88,13 +88,13 @@
                              IsReadOnly="True"
                              SelectionMode="Extended">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="变量名称" Binding="{Binding  Variable.Name}"/>
-                    <DataGridTextColumn Header="MQTT发送名称" Binding="{Binding  MqttAlias}"/>
+                    <DataGridTextColumn Header="变量名称" Binding="{Binding Variable.Name}"/>
+                    <DataGridTextColumn Header="MQTT发送名称" Binding="{Binding MqttAlias}"/>
                     <DataGridTextColumn Header="地址" Binding="{Binding Variable.S7Address}"/>
                     <DataGridTextColumn Header="数据类型" Binding="{Binding Variable.SignalType}"/>
                     <DataGridTextColumn Header="当前值" Binding="{Binding Variable.DataValue}"/>
                     <DataGridTextColumn Header="显示值" Binding="{Binding Variable.DisplayValue}"/>
-                    <DataGridTextColumn Header="更新时间" Binding="{Binding Variable.UpdateTime, StringFormat='yyyy-MM-dd HH:mm:ss'}"/>
+                    <DataGridTextColumn Header="更新时间" Binding="{Binding Variable.UpdatedAt, StringFormat='yyyy-MM-dd HH:mm:ss'}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

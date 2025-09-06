@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class MqttAliasDialogViewModel : ObservableObject
+public partial class MqttAliasDialogViewModel : DialogViewModelBase<string>
 {
     [ObservableProperty]
     private string _title = "设置MQTT别名";
@@ -30,5 +30,17 @@ public partial class MqttAliasDialogViewModel : ObservableObject
     public MqttAliasDialogViewModel()
     {
         
+    }
+
+    [RelayCommand]
+    private void Confirm()
+    {
+        Close(MqttAlias);
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        Close(null);
     }
 }

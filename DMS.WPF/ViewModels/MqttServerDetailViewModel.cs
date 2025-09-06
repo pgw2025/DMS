@@ -9,7 +9,7 @@ using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Items;
 
-namespace DMS.ViewModels
+namespace DMS.WPF.ViewModels
 {
     /// <summary>
     /// MQTT服务器详情视图模型。

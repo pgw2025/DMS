@@ -6,9 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Core", "DMS.Core\DMS.Core.csproj", "{CD16527A-A5F9-482F-ABF7-755DDE1B0406}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Application", "DMS.Application\DMS.Application.csproj", "{46E180A5-38CB-4229-915F-C9BC44534E77}"
-	ProjectSection(ProjectDependencies) = postProject
-		{66FB5295-C6B7-4767-948C-5986480F6733} = {66FB5295-C6B7-4767-948C-5986480F6733}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS.Infrastructure", "DMS.Infrastructure\DMS.Infrastructure.csproj", "{66FB5295-C6B7-4767-948C-5986480F6733}"
 	ProjectSection(ProjectDependencies) = postProject

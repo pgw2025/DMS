@@ -19,9 +19,9 @@ public class DbMqttServer
     public string ServerName { get; set; }
 
     /// <summary>
-    /// MQTT代理地址
+    /// MQTT服务器URL
     /// </summary>
-    public string BrokerAddress { get; set; }
+    public string ServerUrl { get; set; }
 
     /// <summary>
     /// 端口号
@@ -66,15 +66,18 @@ public class DbMqttServer
     /// <summary>
     /// 连接时间
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public DateTime? ConnectedAt { get; set; }
 
     /// <summary>
     /// 连接持续时间（秒）
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public long ConnectionDuration { get; set; }
 
     /// <summary>
     /// 消息格式
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string MessageFormat { get; set; }
 }

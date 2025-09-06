@@ -7,7 +7,7 @@ public class MqttServer
 {
     public int Id { get; set; }
     public string ServerName { get; set; }
-    public string BrokerAddress { get; set; } // Broker地址
+    public string ServerUrl { get; set; } // Broker地址
     public int Port { get; set; } // 端口
     public string Username { get; set; } // 用户名
     public string Password { get; set; } // 密码

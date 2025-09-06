@@ -10,7 +10,7 @@ public class MqttServerDto
 {
     public int Id { get; set; }
     public string ServerName { get; set; }
-    public string BrokerAddress { get; set; }
+    public string ServerUrl { get; set; }
     public int Port { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }

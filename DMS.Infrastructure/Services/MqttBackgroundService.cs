@@ -266,7 +266,7 @@ public class MqttBackgroundService : BackgroundService
 
         var options = new MqttClientOptionsBuilder()
                       .WithClientId(mqtt.ClientId)
-                      .WithTcpServer(mqtt.BrokerAddress, mqtt.Port)
+                      .WithTcpServer(mqtt.ServerUrl, mqtt.Port)
                       .WithCredentials(mqtt.Username, mqtt.Password)
                       .WithCleanSession()
                       .Build();

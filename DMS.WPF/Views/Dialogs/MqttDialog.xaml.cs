@@ -5,9 +5,13 @@ namespace DMS.WPF.Views.Dialogs;
 
 public partial class MqttDialog : ContentDialog
 {
-    public MqttDialog(MqttDialogViewModel viewModel)
+    public MqttDialog()
     {
         InitializeComponent();
+    }
+
+    public MqttDialog(MqttDialogViewModel viewModel) : this()
+    {
         DataContext = viewModel;
     }
 }

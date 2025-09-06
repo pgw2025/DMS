@@ -2,11 +2,13 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using DMS.Application.DTOs;
 using DMS.Core.Models;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Models;
+using DMS.Message;
 using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.Services;
@@ -15,10 +17,11 @@ namespace DMS.WPF.Services;
 /// 数据服务类，负责从数据库加载和管理各种数据，并提供数据变更通知。
 /// 继承自ObservableRecipient，可以接收消息；实现IRecipient<LoadMessage>，处理加载消息。
 /// </summary>
-public partial class DataServices : ObservableObject, IDisposable
+public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, IDisposable
 {
     private readonly IMapper _mapper;
     private readonly IDataCenterService _dataCenterService;
+    private readonly IMqttAppService _mqttAppService;
 
 
     // 设备列表，使用ObservableProperty特性，当值改变时会自动触发属性变更通知。
@@ -42,8 +45,8 @@ public partial class DataServices : ObservableObject, IDisposable
     private ObservableCollection<MenuItemViewModel> _menuTrees;
 
     // MQTT配置列表。
-    // [ObservableProperty]
-    // private List<Mqtt> _mqtts;
+    [ObservableProperty]
+    private ObservableCollection<MqttServerItemViewModel> _mqttServers;
 
 
     // 设备列表变更事件，当设备列表数据更新时触发。
@@ -53,7 +56,7 @@ public partial class DataServices : ObservableObject, IDisposable
     public event Action<List<MenuBean>> OnMenuTreeListChanged;
 
     // MQTT列表变更事件，当MQTT配置数据更新时触发。
-    // public event Action<List<Mqtt>> OnMqttListChanged;
+    public event Action<List<MqttServerDto>> OnMqttListChanged;
 
     /// <summary>
     /// 处理变量值变更事件
@@ -81,19 +84,24 @@ public partial class DataServices : ObservableObject, IDisposable
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="dataCenterService">数据服务中心实例。</param>
-    public DataServices(IMapper mapper, IDataCenterService dataCenterService)
+    /// <param name="mqttAppService">MQTT应用服务实例。</param>
+    public DataServices(IMapper mapper, IDataCenterService dataCenterService, IMqttAppService mqttAppService)
     {
         _mapper = mapper;
         _dataCenterService = dataCenterService;
+        _mqttAppService = mqttAppService;
         Devices = new ObservableCollection<DeviceItemViewModel>();
         VariableTables = new ObservableCollection<VariableTableItemViewModel>();
         Variables = new ObservableCollection<VariableItemViewModel>();
         Menus = new ObservableCollection<MenuItemViewModel>();
         MenuTrees = new ObservableCollection<MenuItemViewModel>();
-        // AllVariables = new ConcurrentDictionary<int, Variable>();
+        MqttServers = new ObservableCollection<MqttServerItemViewModel>();
         
         // 监听变量值变更事件
         _dataCenterService.VariableValueChanged += OnVariableValueChanged;
+        
+        // 注册消息接收
+        // WeakReferenceMessenger.Register<LoadMessage>(this, (r, m) => r.Receive(m));
     }
 
 
@@ -378,6 +386,84 @@ public partial class DataServices : ObservableObject, IDisposable
         variableTable.Variables.Remove(variableItem);
 
         Variables.Remove(variableItem);
+    }
+
+    /// <summary>
+    /// 异步加载所有MQTT服务器数据
+    /// </summary>
+    public async Task LoadMqttServers(IMqttAppService mqttAppService)
+    {
+        try
+        {
+            var mqttServerDtos = await mqttAppService.GetAllMqttServersAsync();
+            MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(mqttServerDtos);
+            OnMqttListChanged?.Invoke(mqttServerDtos);
+        }
+        catch (Exception ex)
+        {
+            // 记录异常或处理错误
+            Console.WriteLine($"加载MQTT服务器数据时发生错误: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 添加MQTT服务器
+    /// </summary>
+    public async Task<MqttServerItemViewModel> AddMqttServer(IMqttAppService mqttAppService, MqttServerItemViewModel mqttServer)
+    {
+        var dto = _mapper.Map<MqttServerDto>(mqttServer);
+        var id = await mqttAppService.CreateMqttServerAsync(dto);
+        dto.Id = id;
+        
+        var mqttServerItem = _mapper.Map<MqttServerItemViewModel>(dto);
+        MqttServers.Add(mqttServerItem);
+        
+        return mqttServerItem;
+    }
+
+    /// <summary>
+    /// 更新MQTT服务器
+    /// </summary>
+    public async Task<bool> UpdateMqttServer(IMqttAppService mqttAppService, MqttServerItemViewModel mqttServer)
+    {
+        var dto = _mapper.Map<MqttServerDto>(mqttServer);
+        await mqttAppService.UpdateMqttServerAsync(dto);
+        return true;
+    }
+
+    /// <summary>
+    /// 删除MQTT服务器
+    /// </summary>
+    public async Task<bool> DeleteMqttServer(IMqttAppService mqttAppService, MqttServerItemViewModel mqttServer)
+    {
+        await mqttAppService.DeleteMqttServerAsync(mqttServer.Id);
+        MqttServers.Remove(mqttServer);
+        return true;
+    }
+
+    /// <summary>
+    /// 处理LoadMessage消息
+    /// </summary>
+    /// <param name="message">加载消息</param>
+    public void Receive(LoadMessage message)
+    {
+        switch (message.LoadType)
+        {
+            case LoadTypes.Devices:
+                // 设备数据已在IDataCenterService中处理
+                break;
+            case LoadTypes.Menu:
+                // 菜单数据已在IDataCenterService中处理
+                break;
+            case LoadTypes.Mqtts:
+                _ = Task.Run(async () => await LoadMqttServers(_mqttAppService));
+                break;
+            case LoadTypes.All:
+                // 加载所有数据
+                LoadAllDatas();
+                _ = Task.Run(async () => await LoadMqttServers(_mqttAppService));
+                break;
+        }
     }
 
     /// <summary>

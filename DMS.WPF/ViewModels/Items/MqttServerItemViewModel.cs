@@ -14,7 +14,7 @@ public partial class MqttServerItemViewModel : ObservableObject
     private string _serverName;
 
     [ObservableProperty]
-    private string _brokerAddress;
+    private string _serverUrl;
 
     [ObservableProperty]
     private int _port;

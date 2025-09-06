@@ -97,7 +97,7 @@ namespace DMS.Infrastructure.UnitTests
         {
             var dbMqttServer = new Faker<DbMqttServer>()
                                .RuleFor(d => d.ServerName, f => f.Company.CompanyName())
-                               .RuleFor(d => d.BrokerAddress, f => f.Internet.Ip())
+                               .RuleFor(d => d.ServerUrl, f => f.Internet.Ip())
                                .RuleFor(d => d.Username, f => f.Internet.UserName())
                                .RuleFor(d => d.Password, f => f.Internet.Password())
                                .RuleFor(d => d.SubscribeTopic, f => "/topic/sub")

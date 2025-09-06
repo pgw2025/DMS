@@ -1,4 +1,3 @@
-using DMS.ViewModels;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Items;

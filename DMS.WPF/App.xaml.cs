@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using AutoMapper;
 using AutoMapper.Internal;
 using DMS.Application.Interfaces;
 using DMS.Application.Services;
@@ -167,7 +168,14 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IDialogService, DialogService>();
         
         // 注册WPF中的服务
-        services.AddSingleton<DataServices>();
+        services.AddSingleton<IMqttAppService, MqttAppService>();
+        services.AddSingleton<DataServices>(provider => 
+            new DataServices(
+                provider.GetRequiredService<IMapper>(),
+                provider.GetRequiredService<IDataCenterService>(),
+                provider.GetRequiredService<IMqttAppService>()
+            )
+        );
         
 
         
@@ -182,7 +190,18 @@ public partial class App : System.Windows.Application
         services.AddSingleton<SettingViewModel>();
         services.AddTransient<VariableTableViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
-        services.AddSingleton<MqttsViewModel>();
+        services.AddSingleton<MqttsViewModel>(provider => 
+            new MqttsViewModel(
+                provider.GetRequiredService<ILogger<MqttsViewModel>>(),
+                provider.GetRequiredService<IDialogService>(),
+                provider.GetRequiredService<DataServices>(),
+                provider.GetRequiredService<IMqttAppService>(),
+                provider.GetRequiredService<IMapper>(),
+                provider.GetRequiredService<INavigationService>(),
+                provider.GetRequiredService<INotificationService>()
+            )
+        );
+        services.AddScoped<MqttServerDetailViewModel>();
         
         // 注册对话框模型
         services.AddTransient<ImportExcelDialogViewModel>();

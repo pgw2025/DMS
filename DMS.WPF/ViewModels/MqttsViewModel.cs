@@ -1,181 +1,184 @@
 using System.Collections.ObjectModel;
+using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
 using DMS.Core.Enums;
-using DMS.Services;
-using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
+using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.Logging;
-using DMS.WPF.Views;
 
 namespace DMS.WPF.ViewModels;
 
+/// <summary>
+/// MQTT服务器管理视图模型，负责MQTT服务器的增删改查操作。
+/// </summary>
 public partial class MqttsViewModel : ViewModelBase
 {
     private readonly DataServices _dataServices;
+    private readonly IMqttAppService _mqttAppService;
+    private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
-    private readonly ILogger<MqttsViewModel> _logger;
+    private readonly INavigationService _navigationService;
+    private readonly INotificationService _notificationService;
+
+    /// <summary>
+    /// MQTT服务器列表。
+    /// </summary>
     [ObservableProperty]
     private ObservableCollection<MqttServerItemViewModel> _mqtts;
 
-    // public ObservableCollection<Mqtt> Mqtts
-    // {
-    //     get => _mqtts;
-    //     set
-    //     {
-    //         if (_mqtts != null)
-    //         {
-    //             foreach (var mqtt in _mqtts)
-    //             {
-    //                 mqtt.PropertyChanged -= Mqtt_PropertyChanged;
-    //             }
-    //         }
-    //
-    //         SetProperty(ref _mqtts, value);
-    //
-    //         if (_mqtts != null)
-    //         {
-    //             foreach (var mqtt in _mqtts)
-    //             {
-    //                 mqtt.PropertyChanged += Mqtt_PropertyChanged;
-    //             }
-    //         }
-    //     }
-    // }
-
+    /// <summary>
+    /// 当前选中的MQTT服务器。
+    /// </summary>
     [ObservableProperty]
     private MqttServerItemViewModel _selectedMqtt;
 
+    private readonly ILogger<MqttsViewModel> _logger;
+
     public MqttsViewModel(
-        ILogger<MqttsViewModel> logger, IDialogService dialogService, DataServices dataServices
+        ILogger<MqttsViewModel> logger, 
+        IDialogService dialogService, 
+        DataServices dataServices,
+        IMqttAppService mqttAppService,
+        IMapper mapper,
+        INavigationService navigationService,
+        INotificationService notificationService
     )
     {
         _logger = logger;
         _dialogService = dialogService;
         _dataServices = dataServices;
-
-        // if (_dataServices.Mqtts == null || _dataServices.Mqtts.Count == 0)
-        // {
-        //     MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
-        // }
-        // else
-        // {
-        //     Mqtts = new ObservableCollection<Mqtt>(_dataServices.Mqtts);
-        // }
-        //
-        //
-        // _dataServices.OnMqttListChanged += ( mqtts) =>
-        // {
-        //     Mqtts = new ObservableCollection<Mqtt>(mqtts);
-        // };
+        _mqttAppService = mqttAppService;
+        _mapper = mapper;
+        _navigationService = navigationService;
+        _notificationService = notificationService;
+        
+        Mqtts = _dataServices.MqttServers;
     }
 
-    private async void Mqtt_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        // if (e.PropertyName == nameof(Mqtt.IsActive))
-        // {
-        //     if (sender is Mqtt mqtt)
-        //     {
-        //         try
-        //         {
-        //             await _mqttRepository.UpdateAsync(mqtt);
-        //             NotificationHelper.ShowSuccess($"MQTT: {mqtt.Name} 的启用状态已更新。");
-        //             MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
-        //         }
-        //         catch (Exception ex)
-        //         {
-        //             NotificationHelper.ShowError($"更新MQTT启用状态失败: {mqtt.Name} - {ex.Message}", ex);
-        //         }
-        //     }
-        // }
-    }
-
+    /// <summary>
+    /// 添加MQTT服务器命令。
+    /// </summary>
     [RelayCommand]
-    public async void AddMqtt()
+    public async Task AddMqtt()
     {
-        // try
-        // {
-        //     var mqtt = await _dialogService.ShowAddMqttDialog();
-        //     if (mqtt == null)
-        //     {
-        //         _logger.LogInformation("用户取消了添加MQTT操作。");
-        //         return;
-        //     }
-        //
-        //     await _mqttRepository.AddAsync(mqtt);
-        //     MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
-        //     MessageHelper.SendLoadMessage(LoadTypes.Menu);
-        // }
-        // catch (Exception e)
-        // {
-        //     NotificationHelper.ShowError($"添加MQTT的过程中发生错误：{e.Message}", e);
-        // }
+        try
+        {
+            // 1. 显示添加MQTT服务器对话框
+            MqttServerItemViewModel mqtt = await _dialogService.ShowDialogAsync(new MqttDialogViewModel()
+                                                                              {
+                                                                                  Title = "添加MQTT服务器",
+                                                                                  PrimaryButText = "添加MQTT服务器"
+                                                                              });
+            // 如果用户取消或对话框未返回MQTT服务器，则直接返回
+            if (mqtt == null)
+            {
+                return;
+            }
+
+            var mqttItem = await _dataServices.AddMqttServer(_mqttAppService, mqtt);
+            _notificationService.ShowSuccess($"MQTT服务器添加成功：{mqttItem.ServerName}");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "添加MQTT服务器的过程中发生错误");
+            _notificationService.ShowError($"添加MQTT服务器的过程中发生错误：{e.Message}", e);
+        }
     }
 
+    /// <summary>
+    /// 删除MQTT服务器命令。
+    /// </summary>
     [RelayCommand]
-    public async void DeleteMqtt()
+    public async Task DeleteMqtt()
     {
-        // try
-        // {
-        //     if (SelectedMqtt == null)
-        //     {
-        //         NotificationHelper.ShowError("你没有选择任何MQTT，请选择MQTT后再点击删除");
-        //         return;
-        //     }
-        //
-        //     string msg = $"确认要删除MQTT名为:{SelectedMqtt.Name}";
-        //     var isDel = await _dialogService.ShowConfrimeDialog("删除MQTT", msg, "删除MQTT");
-        //     if (isDel)
-        //     {
-        //         await _mqttRepository.DeleteAsync(SelectedMqtt);
-        //         MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
-        //         MessageHelper.SendLoadMessage(LoadTypes.Menu);
-        //         NotificationHelper.ShowSuccess($"删除MQTT成功,MQTT名：{SelectedMqtt.Name}");
-        //     }
-        // }
-        // catch (Exception e)
-        // {
-        //     NotificationHelper.ShowError($"删除MQTT的过程中发生错误：{e.Message}", e);
-        // }
+        try
+        {
+            if (SelectedMqtt == null)
+            {
+                _notificationService.ShowError("你没有选择任何MQTT服务器，请选择MQTT服务器后再点击删除");
+                return;
+            }
+
+            var viewModel = new ConfirmDialogViewModel("删除MQTT服务器", $"确认要删除MQTT服务器名为:{SelectedMqtt.ServerName}", "删除MQTT服务器");
+            if (await _dialogService.ShowDialogAsync(viewModel))
+            {
+                var mqttName = SelectedMqtt.ServerName;
+                await _dataServices.DeleteMqttServer(_mqttAppService, SelectedMqtt);
+                _notificationService.ShowSuccess($"删除MQTT服务器成功,服务器名：{mqttName}");
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "删除MQTT服务器的过程中发生错误");
+            _notificationService.ShowError($"删除MQTT服务器的过程中发生错误：{e.Message}", e);
+        }
     }
 
+    /// <summary>
+    /// 编辑MQTT服务器命令。
+    /// </summary>
     [RelayCommand]
-    public async void EditMqtt()
+    public async Task EditMqtt()
     {
-        // try
-        // {
-        //     if (SelectedMqtt == null)
-        //     {
-        //         NotificationHelper.ShowError("你没有选择任何MQTT，请选择MQTT后再点击编辑");
-        //         return;
-        //     }
-        //
-        //     var editMqtt = await _dialogService.ShowEditMqttDialog(SelectedMqtt);
-        //     if (editMqtt != null)
-        //     {
-        //         var res = await _mqttRepository.UpdateAsync(editMqtt);
-        //         MessageHelper.SendLoadMessage(LoadTypes.Mqtts);
-        //     }
-        // }
-        // catch (Exception e)
-        // {
-        //     NotificationHelper.ShowError($"编辑MQTT的过程中发生错误：{e.Message}", e);
-        // }
+        try
+        {
+            if (SelectedMqtt == null)
+            {
+                _notificationService.ShowError("你没有选择任何MQTT服务器，请选择MQTT服务器后再点击编辑");
+                return;
+            }
+
+            MqttDialogViewModel mqttDialogViewModel = new MqttDialogViewModel(SelectedMqtt)
+                                                          {
+                                                              Title = "编辑MQTT服务器",
+                                                              PrimaryButText = "保存修改"
+                                                          };
+            // 1. 显示MQTT服务器对话框
+            MqttServerItemViewModel mqtt = await _dialogService.ShowDialogAsync(mqttDialogViewModel);
+            // 如果用户取消或对话框未返回MQTT服务器，则直接返回
+            if (mqtt == null)
+            {
+                return;
+            }
+
+            await _dataServices.UpdateMqttServer(_mqttAppService, mqtt);
+            
+            // 更新UI
+            _mapper.Map(mqtt, SelectedMqtt);
+            
+            _notificationService.ShowSuccess($"编辑MQTT服务器成功：{mqtt.ServerName}");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "编辑MQTT服务器的过程中发生错误");
+            _notificationService.ShowError($"编辑MQTT服务器的过程中发生错误：{e.Message}", e);
+        }
     }
 
     /// <summary>
     /// 导航到MQTT服务器详情页面。
     /// </summary>
     [RelayCommand]
-    private void NavigateToMqttDetail()
+    private async Task NavigateToMqttDetail()
     {
-        // if (SelectedMqtt == null)
-        // {
-        //     NotificationHelper.ShowMessage("请选择一个MQTT服务器以查看详情。", NotificationType.Warning);
-        //     return;
-        // }
-        // _navgatorServices.NavigateTo<MqttServerDetailView>(SelectedMqtt);
+        if (SelectedMqtt == null) 
+        {
+            _notificationService.ShowWarn("请选择一个MQTT服务器以查看详情。");
+            return;
+        }
+
+        // 导航到MQTT服务器详情页
+        var menu = new MenuItemViewModel
+        {
+            TargetViewKey = "MqttServerDetailView",
+            TargetId = SelectedMqtt.Id
+        };
+        
+        await _navigationService.NavigateToAsync(menu);
     }
 }
