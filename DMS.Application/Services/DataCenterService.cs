@@ -648,37 +648,66 @@ public class DataCenterService : IDataCenterService
             MenuTrees.Clear();
             MqttServers.Clear();
 
-            // 顺序加载所有数据，避免数据库连接并发问题
-            var devices = await LoadAllDevicesAsync();
-            var variableTables = await LoadAllVariableTablesAsync();
-            var variables = await LoadAllVariablesAsync();
-            var menus = await LoadAllMenusAsync();
+            // 加载所有设备
+            var devices = await _repositoryManager.Devices.GetAllAsync();
+            var deviceDtos = _mapper.Map<List<DeviceDto>>(devices);
+
+            // 加载所有变量表
+            var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
+            var variableTableDtos = _mapper.Map<List<VariableTableDto>>(variableTables);
+
+            // 加载所有变量
+            var variables = await _repositoryManager.Variables.GetAllAsync();
+            var variableDtos = _mapper.Map<List<VariableDto>>(variables);
+
+            // 加载所有菜单
+            var menus = await _repositoryManager.Menus.GetAllAsync();
+            var menuDtos = _mapper.Map<List<MenuBeanDto>>(menus);
+            
             var mqttServers = await LoadAllMqttServersAsync();
 
-            // 加载设备数据到内存
-            foreach (var device in devices)
+            // 建立设备与变量表的关联
+            foreach (var deviceDto in deviceDtos)
             {
-                Devices.TryAdd(device.Id, device);
+                deviceDto.VariableTables = variableTableDtos
+                                           .Where(vt => vt.DeviceId == deviceDto.Id)
+                                           .ToList();
+
+                // 将设备添加到安全字典
+                Devices.TryAdd(deviceDto.Id, deviceDto);
             }
 
-            // 加载变量表数据到内存
-            foreach (var variableTable in variableTables)
+            // 建立变量表与变量的关联
+            foreach (var variableTableDto in variableTableDtos)
             {
-                VariableTables.TryAdd(variableTable.Id, variableTable);
+                variableTableDto.Variables = variableDtos
+                                             .Where(v => v.VariableTableId == variableTableDto.Id)
+                                             .ToList();
+                if (Devices.TryGetValue(variableTableDto.DeviceId, out var deviceDto))
+                {
+                    variableTableDto.Device = deviceDto;
+                }
+
+                // 将变量表添加到安全字典
+                VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
             }
 
-            // 加载变量数据到内存
-            foreach (var variable in variables)
+            // 将变量添加到安全字典
+            foreach (var variableDto in variableDtos)
             {
-                Variables.TryAdd(variable.Id, variable);
+                if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                {
+                    variableDto.VariableTable = variableTable;
+                }
+                Variables.TryAdd(variableDto.Id, variableDto);
             }
 
-            // 加载菜单数据到内存
-            foreach (var menu in menus)
+            // 将菜单添加到安全字典
+            foreach (var menuDto in menuDtos)
             {
-                Menus.TryAdd(menu.Id, menu);
+                Menus.TryAdd(menuDto.Id, menuDto);
             }
-
+            
             // 加载MQTT服务器数据到内存
             foreach (var mqttServer in mqttServers)
             {

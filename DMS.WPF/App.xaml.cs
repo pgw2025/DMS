@@ -171,6 +171,7 @@ public partial class App : System.Windows.Application
         
         // 注册MQTT服务管理器
         services.AddSingleton<IMqttServiceManager, MqttServiceManager>();
+        services.AddSingleton<IMqttAliasAppService, MqttAliasAppService>();
         services.AddHostedService<MqttBackgroundService>();
         
         // 注册WPF中的服务

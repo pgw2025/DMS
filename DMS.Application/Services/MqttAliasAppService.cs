@@ -1,14 +1,16 @@
 using AutoMapper;
-using DMS.Core.Interfaces;
-using DMS.Core.Models;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Core.Interfaces;
+using DMS.Core.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
 namespace DMS.Application.Services;
 
 /// <summary>
-/// MQTT别名应用服务，负责处理MQTT别名相关的业务逻辑。
-/// 实现 <see cref="IMqttAliasAppService"/> 接口。
+/// IMqttAliasAppService 的实现，负责管理变量与MQTT服务器的别名关联。
 /// </summary>
 public class MqttAliasAppService : IMqttAliasAppService
 {
@@ -16,10 +18,8 @@ public class MqttAliasAppService : IMqttAliasAppService
     private readonly IMapper _mapper;
 
     /// <summary>
-    /// 构造函数，通过依赖注入获取仓储管理器和AutoMapper实例。
+    /// 构造函数。
     /// </summary>
-    /// <param name="repoManager">仓储管理器实例。</param>
-    /// <param name="mapper">AutoMapper 实例。</param>
     public MqttAliasAppService(IRepositoryManager repoManager, IMapper mapper)
     {
         _repoManager = repoManager;
@@ -27,94 +27,93 @@ public class MqttAliasAppService : IMqttAliasAppService
     }
 
     /// <summary>
-    /// 异步根据ID获取MQTT别名数据传输对象。
+    /// 异步获取指定变量的所有MQTT别名关联。
     /// </summary>
-    /// <param name="id">MQTT别名ID。</param>
-    /// <returns>MQTT别名数据传输对象。</returns>
-    public async Task<VariableMqttAliasDto> GetMqttAliasByIdAsync(int id)
+    public async Task<List<VariableMqttAliasDto>> GetAliasesForVariableAsync(int variableId)
     {
-        var mqttAlias = await _repoManager.VariableMqttAliases.GetByIdAsync(id);
-        return _mapper.Map<VariableMqttAliasDto>(mqttAlias);
+        // 从仓储获取别名，并确保加载了关联的MqttServer信息
+        var aliases = await _repoManager.VariableMqttAliases.GetAliasesForVariableAsync(variableId);
+        return _mapper.Map<List<VariableMqttAliasDto>>(aliases);
     }
 
     /// <summary>
-    /// 异步获取所有MQTT别名数据传输对象列表。
+    /// 异步为变量分配或更新一个MQTT别名。
     /// </summary>
-    /// <returns>MQTT别名数据传输对象列表。</returns>
-    public async Task<List<VariableMqttAliasDto>> GetAllMqttAliasesAsync()
-    {
-        var mqttAliases = await _repoManager.VariableMqttAliases.GetAllAsync();
-        return _mapper.Map<List<VariableMqttAliasDto>>(mqttAliases);
-    }
-
-    /// <summary>
-    /// 异步创建一个新MQTT别名（事务性操作）。
-    /// </summary>
-    /// <param name="mqttAliasDto">要创建的MQTT别名数据传输对象。</param>
-    /// <returns>新创建MQTT别名的ID。</returns>
-    /// <exception cref="ApplicationException">如果创建MQTT别名时发生错误。</exception>
-    public async Task<int> CreateMqttAliasAsync(VariableMqttAliasDto mqttAliasDto)
+    public async Task AssignAliasAsync(int variableId, int mqttServerId, string alias)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            var mqttAlias = _mapper.Map<VariableMqttAlias>(mqttAliasDto);
-            await _repoManager.VariableMqttAliases.AddAsync(mqttAlias);
-            await _repoManager.CommitAsync();
-            return mqttAlias.Id;
-        }
-        catch (Exception ex)
-        {
-            await _repoManager.RollbackAsync();
-            throw new ApplicationException("创建MQTT别名时发生错误，操作已回滚。", ex);
-        }
-    }
 
-    /// <summary>
-    /// 异步更新一个已存在的MQTT别名（事务性操作）。
-    /// </summary>
-    /// <param name="mqttAliasDto">要更新的MQTT别名数据传输对象。</param>
-    /// <returns>表示异步操作的任务。</returns>
-    /// <exception cref="ApplicationException">如果找不到MQTT别名或更新MQTT别名时发生错误。</exception>
-    public async Task UpdateMqttAliasAsync(VariableMqttAliasDto mqttAliasDto)
-    {
-        try
-        {
-            await _repoManager.BeginTranAsync();
-            var mqttAlias = await _repoManager.VariableMqttAliases.GetByIdAsync(mqttAliasDto.Id);
-            if (mqttAlias == null)
+            // 检查是否已存在该变量与该服务器的关联
+            var existingAlias = await _repoManager.VariableMqttAliases.GetByVariableAndServerAsync(variableId, mqttServerId);
+
+            if (existingAlias != null)
             {
-                throw new ApplicationException($"MQTT Alias with ID {mqttAliasDto.Id} not found.");
+                // 如果存在，则更新别名
+                existingAlias.Alias = alias;
+                await _repoManager.VariableMqttAliases.UpdateAsync(existingAlias);
             }
-            _mapper.Map(mqttAliasDto, mqttAlias);
-            await _repoManager.VariableMqttAliases.UpdateAsync(mqttAlias);
+            else
+            {
+                // 如果不存在，则创建新的关联
+                var newAlias = new VariableMqttAlias
+                {
+                    VariableId = variableId,
+                    MqttServerId = mqttServerId,
+                    Alias = alias
+                };
+                await _repoManager.VariableMqttAliases.AddAsync(newAlias);
+            }
+
             await _repoManager.CommitAsync();
         }
         catch (Exception ex)
         {
             await _repoManager.RollbackAsync();
-            throw new ApplicationException("更新MQTT别名时发生错误，操作已回滚。", ex);
+            throw new ApplicationException("分配/更新MQTT别名失败。", ex);
         }
     }
 
     /// <summary>
-    /// 异步删除一个MQTT别名（事务性操作）。
+    /// 异步更新一个已存在的MQTT别名。
     /// </summary>
-    /// <param name="id">要删除MQTT别名的ID。</param>
-    /// <returns>表示异步操作的任务。</returns>
-    /// <exception cref="ApplicationException">如果删除MQTT别名时发生错误。</exception>
-    public async Task DeleteMqttAliasAsync(int id)
+    public async Task UpdateAliasAsync(int aliasId, string newAlias)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            await _repoManager.VariableMqttAliases.DeleteByIdAsync(id);
+            var aliasToUpdate = await _repoManager.VariableMqttAliases.GetByIdAsync(aliasId);
+            if (aliasToUpdate == null)
+            {
+                throw new KeyNotFoundException($"未找到ID为 {aliasId} 的MQTT别名关联。");
+            }
+            aliasToUpdate.Alias = newAlias;
+            await _repoManager.VariableMqttAliases.UpdateAsync(aliasToUpdate);
             await _repoManager.CommitAsync();
         }
         catch (Exception ex)
         {
             await _repoManager.RollbackAsync();
-            throw new ApplicationException("删除MQTT别名时发生错误，操作已回滚。", ex);
+            throw new ApplicationException("更新MQTT别名失败。", ex);
+        }
+    }
+
+    /// <summary>
+    /// 异步移除一个MQTT别名关联。
+    /// </summary>
+    public async Task RemoveAliasAsync(int aliasId)
+    {
+        try
+        {
+            await _repoManager.BeginTranAsync();
+            await _repoManager.VariableMqttAliases.DeleteByIdAsync(aliasId);
+            await _repoManager.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("移除MQTT别名失败。", ex);
         }
     }
 }

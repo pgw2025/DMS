@@ -1,34 +1,37 @@
 using DMS.Application.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DMS.Application.Interfaces;
 
 /// <summary>
-/// 定义MQTT别名管理相关的应用服务操作。
+/// 定义了MQTT别名管理相关的应用服务操作。
 /// </summary>
 public interface IMqttAliasAppService
 {
     /// <summary>
-    /// 异步根据ID获取MQTT别名DTO。
+    /// 异步获取指定变量的所有MQTT别名关联。
     /// </summary>
-    Task<VariableMqttAliasDto> GetMqttAliasByIdAsync(int id);
+    Task<List<VariableMqttAliasDto>> GetAliasesForVariableAsync(int variableId);
 
     /// <summary>
-    /// 异步获取所有MQTT别名DTO列表。
+    /// 异步为变量分配或更新一个MQTT别名。
     /// </summary>
-    Task<List<VariableMqttAliasDto>> GetAllMqttAliasesAsync();
-
-    /// <summary>
-    /// 异步创建一个新的MQTT别名。
-    /// </summary>
-    Task<int> CreateMqttAliasAsync(VariableMqttAliasDto mqttAliasDto);
+    /// <param name="variableId">变量ID。</param>
+    /// <param name="mqttServerId">MQTT服务器ID。</param>
+    /// <param name="alias">要设置的别名。</param>
+    Task AssignAliasAsync(int variableId, int mqttServerId, string alias);
 
     /// <summary>
     /// 异步更新一个已存在的MQTT别名。
     /// </summary>
-    Task UpdateMqttAliasAsync(VariableMqttAliasDto mqttAliasDto);
+    /// <param name="aliasId">别名关联的ID。</param>
+    /// <param name="newAlias">新的别名字符串。</param>
+    Task UpdateAliasAsync(int aliasId, string newAlias);
 
     /// <summary>
-    /// 异步删除一个MQTT别名。
+    /// 异步移除一个MQTT别名关联。
     /// </summary>
-    Task DeleteMqttAliasAsync(int id);
+    /// <param name="aliasId">要移除的别名关联的ID。</param>
+    Task RemoveAliasAsync(int aliasId);
 }

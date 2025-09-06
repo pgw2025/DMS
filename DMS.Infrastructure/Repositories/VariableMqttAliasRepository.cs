@@ -2,11 +2,12 @@ using System.Diagnostics;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
-
-
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using DMS.Core.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace DMS.Infrastructure.Repositories;
 
@@ -108,5 +109,27 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     {
         var dbEntities = _mapper.Map<List<DbVariableMqttAlias>>(entities);
         return base.AddBatchAsync(dbEntities);
+    }
+
+    /// <summary>
+    /// 异步获取指定变量的所有MQTT别名关联。
+    /// </summary>
+    public async Task<List<VariableMqttAlias>> GetAliasesForVariableAsync(int variableId)
+    {
+        var dbList = await Db.Queryable<DbVariableMqttAlias>()
+            .Where(x => x.VariableId == variableId)
+            .ToListAsync();
+        return _mapper.Map<List<VariableMqttAlias>>(dbList);
+    }
+
+    /// <summary>
+    /// 异步根据变量和服务器获取别名关联。
+    /// </summary>
+    public async Task<VariableMqttAlias> GetByVariableAndServerAsync(int variableId, int mqttServerId)
+    {
+        var dbAlias = await Db.Queryable<DbVariableMqttAlias>()
+            .Where(x => x.VariableId == variableId && x.MqttServerId == mqttServerId)
+            .FirstAsync();
+        return _mapper.Map<VariableMqttAlias>(dbAlias);
     }
 }
