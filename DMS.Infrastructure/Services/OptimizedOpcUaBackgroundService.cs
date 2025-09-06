@@ -32,10 +32,10 @@ namespace DMS.Infrastructure.Services
             _opcUaServiceManager = opcUaServiceManager ?? throw new ArgumentNullException(nameof(opcUaServiceManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _dataCenterService.DataLoadCompleted += OnDataLoadCompleted;
+            _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
         }
 
-        private void OnDataLoadCompleted(object sender, DataLoadCompletedEventArgs e)
+        private void OnLoadDataCompleted(object sender, DataLoadCompletedEventArgs e)
         {
             _logger.LogInformation("收到数据加载完成通知，触发OPC UA服务重新加载");
             _reloadSemaphore.Release();
@@ -145,7 +145,7 @@ namespace DMS.Infrastructure.Services
         {
             _logger.LogInformation("正在释放OPC UA后台服务资源...");
             
-            _dataCenterService.DataLoadCompleted -= OnDataLoadCompleted;
+            _dataCenterService.OnLoadDataCompleted -= OnLoadDataCompleted;
             _reloadSemaphore?.Dispose();
             
             base.Dispose();

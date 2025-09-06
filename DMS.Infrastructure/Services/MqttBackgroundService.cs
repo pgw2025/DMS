@@ -1,345 +1,247 @@
-using System.Collections.Concurrent;
-using System.Text;
-using System.Threading.Channels;
-using DMS.Core.Models;
+using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Hosting;
-using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Disconnecting;
-using MQTTnet.Client.Options;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using DMS.Application.DTOs.Events;
+using DMS.Core.Models;
 using DMS.Application.Interfaces;
-using DMS.Core.Interfaces;
 
-namespace DMS.Infrastructure.Services;
-
-/// <summary>
-/// MQTT后台服务，继承自BackgroundService，用于在后台管理MQTT连接和数据发布。
-/// </summary>
-public class MqttBackgroundService : BackgroundService
+namespace DMS.Infrastructure.Services
 {
-    private readonly IRepositoryManager _repositoryManager;
-    private readonly ILogger<MqttBackgroundService> _logger;
-
-    private readonly ConcurrentDictionary<int, IMqttClient> _mqttClients;
-    private readonly ConcurrentDictionary<int, MqttServer> _mqttConfigDic;
-    private readonly ConcurrentDictionary<int, int> _reconnectAttempts;
-
-    private readonly SemaphoreSlim _reloadSemaphore = new(0);
-    private readonly Channel<VariableMqtt> _messageChannel;
-
     /// <summary>
-    /// 构造函数，注入DataServices。
+    /// MQTT后台服务，负责管理MQTT连接和数据传输
     /// </summary>
-    public MqttBackgroundService(IRepositoryManager repositoryManager, ILogger<MqttBackgroundService> logger)
+    public class MqttBackgroundService : BackgroundService, IMqttBackgroundService
     {
-        _repositoryManager = repositoryManager;
-        _logger = logger;
-        _mqttClients = new ConcurrentDictionary<int, IMqttClient>();
-        _mqttConfigDic = new ConcurrentDictionary<int, MqttServer>();
-        _reconnectAttempts = new ConcurrentDictionary<int, int>();
-        _messageChannel = Channel.CreateUnbounded<VariableMqtt>();
+        private readonly ILogger<MqttBackgroundService> _logger;
+        private readonly IMqttServiceManager _mqttServiceManager;
+        private readonly IDataCenterService _dataCenterService;
+        private readonly ConcurrentDictionary<int, MqttServer> _mqttServers;
+        private readonly SemaphoreSlim _reloadSemaphore = new(0);
 
-        // _deviceDataService.OnMqttListChanged += HandleMqttListChanged;
-    }
-
-    /// <summary>
-    /// 将待发送的变量数据异步推入队列。
-    /// </summary>
-    /// <param name="data">包含MQTT别名和变量数据的对象。</param>
-    public async Task SendVariableAsync(VariableMqtt data)
-    {
-        await _messageChannel.Writer.WriteAsync(data);
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("Mqtt后台服务正在启动。");
-        _reloadSemaphore.Release();
-
-        var processQueueTask = ProcessMessageQueueAsync(stoppingToken);
-
-        try
+        public MqttBackgroundService(
+            ILogger<MqttBackgroundService> logger,
+            IMqttServiceManager mqttServiceManager,
+            IDataCenterService dataCenterService)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mqttServiceManager = mqttServiceManager ?? throw new ArgumentNullException(nameof(mqttServiceManager));
+            _dataCenterService = dataCenterService ?? throw new ArgumentNullException(nameof(dataCenterService));
+            _mqttServers = new ConcurrentDictionary<int, MqttServer>();
+
+            _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+        }
+
+        private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
             {
-                await _reloadSemaphore.WaitAsync(stoppingToken);
+                Start();
+            }
+            
+        }
 
-                if (stoppingToken.IsCancellationRequested) break;
+        /// <summary>
+        /// 启动MQTT后台服务
+        /// </summary>
+        private void Start(CancellationToken cancellationToken = default)
+        {
+            _reloadSemaphore.Release();
+            _logger.LogInformation("MQTT后台服务启动请求已发送");
+        }
 
-                // if (_deviceDataService.Mqtts == null || _deviceDataService.Mqtts.Count == 0)
-                // {
-                //     _logger.LogInformation("没有可用的Mqtt配置，等待Mqtt列表更新...");
-                //     continue;
-                // }
+        /// <summary>
+        /// 停止MQTT后台服务
+        /// </summary>
+        public async Task StopAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("MQTT后台服务停止请求已发送");
+        }
 
-                if (!LoadMqttConfigurations())
-                {
-                    _logger.LogInformation("加载Mqtt配置过程中发生了错误，停止后面的操作。");
-                    continue;
-                }
+        /// <summary>
+        /// 添加MQTT服务器配置
+        /// </summary>
+        public void AddMqttServer(MqttServer mqttServer)
+        {
+            if (mqttServer == null)
+                throw new ArgumentNullException(nameof(mqttServer));
 
-                await ConnectMqttList(stoppingToken);
-                _logger.LogInformation("Mqtt后台服务已启动。");
+            _mqttServers.AddOrUpdate(mqttServer.Id, mqttServer, (key, oldValue) => mqttServer);
+            _mqttServiceManager.AddMqttServer(mqttServer);
+            _reloadSemaphore.Release();
+            _logger.LogInformation("已添加MQTT服务器 {ServerName} 到监控列表", mqttServer.ServerName);
+        }
 
-                while (!stoppingToken.IsCancellationRequested && _reloadSemaphore.CurrentCount == 0)
-                {
-                    await Task.Delay(1000, stoppingToken);
-                }
+        /// <summary>
+        /// 移除MQTT服务器配置
+        /// </summary>
+        public async Task RemoveMqttServerAsync(int mqttServerId, CancellationToken cancellationToken = default)
+        {
+            if (_mqttServers.TryRemove(mqttServerId, out var mqttServer))
+            {
+                await _mqttServiceManager.RemoveMqttServerAsync(mqttServerId, cancellationToken);
+                _logger.LogInformation("已移除MQTT服务器 {ServerName} 的监控", mqttServer?.ServerName ?? mqttServerId.ToString());
             }
         }
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("Mqtt后台服务正在停止。");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, $"Mqtt后台服务运行中发生了错误:{e.Message}");
-        }
-        finally
-        {
-            _messageChannel.Writer.Complete();
-            await processQueueTask; // 等待消息队列处理完成
-            await DisconnectAll(stoppingToken);
-            // _deviceDataService.OnMqttListChanged -= HandleMqttListChanged;
-            _logger.LogInformation("Mqtt后台服务已停止。");
-        }
-    }
 
-    private async Task ProcessMessageQueueAsync(CancellationToken stoppingToken)
-    {
-        _logger.LogInformation("MQTT消息发送队列处理器已启动。");
-        var batch = new List<VariableMqtt>();
-        var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-
-        while (!stoppingToken.IsCancellationRequested)
+        /// <summary>
+        /// 更新MQTT服务器配置
+        /// </summary>
+        public void UpdateMqttServer(MqttServer mqttServer)
         {
+            if (mqttServer == null)
+                throw new ArgumentNullException(nameof(mqttServer));
+
+            _mqttServers.AddOrUpdate(mqttServer.Id, mqttServer, (key, oldValue) => mqttServer);
+            _reloadSemaphore.Release();
+            _logger.LogInformation("已更新MQTT服务器 {ServerName} 的配置", mqttServer.ServerName);
+        }
+
+        /// <summary>
+        /// 获取所有MQTT服务器配置
+        /// </summary>
+        public IEnumerable<MqttServer> GetAllMqttServers()
+        {
+            return _mqttServers.Values.ToList();
+        }
+
+        /// <summary>
+        /// 发布变量数据到MQTT服务器
+        /// </summary>
+        public async Task PublishVariableDataAsync(VariableMqtt variableMqtt, CancellationToken cancellationToken = default)
+        {
+            await _mqttServiceManager.PublishVariableDataAsync(variableMqtt, cancellationToken);
+        }
+
+        /// <summary>
+        /// 发布批量变量数据到MQTT服务器
+        /// </summary>
+        public async Task PublishVariablesDataAsync(List<VariableMqtt> variableMqtts, CancellationToken cancellationToken = default)
+        {
+            await _mqttServiceManager.PublishVariablesDataAsync(variableMqtts, cancellationToken);
+        }
+
+        /// <summary>
+        /// 后台服务的核心执行逻辑
+        /// </summary>
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation("MQTT后台服务正在启动");
+
             try
             {
-                // 等待信号：要么是新消息到达，要么是1秒定时器触发
-                await Task.WhenAny(
-                    _messageChannel.Reader.WaitToReadAsync(stoppingToken).AsTask(),
-                    timer.WaitForNextTickAsync(stoppingToken).AsTask()
-                );
-
-                // 尽可能多地读取消息，直到达到批次上限
-                while (batch.Count < 50 && _messageChannel.Reader.TryRead(out var message))
+                while (!stoppingToken.IsCancellationRequested )
                 {
-                    batch.Add(message);
-                }
+                    await _reloadSemaphore.WaitAsync(stoppingToken);
 
-                if (batch.Any())
-                {
-                    await SendBatchAsync(batch, stoppingToken);
-                    batch.Clear();
+                    if (stoppingToken.IsCancellationRequested ) break;
+
+                    // 加载MQTT配置
+                    if (!LoadMqttConfigurations())
+                    {
+                        _logger.LogInformation("加载MQTT配置过程中发生了错误，停止后面的操作");
+                        continue;
+                    }
+
+                    // 连接MQTT服务器
+                    await ConnectMqttServersAsync(stoppingToken);
+                    _logger.LogInformation("MQTT后台服务已启动");
+
+                    // 保持运行状态
+                    while (!stoppingToken.IsCancellationRequested  && _reloadSemaphore.CurrentCount == 0)
+                    {
+                        await Task.Delay(1000, stoppingToken);
+                    }
                 }
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("MQTT消息发送队列处理器已停止。");
-                break;
+                _logger.LogInformation("MQTT后台服务正在停止");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"处理MQTT消息队列时发生错误: {ex.Message}");
-                await Task.Delay(5000, stoppingToken); // 发生未知错误时，延迟一段时间再重试
+                _logger.LogError(ex, $"MQTT后台服务运行中发生了错误: {ex.Message}");
+            }
+            finally
+            {
+                _logger.LogInformation("MQTT后台服务已停止");
             }
         }
-    }
 
-    private async Task SendBatchAsync(List<VariableMqtt> batch, CancellationToken stoppingToken)
-    {
-        _logger.LogInformation($"准备发送一批 {batch.Count} 条MQTT消息。");
-        // 按MQTT服务器ID进行分组
-        var groupedByMqtt = batch.GroupBy(vm => vm.Mqtt.Id);
-
-        foreach (var group in groupedByMqtt)
+        /// <summary>
+        /// 加载MQTT配置
+        /// </summary>
+        private bool LoadMqttConfigurations()
         {
-            var mqttId = group.Key;
-            if (!_mqttClients.TryGetValue(mqttId, out var client) || !client.IsConnected)
-            {
-                _logger.LogWarning($"MQTT客户端 (ID: {mqttId}) 未连接或不存在，跳过 {group.Count()} 条消息。");
-                continue;
-            }
-
-            var messages = group.Select(vm => new MqttApplicationMessageBuilder()
-                                              .WithTopic(vm.Mqtt.PublishTopic)
-                                              .WithPayload(vm.Variable?.DataValue?.ToString() ?? string.Empty)
-                                              .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-                                              .Build())
-                                .ToList();
             try
             {
-                foreach (var message in messages)
+                _logger.LogInformation("开始加载MQTT配置...");
+                _mqttServers.Clear();
+
+                // 从数据服务中心获取所有激活的MQTT服务器
+                var mqttServerDtos = _dataCenterService.MqttServers.Values
+                    .Where(m => m.IsActive)
+                    .ToList();
+
+                foreach (var mqttServerDto in mqttServerDtos)
                 {
-                    await client.PublishAsync(message, stoppingToken);
+                    // 将 MqttServerDto 转换为 MqttServer
+                    var mqttServer = new MqttServer
+                    {
+                        Id = mqttServerDto.Id,
+                        ServerName = mqttServerDto.ServerName,
+                        ServerUrl = mqttServerDto.ServerUrl,
+                        Port = mqttServerDto.Port,
+                        Username = mqttServerDto.Username,
+                        Password = mqttServerDto.Password,
+                        IsActive = mqttServerDto.IsActive,
+                        SubscribeTopic = mqttServerDto.SubscribeTopic,
+                        PublishTopic = mqttServerDto.PublishTopic,
+                        ClientId = mqttServerDto.ClientId,
+                        CreatedAt = mqttServerDto.CreatedAt,
+                        ConnectedAt = mqttServerDto.ConnectedAt,
+                        ConnectionDuration = mqttServerDto.ConnectionDuration,
+                        MessageFormat = mqttServerDto.MessageFormat
+                    };
+
+                    _mqttServers.TryAdd(mqttServer.Id, mqttServer);
+                    _mqttServiceManager.AddMqttServer(mqttServer);
                 }
-                _logger.LogInformation($"成功向MQTT客户端 (ID: {mqttId}) 发送 {messages.Count} 条消息。");
+
+                _logger.LogInformation($"成功加载 {mqttServerDtos.Count} 个MQTT配置");
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"向MQTT客户端 (ID: {mqttId}) 批量发送消息时发生错误: {ex.Message}");
+                _logger.LogError(ex, $"加载MQTT配置时发生错误: {ex.Message}");
+                return false;
             }
         }
-    }
 
-    private async Task DisconnectAll(CancellationToken stoppingToken)
-    {
-        var disconnectTasks = _mqttClients.Values.Select(client => client.DisconnectAsync(new MqttClientDisconnectOptions(), stoppingToken));
-        await Task.WhenAll(disconnectTasks);
-        _mqttClients.Clear();
-    }
-
-    private bool LoadMqttConfigurations()
-    {
-        try
+        /// <summary>
+        /// 连接MQTT服务器列表
+        /// </summary>
+        private async Task ConnectMqttServersAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("开始加载Mqtt配置文件...");
-            _mqttConfigDic.Clear();
-            // var mqttConfigList = _deviceDataService.Mqtts.Where(m => m.IsActive).ToList();
-            //
-            // foreach (var mqtt in mqttConfigList)
-            // {
-            //     // mqtt.OnMqttIsActiveChanged += OnMqttIsActiveChangedHandler; // 移除此行，因为MqttServer没有这个事件
-            //     _mqttConfigDic.TryAdd(mqtt.Id, mqtt);
-            //     // mqtt.ConnectMessage = "配置加载成功."; // 移除此行，因为MqttServer没有这个属性
-            // }
-            //
-            // _logger.LogInformation($"Mqtt配置文件加载成功，开启的Mqtt客户端：{mqttConfigList.Count}个。");
-            return true;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, $"Mqtt后台服务在加载配置的过程中发生了错误:{e.Message}");
-            return false;
-        }
-    }
+            var connectTasks = _mqttServers.Values
+                .Where(m => m.IsActive)
+                .Select(mqtt => _mqttServiceManager.ConnectMqttServerAsync(mqtt.Id, stoppingToken));
 
-    // private async void OnMqttIsActiveChangedHandler(MqttServer mqtt) // 移除此方法，因为MqttServer没有这个事件
-    // {
-    //     try
-    //     {
-    //         if (mqtt.IsActive)
-    //         {
-    //             await ConnectMqtt(mqtt, CancellationToken.None);
-    //         }
-    //         else
-    //         {
-    //             if (_mqttClients.TryRemove(mqtt.Id, out var client) && client.IsConnected)
-    //             {
-    //                 await client.DisconnectAsync();
-    //                 _logger.LogInformation($"{mqtt.Name}的客户端，与服务器断开连接.");
-    //             }
-    //             mqtt.IsConnected = false;
-    //             mqtt.ConnectMessage = "已断开连接.";
-    //         }
-    //
-    //         await _repositoryManager.MqttServers.UpdateAsync(mqtt);
-    //         _logger.LogInformation($"Mqtt客户端：{mqtt.Name},激活状态修改成功。");
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _logger.LogError(e, $"{mqtt.Name}客户端，开启或关闭的过程中发生了错误:{e.Message}");
-    //     }
-    // }
-
-    private async Task ConnectMqttList(CancellationToken stoppingToken)
-    {
-        var connectTasks = _mqttConfigDic.Values.Select(mqtt => ConnectMqtt(mqtt, stoppingToken));
-        await Task.WhenAll(connectTasks);
-    }
-
-    private async Task ConnectMqtt(MqttServer mqtt, CancellationToken stoppingToken)
-    {
-        if (_mqttClients.TryGetValue(mqtt.Id, out var existingClient) && existingClient.IsConnected)
-        {
-            _logger.LogInformation($"{mqtt.ServerName}的Mqtt服务器连接已存在。");
-            return;
+            await Task.WhenAll(connectTasks);
         }
 
-        _logger.LogInformation($"开始连接：{mqtt.ServerName}的服务器...");
-        // mqtt.ConnectMessage = "开始连接服务器..."; // 移除此行，因为MqttServer没有这个属性
-
-        var factory = new MqttFactory();
-        var client = factory.CreateMqttClient();
-
-        var options = new MqttClientOptionsBuilder()
-                      .WithClientId(mqtt.ClientId)
-                      .WithTcpServer(mqtt.ServerUrl, mqtt.Port)
-                      .WithCredentials(mqtt.Username, mqtt.Password)
-                      .WithCleanSession()
-                      .Build();
-
-        client.UseConnectedHandler(async e => await HandleConnected(e, client, mqtt));
-        client.UseApplicationMessageReceivedHandler(e => HandleMessageReceived(e, mqtt));
-        client.UseDisconnectedHandler(async e => await HandleDisconnected(e, options, client, mqtt, stoppingToken));
-
-        try
+        /// <summary>
+        /// 处理MQTT列表变化
+        /// </summary>
+        private void HandleMqttListChanged(List<MqttServer> mqtts)
         {
-            await client.ConnectAsync(options, stoppingToken);
-            _mqttClients.AddOrUpdate(mqtt.Id, client, (id, oldClient) => client);
+            _logger.LogInformation("MQTT列表发生了变化，正在重新加载数据...");
+            _reloadSemaphore.Release();
         }
-        catch (Exception ex)
-        {
-            // mqtt.ConnectMessage = $"连接MQTT服务器失败: {ex.Message}"; // 移除此行，因为MqttServer没有这个属性
-            _logger.LogError(ex, $"连接MQTT服务器失败: {mqtt.ServerName}");
-        }
-    }
-
-    private static void HandleMessageReceived(MqttApplicationMessageReceivedEventArgs e, MqttServer mqtt)
-    {
-        var topic = e.ApplicationMessage.Topic;
-        var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-        // _logger.LogInformation($"MQTT客户端 {mqtt.ServerName} 收到消息: 主题={topic}, 消息={payload}");
-    }
-
-    private async Task HandleDisconnected(MqttClientDisconnectedEventArgs args, IMqttClientOptions options, IMqttClient client, MqttServer mqtt, CancellationToken stoppingToken)
-    {
-        _logger.LogWarning($"与MQTT服务器断开连接: {mqtt.ServerName}");
-        // mqtt.ConnectMessage = "断开连接."; // 移除此行，因为MqttServer没有这个属性
-        // mqtt.IsConnected = false; // 移除此行，因为MqttServer没有这个属性
-
-        if (stoppingToken.IsCancellationRequested || !mqtt.IsActive) return;
-
-        _reconnectAttempts.AddOrUpdate(mqtt.Id, 1, (id, count) => count + 1);
-        var attempt = _reconnectAttempts[mqtt.Id];
-
-        var delay = TimeSpan.FromSeconds(Math.Min(60, Math.Pow(2, attempt)));
-        _logger.LogInformation($"与MQTT服务器：{mqtt.ServerName} 的连接已断开。将在 {delay.TotalSeconds} 秒后尝试第 {attempt} 次重新连接...");
-        // mqtt.ConnectMessage = $"连接已断开，{delay.TotalSeconds}秒后尝试重连..."; // 移除此行，因为MqttServer没有这个属性
-
-        await Task.Delay(delay, stoppingToken);
-
-        try
-        {
-            // mqtt.ConnectMessage = "开始重新连接服务器..."; // 移除此行，因为MqttServer没有这个属性
-            await client.ConnectAsync(options, stoppingToken);
-        }
-        catch (Exception ex)
-        {
-            // mqtt.ConnectMessage = "重新连接失败."; // 移除此行，因为MqttServer没有这个属性
-            _logger.LogError(ex, $"重新与Mqtt服务器连接失败: {mqtt.ServerName}");
-        }
-    }
-
-    private async Task HandleConnected(MqttClientConnectedEventArgs args, IMqttClient client, MqttServer mqtt)
-    {
-        _reconnectAttempts.TryRemove(mqtt.Id, out _);
-        _logger.LogInformation($"已连接到MQTT服务器: {mqtt.ServerName}");
-        // mqtt.IsConnected = true; // 移除此行，因为MqttServer没有这个属性
-        // mqtt.ConnectMessage = "连接成功."; // 移除此行，因为MqttServer没有这个属性
-
-        if (!string.IsNullOrEmpty(mqtt.SubscribeTopic))
-        {
-            await client.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(mqtt.SubscribeTopic).Build());
-            _logger.LogInformation($"MQTT客户端 {mqtt.ServerName} 已订阅主题: {mqtt.SubscribeTopic}");
-        }
-    }
-
-    private void HandleMqttListChanged(List<MqttServer> mqtts)
-    {
-        _logger.LogInformation("Mqtt列表发生了变化，正在重新加载数据...");
-        _reloadSemaphore.Release();
     }
 }

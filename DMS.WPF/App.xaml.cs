@@ -156,6 +156,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IExcelService, ExcelService>();
 
         services.AddTransient<IOpcUaService, OpcUaService>();
+        services.AddTransient<IMqttService, MqttService>();
+        services.AddTransient<IMqttServiceFactory, MqttServiceFactory>();
         
         // 注册App服务
         services.AddSingleton<IInitializeService, InitializeService>();
@@ -166,6 +168,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IDataCenterService, DataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
+        
+        // 注册MQTT服务管理器
+        services.AddSingleton<IMqttServiceManager, MqttServiceManager>();
+        services.AddHostedService<MqttBackgroundService>();
         
         // 注册WPF中的服务
         services.AddSingleton<IMqttAppService, MqttAppService>();

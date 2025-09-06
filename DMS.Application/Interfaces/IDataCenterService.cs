@@ -333,7 +333,7 @@ public interface IDataCenterService
     /// <summary>
     /// 当数据加载完成时触发
     /// </summary>
-    event EventHandler<DataLoadCompletedEventArgs> DataLoadCompleted;
+    event EventHandler<DataLoadCompletedEventArgs> OnLoadDataCompleted;
 
     /// <summary>
     /// 当设备数据发生变化时触发

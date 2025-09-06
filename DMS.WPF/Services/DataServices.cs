@@ -101,13 +101,13 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         
         // 监听变量值变更事件
         _dataCenterService.VariableValueChanged += OnVariableValueChanged;
-        _dataCenterService.DataLoadCompleted += OnDataLoadCompleted;
+        _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
 
         // 注册消息接收
         // WeakReferenceMessenger.Register<LoadMessage>(this, (r, m) => r.Receive(m));
     }
 
-    private  void OnDataLoadCompleted(object? sender, DataLoadCompletedEventArgs e)
+    private  void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
     {
         if (e.IsSuccess)
         {

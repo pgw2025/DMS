@@ -81,10 +81,10 @@ public class OpcUaBackgroundService : BackgroundService
         _opcUaPollVariablesByDeviceId = new ConcurrentDictionary<int, List<Variable>>();
         _opcUaVariablesByDeviceId = new ConcurrentDictionary<int, List<VariableDto>>();
 
-        _dataCenterService.DataLoadCompleted += DataLoadCompleted;
+        _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
     }
 
-    private void DataLoadCompleted(object? sender, DataLoadCompletedEventArgs e)
+    private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
     {
         _reloadSemaphore.Release();
     }

@@ -51,10 +51,10 @@ public class S7BackgroundService : BackgroundService
         _messenger = messenger;
         _logger = logger;
 
-        _dataCenterService.DataLoadCompleted += DataLoadCompleted;
+        _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
     }
 
-    private void DataLoadCompleted(object? sender, DataLoadCompletedEventArgs e)
+    private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
     {
         _reloadSemaphore.Release();
     }

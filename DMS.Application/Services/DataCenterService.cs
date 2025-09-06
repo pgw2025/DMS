@@ -63,7 +63,7 @@ public class DataCenterService : IDataCenterService
     /// <summary>
     /// 当数据加载完成时触发
     /// </summary>
-    public event EventHandler<DataLoadCompletedEventArgs> DataLoadCompleted;
+    public event EventHandler<DataLoadCompletedEventArgs> OnLoadDataCompleted;
 
     /// <summary>
     /// 当设备数据发生变化时触发
@@ -747,7 +747,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     protected virtual void OnDataLoadCompleted(DataLoadCompletedEventArgs e)
     {
-        DataLoadCompleted?.Invoke(this, e);
+        OnLoadDataCompleted?.Invoke(this, e);
     }
 
     /// <summary>
