@@ -1,34 +1,100 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
+using DMS.Application.DTOs;
 using DMS.WPF.ViewModels.Items;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace DMS.WPF.ViewModels.Dialogs;
-
-public partial class MqttAliasBatchEditDialogViewModel : ObservableObject
+namespace DMS.WPF.ViewModels.Dialogs
 {
-    [ObservableProperty]
-    private string _title = "批量设置MQTT别名";
-
-    [ObservableProperty]
-    private ObservableCollection<VariableMqttAlias> _variablesToEdit;
-
-    public MqttServerItemViewModel SelectedMqtt { get; private set; }
-
-    public MqttAliasBatchEditDialogViewModel(List<VariableItemViewModel> selectedVariables, MqttServerItemViewModel selectedMqtt)
+    /// <summary>
+    /// MQTT别名批量编辑对话框的视图模型
+    /// </summary>
+    public partial class MqttAliasBatchEditDialogViewModel : DialogViewModelBase<List<VariableMqttAliasItemViewModel>>
     {
-        SelectedMqtt = selectedMqtt;
-        Title=$"设置：{SelectedMqtt.ServerName}-MQTT服务器关联变量的别名";
-        // VariablesToEdit = new ObservableCollection<VariableMqttAlias>(
-        //     selectedVariables.Select(v => new VariableMqttAlias(v, selectedMqtt))
-        // );
-    }
+        [ObservableProperty]
+        private ObservableCollection<VariableMqttAliasItemViewModel> _variableMqttAliases = new();
 
-    public MqttAliasBatchEditDialogViewModel()
-    {
-        // For design time
-        // VariablesToEdit = new ObservableCollection<VariableMqtt>();
+        [ObservableProperty]
+        private MqttServerItemViewModel _selectedMqttServer;
+
+        public MqttAliasBatchEditDialogViewModel(
+            List<VariableItemViewModel> variables, 
+            MqttServerItemViewModel mqttServer)
+        {
+            _selectedMqttServer = mqttServer;
+            InitializeVariableMqttAliases(variables);
+        }
+
+        /// <summary>
+        /// 初始化变量MQTT别名列表
+        /// </summary>
+        private void InitializeVariableMqttAliases(List<VariableItemViewModel> variables)
+        {
+            VariableMqttAliases.Clear();
+
+            foreach (var variable in variables)
+            {
+                // 检查该变量是否已经有针对此MQTT服务器的别名
+                var existingAlias = variable.MqttAliases?.FirstOrDefault(ma => ma.MqttServerId == SelectedMqttServer.Id);
+
+                var variableMqttAlias = new VariableMqttAliasItemViewModel
+                {
+                    VariableId = variable.Id,
+                    MqttServerId = SelectedMqttServer.Id,
+                    MqttServerName = SelectedMqttServer.ServerName,
+                    MqttServer = SelectedMqttServer,
+                    Alias = existingAlias?.Alias ?? GenerateDefaultAlias(variable)
+                };
+
+                VariableMqttAliases.Add(variableMqttAlias);
+            }
+        }
+
+        /// <summary>
+        /// 生成默认别名
+        /// </summary>
+        private string GenerateDefaultAlias(VariableItemViewModel variable)
+        {
+            // 可以根据需要自定义默认别名生成逻辑
+            return $"{variable.Name}_{Guid.NewGuid().ToString("N")[..8]}";
+        }
+
+        /// <summary>
+        /// 确认编辑
+        /// </summary>
+        [RelayCommand]
+        private void Confirm()
+        {
+            var result = VariableMqttAliases.ToList();
+            Close(result);
+        }
+
+        /// <summary>
+        /// 取消编辑
+        /// </summary>
+        [RelayCommand]
+        private void Cancel()
+        {
+            Close(null);
+        }
+
+        /// <summary>
+        /// 全部应用相同的别名前缀
+        /// </summary>
+        [RelayCommand]
+        private void ApplySamePrefix(string prefix)
+        {
+            if (string.IsNullOrWhiteSpace(prefix))
+                return;
+
+            foreach (var alias in VariableMqttAliases)
+            {
+                alias.Alias = $"{prefix}_{alias.VariableId}";
+            }
+        }
     }
 }

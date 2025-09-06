@@ -18,6 +18,7 @@ public partial class VariableMqttAliasItemViewModel : ObservableObject
 
     [ObservableProperty]
     private string _alias;
-
     
+    [ObservableProperty]
+    private MqttServerItemViewModel _mqttServer;
 }

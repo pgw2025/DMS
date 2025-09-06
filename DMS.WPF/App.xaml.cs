@@ -195,7 +195,16 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DevicesViewModel>();
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<SettingViewModel>();
-        services.AddTransient<VariableTableViewModel>();
+        services.AddTransient<VariableTableViewModel>(provider =>
+            new VariableTableViewModel(
+                provider.GetRequiredService<IMapper>(),
+                provider.GetRequiredService<IDialogService>(),
+                provider.GetRequiredService<IVariableAppService>(),
+                provider.GetRequiredService<IMqttAliasAppService>(),
+                provider.GetRequiredService<IMqttAppService>(),
+                provider.GetRequiredService<DataServices>(),
+                provider.GetRequiredService<INotificationService>()
+            ));
         services.AddSingleton<DeviceDetailViewModel>();
         services.AddSingleton<MqttsViewModel>(provider => 
             new MqttsViewModel(
@@ -210,10 +219,18 @@ public partial class App : System.Windows.Application
         );
         services.AddScoped<MqttServerDetailViewModel>();
         
-        // 注册对话框模型
+        // 注册对话框视图模型
+        services.AddTransient<DeviceDialogViewModel>();
+        services.AddTransient<ConfirmDialogViewModel>();
+        services.AddTransient<VariableTableDialogViewModel>();
         services.AddTransient<ImportExcelDialogViewModel>();
         services.AddTransient<ImportOpcUaDialogViewModel>();
         services.AddTransient<VariableDialogViewModel>();
+        services.AddTransient<PollLevelDialogViewModel>();
+        services.AddTransient<IsActiveDialogViewModel>();
+        services.AddTransient<MqttDialogViewModel>();
+        services.AddTransient<MqttSelectionDialogViewModel>();
+        services.AddTransient<MqttAliasBatchEditDialogViewModel>();
         
         // 注册View视图
         services.AddSingleton<SplashWindow>();

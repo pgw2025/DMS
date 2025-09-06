@@ -1,29 +1,29 @@
-using DMS.WPF.ViewModels.Dialogs;
 using iNKORE.UI.WPF.Modern.Controls;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 
-namespace DMS.WPF.Views.Dialogs;
-
-public partial class MqttSelectionDialog : ContentDialog
+namespace DMS.WPF.Views.Dialogs
 {
-    public MqttSelectionDialog(MqttSelectionDialogViewModel viewModel)
+    /// <summary>
+    /// MqttSelectionDialog.xaml 的交互逻辑
+    /// </summary>
+    public partial class MqttSelectionDialog : ContentDialog
     {
-        InitializeComponent();
-        DataContext = viewModel;
-    }
-
-    private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-    {
-        // 在这里可以添加一些验证逻辑，例如确保选择了MQTT服务器
-        // var viewModel = (MqttSelectionDialogViewModel)DataContext;
-        // if (viewModel.SelectedMqtt == null)
-        // {
-        //     args.Cancel = true; // 取消关闭对话框
-        //     // 可以显示一个警告消息
-        // }
-    }
-
-    private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-    {
-        // 用户点击取消，不需要额外处理
+        public MqttSelectionDialog()
+        {
+            InitializeComponent();
+        }
     }
 }

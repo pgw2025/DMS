@@ -27,6 +27,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     private readonly IDialogService _dialogService;
 
     private readonly IVariableAppService _variableAppService;
+    private readonly IMqttAliasAppService _mqttAliasAppService;
+    private readonly IMqttAppService _mqttAppService;
 
     /// <summary>
     /// 当前正在操作的变量表实体。
@@ -89,11 +91,14 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     private readonly INotificationService _notificationService;
 
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
+                                  IMqttAliasAppService mqttAliasAppService, IMqttAppService mqttAppService,
                                   DataServices dataServices, INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
         _variableAppService = variableAppService;
+        _mqttAliasAppService = mqttAliasAppService;
+        _mqttAppService = mqttAppService;
         _dataServices = dataServices;
         _notificationService = notificationService;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
@@ -556,101 +561,96 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     public async Task AddMqttServerToVariables(IList<object> variablesToAddMqtt)
     {
-        // var validVariables = variablesToAddMqtt?.OfType<Variable>()
-        //                                        .ToList();
-        //
-        // // 检查是否有变量被选中
-        // if (validVariables == null || !validVariables.Any())
-        // {
-        //     NotificationHelper.ShowInfo("请选择要添加MQTT服务器的变量");
-        //     return;
-        // }
-        //
-        // try
-        // {
-        //     // 显示MQTT服务器选择对话框，让用户选择一个MQTT服务器
-        //     var selectedMqtt = await _dialogService.ShowMqttSelectionDialog();
-        //     if (selectedMqtt == null)
-        //     {
-        //         return; // 用户取消选择
-        //     }
-        //
-        //     // 显示批量编辑别名对话框
-        //     var editedVariableMqtts = await _dialogService.ShowMqttAliasBatchEditDialog(validVariables, selectedMqtt);
-        //
-        //     if (editedVariableMqtts == null || !editedVariableMqtts.Any())
-        //     {
-        //         NotificationHelper.ShowInfo("没有变量别名被设置或已取消。");
-        //         return;
-        //     }
-        //
-        //
-        //     int totalAffectedCount = 0;
-        //     // 调用仓库方法来添加或更新MQTT服务器关联和别名
-        //     var resCount = await _varDataRepository.AddMqttToVariablesAsync(editedVariableMqtts);
-        //     totalAffectedCount += resCount;
-        //     
-        //
-        //     //更新变量Variable的VariableMqtts列表
-        //     foreach (var editedVariableMqtt in editedVariableMqtts)
-        //     {
-        //             // 更新内存中的 Variable 对象
-        //             var originalVariable = VariableTable.Variables.FirstOrDefault(v=>v.Id==editedVariableMqtt.Variable.Id);
-        //             if (originalVariable == null)
-        //             {
-        //                 NlogHelper.Warn($"没有在VariableTable.Variables中找到,ID:{editedVariableMqtt.Variable.Id},Name:{editedVariableMqtt.Variable.Name}的对象");
-        //                 continue;
-        //             }
-        //             
-        //             
-        //             if (originalVariable.VariableMqtts == null)
-        //             {
-        //                 originalVariable.VariableMqtts = new List<VariableMqtt>();
-        //             }
-        //
-        //             // 检查是否已存在该变量与该MQTT服务器的关联
-        //             var existingVariableMqtt
-        //                 = originalVariable.VariableMqtts.FirstOrDefault(vm => vm.MqttId ==
-        //                                                                       editedVariableMqtt.Mqtt.Id);
-        //
-        //             if (existingVariableMqtt == null)
-        //             {
-        //                 // 如果不存在，则添加新的关联
-        //                 var variableMqtt = new VariableMqtt(originalVariable,editedVariableMqtt.Mqtt)
-        //                                    {
-        //                                        VariableId = originalVariable.Id,
-        //                                        MqttId = editedVariableMqtt.Mqtt.Id,
-        //                                        MqttAlias = editedVariableMqtt.MqttAlias,
-        //                                        Mqtt = editedVariableMqtt.Mqtt // 关联Mqtt对象，方便UI显示
-        //                                    };
-        //                 originalVariable.VariableMqtts.Add(variableMqtt);
-        //                 //更新MQTT服务器对应的的VariableMqtts列表
-        //                 selectedMqtt.VariableMqtts.Add(variableMqtt);
-        //             }
-        //             else
-        //             {
-        //                 // 如果存在，则更新别名
-        //                 existingVariableMqtt.MqttAlias = editedVariableMqtt.MqttAlias;
-        //             }
-        //     }
-        //
-        //
-        //     if (totalAffectedCount > 0)
-        //     {
-        //         // 刷新界面以反映更改
-        //         await RefreshDataView();
-        //         NotificationHelper.ShowSuccess($"已成功为 {totalAffectedCount} 个变量添加/更新MQTT服务器: {selectedMqtt.Name} 的别名。");
-        //     }
-        //     else
-        //     {
-        //         NotificationHelper.ShowInfo($"没有新的变量关联或别名更新到MQTT服务器: {selectedMqtt.Name}。");
-        //     }
-        // }
-        // catch (Exception ex)
-        // {
-        //     // 捕获并显示错误通知
-        //     NotificationHelper.ShowError($"添加MQTT服务器失败: {ex.Message}", ex);
-        // }
+        var validVariables = variablesToAddMqtt?.OfType<VariableItemViewModel>()
+                                               .ToList();
+
+        // 检查是否有变量被选中
+        if (validVariables == null || !validVariables.Any())
+        {
+            _notificationService.ShowInfo("请选择要添加MQTT服务器的变量");
+            return;
+        }
+
+        try
+        {
+            // 显示MQTT服务器选择对话框，让用户选择一个MQTT服务器
+            var mqttSelectionViewModel = new MqttSelectionDialogViewModel(_mqttAppService);
+            var selectedMqtt = await _dialogService.ShowDialogAsync(mqttSelectionViewModel);
+            if (selectedMqtt == null)
+            {
+                return; // 用户取消选择
+            }
+
+            // 显示批量编辑别名对话框
+            var mqttAliasBatchEditViewModel = new MqttAliasBatchEditDialogViewModel(validVariables, selectedMqtt);
+            var editedVariableMqtts = await _dialogService.ShowDialogAsync(mqttAliasBatchEditViewModel);
+
+            if (editedVariableMqtts == null || !editedVariableMqtts.Any())
+            {
+                _notificationService.ShowInfo("没有变量别名被设置或已取消。");
+                return;
+            }
+
+            int totalAffectedCount = 0;
+            
+            // 为每个变量分配MQTT别名
+            foreach (var editedVariableMqtt in editedVariableMqtts)
+            {
+                await _mqttAliasAppService.AssignAliasAsync(
+                    editedVariableMqtt.VariableId,
+                    selectedMqtt.Id,
+                    editedVariableMqtt.Alias);
+
+                totalAffectedCount++;
+                
+                // 更新内存中的 Variable 对象
+                var originalVariable = validVariables.FirstOrDefault(v => v.Id == editedVariableMqtt.VariableId);
+                if (originalVariable == null)
+                {
+                    continue;
+                }
+
+                if (originalVariable.MqttAliases == null)
+                {
+                    originalVariable.MqttAliases = new ();
+                }
+
+                // 检查是否已存在该变量与该MQTT服务器的关联
+                var existingVariableMqtt = originalVariable.MqttAliases.FirstOrDefault(vm => vm.MqttServerId == selectedMqtt.Id);
+
+                if (existingVariableMqtt == null)
+                {
+                    // 如果不存在，则添加新的关联
+                    var variableMqtt = new VariableMqttAliasItemViewModel
+                    {
+                        VariableId = originalVariable.Id,
+                        MqttServerId = selectedMqtt.Id,
+                        Alias = editedVariableMqtt.Alias,
+                        MqttServer = selectedMqtt
+                    };
+                    // originalVariable.MqttAliases.Add(variableMqtt);
+                }
+                else
+                {
+                    // 如果存在，则更新别名
+                    existingVariableMqtt.Alias = editedVariableMqtt.Alias;
+                }
+            }
+
+            if (totalAffectedCount > 0)
+            {
+                _notificationService.ShowSuccess($"已成功为 {totalAffectedCount} 个变量添加/更新MQTT服务器: {selectedMqtt.ServerName} 的别名。");
+            }
+            else
+            {
+                _notificationService.ShowInfo($"没有新的变量关联或别名更新到MQTT服务器: {selectedMqtt.ServerName}。");
+            }
+        }
+        catch (Exception ex)
+        {
+            // 捕获并显示错误通知
+            _notificationService.ShowError($"添加MQTT服务器失败: {ex.Message}", ex);
+        }
     }
 
     /// <summary>

@@ -23,7 +23,10 @@ namespace DMS.WPF.Services
             { typeof(VariableDialogViewModel), typeof(VariableDialog) },
             { typeof(PollLevelDialogViewModel), typeof(PollLevelDialog) },
             { typeof(IsActiveDialogViewModel), typeof(IsActiveDialog) },
-            { typeof(MqttDialogViewModel), typeof(MqttDialog) }, // Add other mappings here
+            { typeof(MqttDialogViewModel), typeof(MqttDialog) },
+            { typeof(MqttSelectionDialogViewModel), typeof(MqttSelectionDialog) },
+            { typeof(MqttAliasBatchEditDialogViewModel), typeof(MqttAliasBatchEditDialog) }
+            // Add other mappings here
             // ... other dialogs
         };
 
