@@ -1,48 +1,48 @@
-# Project Overview: DMS (Device Management System)
+# 项目概述：DMS (Device Management System - 设备管理系统)
 
-This directory contains the source code for the Device Management System (DMS), a C#/.NET 8 application. The system is primarily composed of a WPF desktop application for the user interface, backed by a layered architecture including Core, Application, and Infrastructure projects. It also includes dedicated unit test projects for both the infrastructure and WPF layers.
+此目录包含了设备管理系统 (DMS) 的源代码，这是一个基于 C#/.NET 8 构建的应用程序。该系统主要由一个用于用户界面的 WPF 桌面应用程序组成，后端采用分层架构，包括 Core（核心）、Application（应用）和 Infrastructure（基础设施）项目。此外，还为基础设施层和 WPF 层配备了专门的单元测试项目。
 
-A significant feature described in the README is an OPC UA service implementation, suggesting the system is designed for industrial device communication and management.
+项目自述文件中提到的一个重要特性是 OPC UA 服务实现，表明该系统是为工业设备通信和管理而设计的。
 
-## Project Structure
+## 项目结构
 
-The solution (`DMS.sln`) is organized into several key projects:
+解决方案 (`DMS.sln`) 由几个关键项目组成：
 
-*   **`DMS.Core`**: Contains fundamental, reusable components and shared models. Likely includes utilities, common data transfer objects (DTOs), and core business logic abstractions. It references `Microsoft.Extensions.Logging.Abstractions`, `Newtonsoft.Json`, and `NLog`.
-*   **`DMS.Application`**: Implements application-specific business logic. It depends on `DMS.Core` and uses libraries like `AutoMapper` for object mapping and `Microsoft.Extensions` for hosting and logging abstractions.
-*   **`DMS.Infrastructure`**: Handles data access, external integrations, and technical implementations. It references `DMS.Core` and `DMS.Application`. Key dependencies include:
-    *   `SqlSugarCore`: For database interaction (MySQL).
-    *   `MQTTnet`: For MQTT protocol communication.
-    *   `OPCFoundation.NetStandard.Opc.Ua`: For OPC UA communication.
-    *   `S7netplus`: For Siemens S7 PLC communication.
-    *   `NPOI`: For reading/writing Excel files.
-    *   `AutoMapper.Extensions.Microsoft.DependencyInjection`: For dependency injection setup of AutoMapper.
-*   **`DMS.WPF`**: The main WPF desktop application. It targets `net8.0-windows` and uses WPF-specific libraries like `CommunityToolkit.Mvvm`, `HandyControl` (UI toolkit), `Hardcodet.NotifyIcon.Wpf` (system tray icon), and `iNKORE.UI.WPF.Modern` (modern UI styling). It depends on `DMS.Application` and `DMS.Infrastructure`.
-*   **`DMS.Infrastructure.UnitTests`**: Unit tests for the `DMS.Infrastructure` project. Uses `xunit`, `Moq`, `Bogus` (for fake data), and `Microsoft.NET.Test.Sdk`.
-*   **`DMS.WPF.UnitTests`**: Unit tests for the `DMS.WPF` project. Also uses `xunit`, `Moq`, and `Bogus`.
+*   **`DMS.Core`**: 包含基础的、可复用的组件和共享模型。可能包括实用工具、通用数据传输对象 (DTOs) 以及核心业务逻辑抽象。它引用了 `Microsoft.Extensions.Logging.Abstractions`、`Newtonsoft.Json` 和 `NLog`。
+*   **`DMS.Application`**: 实现应用特定的业务逻辑。它依赖于 `DMS.Core`，并使用 `AutoMapper`（用于对象映射）和 `Microsoft.Extensions`（用于托管和日志记录抽象）等库。
+*   **`DMS.Infrastructure`**: 处理数据访问、外部集成和技术实现。它引用了 `DMS.Core` 和 `DMS.Application`。关键依赖包括：
+    *   `SqlSugarCore`：用于数据库交互（MySQL）。
+    *   `MQTTnet`：用于 MQTT 协议通信。
+    *   `OPCFoundation.NetStandard.Opc.Ua`：用于 OPC UA 通信。
+    *   `S7netplus`：用于西门子 S7 PLC 通信。
+    *   `NPOI`：用于读写 Excel 文件。
+    *   `AutoMapper.Extensions.Microsoft.DependencyInjection`：用于 AutoMapper 的依赖注入设置。
+*   **`DMS.WPF`**：主 WPF 桌面应用程序。它以 `net8.0-windows` 为目标，并使用 WPF 特定的库，如 `CommunityToolkit.Mvvm`、`HandyControl`（UI 工具包）、`Hardcodet.NotifyIcon.Wpf`（系统托盘图标）和 `iNKORE.UI.WPF.Modern`（现代 UI 样式）。它依赖于 `DMS.Application` 和 `DMS.Infrastructure`。
+*   **`DMS.Infrastructure.UnitTests`**：针对 `DMS.Infrastructure` 项目的单元测试。使用 `xunit`、`Moq`、`Bogus`（用于伪造数据）和 `Microsoft.NET.Test.Sdk`。
+*   **`DMS.WPF.UnitTests`**：针对 `DMS.WPF` 项目的单元测试。同样使用 `xunit`、`Moq` 和 `Bogus`。
 
-## Building and Running
+## 构建与运行
 
-This is a .NET 8 solution. You will need the .NET 8 SDK and an IDE like Visual Studio or JetBrains Rider to build and run it.
+这是一个 .NET 8 解决方案。您需要安装 .NET 8 SDK 以及 Visual Studio 或 JetBrains Rider 等 IDE 来构建和运行它。
 
-**To Build:**
-Use the standard .NET CLI command within the solution directory:
+**构建：**
+在解决方案目录下使用标准 .NET CLI 命令：
 `dotnet build`
 
-**To Run:**
-The main executable is the WPF application (`DMS.WPF`). You can run it using:
+**运行：**
+主可执行文件是 WPF 应用程序 (`DMS.WPF`)。您可以使用以下命令运行它：
 `dotnet run --project DMS.WPF`
 
-**To Test:**
-Unit tests are included in `DMS.Infrastructure.UnitTests` and `DMS.WPF.UnitTests`.
-Run all tests using:
+**测试：**
+单元测试包含在 `DMS.Infrastructure.UnitTests` 和 `DMS.WPF.UnitTests` 中。
+使用以下命令运行所有测试：
 `dotnet test`
 
-## Development Conventions
+## 开发规范
 
-*   **Language & Framework:** C# with .NET 8.
-*   **Architecture:** Layered architecture (Core, Application, Infrastructure) with a WPF presentation layer.
-*   **UI Pattern:** MVVM (Model-View-ViewModel), supported by `CommunityToolkit.Mvvm`.
-*   **DI (Dependency Injection):** Microsoft.Extensions.DependencyInjection is used, configured likely in the `DMS.WPF` project.
-*   **Logging:** NLog is used for logging, configured via `DMS.WPF\Configurations\nlog.config`.
-*   **Mapping:** AutoMapper is used for object-to-object mapping.
+*   **语言与框架：** C# 配合 .NET 8。
+*   **架构：** 分层架构（Core, Application, Infrastructure）配合 WPF 表现层。
+*   **UI 模式：** MVVM（Model-View-ViewModel），由 `CommunityToolkit.Mvvm` 支持。
+*   **依赖注入 (DI)：** 使用 Microsoft.Extensions.DependencyInjection，在 `DMS.WPF` 项目中进行配置。
+*   **日志记录：** 使用 NLog 进行日志记录，配置文件位于 `DMS.WPF\Configurations\nlog.config`。
+*   **对象映射：** 使用 AutoMapper 进行对象到对象的映射。

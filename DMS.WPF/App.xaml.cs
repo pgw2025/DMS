@@ -204,6 +204,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IMenuRepository, MenuRepository>();
         services.AddSingleton<IVariableHistoryRepository, VariableHistoryRepository>();
         services.AddSingleton<IUserRepository, UserRepository>();
+        services.AddSingleton<INlogRepository, NlogRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IExcelService, ExcelService>();
 

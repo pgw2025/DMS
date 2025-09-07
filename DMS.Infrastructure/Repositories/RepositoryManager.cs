@@ -27,6 +27,7 @@ public class RepositoryManager : IRepositoryManager
     /// <param name="menus">菜单仓储实例。</param>
     /// <param name="variableHistories">变量历史仓储实例。</param>
     /// <param name="users">用户仓储实例。</param>
+    /// <param name="nlogs">Nlog日志仓储实例。</param>
     public RepositoryManager( SqlSugarDbContext dbContext,
         IInitializeRepository initializeRepository,
         IDeviceRepository devices,
@@ -36,7 +37,8 @@ public class RepositoryManager : IRepositoryManager
         IVariableMqttAliasRepository variableMqttAliases,
         IMenuRepository menus,
         IVariableHistoryRepository variableHistories,
-        IUserRepository users)
+        IUserRepository users,
+        INlogRepository nlogs)
     {
         _dbContext = dbContext;
         InitializeRepository = initializeRepository;
@@ -48,6 +50,7 @@ public class RepositoryManager : IRepositoryManager
         Menus = menus;
         VariableHistories = variableHistories;
         Users = users;
+        Nlogs = nlogs;
         
        _db = dbContext.GetInstance();
     }
@@ -92,6 +95,10 @@ public class RepositoryManager : IRepositoryManager
     /// 获取用户仓储实例。
     /// </summary>
     public IUserRepository Users { get; set; }
+    /// <summary>
+    /// 获取Nlog日志仓储实例。
+    /// </summary>
+    public INlogRepository Nlogs { get; set; }
     /// <summary>
     /// 获取初始化仓储实例。
     /// </summary>

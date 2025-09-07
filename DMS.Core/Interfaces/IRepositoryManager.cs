@@ -50,6 +50,11 @@ public interface IRepositoryManager : IDisposable
     IUserRepository Users { get; set; }
 
     /// <summary>
+    /// 获取Nlog日志仓储的实例。
+    /// </summary>
+    INlogRepository Nlogs { get; set; }
+
+    /// <summary>
     /// 初始化数据库
     /// </summary>
     IInitializeRepository InitializeRepository { get; set; }
