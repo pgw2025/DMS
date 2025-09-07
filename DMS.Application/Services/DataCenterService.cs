@@ -22,12 +22,14 @@ public class DataCenterService : IDataCenterService
 {
     private readonly IRepositoryManager _repositoryManager;
     private readonly IMapper _mapper;
-    private readonly IDeviceAppService _deviceAppService;
-    private readonly IVariableTableAppService _variableTableAppService;
-    private readonly IVariableAppService _variableAppService;
-    private readonly IMenuService _menuService;
-    private readonly IMqttAppService _mqttAppService;
-    private readonly INlogAppService _nlogAppService;
+    
+    // 管理服务
+    private readonly DeviceManagementService _deviceManagementService;
+    private readonly VariableTableManagementService _variableTableManagementService;
+    private readonly VariableManagementService _variableManagementService;
+    private readonly MenuManagementService _menuManagementService;
+    private readonly MqttManagementService _mqttManagementService;
+    private readonly LogManagementService _logManagementService;
 
     /// <summary>
     /// 安全字典，用于存储所有设备数据
@@ -131,12 +133,14 @@ public class DataCenterService : IDataCenterService
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
-        _deviceAppService = deviceAppService;
-        _variableTableAppService = variableTableAppService;
-        _variableAppService = variableAppService;
-        _menuService = menuService;
-        _mqttAppService = mqttAppService;
-        _nlogAppService = nlogAppService;
+        
+        // 初始化管理服务
+        _deviceManagementService = new DeviceManagementService(deviceAppService, Devices);
+        _variableTableManagementService = new VariableTableManagementService(variableTableAppService, VariableTables);
+        _variableManagementService = new VariableManagementService(variableAppService, Variables);
+        _menuManagementService = new MenuManagementService(menuService, Menus, MenuTrees);
+        _mqttManagementService = new MqttManagementService(mqttAppService, MqttServers);
+        _logManagementService = new LogManagementService(nlogAppService, Nlogs);
     }
 
     #region 设备管理
@@ -146,7 +150,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<DeviceDto> GetDeviceByIdAsync(int id)
     {
-        return await _deviceAppService.GetDeviceByIdAsync(id);
+        return await _deviceManagementService.GetDeviceByIdAsync(id);
     }
 
     /// <summary>
@@ -154,7 +158,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<DeviceDto>> GetAllDevicesAsync()
     {
-        return await _deviceAppService.GetAllDevicesAsync();
+        return await _deviceManagementService.GetAllDevicesAsync();
     }
 
     /// <summary>
@@ -162,7 +166,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<CreateDeviceWithDetailsDto> CreateDeviceWithDetailsAsync(CreateDeviceWithDetailsDto dto)
     {
-        return await _deviceAppService.CreateDeviceWithDetailsAsync(dto);
+        return await _deviceManagementService.CreateDeviceWithDetailsAsync(dto);
     }
 
     /// <summary>
@@ -170,7 +174,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<int> UpdateDeviceAsync(DeviceDto deviceDto)
     {
-        return await _deviceAppService.UpdateDeviceAsync(deviceDto);
+        return await _deviceManagementService.UpdateDeviceAsync(deviceDto);
     }
 
     /// <summary>
@@ -178,7 +182,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<bool> DeleteDeviceByIdAsync(int deviceId)
     {
-        return await _deviceAppService.DeleteDeviceByIdAsync(deviceId);
+        return await _deviceManagementService.DeleteDeviceByIdAsync(deviceId);
     }
 
     /// <summary>
@@ -186,7 +190,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task ToggleDeviceActiveStateAsync(int id)
     {
-        await _deviceAppService.ToggleDeviceActiveStateAsync(id);
+        await _deviceManagementService.ToggleDeviceActiveStateAsync(id);
     }
 
     /// <summary>
@@ -194,10 +198,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddDeviceToMemory(DeviceDto deviceDto)
     {
-        if (Devices.TryAdd(deviceDto.Id, deviceDto))
-        {
-            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Added, deviceDto));
-        }
+        _deviceManagementService.AddDeviceToMemory(deviceDto, VariableTables, Variables);
     }
 
     /// <summary>
@@ -205,8 +206,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateDeviceInMemory(DeviceDto deviceDto)
     {
-        Devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
-        OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
+        _deviceManagementService.UpdateDeviceInMemory(deviceDto);
     }
 
     /// <summary>
@@ -214,22 +214,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveDeviceFromMemory(int deviceId)
     {
-        if (Devices.TryGetValue(deviceId, out var deviceDto))
-        {
-            foreach (var variableTable in deviceDto.VariableTables)
-            {
-                foreach (var variable in variableTable.Variables)
-                {
-                    Variables.TryRemove(variable.Id, out _);
-                }
-
-                VariableTables.TryRemove(variableTable.Id, out _);
-            }
-
-            Devices.TryRemove(deviceId, out _);
-
-            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
-        }
+        _deviceManagementService.RemoveDeviceFromMemory(deviceId, VariableTables, Variables);
     }
 
     #endregion
@@ -241,7 +226,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<VariableTableDto> GetVariableTableByIdAsync(int id)
     {
-        return await _variableTableAppService.GetVariableTableByIdAsync(id);
+        return await _variableTableManagementService.GetVariableTableByIdAsync(id);
     }
 
     /// <summary>
@@ -249,7 +234,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableTableDto>> GetAllVariableTablesAsync()
     {
-        return await _variableTableAppService.GetAllVariableTablesAsync();
+        return await _variableTableManagementService.GetAllVariableTablesAsync();
     }
 
     /// <summary>
@@ -257,7 +242,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<CreateVariableTableWithMenuDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto dto)
     {
-        return await _variableTableAppService.CreateVariableTableAsync(dto);
+        return await _variableTableManagementService.CreateVariableTableAsync(dto);
     }
 
     /// <summary>
@@ -265,7 +250,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<int> UpdateVariableTableAsync(VariableTableDto variableTableDto)
     {
-        return await _variableTableAppService.UpdateVariableTableAsync(variableTableDto);
+        return await _variableTableManagementService.UpdateVariableTableAsync(variableTableDto);
     }
 
     /// <summary>
@@ -273,7 +258,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<bool> DeleteVariableTableAsync(int id)
     {
-        return await _variableTableAppService.DeleteVariableTableAsync(id);
+        return await _variableTableManagementService.DeleteVariableTableAsync(id);
     }
 
     /// <summary>
@@ -281,21 +266,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddVariableTableToMemory(VariableTableDto variableTableDto)
     {
-        DeviceDto deviceDto = null;
-        if (Devices.TryGetValue(variableTableDto.DeviceId, out var device))
-        {
-            deviceDto = device;
-            device.VariableTables.Add(variableTableDto);
-            variableTableDto.Device = device;
-        }
-
-        if (VariableTables.TryAdd(variableTableDto.Id, variableTableDto))
-        {
-            OnVariableTableChanged(new VariableTableChangedEventArgs(
-                                       DataChangeType.Added,
-                                       variableTableDto,
-                                       deviceDto));
-        }
+        _variableTableManagementService.AddVariableTableToMemory(variableTableDto, Devices);
     }
 
     /// <summary>
@@ -303,17 +274,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateVariableTableInMemory(VariableTableDto variableTableDto)
     {
-        DeviceDto deviceDto = null;
-        if (Devices.TryGetValue(variableTableDto.DeviceId, out var device))
-        {
-            deviceDto = device;
-        }
-
-        VariableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
-        OnVariableTableChanged(new VariableTableChangedEventArgs(
-                                   DataChangeType.Updated,
-                                   variableTableDto,
-                                   deviceDto));
+        _variableTableManagementService.UpdateVariableTableInMemory(variableTableDto, Devices);
     }
 
     /// <summary>
@@ -321,20 +282,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveVariableTableFromMemory(int variableTableId)
     {
-        if (VariableTables.TryRemove(variableTableId, out var variableTableDto))
-        {
-            DeviceDto deviceDto = null;
-            if (variableTableDto != null && Devices.TryGetValue(variableTableDto.DeviceId, out var device))
-            {
-                deviceDto = device;
-                device.VariableTables.Remove(variableTableDto);
-            }
-
-            OnVariableTableChanged(new VariableTableChangedEventArgs(
-                                       DataChangeType.Deleted,
-                                       variableTableDto,
-                                       deviceDto));
-        }
+        _variableTableManagementService.RemoveVariableTableFromMemory(variableTableId, Devices);
     }
 
     #endregion
@@ -346,7 +294,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<MenuBeanDto>> GetAllMenusAsync()
     {
-        return await _menuService.GetAllMenusAsync();
+        return await _menuManagementService.GetAllMenusAsync();
     }
 
     /// <summary>
@@ -354,7 +302,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<MenuBeanDto> GetMenuByIdAsync(int id)
     {
-        return await _menuService.GetMenuByIdAsync(id);
+        return await _menuManagementService.GetMenuByIdAsync(id);
     }
 
     /// <summary>
@@ -362,7 +310,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<int> CreateMenuAsync(MenuBeanDto menuDto)
     {
-        return await _menuService.CreateMenuAsync(menuDto);
+        return await _menuManagementService.CreateMenuAsync(menuDto);
     }
 
     /// <summary>
@@ -370,7 +318,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task UpdateMenuAsync(MenuBeanDto menuDto)
     {
-        await _menuService.UpdateMenuAsync(menuDto);
+        await _menuManagementService.UpdateMenuAsync(menuDto);
     }
 
     /// <summary>
@@ -378,7 +326,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task DeleteMenuAsync(int id)
     {
-        await _menuService.DeleteMenuAsync(id);
+        await _menuManagementService.DeleteMenuAsync(id);
     }
 
     /// <summary>
@@ -386,17 +334,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddMenuToMemory(MenuBeanDto menuDto)
     {
-        if (Menus.TryAdd(menuDto.Id, menuDto))
-        {
-            MenuBeanDto parentMenu = null;
-            if (menuDto.ParentId > 0 && Menus.TryGetValue(menuDto.ParentId, out var parent))
-            {
-                parentMenu = parent;
-                parent.Children.Add(menuDto);
-            }
-
-            OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Added, menuDto, parentMenu));
-        }
+        _menuManagementService.AddMenuToMemory(menuDto);
     }
 
     /// <summary>
@@ -404,15 +342,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateMenuInMemory(MenuBeanDto menuDto)
     {
-        Menus.AddOrUpdate(menuDto.Id, menuDto, (key, oldValue) => menuDto);
-
-        MenuBeanDto parentMenu = null;
-        if (menuDto.ParentId > 0 && Menus.TryGetValue(menuDto.ParentId, out var parent))
-        {
-            parentMenu = parent;
-        }
-
-        OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Updated, menuDto, parentMenu));
+        _menuManagementService.UpdateMenuInMemory(menuDto);
     }
 
     /// <summary>
@@ -420,16 +350,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveMenuFromMemory(int menuId)
     {
-        if (Menus.TryRemove(menuId, out var menuDto))
-        {
-            MenuBeanDto parentMenu = null;
-            if (menuDto.ParentId > 0 && Menus.TryGetValue(menuDto.ParentId, out var parent))
-            {
-                parentMenu = parent;
-            }
-
-            OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Deleted, menuDto, parentMenu));
-        }
+        _menuManagementService.RemoveMenuFromMemory(menuId);
     }
 
     /// <summary>
@@ -437,8 +358,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public List<MenuBeanDto> GetRootMenus()
     {
-        return Menus.Values.Where(m => m.ParentId == 0)
-                    .ToList();
+        return _menuManagementService.GetRootMenus();
     }
 
     /// <summary>
@@ -448,8 +368,7 @@ public class DataCenterService : IDataCenterService
     /// <returns>子菜单列表</returns>
     public List<MenuBeanDto> GetChildMenus(int parentId)
     {
-        return Menus.Values.Where(m => m.ParentId == parentId)
-                    .ToList();
+        return _menuManagementService.GetChildMenus(parentId);
     }
 
     #endregion
@@ -461,7 +380,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<VariableDto> GetVariableByIdAsync(int id)
     {
-        return await _variableAppService.GetVariableByIdAsync(id);
+        return await _variableManagementService.GetVariableByIdAsync(id);
     }
 
     /// <summary>
@@ -469,7 +388,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableDto>> GetAllVariablesAsync()
     {
-        return await _variableAppService.GetAllVariablesAsync();
+        return await _variableManagementService.GetAllVariablesAsync();
     }
 
     /// <summary>
@@ -477,7 +396,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<VariableDto> CreateVariableAsync(VariableDto variableDto)
     {
-        return await _variableAppService.CreateVariableAsync(variableDto);
+        return await _variableManagementService.CreateVariableAsync(variableDto);
     }
 
     /// <summary>
@@ -485,7 +404,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<int> UpdateVariableAsync(VariableDto variableDto)
     {
-        return await _variableAppService.UpdateVariableAsync(variableDto);
+        return await _variableManagementService.UpdateVariableAsync(variableDto);
     }
 
     /// <summary>
@@ -493,7 +412,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos)
     {
-        return await _variableAppService.UpdateVariablesAsync(variableDtos);
+        return await _variableManagementService.UpdateVariablesAsync(variableDtos);
     }
 
     /// <summary>
@@ -501,7 +420,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<bool> DeleteVariableAsync(int id)
     {
-        return await _variableAppService.DeleteVariableAsync(id);
+        return await _variableManagementService.DeleteVariableAsync(id);
     }
 
     /// <summary>
@@ -509,7 +428,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<bool> DeleteVariablesAsync(List<int> ids)
     {
-        return await _variableAppService.DeleteVariablesAsync(ids);
+        return await _variableManagementService.DeleteVariablesAsync(ids);
     }
 
     /// <summary>
@@ -517,18 +436,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddVariableToMemory(VariableDto variableDto)
     {
-        VariableTableDto variableTableDto = null;
-        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-        {
-            variableTableDto = variableTable;
-            variableDto.VariableTable = variableTableDto;
-            variableTable.Variables.Add(variableDto);
-        }
-
-        if (Variables.TryAdd(variableDto.Id, variableDto))
-        {
-            OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
-        }
+        _variableManagementService.AddVariableToMemory(variableDto, VariableTables);
     }
 
     /// <summary>
@@ -536,14 +444,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateVariableInMemory(VariableDto variableDto)
     {
-        VariableTableDto variableTableDto = null;
-        if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-        {
-            variableTableDto = variableTable;
-        }
-
-        Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
-        OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
+        _variableManagementService.UpdateVariableInMemory(variableDto, VariableTables);
     }
 
     /// <summary>
@@ -551,17 +452,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveVariableFromMemory(int variableId)
     {
-        if (Variables.TryRemove(variableId, out var variableDto))
-        {
-            VariableTableDto variableTableDto = null;
-            if (variableDto != null && VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-            {
-                variableTableDto = variableTable;
-                variableTable.Variables.Remove(variableDto);
-            }
-
-            OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
-        }
+        _variableManagementService.RemoveVariableFromMemory(variableId, VariableTables);
     }
 
     #endregion
@@ -573,7 +464,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<MqttServerDto> GetMqttServerByIdAsync(int id)
     {
-        return await _mqttAppService.GetMqttServerByIdAsync(id);
+        return await _mqttManagementService.GetMqttServerByIdAsync(id);
     }
 
     /// <summary>
@@ -581,7 +472,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<MqttServerDto>> GetAllMqttServersAsync()
     {
-        return await _mqttAppService.GetAllMqttServersAsync();
+        return await _mqttManagementService.GetAllMqttServersAsync();
     }
 
     /// <summary>
@@ -589,7 +480,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<int> CreateMqttServerAsync(MqttServerDto mqttServerDto)
     {
-        return await _mqttAppService.CreateMqttServerAsync(mqttServerDto);
+        return await _mqttManagementService.CreateMqttServerAsync(mqttServerDto);
     }
 
     /// <summary>
@@ -597,7 +488,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task UpdateMqttServerAsync(MqttServerDto mqttServerDto)
     {
-        await _mqttAppService.UpdateMqttServerAsync(mqttServerDto);
+        await _mqttManagementService.UpdateMqttServerAsync(mqttServerDto);
     }
 
     /// <summary>
@@ -605,7 +496,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task DeleteMqttServerAsync(int id)
     {
-        await _mqttAppService.DeleteMqttServerAsync(id);
+        await _mqttManagementService.DeleteMqttServerAsync(id);
     }
 
     /// <summary>
@@ -613,10 +504,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddMqttServerToMemory(MqttServerDto mqttServerDto)
     {
-        if (MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto))
-        {
-            OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Added, mqttServerDto));
-        }
+        _mqttManagementService.AddMqttServerToMemory(mqttServerDto);
     }
 
     /// <summary>
@@ -624,8 +512,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateMqttServerInMemory(MqttServerDto mqttServerDto)
     {
-        MqttServers.AddOrUpdate(mqttServerDto.Id, mqttServerDto, (key, oldValue) => mqttServerDto);
-        OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Updated, mqttServerDto));
+        _mqttManagementService.UpdateMqttServerInMemory(mqttServerDto);
     }
 
     /// <summary>
@@ -633,10 +520,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveMqttServerFromMemory(int mqttServerId)
     {
-        if (MqttServers.TryRemove(mqttServerId, out var mqttServerDto))
-        {
-            OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Deleted, mqttServerDto));
-        }
+        _mqttManagementService.RemoveMqttServerFromMemory(mqttServerId);
     }
 
     #endregion
@@ -755,7 +639,7 @@ public class DataCenterService : IDataCenterService
             
 
             // 构建菜单树
-            BuildMenuTree();
+            _menuManagementService.BuildMenuTree();
 
             // 触发数据加载完成事件
             OnDataLoadCompleted(new DataLoadCompletedEventArgs(true, "数据加载完成"));
@@ -772,7 +656,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<DeviceDto>> LoadAllDevicesAsync()
     {
-        return await _deviceAppService.GetAllDevicesAsync();
+        return await _deviceManagementService.GetAllDevicesAsync();
     }
 
     /// <summary>
@@ -780,7 +664,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableTableDto>> LoadAllVariableTablesAsync()
     {
-        return await _variableTableAppService.GetAllVariableTablesAsync();
+        return await _variableTableManagementService.GetAllVariableTablesAsync();
     }
 
     /// <summary>
@@ -788,7 +672,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableDto>> LoadAllVariablesAsync()
     {
-        return await _variableAppService.GetAllVariablesAsync();
+        return await _variableManagementService.GetAllVariablesAsync();
     }
 
     /// <summary>
@@ -796,7 +680,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<MenuBeanDto>> LoadAllMenusAsync()
     {
-        return await _menuService.GetAllMenusAsync();
+        return await _menuManagementService.GetAllMenusAsync();
     }
 
     /// <summary>
@@ -804,7 +688,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<MqttServerDto>> LoadAllMqttServersAsync()
     {
-        return await _mqttAppService.GetAllMqttServersAsync();
+        return await _mqttManagementService.GetAllMqttServersAsync();
     }
     
     /// <summary>
@@ -812,7 +696,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<NlogDto>> LoadAllNlogsAsync()
     {
-        return await _nlogAppService.GetAllLogsAsync();
+        return await _logManagementService.GetAllNlogsAsync();
     }
 
     #endregion
@@ -886,28 +770,6 @@ public class DataCenterService : IDataCenterService
 
     #endregion
     
-    #region 私有辅助方法
-
-    /// <summary>
-    /// 构建菜单树结构
-    /// </summary>
-    private void BuildMenuTree()
-    {
-        // 清空现有菜单树
-        MenuTrees.Clear();
-
-        // 获取所有根菜单
-        var rootMenus = GetRootMenus();
-
-        // 将根菜单添加到菜单树中
-        foreach (var rootMenu in rootMenus)
-        {
-            MenuTrees.TryAdd(rootMenu.Id, rootMenu);
-        }
-    }
-
-    #endregion
-
     #region 日志管理
 
     /// <summary>
@@ -915,7 +777,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<NlogDto> GetNlogByIdAsync(int id)
     {
-        return await _nlogAppService.GetLogByIdAsync(id);
+        return await _logManagementService.GetNlogByIdAsync(id);
     }
 
     /// <summary>
@@ -923,7 +785,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<NlogDto>> GetAllNlogsAsync()
     {
-        return await _nlogAppService.GetAllLogsAsync();
+        return await _logManagementService.GetAllNlogsAsync();
     }
 
     /// <summary>
@@ -931,7 +793,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<NlogDto>> GetLatestNlogsAsync(int count)
     {
-        return await _nlogAppService.GetLatestLogsAsync(count);
+        return await _logManagementService.GetLatestNlogsAsync(count);
     }
 
     /// <summary>
@@ -939,7 +801,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task ClearAllNlogsAsync()
     {
-        await _nlogAppService.ClearAllLogsAsync();
+        await _logManagementService.ClearAllNlogsAsync();
     }
 
     /// <summary>
@@ -947,10 +809,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void AddNlogToMemory(NlogDto nlogDto)
     {
-        if (Nlogs.TryAdd(nlogDto.Id, nlogDto))
-        {
-            OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Added, nlogDto));
-        }
+        _logManagementService.AddNlogToMemory(nlogDto);
     }
 
     /// <summary>
@@ -958,8 +817,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void UpdateNlogInMemory(NlogDto nlogDto)
     {
-        Nlogs.AddOrUpdate(nlogDto.Id, nlogDto, (key, oldValue) => nlogDto);
-        OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Updated, nlogDto));
+        _logManagementService.UpdateNlogInMemory(nlogDto);
     }
 
     /// <summary>
@@ -967,10 +825,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveNlogFromMemory(int nlogId)
     {
-        if (Nlogs.TryRemove(nlogId, out var nlogDto))
-        {
-            OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Deleted, nlogDto));
-        }
+        _logManagementService.RemoveNlogFromMemory(nlogId);
     }
 
     #endregion
