@@ -13,6 +13,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DMS.WPF.ViewModels.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
+using System;
 
 namespace DMS.WPF.ViewModels;
 
@@ -32,9 +34,14 @@ partial class LogHistoryViewModel : ViewModelBase
     [ObservableProperty]
     private string _searchText;
 
+    [ObservableProperty]
+    private string _selectedLogLevel;
+
     private readonly ObservableList<NlogItemViewModel> _logItemList;
     private readonly ISynchronizedView<NlogItemViewModel, NlogItemViewModel> _synchronizedView;
     public NotifyCollectionChangedSynchronizedViewList<NlogItemViewModel> LogItemListView { get; }
+
+    public ObservableCollection<string> LogLevels { get; } = new ObservableCollection<string> { "Trace", "Debug", "Info", "Warn", "Error", "Fatal" };
 
     public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, INotificationService notificationService)
     {
@@ -50,16 +57,34 @@ partial class LogHistoryViewModel : ViewModelBase
 
     private bool FilterLogs(NlogItemViewModel item)
     {
-        var searchTextLower = SearchText.ToLower();
-        return item.Logger?.ToLower().Contains(searchTextLower) == true ||
-               item.Message?.ToLower().Contains(searchTextLower) == true ||
-               item.Exception?.ToLower().Contains(searchTextLower) == true ||
-               item.StackTrace?.ToLower().Contains(searchTextLower) == true;
+        // 搜索文本过滤
+        var searchTextLower = SearchText?.ToLower() ?? string.Empty;
+        var searchTextMatch = string.IsNullOrWhiteSpace(SearchText) ||
+                             item.Logger?.ToLower().Contains(searchTextLower) == true ||
+                             item.Message?.ToLower().Contains(searchTextLower) == true ||
+                             item.Exception?.ToLower().Contains(searchTextLower) == true ||
+                             item.StackTrace?.ToLower().Contains(searchTextLower) == true;
+
+        // 日志级别过滤
+        var levelMatch = string.IsNullOrWhiteSpace(SelectedLogLevel) || 
+                        item.Level?.Equals(SelectedLogLevel, StringComparison.OrdinalIgnoreCase) == true;
+
+        return searchTextMatch && levelMatch;
     }
 
     partial void OnSearchTextChanged(string value)
     {
-        if (string.IsNullOrWhiteSpace(SearchText))
+        ApplyFilter();
+    }
+
+    partial void OnSelectedLogLevelChanged(string value)
+    {
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText) && string.IsNullOrWhiteSpace(SelectedLogLevel))
         {
             _synchronizedView.ResetFilter();
         }
@@ -106,7 +131,11 @@ partial class LogHistoryViewModel : ViewModelBase
         try
         {
             var logs = await _nlogAppService.GetAllLogsAsync();
-            var logItems = logs.Select(logDto => 
+            
+            // 按时间倒序排序
+            var sortedLogs = logs.OrderByDescending(logDto => logDto.LogTime).ToList();
+            
+            var logItems = sortedLogs.Select(logDto => 
             {
                 // Manually map NlogDto to Nlog
                 var nlog = new Nlog

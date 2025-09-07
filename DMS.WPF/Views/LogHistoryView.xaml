@@ -80,6 +80,15 @@
                     HorizontalAlignment="Left"
                     ui:ControlHelper.PlaceholderText="搜索日志..."
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                
+                <TextBlock Style="{StaticResource LogHistoryLabelStyle}" Text="级别:" />
+                <ComboBox
+                    Width="100"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    ItemsSource="{Binding LogLevels}"
+                    SelectedItem="{Binding SelectedLogLevel}"
+                    ui:ControlHelper.PlaceholderText="所有级别" />
             </ikw:SimpleStackPanel>
 
 
@@ -90,7 +99,7 @@
             Margin="10"
             AutoGenerateColumns="False"
             CanUserDeleteRows="False"
-            CanUserSortColumns="False"
+            CanUserSortColumns="True"
             IsReadOnly="True"
             ItemsSource="{Binding LogItemListView}"
             SelectedItem="{Binding SelectedLog}"
