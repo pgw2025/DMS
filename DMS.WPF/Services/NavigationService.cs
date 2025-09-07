@@ -11,13 +11,15 @@ namespace DMS.WPF.Services;
 public class NavigationService : INavigationService
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly INotificationService _notificationService;
 
     /// <summary>
     /// 构造函数。
     /// </summary>
-    public NavigationService(IServiceProvider serviceProvider)
+    public NavigationService(IServiceProvider serviceProvider,INotificationService notificationService)
     {
         _serviceProvider = serviceProvider;
+        _notificationService = notificationService;
     }
 
     /// <summary>
@@ -34,8 +36,7 @@ public class NavigationService : INavigationService
         var viewModel = GetViewModelByKey(menu.TargetViewKey);
         if (viewModel == null)
         {
-            var notificationService = App.Current.Services.GetRequiredService<INotificationService>();
-            notificationService.ShowError($"切换界面失败，没有找到界面：{menu.TargetViewKey}");
+            _notificationService.ShowError($"切换界面失败，没有找到界面：{menu.TargetViewKey}");
             return;
         }
 
@@ -51,26 +52,36 @@ public class NavigationService : INavigationService
 
     private ViewModelBase GetViewModelByKey(string key)
     {
-        switch (key)
+        try
         {
-            case "HomeView":
-                return App.Current.Services.GetRequiredService<HomeViewModel>();
-            case "DevicesView":
-                return App.Current.Services.GetRequiredService<DevicesViewModel>();
-            case "DeviceDetailView":
-                return App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
-            case "DataTransformView":
-                return App.Current.Services.GetRequiredService<DataTransformViewModel>();
-            case "VariableTableView":
-                return App.Current.Services.GetRequiredService<VariableTableViewModel>();
-            case "MqttsView":
-                return App.Current.Services.GetRequiredService<MqttsViewModel>();
-            case "MqttServerDetailView":
-                return App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
-            case "SettingView":
-                return App.Current.Services.GetRequiredService<SettingViewModel>();
-            default:
-                return null;
+            switch (key)
+            {
+                case "HomeView":
+                    return App.Current.Services.GetRequiredService<HomeViewModel>();
+                case "DevicesView":
+                    return App.Current.Services.GetRequiredService<DevicesViewModel>();
+                case "DeviceDetailView":
+                    return App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
+                case "DataTransformView":
+                    return App.Current.Services.GetRequiredService<DataTransformViewModel>();
+                case "VariableTableView":
+                    return App.Current.Services.GetRequiredService<VariableTableViewModel>();
+                case "LogHistoryView":
+                    return App.Current.Services.GetRequiredService<LogHistoryViewModel>();
+                case "MqttsView":
+                    return App.Current.Services.GetRequiredService<MqttsViewModel>();
+                case "MqttServerDetailView":
+                    return App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
+                case "SettingView":
+                    return App.Current.Services.GetRequiredService<SettingViewModel>();
+                default:
+                    return null;
+            }
+        }
+        catch (Exception e)
+        {
+            _notificationService.ShowError($"切换界面失败，获取：{key}对应的ViewModel时发生了错误：{e.Message}");
+            throw;
         }
     }
 }

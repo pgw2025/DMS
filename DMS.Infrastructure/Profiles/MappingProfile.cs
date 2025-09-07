@@ -34,5 +34,6 @@ public class MappingProfile : Profile
         
         CreateMap<DbMenu, MenuBean>().ReverseMap();
         
+        CreateMap<DbNlog, Nlog>().ReverseMap();
     }
 }

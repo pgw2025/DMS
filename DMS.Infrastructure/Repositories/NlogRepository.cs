@@ -27,6 +27,14 @@ public class NlogRepository : BaseRepository<DbNlog>, INlogRepository
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// 异步删除所有Nlog日志。
+    /// </summary>
+    public async Task DeleteAllAsync()
+    {
+        await Db.Deleteable<DbNlog>().ExecuteCommandAsync();
+    }
+
     // Nlog 通常是只读或追加的日志，因此像 AddAsync, UpdateAsync, DeleteAsync 这样的修改方法
     // 可能不需要在仓储接口中暴露，或者可以省略具体实现或抛出 NotSupportedException。
     // 但为了保持与基类一致性并满足接口要求，这里显式实现它们。

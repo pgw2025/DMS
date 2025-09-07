@@ -1,0 +1,156 @@
+<UserControl
+    x:Class="DMS.WPF.Views.LogHistoryView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ex="clr-namespace:DMS.Extensions"
+    xmlns:helper="clr-namespace:DMS.WPF.Helper"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
+    d:DataContext="{d:DesignInstance vm:LogHistoryViewModel}"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    Loaded="LogHistoryView_OnLoaded"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ex:BindingProxy x:Key="proxy" Data="{Binding}" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <!--  标签字体的样式  -->
+        <Style x:Key="LogHistoryLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!--  值字体的样式  -->
+        <Style x:Key="LogHistoryValueStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="MinWidth" Value="100" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel>
+
+        <ikw:SimpleStackPanel Margin="10" DockPanel.Dock="Top">
+            <!--  操作菜单  -->
+            <controls:CommandBar
+                x:Name="PrimaryCommandBar"
+                DefaultLabelPosition="Right"
+                IsOpen="False">
+                <ui:AppBarButton Command="{Binding RefreshLogsCommand}" Label="刷新日志">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+
+                <ui:AppBarButton Command="{Binding ClearLogsCommand}" Label="清空日志">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+
+                <ui:AppBarButton x:Name="ShareButton" Label="Share">
+                    <ui:AppBarButton.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Share}" />
+                    </ui:AppBarButton.Icon>
+                </ui:AppBarButton>
+                <ui:CommandBar.SecondaryCommands>
+                    <ui:AppBarButton
+                        x:Name="SettingsButton"
+                        Icon="Setting"
+                        Label="Settings" />
+                </ui:CommandBar.SecondaryCommands>
+
+            </controls:CommandBar>
+            <!--  日志的搜索信息  -->
+            <ikw:SimpleStackPanel
+                Margin="5"
+                Orientation="Horizontal"
+                Spacing="10">
+                <TextBlock Style="{StaticResource LogHistoryLabelStyle}" Text="搜索:" />
+                <TextBox
+                    Width="200"
+                    Margin="5,0,0,0"
+                    HorizontalAlignment="Left"
+                    ui:ControlHelper.PlaceholderText="搜索日志..."
+                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+            </ikw:SimpleStackPanel>
+
+
+        </ikw:SimpleStackPanel>
+
+        <DataGrid
+            x:Name="BasicGridView"
+            Margin="10"
+            AutoGenerateColumns="False"
+            CanUserDeleteRows="False"
+            CanUserSortColumns="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding LogItemListView}"
+            SelectedItem="{Binding SelectedLog}"
+            SelectionMode="Extended"
+            Style="{StaticResource DataGridBaseStyle}">
+            <i:Interaction.Behaviors>
+                <helper:SelectedItemsBehavior SelectedItems="{Binding SelectedLogs}" />
+            </i:Interaction.Behaviors>
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="{Binding RefreshLogsCommand}" Header="刷新日志">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Command="{Binding ClearLogsCommand}" Header="清空日志">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <!-- <Setter Property="Background" Value="#fff"/> -->
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Level}" Value="Error">
+                            <Setter Property="Background" Value="LightCoral" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Level}" Value="Warn">
+                            <Setter Property="Background" Value="LightGoldenrodYellow" />
+                            <Setter Property="Foreground" Value="Black" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </DataTrigger>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextIconBrush}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding TimeStamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Header="时间戳" />
+                <DataGridTextColumn Binding="{Binding Level}" Header="级别" />
+                <DataGridTextColumn Binding="{Binding Logger}" Header="记录器" />
+                <DataGridTextColumn Binding="{Binding Message}" Header="消息" />
+                <DataGridTextColumn Binding="{Binding Exception}" Header="异常" />
+                <DataGridTextColumn Binding="{Binding StackTrace}" Header="堆栈跟踪" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+
+</UserControl>

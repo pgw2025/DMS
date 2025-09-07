@@ -47,5 +47,6 @@ public class MappingProfile : Profile
 
         // User 映射
         CreateMap<User, UserDto>().ReverseMap();
+        CreateMap<Nlog, NlogDto>().ReverseMap();
     }
 }

@@ -1,50 +1,24 @@
-// 文件: DMS.WPF/ViewModels/Items/NlogItemViewModel.cs
-
 using CommunityToolkit.Mvvm.ComponentModel;
+using DMS.Core.Models;
 
 namespace DMS.WPF.ViewModels.Items;
 
-/// <summary>
-/// 代表日志列表中的单个日志项的ViewModel。
-/// 实现了INotifyPropertyChanged，其任何属性变化都会自动通知UI。
-/// </summary>
-public partial class NlogItemViewModel : ObservableObject
+public class NlogItemViewModel : ObservableObject
 {
-    public int Id { get; set; }
+    private Nlog _nlog;
 
-    [ObservableProperty]
-    private DateTime _logTime;
+    public NlogItemViewModel(Nlog nlog)
+    {
+        _nlog = nlog;
+    }
 
-    [ObservableProperty]
-    private string _level;
-
-    [ObservableProperty]
-    private int _threadId;
-
-    [ObservableProperty]
-    private string _threadName;
-
-    [ObservableProperty]
-    private string _callsite;
-
-    [ObservableProperty]
-    private int _callsiteLineNumber;
-
-    [ObservableProperty]
-    private string _message;
-
-    [ObservableProperty]
-    private string _logger;
-
-    [ObservableProperty]
-    private string _exception;
-
-    [ObservableProperty]
-    private string _callerFilePath;
-
-    [ObservableProperty]
-    private int _callerLineNumber;
-
-    [ObservableProperty]
-    private string _callerMember;
+    public int Id => _nlog.Id;
+    public string Level => _nlog.Level;
+    public string ThreadName => _nlog.ThreadName;
+    public string Callsite => _nlog.Callsite;
+    public string Message => _nlog.Message;
+    public string Logger => _nlog.Logger;
+    public string Exception => _nlog.Exception;
+    public string StackTrace => _nlog.Exception; // Using Exception as StackTrace since it's not in the Nlog model
+    public System.DateTime TimeStamp => _nlog.LogTime;
 }

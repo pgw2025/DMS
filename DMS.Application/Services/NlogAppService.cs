@@ -65,6 +65,17 @@ public class NlogAppService : INlogAppService
         return allLogs.OrderByDescending(l => l.LogTime).Take(count).ToList();
     }
 
+    /// <summary>
+    /// 异步清空所有Nlog日志。
+    /// </summary>
+    public async Task ClearAllLogsAsync()
+    {
+        // 这里需要实现清空日志的逻辑
+        // 暂时只清空UI上的日志列表
+        // 实际实现可能需要在 INlogRepository 中添加相应的方法
+        await _repoManager.Nlogs.DeleteAllAsync();
+    }
+
     // 可以在这里实现 INlogAppService 接口中定义的其他方法
     // 例如：
     /*

@@ -23,6 +23,11 @@ public interface INlogAppService
     /// <param name="count">要获取的日志条目数量。</param>
     Task<List<NlogDto>> GetLatestLogsAsync(int count);
 
+    /// <summary>
+    /// 异步清空所有Nlog日志。
+    /// </summary>
+    Task ClearAllLogsAsync();
+
     // 可以在这里添加更多针对日志的查询服务方法，例如：
     // Task<List<NlogDto>> GetLogsByLevelAsync(string level);
     // Task<List<NlogDto>> GetLogsByDateRangeAsync(DateTime startDate, DateTime endDate);

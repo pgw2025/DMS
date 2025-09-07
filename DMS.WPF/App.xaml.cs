@@ -221,6 +221,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IDataCenterService, DataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<INlogAppService, NlogAppService>();
         
         // 注册MQTT服务管理器
         services.AddSingleton<IMqttServiceManager, MqttServiceManager>();
@@ -248,6 +249,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DevicesViewModel>();
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<SettingViewModel>();
+        services.AddSingleton<LogHistoryViewModel>();
         services.AddTransient<VariableTableViewModel>(provider =>
             new VariableTableViewModel(
                 provider.GetRequiredService<IMapper>(),
@@ -267,6 +269,14 @@ public partial class App : System.Windows.Application
                 provider.GetRequiredService<IMqttAppService>(),
                 provider.GetRequiredService<IMapper>(),
                 provider.GetRequiredService<INavigationService>(),
+                provider.GetRequiredService<INotificationService>()
+            )
+        );
+        services.AddSingleton<LogHistoryViewModel>(provider =>
+            new LogHistoryViewModel(
+                provider.GetRequiredService<IMapper>(),
+                provider.GetRequiredService<INlogAppService>(),
+                provider.GetRequiredService<IDialogService>(),
                 provider.GetRequiredService<INotificationService>()
             )
         );
@@ -292,6 +302,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<HomeView>();
         services.AddSingleton<DevicesView>();
         services.AddSingleton<VariableTableView>();
+        services.AddSingleton<LogHistoryView>();
         services.AddScoped<DeviceDetailView>();
         services.AddScoped<MqttsView>();
     }

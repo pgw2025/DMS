@@ -104,6 +104,10 @@
                         <DataTemplate DataType="{x:Type vm:SettingViewModel}">
                             <local:SettingView />
                         </DataTemplate>
+                        <!--  日志历史页  -->
+                        <DataTemplate DataType="{x:Type vm:LogHistoryViewModel}">
+                            <local:LogHistoryView />
+                        </DataTemplate>
                         <!--  设备详情页  -->
                         <DataTemplate DataType="{x:Type vm:DeviceDetailViewModel}">
                             <local:DeviceDetailView />
