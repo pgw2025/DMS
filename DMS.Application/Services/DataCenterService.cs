@@ -15,7 +15,7 @@ using System.Linq;
 namespace DMS.Application.Services;
 
 /// <summary>
-/// 数据中心服务，负责管理所有的数据，包括设备、变量表、变量和菜单。
+/// 数据中心服务，负责管理所有的数据，包括设备、变量表、变量、菜单和日志。
 /// 实现 <see cref="IDataCenterService"/> 接口。
 /// </summary>
 public class DataCenterService : IDataCenterService
@@ -27,6 +27,7 @@ public class DataCenterService : IDataCenterService
     private readonly IVariableAppService _variableAppService;
     private readonly IMenuService _menuService;
     private readonly IMqttAppService _mqttAppService;
+    private readonly INlogAppService _nlogAppService;
 
     /// <summary>
     /// 安全字典，用于存储所有设备数据
@@ -57,6 +58,11 @@ public class DataCenterService : IDataCenterService
     /// 安全字典，用于存储所有MQTT服务器数据
     /// </summary>
     public ConcurrentDictionary<int, MqttServerDto> MqttServers { get; } = new();
+
+    /// <summary>
+    /// 安全字典，用于存储所有日志数据
+    /// </summary>
+    public ConcurrentDictionary<int, NlogDto> Nlogs { get; } = new();
 
     #region 事件定义
 
@@ -90,6 +96,10 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public event EventHandler<MqttServerChangedEventArgs> MqttServerChanged;
 
+    /// <summary>
+    /// 当日志数据发生变化时触发
+    /// </summary>
+    public event EventHandler<NlogChangedEventArgs> NlogChanged;
 
     /// <summary>
     /// 当变量值发生变化时触发
@@ -108,6 +118,7 @@ public class DataCenterService : IDataCenterService
     /// <param name="variableAppService">变量应用服务实例。</param>
     /// <param name="menuService">菜单服务实例。</param>
     /// <param name="mqttAppService">MQTT应用服务实例。</param>
+    /// <param name="nlogAppService">Nlog应用服务实例。</param>
     public DataCenterService(
         IRepositoryManager repositoryManager,
         IMapper mapper,
@@ -115,7 +126,8 @@ public class DataCenterService : IDataCenterService
         IVariableTableAppService variableTableAppService,
         IVariableAppService variableAppService,
         IMenuService menuService,
-        IMqttAppService mqttAppService)
+        IMqttAppService mqttAppService,
+        INlogAppService nlogAppService)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
@@ -124,6 +136,7 @@ public class DataCenterService : IDataCenterService
         _variableAppService = variableAppService;
         _menuService = menuService;
         _mqttAppService = mqttAppService;
+        _nlogAppService = nlogAppService;
     }
 
     #region 设备管理
@@ -644,6 +657,7 @@ public class DataCenterService : IDataCenterService
             Menus.Clear();
             MenuTrees.Clear();
             MqttServers.Clear();
+            Nlogs.Clear();
 
             // 加载所有设备
             var devices = await _repositoryManager.Devices.GetAllAsync();
@@ -662,6 +676,9 @@ public class DataCenterService : IDataCenterService
             var menuDtos = _mapper.Map<List<MenuBeanDto>>(menus);
 
             var mqttServers = await LoadAllMqttServersAsync();
+            
+            // 加载所有日志
+            var nlogs = await LoadAllNlogsAsync();
 
             var variableMqttAliases = await _repositoryManager.VariableMqttAliases.GetAllAsync();
 
@@ -695,6 +712,12 @@ public class DataCenterService : IDataCenterService
             foreach (var mqttServer in mqttServers)
             {
                 MqttServers.TryAdd(mqttServer.Id, mqttServer);
+            }
+            
+            // 加载日志数据到内存
+            foreach (var nlog in nlogs)
+            {
+                Nlogs.TryAdd(nlog.Id, nlog);
             }
 
             // 将变量添加到安全字典
@@ -783,6 +806,14 @@ public class DataCenterService : IDataCenterService
     {
         return await _mqttAppService.GetAllMqttServersAsync();
     }
+    
+    /// <summary>
+    /// 异步加载所有日志数据。
+    /// </summary>
+    public async Task<List<NlogDto>> LoadAllNlogsAsync()
+    {
+        return await _nlogAppService.GetAllLogsAsync();
+    }
 
     #endregion
 
@@ -836,6 +867,14 @@ public class DataCenterService : IDataCenterService
         MqttServerChanged?.Invoke(this, e);
     }
 
+    /// <summary>
+    /// 触发日志变更事件
+    /// </summary>
+    protected virtual void OnNlogChanged(NlogChangedEventArgs e)
+    {
+        NlogChanged?.Invoke(this, e);
+    }
+
 
     /// <summary>
     /// 触发变量值变更事件
@@ -846,7 +885,7 @@ public class DataCenterService : IDataCenterService
     }
 
     #endregion
-
+    
     #region 私有辅助方法
 
     /// <summary>
@@ -864,6 +903,73 @@ public class DataCenterService : IDataCenterService
         foreach (var rootMenu in rootMenus)
         {
             MenuTrees.TryAdd(rootMenu.Id, rootMenu);
+        }
+    }
+
+    #endregion
+
+    #region 日志管理
+
+    /// <summary>
+    /// 异步根据ID获取日志DTO。
+    /// </summary>
+    public async Task<NlogDto> GetNlogByIdAsync(int id)
+    {
+        return await _nlogAppService.GetLogByIdAsync(id);
+    }
+
+    /// <summary>
+    /// 异步获取所有日志DTO列表。
+    /// </summary>
+    public async Task<List<NlogDto>> GetAllNlogsAsync()
+    {
+        return await _nlogAppService.GetAllLogsAsync();
+    }
+
+    /// <summary>
+    /// 异步获取指定数量的最新日志DTO列表。
+    /// </summary>
+    public async Task<List<NlogDto>> GetLatestNlogsAsync(int count)
+    {
+        return await _nlogAppService.GetLatestLogsAsync(count);
+    }
+
+    /// <summary>
+    /// 异步清空所有日志。
+    /// </summary>
+    public async Task ClearAllNlogsAsync()
+    {
+        await _nlogAppService.ClearAllLogsAsync();
+    }
+
+    /// <summary>
+    /// 在内存中添加日志
+    /// </summary>
+    public void AddNlogToMemory(NlogDto nlogDto)
+    {
+        if (Nlogs.TryAdd(nlogDto.Id, nlogDto))
+        {
+            OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Added, nlogDto));
+        }
+    }
+
+    /// <summary>
+    /// 在内存中更新日志
+    /// </summary>
+    public void UpdateNlogInMemory(NlogDto nlogDto)
+    {
+        Nlogs.AddOrUpdate(nlogDto.Id, nlogDto, (key, oldValue) => nlogDto);
+        OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Updated, nlogDto));
+    }
+
+    /// <summary>
+    /// 在内存中删除日志
+    /// </summary>
+    public void RemoveNlogFromMemory(int nlogId)
+    {
+        if (Nlogs.TryRemove(nlogId, out var nlogDto))
+        {
+            OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Deleted, nlogDto));
         }
     }
 

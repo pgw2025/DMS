@@ -277,7 +277,9 @@ public partial class App : System.Windows.Application
                 provider.GetRequiredService<IMapper>(),
                 provider.GetRequiredService<INlogAppService>(),
                 provider.GetRequiredService<IDialogService>(),
-                provider.GetRequiredService<INotificationService>()
+                provider.GetRequiredService<INotificationService>(),
+                provider.GetRequiredService<DataServices>(),
+                provider.GetRequiredService<IDataCenterService>()
             )
         );
         services.AddScoped<MqttServerDetailViewModel>();

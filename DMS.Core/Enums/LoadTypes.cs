@@ -5,5 +5,6 @@ public enum LoadTypes
     Devices,
     Menu,
     Mqtts,
+    Logs,
     All
 }

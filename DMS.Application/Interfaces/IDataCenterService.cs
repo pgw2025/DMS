@@ -261,6 +261,45 @@ public interface IDataCenterService
 
     #endregion
 
+    #region 日志管理
+
+    /// <summary>
+    /// 异步根据ID获取日志DTO。
+    /// </summary>
+    Task<NlogDto> GetNlogByIdAsync(int id);
+
+    /// <summary>
+    /// 异步获取所有日志DTO列表。
+    /// </summary>
+    Task<List<NlogDto>> GetAllNlogsAsync();
+
+    /// <summary>
+    /// 异步获取指定数量的最新日志DTO列表。
+    /// </summary>
+    Task<List<NlogDto>> GetLatestNlogsAsync(int count);
+
+    /// <summary>
+    /// 异步清空所有日志。
+    /// </summary>
+    Task ClearAllNlogsAsync();
+
+    /// <summary>
+    /// 在内存中添加日志
+    /// </summary>
+    void AddNlogToMemory(NlogDto nlogDto);
+
+    /// <summary>
+    /// 在内存中更新日志
+    /// </summary>
+    void UpdateNlogInMemory(NlogDto nlogDto);
+
+    /// <summary>
+    /// 在内存中删除日志
+    /// </summary>
+    void RemoveNlogFromMemory(int nlogId);
+
+    #endregion
+
     #region 数据存储访问
 
     /// <summary>
@@ -291,6 +330,11 @@ public interface IDataCenterService
     /// 获取所有MQTT服务器的安全字典。
     /// </summary>
     ConcurrentDictionary<int, MqttServerDto> MqttServers { get; }
+    
+    /// <summary>
+    /// 获取所有日志的安全字典。
+    /// </summary>
+    ConcurrentDictionary<int, NlogDto> Nlogs { get; }
 
     #endregion
 
@@ -325,6 +369,11 @@ public interface IDataCenterService
     /// 异步加载所有MQTT服务器数据。
     /// </summary>
     Task<List<MqttServerDto>> LoadAllMqttServersAsync();
+    
+    /// <summary>
+    /// 异步加载所有日志数据。
+    /// </summary>
+    Task<List<NlogDto>> LoadAllNlogsAsync();
 
     #endregion
 
@@ -360,6 +409,10 @@ public interface IDataCenterService
     /// </summary>
     event EventHandler<MqttServerChangedEventArgs> MqttServerChanged;
 
+    /// <summary>
+    /// 当日志数据发生变化时触发
+    /// </summary>
+    event EventHandler<NlogChangedEventArgs> NlogChanged;
 
     /// <summary>
     /// 当变量值发生变化时触发

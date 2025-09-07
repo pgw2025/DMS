@@ -7,6 +7,11 @@ public class NlogItemViewModel : ObservableObject
 {
     private Nlog _nlog;
 
+    public NlogItemViewModel()
+    {
+        _nlog = new Nlog();
+    }
+
     public NlogItemViewModel(Nlog nlog)
     {
         _nlog = nlog;

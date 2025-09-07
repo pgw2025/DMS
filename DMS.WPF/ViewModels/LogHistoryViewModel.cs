@@ -15,15 +15,19 @@ using DMS.WPF.ViewModels.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System;
+using DMS.WPF.Services;
+using DMS.Application.DTOs.Events;
 
 namespace DMS.WPF.ViewModels;
 
-partial class LogHistoryViewModel : ViewModelBase
+partial class LogHistoryViewModel : ViewModelBase,IDisposable
 {
+    public DataServices DataServices { get; }
     private readonly IMapper _mapper;
     private readonly INlogAppService _nlogAppService;
     private readonly IDialogService _dialogService;
     private readonly INotificationService _notificationService;
+    private readonly IDataCenterService _dataCenterService;
 
     [ObservableProperty]
     private NlogItemViewModel _selectedLog;
@@ -43,16 +47,85 @@ partial class LogHistoryViewModel : ViewModelBase
 
     public ObservableCollection<string> LogLevels { get; } = new ObservableCollection<string> { "Trace", "Debug", "Info", "Warn", "Error", "Fatal" };
 
-    public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, INotificationService notificationService)
+    public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, 
+                              INotificationService notificationService, DataServices dataServices, IDataCenterService dataCenterService)
     {
         _mapper = mapper;
         _nlogAppService = nlogAppService;
         _dialogService = dialogService;
         _notificationService = notificationService;
+        DataServices = dataServices;
+        _dataCenterService = dataCenterService;
 
-        _logItemList = new ObservableList<NlogItemViewModel>();
+        _logItemList = new ObservableList<NlogItemViewModel>(DataServices.Nlogs);
+        
         _synchronizedView = _logItemList.CreateView(v => v);
         LogItemListView = _synchronizedView.ToNotifyCollectionChanged();
+        
+        // 订阅日志变更事件
+        _dataCenterService.NlogChanged += OnNlogChanged;
+    }
+
+    /// <summary>
+    /// 处理日志变更事件
+    /// </summary>
+    private void OnNlogChanged(object sender, NlogChangedEventArgs e)
+    {
+        // 在UI线程上更新日志
+        App.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            switch (e.ChangeType)
+            {
+                case DataChangeType.Added:
+                    var newLogItem = new NlogItemViewModel(new Nlog
+                    {
+                        Id = e.Nlog.Id,
+                        LogTime = e.Nlog.LogTime,
+                        Level = e.Nlog.Level,
+                        ThreadId = e.Nlog.ThreadId,
+                        ThreadName = e.Nlog.ThreadName,
+                        Callsite = e.Nlog.Callsite,
+                        CallsiteLineNumber = e.Nlog.CallsiteLineNumber,
+                        Message = e.Nlog.Message,
+                        Logger = e.Nlog.Logger,
+                        Exception = e.Nlog.Exception,
+                        CallerFilePath = e.Nlog.CallerFilePath,
+                        CallerLineNumber = e.Nlog.CallerLineNumber,
+                        CallerMember = e.Nlog.CallerMember
+                    });
+                    _logItemList.Add(newLogItem);
+                    break;
+                case DataChangeType.Updated:
+                    var existingLog = _logItemList.FirstOrDefault(l => l.Id == e.Nlog.Id);
+                    if (existingLog != null)
+                    {
+                        existingLog = new NlogItemViewModel(new Nlog
+                        {
+                            Id = e.Nlog.Id,
+                            LogTime = e.Nlog.LogTime,
+                            Level = e.Nlog.Level,
+                            ThreadId = e.Nlog.ThreadId,
+                            ThreadName = e.Nlog.ThreadName,
+                            Callsite = e.Nlog.Callsite,
+                            CallsiteLineNumber = e.Nlog.CallsiteLineNumber,
+                            Message = e.Nlog.Message,
+                            Logger = e.Nlog.Logger,
+                            Exception = e.Nlog.Exception,
+                            CallerFilePath = e.Nlog.CallerFilePath,
+                            CallerLineNumber = e.Nlog.CallerLineNumber,
+                            CallerMember = e.Nlog.CallerMember
+                        });
+                    }
+                    break;
+                case DataChangeType.Deleted:
+                    var logToRemove = _logItemList.FirstOrDefault(l => l.Id == e.Nlog.Id);
+                    if (logToRemove != null)
+                    {
+                        _logItemList.Remove(logToRemove);
+                    }
+                    break;
+            }
+        }));
     }
 
     private bool FilterLogs(NlogItemViewModel item)
@@ -164,5 +237,12 @@ partial class LogHistoryViewModel : ViewModelBase
         {
             _notificationService.ShowError($"加载日志时发生错误: {ex.Message}", ex);
         }
+    }
+
+    public void Dispose()
+    {
+        // 取消订阅事件
+        _dataCenterService.NlogChanged -= OnNlogChanged;
+
     }
 }

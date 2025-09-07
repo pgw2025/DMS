@@ -12,6 +12,7 @@ using DMS.Core.Models;
 using DMS.Message;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using ObservableCollections;
 
 namespace DMS.WPF.Services;
 
@@ -50,6 +51,10 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
     [ObservableProperty]
     private ObservableCollection<MqttServerItemViewModel> _mqttServers;
 
+    // 日志列表。
+    [ObservableProperty]
+    private ObservableCollection<NlogItemViewModel> _nlogs;
+
 
     // 设备列表变更事件，当设备列表数据更新时触发。
     public event Action<List<Device>> OnDeviceListChanged;
@@ -79,6 +84,37 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         }));
     }
 
+    /// <summary>
+    /// 处理日志变更事件
+    /// </summary>
+    private void OnNlogChanged(object sender, NlogChangedEventArgs e)
+    {
+        // 在UI线程上更新日志
+        App.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            switch (e.ChangeType)
+            {
+                case DataChangeType.Added:
+                    Nlogs.Add(_mapper.Map<NlogItemViewModel>(e.Nlog));
+                    break;
+                case DataChangeType.Updated:
+                    var existingLog = Nlogs.FirstOrDefault(l => l.Id == e.Nlog.Id);
+                    if (existingLog != null)
+                    {
+                        _mapper.Map(e.Nlog, existingLog);
+                    }
+                    break;
+                case DataChangeType.Deleted:
+                    var logToRemove = Nlogs.FirstOrDefault(l => l.Id == e.Nlog.Id);
+                    if (logToRemove != null)
+                    {
+                        Nlogs.Remove(logToRemove);
+                    }
+                    break;
+            }
+        }));
+    }
+
 
     /// <summary>
     /// DataServices类的构造函数。
@@ -98,10 +134,13 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         Menus = new ObservableCollection<MenuItemViewModel>();
         MenuTrees = new ObservableCollection<MenuItemViewModel>();
         MqttServers = new ObservableCollection<MqttServerItemViewModel>();
+        Nlogs = new ObservableCollection<NlogItemViewModel>();
         
         // 监听变量值变更事件
         _dataCenterService.VariableValueChanged += OnVariableValueChanged;
         _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+        // 监听日志变更事件
+        _dataCenterService.NlogChanged += OnNlogChanged;
 
         // 注册消息接收
         // WeakReferenceMessenger.Register<LoadMessage>(this, (r, m) => r.Receive(m));
@@ -144,6 +183,9 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         
         // 加载MQTT服务器数据
         MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(_dataCenterService.MqttServers.Values);
+        
+        // 加载日志数据
+        Nlogs = _mapper.Map<ObservableCollection<NlogItemViewModel>>(_dataCenterService.Nlogs.Values);
 
         BuildMenuTrees();
     }
@@ -476,6 +518,9 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
                 break;
             case LoadTypes.Mqtts:
                 _ = Task.Run(async () => await LoadMqttServers(_mqttAppService));
+                break;
+            case LoadTypes.Logs:
+                // 日志数据已在IDataCenterService中处理
                 break;
             case LoadTypes.All:
                 // 加载所有数据
