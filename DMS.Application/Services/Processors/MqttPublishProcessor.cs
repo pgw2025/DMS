@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
+using AutoMapper;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
+using DMS.Core.Interfaces.Services;
 using DMS.Core.Models;
 
 namespace DMS.Application.Services.Processors;
@@ -10,12 +12,14 @@ namespace DMS.Application.Services.Processors;
 /// </summary>
 public class MqttPublishProcessor : IVariableProcessor
 {
-    // private readonly IMqttServiceManager _mqttServiceManager;
+    private readonly IMapper _mapper;
+    private readonly IMqttServiceManager _mqttServiceManager;
 
-    // public MqttPublishProcessor(IMqttServiceManager mqttServiceManager)
-    // {
-    //     // _mqttServiceManager = mqttServiceManager;
-    // }
+    public MqttPublishProcessor(IMapper mapper, IMqttServiceManager mqttServiceManager)
+    {
+        _mapper = mapper;
+        _mqttServiceManager = mqttServiceManager;
+    }
 
     /// <summary>
     /// 处理单个变量上下文，如果有关联的MQTT配置，则将其推送到发送队列。
@@ -23,25 +27,25 @@ public class MqttPublishProcessor : IVariableProcessor
     /// <param name="context">包含变量及其元数据的上下文对象。</param>
     public async Task ProcessAsync(VariableContext context)
     {
-        // var variable = context.Data;
-        // if (variable?.MqttAliases == null || variable.MqttAliases.Count == 0)
-        // {
-        //     return; // 没有关联的MQTT配置，直接返回
-        // }
-        //
-        // // 遍历所有关联的MQTT配置，并将其推入发送队列
-        // foreach (var variableMqttAlias in variable.MqttAliases)
-        // {
-        //     // 创建VariableMqtt对象
-        //     var variableMqtt = new VariableMqtt
-        //     {
-        //         Variable = variable,
-        //         Mqtt = variableMqttAlias.MqttServer,
-        //         MqttId = variableMqttAlias.MqttServerId
-        //     };
-        //     
-        //     // 发布变量数据到MQTT服务器
-        //     await _mqttServiceManager.PublishVariableDataAsync(variableMqtt);
-        // }
+        var variable = context.Data;
+        if (variable?.MqttAliases == null || variable.MqttAliases.Count == 0)
+        {
+            return; // 没有关联的MQTT配置，直接返回
+        }
+        
+        // 遍历所有关联的MQTT配置，并将其推入发送队列
+        foreach (var variableMqttAlias in variable.MqttAliases)
+        {
+            // 创建VariableMqtt对象
+            var variableMqtt = new VariableMqtt
+            {
+                Variable = _mapper.Map<Variable>(variable),
+                Mqtt = variableMqttAlias.MqttServer,
+                MqttId = variableMqttAlias.MqttServerId
+            };
+            
+            // 发布变量数据到MQTT服务器
+            await _mqttServiceManager.PublishVariableDataAsync(variableMqtt);
+        }
     }
 }

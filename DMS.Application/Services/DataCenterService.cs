@@ -90,7 +90,6 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public event EventHandler<MqttServerChangedEventArgs> MqttServerChanged;
 
- 
 
     /// <summary>
     /// 当变量值发生变化时触发
@@ -202,10 +201,9 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public void RemoveDeviceFromMemory(int deviceId)
     {
-
         if (Devices.TryGetValue(deviceId, out var deviceDto))
         {
-            foreach (var variableTable in deviceDto.VariableTables)  
+            foreach (var variableTable in deviceDto.VariableTables)
             {
                 foreach (var variable in variableTable.Variables)
                 {
@@ -216,7 +214,7 @@ public class DataCenterService : IDataCenterService
             }
 
             Devices.TryRemove(deviceId, out _);
-            
+
             OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
         }
     }
@@ -317,7 +315,6 @@ public class DataCenterService : IDataCenterService
             {
                 deviceDto = device;
                 device.VariableTables.Remove(variableTableDto);
-                
             }
 
             OnVariableTableChanged(new VariableTableChangedEventArgs(
@@ -663,8 +660,10 @@ public class DataCenterService : IDataCenterService
             // 加载所有菜单
             var menus = await _repositoryManager.Menus.GetAllAsync();
             var menuDtos = _mapper.Map<List<MenuBeanDto>>(menus);
-            
+
             var mqttServers = await LoadAllMqttServersAsync();
+
+            var variableMqttAliases = await _repositoryManager.VariableMqttAliases.GetAllAsync();
 
             // 建立设备与变量表的关联
             foreach (var deviceDto in deviceDtos)
@@ -691,6 +690,12 @@ public class DataCenterService : IDataCenterService
                 // 将变量表添加到安全字典
                 VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
             }
+            
+            // 加载MQTT服务器数据到内存
+            foreach (var mqttServer in mqttServers)
+            {
+                MqttServers.TryAdd(mqttServer.Id, mqttServer);
+            }
 
             // 将变量添加到安全字典
             foreach (var variableDto in variableDtos)
@@ -699,6 +704,22 @@ public class DataCenterService : IDataCenterService
                 {
                     variableDto.VariableTable = variableTable;
                 }
+
+               // var alises= variableMqttAliases.FirstOrDefault(vm => vm.VariableId == variableDto.Id);
+               // if (alises != null)
+               // {
+               //
+               //     var variableMqttAliasDto = _mapper.Map<VariableMqttAliasDto>(alises);
+               //     variableMqttAliasDto.Variable = _mapper.Map<Variable>(variableDto) ;
+               //     if (MqttServers.TryGetValue(variableMqttAliasDto.MqttServerId, out var mqttServerDto))
+               //     {
+               //         variableMqttAliasDto.MqttServer = _mapper.Map<MqttServer>(mqttServerDto) ;
+               //         variableMqttAliasDto.MqttServerName = variableMqttAliasDto.MqttServer.ServerName;
+               //     }
+               //     
+               //     variableDto.MqttAliases.Add(variableMqttAliasDto);
+               // }
+
                 Variables.TryAdd(variableDto.Id, variableDto);
             }
 
@@ -707,12 +728,8 @@ public class DataCenterService : IDataCenterService
             {
                 Menus.TryAdd(menuDto.Id, menuDto);
             }
+
             
-            // 加载MQTT服务器数据到内存
-            foreach (var mqttServer in mqttServers)
-            {
-                MqttServers.TryAdd(mqttServer.Id, mqttServer);
-            }
 
             // 构建菜单树
             BuildMenuTree();

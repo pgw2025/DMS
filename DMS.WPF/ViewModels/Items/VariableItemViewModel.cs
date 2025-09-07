@@ -60,7 +60,7 @@ public partial class VariableItemViewModel : ObservableObject
     /// 一个变量可以有多个MQTT别名。
     /// </summary>
     [ObservableProperty]
-    private List<VariableMqttAliasItemViewModel>? _mqttAliases;
+    private List<VariableMqttAliasItemViewModel>? _mqttAliases=new List<VariableMqttAliasItemViewModel>();
 
     /// <summary>
     /// 获取或设置变量的信号类型 (如：AI, DI, AO, DO)。

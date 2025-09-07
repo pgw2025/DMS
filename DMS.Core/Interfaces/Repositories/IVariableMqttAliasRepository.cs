@@ -15,5 +15,11 @@ namespace DMS.Core.Interfaces.Repositories
         /// 异步根据变量和服务器获取别名关联。
         /// </summary>
         Task<VariableMqttAlias> GetByVariableAndServerAsync(int variableId, int mqttServerId);
+
+        /// <summary>
+        /// 异步获取所有变量与MQTT别名关联。
+        /// </summary>
+        /// <returns>包含所有变量与MQTT别名关联实体的列表。</returns>
+        Task<List<VariableMqttAlias>> GetAllAsync();
     }
 }

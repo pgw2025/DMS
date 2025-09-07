@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DMS.Core.Models;
 using DMS.Application.Interfaces;
+using DMS.Core.Interfaces.Services;
 
 namespace DMS.Infrastructure.Services
 {

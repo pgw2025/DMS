@@ -1,10 +1,6 @@
 using DMS.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace DMS.Infrastructure.Interfaces.Services
+namespace DMS.Core.Interfaces.Services
 {
     /// <summary>
     /// MQTT服务管理器接口，负责管理MQTT连接和变量监控

@@ -123,7 +123,11 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
     /// </summary>
     private void LoadAllDatas()
     {
-        Devices = _mapper.Map<ObservableCollection<DeviceItemViewModel>>(_dataCenterService.Devices.Values);
+
+        foreach (var deviceDto in _dataCenterService.Devices.Values)
+        {
+            Devices.Add(_mapper.Map<DeviceItemViewModel>(deviceDto));
+        }
         foreach (var device in Devices)
         {
             foreach (var variableTable in device.VariableTables)
