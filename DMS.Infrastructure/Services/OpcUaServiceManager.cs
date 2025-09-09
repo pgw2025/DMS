@@ -308,7 +308,7 @@ namespace DMS.Infrastructure.Services
                             newValue,
                             variable.UpdatedAt);
                         
-                        _appDataCenterService.OnVariableValueChanged( eventArgs);
+                        // _appDataCenterService.OnVariableValueChanged( eventArgs);
 
                         // 推送到数据处理队列
                         await _dataProcessingService.EnqueueAsync(variable);

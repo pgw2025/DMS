@@ -52,7 +52,7 @@ public partial class SplashViewModel : ObservableObject
             _initializeService.InitializeTables();
             _initializeService.InitializeMenus();
             LoadingMessage = "正在加载系统配置...";
-            await _appDataCenterService.LoadAllDataToMemoryAsync();
+            await _appDataCenterService.DataLoaderService.LoadAllDataToMemoryAsync();
 
             // 可以在这里添加加载配置的逻辑
             await Task.Delay(500); // 模拟耗时

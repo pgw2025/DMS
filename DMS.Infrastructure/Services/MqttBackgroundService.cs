@@ -21,6 +21,7 @@ namespace DMS.Infrastructure.Services
     {
         private readonly ILogger<MqttBackgroundService> _logger;
         private readonly IMqttServiceManager _mqttServiceManager;
+        private readonly IAppDataStorageService _appDataStorageService;
         private readonly IAppDataCenterService _appDataCenterService;
         private readonly ConcurrentDictionary<int, MqttServer> _mqttServers;
         private readonly SemaphoreSlim _reloadSemaphore = new(0);
@@ -28,14 +29,16 @@ namespace DMS.Infrastructure.Services
         public MqttBackgroundService(
             ILogger<MqttBackgroundService> logger,
             IMqttServiceManager mqttServiceManager,
+            IAppDataStorageService appDataStorageService,
             IAppDataCenterService appDataCenterService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mqttServiceManager = mqttServiceManager ?? throw new ArgumentNullException(nameof(mqttServiceManager));
+            _appDataStorageService = appDataStorageService;
             _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _mqttServers = new ConcurrentDictionary<int, MqttServer>();
 
-            _appDataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+            _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         }
 
         private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
@@ -185,9 +188,9 @@ namespace DMS.Infrastructure.Services
                 _mqttServers.Clear();
 
                 // 从数据服务中心获取所有激活的MQTT服务器
-                var mqttServerDtos = _appDataCenterService.MqttServers.Values
-                    .Where(m => m.IsActive)
-                    .ToList();
+                var mqttServerDtos = _appDataStorageService.MqttServers.Values
+                                                           .Where(m => m.IsActive)
+                                                           .ToList();
 
                 foreach (var mqttServerDto in mqttServerDtos)
                 {
@@ -252,7 +255,7 @@ namespace DMS.Infrastructure.Services
         {
             _logger.LogInformation("正在释放MQTT后台服务资源...");
             
-            _appDataCenterService.OnLoadDataCompleted -= OnLoadDataCompleted;
+            _appDataCenterService.DataLoaderService.OnLoadDataCompleted -= OnLoadDataCompleted;
             _reloadSemaphore?.Dispose();
             
             base.Dispose();

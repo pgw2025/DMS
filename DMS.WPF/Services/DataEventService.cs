@@ -37,10 +37,10 @@ public class DataEventService : IDataEventService
       
         
         // 监听变量值变更事件
-        _appDataCenterService.VariableValueChanged += OnVariableValueChanged;
-        _appDataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+        _appDataCenterService.VariableManagementService.OnVariableChanged += OnVariableValueChanged;
+        _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
-        // _appDataCenterService.NlogChanged += _logDataService.OnNlogChanged;
+        // _appDataCenterService.OnLogChanged += _logDataService.OnNlogChanged;
     }
     
     private  void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
@@ -60,18 +60,18 @@ public class DataEventService : IDataEventService
     /// <summary>
     /// 处理变量值变更事件。
     /// </summary>
-    private void OnVariableValueChanged(object sender, VariableValueChangedEventArgs e)
+    private void OnVariableValueChanged(object? sender, VariableChangedEventArgs e)
     {
         // 在UI线程上更新变量值
         App.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
             // 查找并更新对应的变量
-            var variableToUpdate = _dataStorageService.Variables.FirstOrDefault(v => v.Id == e.VariableId);
+            var variableToUpdate = _dataStorageService.Variables.FirstOrDefault(v => v.Id == e.Variable.Id);
             if (variableToUpdate != null)
             {
-                variableToUpdate.DataValue = e.NewValue;
-                variableToUpdate.DisplayValue = e.NewValue;
-                variableToUpdate.UpdatedAt = e.UpdateTime;
+                variableToUpdate.DataValue = e.Variable.DataValue;
+                variableToUpdate.DisplayValue = e.Variable.DisplayValue;
+                variableToUpdate.UpdatedAt = e.Variable.UpdatedAt;
             }
         }));
     }

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using DMS.Application.DTOs;
+using DMS.Application.DTOs.Events;
 
 namespace DMS.Application.Interfaces;
 
@@ -11,14 +12,7 @@ public interface IDataLoaderService
     /// <summary>
     /// 异步加载所有设备及其关联数据到内存中
     /// </summary>
-    Task LoadAllDataToMemoryAsync(
-        ConcurrentDictionary<int, DeviceDto> devices,
-        ConcurrentDictionary<int, VariableTableDto> variableTables,
-        ConcurrentDictionary<int, VariableDto> variables,
-        ConcurrentDictionary<int, MenuBeanDto> menus,
-        ConcurrentDictionary<int, MenuBeanDto> menuTrees,
-        ConcurrentDictionary<int, MqttServerDto> mqttServers,
-        ConcurrentDictionary<int, NlogDto> nlogs);
+    Task LoadAllDataToMemoryAsync();
 
     /// <summary>
     /// 异步加载所有设备数据
@@ -49,4 +43,9 @@ public interface IDataLoaderService
     /// 异步加载所有日志数据
     /// </summary>
     Task<List<NlogDto>> LoadAllNlogsAsync();
+
+    /// <summary>
+    /// 当数据加载完成时触发
+    /// </summary>
+    event EventHandler<DataLoadCompletedEventArgs> OnLoadDataCompleted;
 }

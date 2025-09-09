@@ -1,7 +1,5 @@
 using System.Collections.ObjectModel;
 using AutoMapper;
-using CommunityToolkit.Mvvm.ComponentModel;
-using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
@@ -15,7 +13,7 @@ public class MenuDataService : IMenuDataService
 {
     private readonly IMapper _mapper;
     private readonly IDataStorageService _dataStorageService;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppDataStorageService _appDataStorageService;
 
 
 
@@ -23,17 +21,17 @@ public class MenuDataService : IMenuDataService
     /// MenuDataService类的构造函数。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="appDataCenterService">数据服务中心实例。</param>
-    public MenuDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataCenterService appDataCenterService)
+    /// <param name="appDataStorageService">数据服务中心实例。</param>
+    public MenuDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataStorageService appDataStorageService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
-        _appDataCenterService = appDataCenterService;
+        _appDataStorageService = appDataStorageService;
     }
 
     public void LoadAllMenus()
     {
-        _dataStorageService.Menus = _mapper.Map<ObservableCollection<MenuItemViewModel>>(_appDataCenterService.Menus.Values);
+        _dataStorageService.Menus = _mapper.Map<ObservableCollection<MenuItemViewModel>>(_appDataStorageService.Menus.Values);
         BuildMenuTrees();
     }
 

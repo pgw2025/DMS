@@ -16,7 +16,7 @@ public class LogDataService : ILogDataService
 {
     private readonly IMapper _mapper;
     private readonly IDataStorageService _dataStorageService;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppDataStorageService _appDataStorageService;
 
 
 
@@ -24,18 +24,18 @@ public class LogDataService : ILogDataService
     /// LogDataService类的构造函数。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="appDataCenterService">数据服务中心实例。</param>
-    public LogDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataCenterService appDataCenterService)
+    /// <param name="appDataStorageService">数据服务中心实例。</param>
+    public LogDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataStorageService appDataStorageService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
-        _appDataCenterService = appDataCenterService;
+        _appDataStorageService = appDataStorageService;
     }
 
     public void LoadAllLog()
     {
         // 加载日志数据
-        _dataStorageService.Nlogs = _mapper.Map<ObservableCollection<NlogItemViewModel>>(_appDataCenterService.Nlogs.Values);
+        _dataStorageService.Nlogs = _mapper.Map<ObservableCollection<NlogItemViewModel>>(_appDataStorageService.Nlogs.Values);
     }
 
     /// <summary>

@@ -1,34 +1,26 @@
-using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
-using DMS.Core.Models;
 using DMS.Application.Interfaces;
-using DMS.Core.Interfaces;
-using DMS.Core.Enums;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
 
 namespace DMS.Application.Services;
 
 /// <summary>
 /// 设备管理服务，负责设备相关的业务逻辑。
 /// </summary>
-public class DeviceManagementService
+public class DeviceManagementService : IDeviceManagementService
 {
     private readonly IDeviceAppService _deviceAppService;
-    private readonly ConcurrentDictionary<int, DeviceDto> _devices;
+    private readonly IAppDataStorageService _appDataStorageService;
 
     /// <summary>
     /// 当设备数据发生变化时触发
     /// </summary>
-    public event EventHandler<DeviceChangedEventArgs> DeviceChanged;
+    public event EventHandler<DeviceChangedEventArgs> OnDeviceChanged;
 
-    public DeviceManagementService(IDeviceAppService deviceAppService, ConcurrentDictionary<int, DeviceDto> devices)
+    public DeviceManagementService(IDeviceAppService deviceAppService,IAppDataStorageService appDataStorageService)
     {
         _deviceAppService = deviceAppService;
-        _devices = devices;
+        _appDataStorageService = appDataStorageService;
     }
 
     /// <summary>
@@ -82,12 +74,11 @@ public class DeviceManagementService
     /// <summary>
     /// 在内存中添加设备
     /// </summary>
-    public void AddDeviceToMemory(DeviceDto deviceDto, ConcurrentDictionary<int, VariableTableDto> variableTables, 
-                                  ConcurrentDictionary<int, VariableDto> variables)
+    public void AddDeviceToMemory(DeviceDto deviceDto)
     {
-        if (_devices.TryAdd(deviceDto.Id, deviceDto))
+        if (_appDataStorageService.Devices.TryAdd(deviceDto.Id, deviceDto))
         {
-            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Added, deviceDto));
+            OnDeviceChanged?.Invoke(this,new DeviceChangedEventArgs(DataChangeType.Added, deviceDto));
         }
     }
 
@@ -96,39 +87,32 @@ public class DeviceManagementService
     /// </summary>
     public void UpdateDeviceInMemory(DeviceDto deviceDto)
     {
-        _devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
-        OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
+        _appDataStorageService.Devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
+        OnDeviceChanged?.Invoke(this,new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
     }
 
     /// <summary>
     /// 在内存中删除设备
     /// </summary>
-    public void RemoveDeviceFromMemory(int deviceId, ConcurrentDictionary<int, VariableTableDto> variableTables,
-                                       ConcurrentDictionary<int, VariableDto> variables)
+    public void RemoveDeviceFromMemory(int deviceId)
     {
-        if (_devices.TryGetValue(deviceId, out var deviceDto))
+        if (_appDataStorageService.Devices.TryGetValue(deviceId, out var deviceDto))
         {
             foreach (var variableTable in deviceDto.VariableTables)
             {
                 foreach (var variable in variableTable.Variables)
                 {
-                    variables.TryRemove(variable.Id, out _);
+                    _appDataStorageService.Variables.TryRemove(variable.Id, out _);
                 }
 
-                variableTables.TryRemove(variableTable.Id, out _);
+                _appDataStorageService.VariableTables.TryRemove(variableTable.Id, out _);
             }
 
-            _devices.TryRemove(deviceId, out _);
+            _appDataStorageService.Devices.TryRemove(deviceId, out _);
 
-            OnDeviceChanged(new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
+            OnDeviceChanged?.Invoke(this,new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
         }
     }
 
-    /// <summary>
-    /// 触发设备变更事件
-    /// </summary>
-    protected virtual void OnDeviceChanged(DeviceChangedEventArgs e)
-    {
-        DeviceChanged?.Invoke(this, e);
-    }
+
 }

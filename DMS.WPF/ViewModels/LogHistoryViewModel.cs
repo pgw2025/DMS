@@ -65,7 +65,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
         LogItemListView = _synchronizedView.ToNotifyCollectionChanged();
         
         // 订阅日志变更事件
-        _appDataCenterService.NlogChanged += _wpfDataService.LogDataService.OnNlogChanged;
+        _appDataCenterService.LogManagementService.OnLogChanged += _wpfDataService.LogDataService.OnNlogChanged;
     }
 
     /// <summary>
@@ -244,7 +244,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     public void Dispose()
     {
         // 取消订阅事件
-        _appDataCenterService.NlogChanged -= OnNlogChanged;
+        _appDataCenterService.LogManagementService.OnLogChanged -= OnNlogChanged;
 
     }
 }

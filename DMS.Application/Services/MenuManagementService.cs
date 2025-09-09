@@ -15,24 +15,20 @@ namespace DMS.Application.Services;
 /// <summary>
 /// 菜单管理服务，负责菜单相关的业务逻辑。
 /// </summary>
-public class MenuManagementService
+public class MenuManagementService : IMenuManagementService
 {
     private readonly IMenuService _menuService;
-    private readonly ConcurrentDictionary<int, MenuBeanDto> _menus;
-    private readonly ConcurrentDictionary<int, MenuBeanDto> _menuTrees;
+    private readonly IAppDataStorageService _appDataStorageService;
 
     /// <summary>
     /// 当菜单数据发生变化时触发
     /// </summary>
     public event EventHandler<MenuChangedEventArgs> MenuChanged;
 
-    public MenuManagementService(IMenuService menuService, 
-                                ConcurrentDictionary<int, MenuBeanDto> menus,
-                                ConcurrentDictionary<int, MenuBeanDto> menuTrees)
+    public MenuManagementService(IMenuService menuService,IAppDataStorageService appDataStorageService)
     {
         _menuService = menuService;
-        _menus = menus;
-        _menuTrees = menuTrees;
+        _appDataStorageService = appDataStorageService;
     }
 
     /// <summary>
@@ -80,10 +76,10 @@ public class MenuManagementService
     /// </summary>
     public void AddMenuToMemory(MenuBeanDto menuDto)
     {
-        if (_menus.TryAdd(menuDto.Id, menuDto))
+        if (_appDataStorageService.Menus.TryAdd(menuDto.Id, menuDto))
         {
             MenuBeanDto parentMenu = null;
-            if (menuDto.ParentId > 0 && _menus.TryGetValue(menuDto.ParentId, out var parent))
+            if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parent))
             {
                 parentMenu = parent;
                 parent.Children.Add(menuDto);
@@ -98,10 +94,10 @@ public class MenuManagementService
     /// </summary>
     public void UpdateMenuInMemory(MenuBeanDto menuDto)
     {
-        _menus.AddOrUpdate(menuDto.Id, menuDto, (key, oldValue) => menuDto);
+        _appDataStorageService.Menus.AddOrUpdate(menuDto.Id, menuDto, (key, oldValue) => menuDto);
 
         MenuBeanDto parentMenu = null;
-        if (menuDto.ParentId > 0 && _menus.TryGetValue(menuDto.ParentId, out var parent))
+        if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parent))
         {
             parentMenu = parent;
         }
@@ -114,10 +110,10 @@ public class MenuManagementService
     /// </summary>
     public void RemoveMenuFromMemory(int menuId)
     {
-        if (_menus.TryRemove(menuId, out var menuDto))
+        if (_appDataStorageService.Menus.TryRemove(menuId, out var menuDto))
         {
             MenuBeanDto parentMenu = null;
-            if (menuDto.ParentId > 0 && _menus.TryGetValue(menuDto.ParentId, out var parent))
+            if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parent))
             {
                 parentMenu = parent;
             }
@@ -131,7 +127,7 @@ public class MenuManagementService
     /// </summary>
     public List<MenuBeanDto> GetRootMenus()
     {
-        return _menus.Values.Where(m => m.ParentId == 0)
+        return _appDataStorageService.Menus.Values.Where(m => m.ParentId == 0)
                     .ToList();
     }
 
@@ -142,7 +138,7 @@ public class MenuManagementService
     /// <returns>子菜单列表</returns>
     public List<MenuBeanDto> GetChildMenus(int parentId)
     {
-        return _menus.Values.Where(m => m.ParentId == parentId)
+        return _appDataStorageService.Menus.Values.Where(m => m.ParentId == parentId)
                     .ToList();
     }
 
@@ -152,7 +148,7 @@ public class MenuManagementService
     public void BuildMenuTree()
     {
         // 清空现有菜单树
-        _menuTrees.Clear();
+        _appDataStorageService.MenuTrees.Clear();
 
         // 获取所有根菜单
         var rootMenus = GetRootMenus();
@@ -160,7 +156,7 @@ public class MenuManagementService
         // 将根菜单添加到菜单树中
         foreach (var rootMenu in rootMenus)
         {
-            _menuTrees.TryAdd(rootMenu.Id, rootMenu);
+            _appDataStorageService.MenuTrees.TryAdd(rootMenu.Id, rootMenu);
         }
     }
 

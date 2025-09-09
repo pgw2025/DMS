@@ -15,21 +15,20 @@ namespace DMS.Application.Services;
 /// <summary>
 /// MQTT管理服务，负责MQTT相关的业务逻辑。
 /// </summary>
-public class MqttManagementService
+public class MqttManagementService : IMqttManagementService
 {
     private readonly IMqttAppService _mqttAppService;
-    private readonly ConcurrentDictionary<int, MqttServerDto> _mqttServers;
+    private readonly IAppDataStorageService _appDataStorageService;
 
     /// <summary>
     /// 当MQTT服务器数据发生变化时触发
     /// </summary>
     public event EventHandler<MqttServerChangedEventArgs> MqttServerChanged;
 
-    public MqttManagementService(IMqttAppService mqttAppService, 
-                                ConcurrentDictionary<int, MqttServerDto> mqttServers)
+    public MqttManagementService(IMqttAppService mqttAppService,IAppDataStorageService appDataStorageService)
     {
         _mqttAppService = mqttAppService;
-        _mqttServers = mqttServers;
+        _appDataStorageService = appDataStorageService;
     }
 
     /// <summary>
@@ -77,7 +76,7 @@ public class MqttManagementService
     /// </summary>
     public void AddMqttServerToMemory(MqttServerDto mqttServerDto)
     {
-        if (_mqttServers.TryAdd(mqttServerDto.Id, mqttServerDto))
+        if (_appDataStorageService.MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto))
         {
             OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Added, mqttServerDto));
         }
@@ -88,7 +87,7 @@ public class MqttManagementService
     /// </summary>
     public void UpdateMqttServerInMemory(MqttServerDto mqttServerDto)
     {
-        _mqttServers.AddOrUpdate(mqttServerDto.Id, mqttServerDto, (key, oldValue) => mqttServerDto);
+        _appDataStorageService.MqttServers.AddOrUpdate(mqttServerDto.Id, mqttServerDto, (key, oldValue) => mqttServerDto);
         OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Updated, mqttServerDto));
     }
 
@@ -97,7 +96,7 @@ public class MqttManagementService
     /// </summary>
     public void RemoveMqttServerFromMemory(int mqttServerId)
     {
-        if (_mqttServers.TryRemove(mqttServerId, out var mqttServerDto))
+        if (_appDataStorageService.MqttServers.TryRemove(mqttServerId, out var mqttServerDto))
         {
             OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Deleted, mqttServerDto));
         }

@@ -212,15 +212,23 @@ public partial class App : System.Windows.Application
         services.AddTransient<IMqttService, MqttService>();
         services.AddTransient<IMqttServiceFactory, MqttServiceFactory>();
         
-        // 注册App服务
+        // 注册App服务\r\n
         services.AddSingleton<IInitializeService, InitializeService>();
         services.AddSingleton<IDeviceAppService, DeviceAppService>();
         services.AddSingleton<IVariableAppService, VariableAppService>();
         services.AddSingleton<IVariableTableAppService, VariableTableAppService>();
-        services.AddSingleton<IMenuService, MenuService>();
+        services.AddSingleton<IMenuService, MenuService>();       
         services.AddSingleton<IAppDataCenterService, AppDataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IAppDataStorageService, AppDataStorageService>();
+        services.AddSingleton<IDeviceManagementService, DeviceManagementService>();
+        services.AddSingleton<IVariableTableManagementService, VariableTableManagementService>();
+        services.AddSingleton<IVariableManagementService, VariableManagementService>();
+        services.AddSingleton<IMenuManagementService, MenuManagementService>();
+        services.AddSingleton<IMqttManagementService, MqttManagementService>();
+        services.AddSingleton<ILogManagementService, LogManagementService>();
+        
         services.AddSingleton<IDataLoaderService, DataLoaderService>();
         services.AddSingleton<INlogAppService, NlogAppService>();
         
@@ -304,34 +312,34 @@ public partial class App : System.Windows.Application
         loggingBuilder.SetMinimumLevel(LogLevel.Trace);
         // loggingBuilder.addn; // 添加NLog作为日志提供者
 
-        // 捕获未处理的异常并记录
-        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
-        {
-            var ex = args.ExceptionObject as Exception;
-            if (ex != null)
-            {
-                // 可以使用一个专用的 Logger 来记录未处理异常
-                LogManager.GetLogger("UnhandledExceptionLogger")
-                    .Fatal($"应用程序发生未处理的异常:{ex}");
-            }
-        };
-
-        // 捕获 Dispatcher 线程上的未处理异常 (UI 线程)
-        this.DispatcherUnhandledException += (sender, args) =>
-        {
-            LogManager.GetLogger("DispatcherExceptionLogger")
-                .Fatal($"UI 线程发生未处理的异常:{args.Exception}");
-            // 标记为已处理，防止应用程序崩溃 (生产环境慎用，可能掩盖问题)
-            // args.Handled = true; 
-        };
-
-        // 如果您使用 Task (异步方法) 并且没有正确 await，可能会导致异常丢失，
-        // 可以通过以下方式捕获 Task 中的异常。
-        TaskScheduler.UnobservedTaskException += (sender, args) =>
-        {
-            LogManager.GetLogger("UnobservedTaskExceptionLogger")
-                .Fatal($"异步任务发生未观察到的异常:{args.Exception}");
-            // args.SetObserved(); // 标记为已观察，防止进程终止
-        };
+        // // 捕获未处理的异常并记录
+        // AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        // {
+        //     var ex = args.ExceptionObject as Exception;
+        //     if (ex != null)
+        //     {
+        //         // 可以使用一个专用的 Logger 来记录未处理异常
+        //         LogManager.GetLogger("UnhandledExceptionLogger")
+        //             .Fatal($"应用程序发生未处理的异常:{ex}");
+        //     }
+        // };
+        //
+        // // 捕获 Dispatcher 线程上的未处理异常 (UI 线程)
+        // this.DispatcherUnhandledException += (sender, args) =>
+        // {
+        //     LogManager.GetLogger("DispatcherExceptionLogger")
+        //         .Fatal($"UI 线程发生未处理的异常:{args.Exception}");
+        //     // 标记为已处理，防止应用程序崩溃 (生产环境慎用，可能掩盖问题)
+        //     // args.Handled = true; 
+        // };
+        //
+        // // 如果您使用 Task (异步方法) 并且没有正确 await，可能会导致异常丢失，
+        // // 可以通过以下方式捕获 Task 中的异常。
+        // TaskScheduler.UnobservedTaskException += (sender, args) =>
+        // {
+        //     LogManager.GetLogger("UnobservedTaskExceptionLogger")
+        //         .Fatal($"异步任务发生未观察到的异常:{args.Exception}");
+        //     // args.SetObserved(); // 标记为已观察，防止进程终止
+        // };
     }
 }

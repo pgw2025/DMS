@@ -1,35 +1,27 @@
-using AutoMapper;
+using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
-using DMS.Core.Models;
 using DMS.Application.Interfaces;
-using DMS.Core.Interfaces;
-using DMS.Core.Enums;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
 
 namespace DMS.Application.Services;
 
 /// <summary>
 /// 日志管理服务，负责日志相关的业务逻辑。
 /// </summary>
-public class LogManagementService
+public class LogManagementService : ILogManagementService
 {
     private readonly INlogAppService _nlogAppService;
-    private readonly ConcurrentDictionary<int, NlogDto> _nlogs;
+    private readonly IAppDataStorageService _appDataStorageService;
 
     /// <summary>
     /// 当日志数据发生变化时触发
     /// </summary>
-    public event EventHandler<NlogChangedEventArgs> NlogChanged;
+    public event EventHandler<NlogChangedEventArgs> OnLogChanged;
 
-    public LogManagementService(INlogAppService nlogAppService, 
-                               ConcurrentDictionary<int, NlogDto> nlogs)
+    public LogManagementService(INlogAppService nlogAppService,IAppDataStorageService appDataStorageService)
     {
         _nlogAppService = nlogAppService;
-        _nlogs = nlogs;
+        _appDataStorageService = appDataStorageService;
     }
 
     /// <summary>
@@ -69,9 +61,9 @@ public class LogManagementService
     /// </summary>
     public void AddNlogToMemory(NlogDto nlogDto)
     {
-        if (_nlogs.TryAdd(nlogDto.Id, nlogDto))
+        if (_appDataStorageService.Nlogs.TryAdd(nlogDto.Id, nlogDto))
         {
-            OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Added, nlogDto));
+            OnLogChanged?.Invoke(this,new NlogChangedEventArgs(DataChangeType.Added, nlogDto));
         }
     }
 
@@ -80,8 +72,8 @@ public class LogManagementService
     /// </summary>
     public void UpdateNlogInMemory(NlogDto nlogDto)
     {
-        _nlogs.AddOrUpdate(nlogDto.Id, nlogDto, (key, oldValue) => nlogDto);
-        OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Updated, nlogDto));
+        _appDataStorageService.Nlogs.AddOrUpdate(nlogDto.Id, nlogDto, (key, oldValue) => nlogDto);
+        OnLogChanged?.Invoke(this,new NlogChangedEventArgs(DataChangeType.Updated, nlogDto));
     }
 
     /// <summary>
@@ -89,17 +81,11 @@ public class LogManagementService
     /// </summary>
     public void RemoveNlogFromMemory(int nlogId)
     {
-        if (_nlogs.TryRemove(nlogId, out var nlogDto))
+        if (_appDataStorageService.Nlogs.TryRemove(nlogId, out var nlogDto))
         {
-            OnNlogChanged(new NlogChangedEventArgs(DataChangeType.Deleted, nlogDto));
+            OnLogChanged?.Invoke(this,new NlogChangedEventArgs(DataChangeType.Deleted, nlogDto));
         }
     }
 
-    /// <summary>
-    /// 触发日志变更事件
-    /// </summary>
-    protected virtual void OnNlogChanged(NlogChangedEventArgs e)
-    {
-        NlogChanged?.Invoke(this, e);
-    }
+
 }

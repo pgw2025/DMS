@@ -60,11 +60,11 @@ public class VariableDataService : IVariableDataService
             createDto.VariableTable = variableTableDto;
             createDto.DeviceId = variableTableDto.DeviceId;
             createDto.Menu = menuDto;
-            var resDto = await _appDataCenterService.CreateVariableTableAsync(createDto);
+            var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
             _mapper.Map(resDto.VariableTable, variableTableDto);
         }
 
-        _appDataCenterService.AddVariableTableToMemory(variableTableDto);
+        _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(variableTableDto);
 
         return true;
     }
@@ -80,9 +80,9 @@ public class VariableDataService : IVariableDataService
         }
 
         var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
-        if (await _appDataCenterService.UpdateVariableTableAsync(variableTableDto) > 0)
+        if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTableDto) > 0)
         {
-            _appDataCenterService.UpdateVariableTableInMemory(variableTableDto);
+            _appDataCenterService.VariableTableManagementService.UpdateVariableTableInMemory(variableTableDto);
 
             return true;
         }
@@ -102,7 +102,7 @@ public class VariableDataService : IVariableDataService
 
         if (isDeleteDb)
         {
-            if (!await _appDataCenterService.DeleteVariableTableAsync(variableTable.Id))
+            if (!await _appDataCenterService.VariableTableManagementService.DeleteVariableTableAsync(variableTable.Id))
             {
                 return false;
             }
@@ -114,7 +114,7 @@ public class VariableDataService : IVariableDataService
             _dataStorageService.Variables.Remove(variable);
         }
 
-        _appDataCenterService.RemoveVariableTableFromMemory(variableTable.Id);
+        _appDataCenterService.VariableTableManagementService.RemoveVariableTableFromMemory(variableTable.Id);
 
         // 删除变量表
         _dataStorageService.VariableTables.Remove(variableTable);

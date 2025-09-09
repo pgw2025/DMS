@@ -50,12 +50,12 @@ public class VariableTableDataService : IVariableTableDataService
             createDto.VariableTable = variableTableDto;
             createDto.DeviceId = variableTableDto.DeviceId;
             createDto.Menu = menuDto;
-            var resDto = await _appDataCenterService.CreateVariableTableAsync(createDto);
+            var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
             _mapper.Map(resDto.VariableTable, variableTableDto);
             _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(resDto.Menu));
         }
 
-        _appDataCenterService.AddVariableTableToMemory(variableTableDto);
+        _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(variableTableDto);
 
         // var device = _deviceDataService.Devices.FirstOrDefault(d => d.Id == variableTableDto.DeviceId);
         // if (device != null)
@@ -78,9 +78,9 @@ public class VariableTableDataService : IVariableTableDataService
         }
 
         var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
-        if (await _appDataCenterService.UpdateVariableTableAsync(variableTableDto) > 0)
+        if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTableDto) > 0)
         {
-            _appDataCenterService.UpdateVariableTableInMemory(variableTableDto);
+            _appDataCenterService.VariableTableManagementService.UpdateVariableTableInMemory(variableTableDto);
 
             var menu = _dataStorageService.Menus.FirstOrDefault(m =>
                                                                     m.MenuType == MenuType.VariableTableMenu &&
@@ -105,7 +105,7 @@ public class VariableTableDataService : IVariableTableDataService
 
         if (isDeleteDb)
         {
-            if (!await _appDataCenterService.DeleteVariableTableAsync(variableTable.Id))
+            if (!await _appDataCenterService.VariableTableManagementService.DeleteVariableTableAsync(variableTable.Id))
             {
                 return false;
             }
@@ -117,7 +117,7 @@ public class VariableTableDataService : IVariableTableDataService
             _dataStorageService.Variables.Remove(variable);
         }
 
-        _appDataCenterService.RemoveVariableTableFromMemory(variableTable.Id);
+        _appDataCenterService.VariableTableManagementService.RemoveVariableTableFromMemory(variableTable.Id);
 
         var variableTableMenu
             =_dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);

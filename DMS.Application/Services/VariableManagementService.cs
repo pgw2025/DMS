@@ -15,20 +15,20 @@ namespace DMS.Application.Services;
 /// <summary>
 /// 变量管理服务，负责变量相关的业务逻辑。
 /// </summary>
-public class VariableManagementService
+public class VariableManagementService : IVariableManagementService
 {
     private readonly IVariableAppService _variableAppService;
-    private readonly ConcurrentDictionary<int, VariableDto> _variables;
+    private readonly IAppDataStorageService _appDataStorageService;
 
     /// <summary>
     /// 当变量数据发生变化时触发
     /// </summary>
-    public event EventHandler<VariableChangedEventArgs> VariableChanged;
+    public event EventHandler<VariableChangedEventArgs> OnVariableChanged;
 
-    public VariableManagementService(IVariableAppService variableAppService, ConcurrentDictionary<int, VariableDto> variables)
+    public VariableManagementService(IVariableAppService variableAppService,IAppDataStorageService appDataStorageService)
     {
         _variableAppService = variableAppService;
-        _variables = variables;
+        _appDataStorageService = appDataStorageService;
     }
 
     /// <summary>
@@ -100,9 +100,9 @@ public class VariableManagementService
             variableTable.Variables.Add(variableDto);
         }
 
-        if (_variables.TryAdd(variableDto.Id, variableDto))
+        if (_appDataStorageService.Variables.TryAdd(variableDto.Id, variableDto))
         {
-            OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
+            OnVariableChanged?.Invoke(this,new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
         }
     }
 
@@ -117,8 +117,8 @@ public class VariableManagementService
             variableTableDto = variableTable;
         }
 
-        _variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
-        OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
+        _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
+        OnVariableChanged?.Invoke(this,new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public class VariableManagementService
     /// </summary>
     public void RemoveVariableFromMemory(int variableId, ConcurrentDictionary<int, VariableTableDto> variableTables)
     {
-        if (_variables.TryRemove(variableId, out var variableDto))
+        if (_appDataStorageService.Variables.TryRemove(variableId, out var variableDto))
         {
             VariableTableDto variableTableDto = null;
             if (variableDto != null && variableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
@@ -135,15 +135,8 @@ public class VariableManagementService
                 variableTable.Variables.Remove(variableDto);
             }
 
-            OnVariableChanged(new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
+            OnVariableChanged?.Invoke(this,new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
         }
     }
 
-    /// <summary>
-    /// 触发变量变更事件
-    /// </summary>
-    protected virtual void OnVariableChanged(VariableChangedEventArgs e)
-    {
-        VariableChanged?.Invoke(this, e);
-    }
 }

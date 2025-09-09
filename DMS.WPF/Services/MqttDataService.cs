@@ -14,7 +14,7 @@ namespace DMS.WPF.Services;
 public class MqttDataService : IMqttDataService
 {
     private readonly IMapper _mapper;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppDataStorageService _appDataStorageService;
     private readonly IDataStorageService _dataStorageService;
     private readonly IMqttAppService _mqttAppService;
 
@@ -24,10 +24,10 @@ public class MqttDataService : IMqttDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="mqttAppService">MQTT应用服务实例。</param>
-    public MqttDataService(IMapper mapper,IAppDataCenterService appDataCenterService,IDataStorageService dataStorageService, IMqttAppService mqttAppService)
+    public MqttDataService(IMapper mapper, IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService, IMqttAppService mqttAppService)
     {
         _mapper = mapper;
-        _appDataCenterService = appDataCenterService;
+        _appDataStorageService = appDataStorageService;
         _dataStorageService = dataStorageService;
         _mqttAppService = mqttAppService;
     }
@@ -40,7 +40,7 @@ public class MqttDataService : IMqttDataService
         try
         {
             // 加载MQTT服务器数据
-            _dataStorageService.MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(_appDataCenterService.MqttServers.Values);
+            _dataStorageService.MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(_appDataStorageService.MqttServers.Values);
         }
         catch (Exception ex)
         {

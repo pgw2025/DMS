@@ -19,20 +19,23 @@ namespace DMS.Infrastructure.Services
     public class OptimizedOpcUaBackgroundService : BackgroundService
     {
         private readonly IAppDataCenterService _appDataCenterService;
+        private readonly IAppDataStorageService _appDataStorageService;
         private readonly IOpcUaServiceManager _opcUaServiceManager;
         private readonly ILogger<OptimizedOpcUaBackgroundService> _logger;
         private readonly SemaphoreSlim _reloadSemaphore = new SemaphoreSlim(0);
 
         public OptimizedOpcUaBackgroundService(
             IAppDataCenterService appDataCenterService,
+            IAppDataStorageService appDataStorageService,
             IOpcUaServiceManager opcUaServiceManager,
             ILogger<OptimizedOpcUaBackgroundService> logger)
         {
             _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
+            _appDataStorageService = appDataStorageService;
             _opcUaServiceManager = opcUaServiceManager ?? throw new ArgumentNullException(nameof(opcUaServiceManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _appDataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+            _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         }
 
         private void OnLoadDataCompleted(object sender, DataLoadCompletedEventArgs e)
@@ -57,7 +60,7 @@ namespace DMS.Infrastructure.Services
                     if (stoppingToken.IsCancellationRequested)
                         break;
 
-                    if (_appDataCenterService.Devices.IsEmpty)
+                    if (_appDataStorageService.Devices.IsEmpty)
                     {
                         _logger.LogInformation("没有可用的OPC UA设备，等待设备列表更新...");
                         continue;
@@ -93,9 +96,9 @@ namespace DMS.Infrastructure.Services
             try
             {
                 // 获取所有活动的OPC UA设备
-                var opcUaDevices = _appDataCenterService.Devices.Values
-                    .Where(d => d.Protocol == ProtocolType.OpcUa && d.IsActive)
-                    .ToList();
+                var opcUaDevices = _appDataStorageService.Devices.Values
+                                                         .Where(d => d.Protocol == ProtocolType.OpcUa && d.IsActive)
+                                                         .ToList();
 
                 _logger.LogInformation("找到 {DeviceCount} 个活动的OPC UA设备", opcUaDevices.Count);
 
@@ -145,7 +148,7 @@ namespace DMS.Infrastructure.Services
         {
             _logger.LogInformation("正在释放OPC UA后台服务资源...");
             
-            _appDataCenterService.OnLoadDataCompleted -= OnLoadDataCompleted;
+            _appDataCenterService.DataLoaderService.OnLoadDataCompleted -= OnLoadDataCompleted;
             _reloadSemaphore?.Dispose();
             
             base.Dispose();

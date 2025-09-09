@@ -18,6 +18,7 @@ public class OpcUaBackgroundService : BackgroundService
 {
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IDataProcessingService _dataProcessingService;
+    private readonly IAppDataStorageService _appDataStorageService;
 
     // private readonly IDataProcessingService _dataProcessingService;
     private readonly ILogger<OpcUaBackgroundService> _logger;
@@ -70,10 +71,11 @@ public class OpcUaBackgroundService : BackgroundService
               { 1800000, TimeSpan.FromMilliseconds(1800000) } // ThirtyMinutes
           };
 
-    public OpcUaBackgroundService(IAppDataCenterService appDataCenterService,IDataProcessingService dataProcessingService, ILogger<OpcUaBackgroundService> logger)
+    public OpcUaBackgroundService(IAppDataCenterService appDataCenterService,IDataProcessingService dataProcessingService,IAppDataStorageService appDataStorageService, ILogger<OpcUaBackgroundService> logger)
     {
         _appDataCenterService = appDataCenterService;
         _dataProcessingService = dataProcessingService;
+        _appDataStorageService = appDataStorageService;
         _logger = logger;
         _opcUaServices = new ConcurrentDictionary<DeviceDto, OpcUaService>();
         _opcUaSubscriptions = new ConcurrentDictionary<string, Subscription>();
@@ -81,7 +83,7 @@ public class OpcUaBackgroundService : BackgroundService
         _opcUaPollVariablesByDeviceId = new ConcurrentDictionary<int, List<Variable>>();
         _opcUaVariablesByDeviceId = new ConcurrentDictionary<int, List<VariableDto>>();
 
-        _appDataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+        _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
     }
 
     private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
@@ -103,7 +105,7 @@ public class OpcUaBackgroundService : BackgroundService
                     break;
                 }
 
-                if (_appDataCenterService.Devices.IsEmpty)
+                if (_appDataStorageService.Devices.IsEmpty)
                 {
                     _logger.LogInformation("没有可用的OPC UA设备，等待设备列表更新...");
                     continue;
@@ -150,7 +152,7 @@ public class OpcUaBackgroundService : BackgroundService
             _opcUaVariables.Clear();
 
             _logger.LogInformation("开始加载OPC UA变量....");
-            var opcUaDevices = _appDataCenterService
+            var opcUaDevices = _appDataStorageService
                                .Devices.Values.Where(d => d.Protocol == ProtocolType.OpcUa && d.IsActive == true)
                                .ToList();
             int totalVariableCount = 0;
