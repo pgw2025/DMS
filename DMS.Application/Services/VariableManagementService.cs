@@ -25,7 +25,13 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public event EventHandler<VariableChangedEventArgs> OnVariableChanged;
 
-    public VariableManagementService(IVariableAppService variableAppService,IAppDataStorageService appDataStorageService)
+    /// <summary>
+    /// 当变量数据发生变化时触发
+    /// </summary>
+    public event EventHandler<VariableValueChangedEventArgs> OnVariableValueChanged;
+
+    public VariableManagementService(IVariableAppService variableAppService,
+                                     IAppDataStorageService appDataStorageService)
     {
         _variableAppService = variableAppService;
         _appDataStorageService = appDataStorageService;
@@ -102,14 +108,16 @@ public class VariableManagementService : IVariableManagementService
 
         if (_appDataStorageService.Variables.TryAdd(variableDto.Id, variableDto))
         {
-            OnVariableChanged?.Invoke(this,new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
+            OnVariableChanged?.Invoke(
+                this, new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
         }
     }
 
     /// <summary>
     /// 在内存中更新变量
     /// </summary>
-    public void UpdateVariableInMemory(VariableDto variableDto, ConcurrentDictionary<int, VariableTableDto> variableTables)
+    public void UpdateVariableInMemory(VariableDto variableDto,
+                                       ConcurrentDictionary<int, VariableTableDto> variableTables)
     {
         VariableTableDto variableTableDto = null;
         if (variableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
@@ -118,7 +126,8 @@ public class VariableManagementService : IVariableManagementService
         }
 
         _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
-        OnVariableChanged?.Invoke(this,new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
+        OnVariableChanged?.Invoke(
+            this, new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
     }
 
     /// <summary>
@@ -135,8 +144,13 @@ public class VariableManagementService : IVariableManagementService
                 variableTable.Variables.Remove(variableDto);
             }
 
-            OnVariableChanged?.Invoke(this,new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
+            OnVariableChanged?.Invoke(
+                this, new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
         }
     }
 
+    public void VariableValueChanged(VariableValueChangedEventArgs eventArgs)
+    {
+        OnVariableValueChanged?.Invoke(this, eventArgs);
+    }
 }

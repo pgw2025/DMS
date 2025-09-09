@@ -32,9 +32,12 @@ public class VariableTableDataService : IVariableTableDataService
     
     public void LoadAllVariableTables()
     {
-        foreach (var variableTable in _dataStorageService.VariableTables)
+        foreach (var device in _dataStorageService.Devices)
         {
-            _dataStorageService.VariableTables.Add(variableTable);
+            foreach (var variableTable in device.VariableTables)
+            {
+                _dataStorageService.VariableTables.Add(variableTable);
+            }
         }
     }
 

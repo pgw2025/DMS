@@ -37,7 +37,7 @@ public class DataEventService : IDataEventService
       
         
         // 监听变量值变更事件
-        _appDataCenterService.VariableManagementService.OnVariableChanged += OnVariableValueChanged;
+        _appDataCenterService.VariableManagementService.OnVariableValueChanged += OnVariableValueChanged;
         _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
         // _appDataCenterService.OnLogChanged += _logDataService.OnNlogChanged;
@@ -60,18 +60,18 @@ public class DataEventService : IDataEventService
     /// <summary>
     /// 处理变量值变更事件。
     /// </summary>
-    private void OnVariableValueChanged(object? sender, VariableChangedEventArgs e)
+    private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
         // 在UI线程上更新变量值
         App.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
             // 查找并更新对应的变量
-            var variableToUpdate = _dataStorageService.Variables.FirstOrDefault(v => v.Id == e.Variable.Id);
+            var variableToUpdate = _dataStorageService.Variables.FirstOrDefault(v => v.Id == e.VariableId);
             if (variableToUpdate != null)
             {
-                variableToUpdate.DataValue = e.Variable.DataValue;
-                variableToUpdate.DisplayValue = e.Variable.DisplayValue;
-                variableToUpdate.UpdatedAt = e.Variable.UpdatedAt;
+                variableToUpdate.DataValue = e.NewValue;
+                variableToUpdate.DisplayValue = e.NewValue;
+                variableToUpdate.UpdatedAt = e.UpdateTime;
             }
         }));
     }

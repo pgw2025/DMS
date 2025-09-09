@@ -299,6 +299,8 @@ namespace DMS.Infrastructure.Services
                         variable.DataValue = newValue;
                         variable.DisplayValue = newValue;
                         variable.UpdatedAt = DateTime.Now;
+                        
+                        _logger.LogDebug($"节点：{variable.OpcUaNodeId}值发生了变化:{newValue}");
 
                         // 触发变量值变更事件
                         var eventArgs = new VariableValueChangedEventArgs(
@@ -308,7 +310,7 @@ namespace DMS.Infrastructure.Services
                             newValue,
                             variable.UpdatedAt);
                         
-                        // _appDataCenterService.OnVariableValueChanged( eventArgs);
+                        _appDataCenterService.VariableManagementService.VariableValueChanged( eventArgs);
 
                         // 推送到数据处理队列
                         await _dataProcessingService.EnqueueAsync(variable);

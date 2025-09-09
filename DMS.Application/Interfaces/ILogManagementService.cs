@@ -1,7 +1,7 @@
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
 
-namespace DMS.Application.Services;
+namespace DMS.Application.Interfaces;
 
 public interface ILogManagementService
 {

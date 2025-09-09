@@ -1,6 +1,6 @@
 using DMS.Application.DTOs;
 
-namespace DMS.Application.Services;
+namespace DMS.Application.Interfaces;
 
 public interface IMenuManagementService
 {
