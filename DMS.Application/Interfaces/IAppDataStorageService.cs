@@ -39,4 +39,9 @@ public interface IAppDataStorageService
     /// 安全字典，用于存储所有日志数据
     /// </summary>
     ConcurrentDictionary<int, NlogDto> Nlogs { get; }
+
+    /// <summary>
+    /// 安全字典，用于存储所有MQTT变量别名的数据
+    /// </summary>
+    ConcurrentDictionary<int, VariableMqttAliasDto> VariableMqttAliases { get; }
 }

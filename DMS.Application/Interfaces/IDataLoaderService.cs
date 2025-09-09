@@ -17,32 +17,32 @@ public interface IDataLoaderService
     /// <summary>
     /// 异步加载所有设备数据
     /// </summary>
-    Task<List<DeviceDto>> LoadAllDevicesAsync();
+    Task LoadAllDevicesAsync();
 
     /// <summary>
     /// 异步加载所有变量表数据
     /// </summary>
-    Task<List<VariableTableDto>> LoadAllVariableTablesAsync();
+    Task LoadAllVariableTablesAsync();
 
     /// <summary>
     /// 异步加载所有变量数据
     /// </summary>
-    Task<List<VariableDto>> LoadAllVariablesAsync();
+    Task LoadAllVariablesAsync();
 
     /// <summary>
     /// 异步加载所有菜单数据
     /// </summary>
-    Task<List<MenuBeanDto>> LoadAllMenusAsync();
+    Task LoadAllMenusAsync();
 
     /// <summary>
     /// 异步加载所有MQTT服务器数据
     /// </summary>
-    Task<List<MqttServerDto>> LoadAllMqttServersAsync();
+    Task LoadAllMqttServersAsync();
 
     /// <summary>
     /// 异步加载所有日志数据
     /// </summary>
-    Task<List<NlogDto>> LoadAllNlogsAsync(int count);
+    Task LoadAllNlogsAsync(int count);
 
     /// <summary>
     /// 当数据加载完成时触发
