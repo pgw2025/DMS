@@ -18,9 +18,10 @@ namespace DMS.WPF.ViewModels;
 /// </summary>
 public partial class DevicesViewModel : ViewModelBase, INavigatable
 {
-    public DataServices DataServices { get; }
+    private readonly IWPFDataService _wpfDataService;
     private readonly IDeviceAppService _deviceAppService;
     private readonly IMapper _mapper;
+    private readonly IDataStorageService _dataStorageService;
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
 
@@ -45,20 +46,20 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="logger">日志记录器。</param>
     /// <param name="dialogService">对话框服务。</param>
-    /// <param name="dataServices">数据服务。</param>
-    public DevicesViewModel(IMapper mapper,
+    /// <param name="wpfDataService">主数据服务。</param>
+    public DevicesViewModel(IMapper mapper,IDataStorageService dataStorageService,
                             IDialogService dialogService, INavigationService navigationService,
-                            DataServices dataServices, IDeviceAppService deviceAppService,
+                            IWPFDataService wpfDataService, IDeviceAppService deviceAppService,
                             INotificationService notificationService)
     {
         _mapper = mapper;
+        _dataStorageService = dataStorageService;
         _dialogService = dialogService;
         _navigationService = navigationService;
-        DataServices = dataServices;
+        _wpfDataService = wpfDataService;
         _deviceAppService = deviceAppService;
         _notificationService = notificationService;
-        Devices = new ObservableCollection<DeviceItemViewModel>();
-        DataServices.OnDeviceListChanged += (devices) => { };
+        Devices = _dataStorageService.Devices;
     }
 
 
@@ -111,7 +112,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
 
             // 添加设备
-            var addDto = await DataServices.AddDevice(dto);
+            var addDto = await _wpfDataService.DeviceDataService.AddDevice(dto);
 
             _notificationService.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
         }
@@ -140,7 +141,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             if (await _dialogService.ShowDialogAsync(viewModel))
             {
                 var deviceName = SelectedDevice.Name;
-                if (await DataServices.DeleteDevice(SelectedDevice))
+                if (await _wpfDataService.DeviceDataService.DeleteDevice(SelectedDevice))
                 {
                     _notificationService.ShowSuccess($"删除设备成功,设备名：{deviceName}");
                 }
@@ -178,7 +179,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            if (await DataServices.UpdateDevice(device))
+            if (await _wpfDataService.DeviceDataService.UpdateDevice(device))
             {
                 _notificationService.ShowSuccess($"编辑设备成功：{device.Name}");
             }
@@ -194,8 +195,8 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     {
         if (SelectedDevice == null) return;
 
-        var menu = DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu &&
-                                                          m.TargetId == SelectedDevice.Id);
+        var menu = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu &&
+                                                                 m.TargetId == SelectedDevice.Id);
         if (menu == null) return;
 
         _navigationService.NavigateToAsync(menu);

@@ -218,9 +218,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IVariableAppService, VariableAppService>();
         services.AddSingleton<IVariableTableAppService, VariableTableAppService>();
         services.AddSingleton<IMenuService, MenuService>();
-        services.AddSingleton<IDataCenterService, DataCenterService>();
+        services.AddSingleton<IAppDataCenterService, AppDataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IDataLoaderService, DataLoaderService>();
         services.AddSingleton<INlogAppService, NlogAppService>();
         
         // 注册MQTT服务管理器
@@ -230,13 +231,28 @@ public partial class App : System.Windows.Application
         
         // 注册WPF中的服务
         services.AddSingleton<IMqttAppService, MqttAppService>();
-        services.AddSingleton<DataServices>(provider => 
-            new DataServices(
-                provider.GetRequiredService<IMapper>(),
-                provider.GetRequiredService<IDataCenterService>(),
-                provider.GetRequiredService<IMqttAppService>()
-            )
-        );
+        
+        // 注册新的数据服务
+        services.AddSingleton<IDeviceDataService, DeviceDataService>();
+        services.AddSingleton<IVariableDataService, VariableDataService>();
+        services.AddSingleton<IVariableTableDataService, VariableTableDataService>();
+        services.AddSingleton<IMenuDataService, MenuDataService>();
+        services.AddSingleton<IMqttDataService, MqttDataService>();
+        services.AddSingleton<ILogDataService, LogDataService>();
+        services.AddSingleton<IDataEventService, DataEventService>();
+        services.AddSingleton<IDataStorageService, DataStorageService>();
+        
+        // 注册主数据服务
+        services.AddSingleton<IWPFDataService, WPFDataService>();
+        
+        // 保留原DataServices以保证现有代码兼容性（可选，建议逐步移除）
+        // services.AddSingleton<DataServices>(provider => 
+        //     new DataServices(
+        //         provider.GetRequiredService<IMapper>(),
+        //         provider.GetRequiredService<IAppDataCenterService>(),
+        //         provider.GetRequiredService<IMqttAppService>()
+        //     )
+        // );
         
 
         
@@ -250,38 +266,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DataTransformViewModel>();
         services.AddSingleton<SettingViewModel>();
         services.AddSingleton<LogHistoryViewModel>();
-        services.AddTransient<VariableTableViewModel>(provider =>
-            new VariableTableViewModel(
-                provider.GetRequiredService<IMapper>(),
-                provider.GetRequiredService<IDialogService>(),
-                provider.GetRequiredService<IVariableAppService>(),
-                provider.GetRequiredService<IMqttAliasAppService>(),
-                provider.GetRequiredService<IMqttAppService>(),
-                provider.GetRequiredService<DataServices>(),
-                provider.GetRequiredService<INotificationService>()
-            ));
+        services.AddTransient<VariableTableViewModel>();
         services.AddSingleton<DeviceDetailViewModel>();
-        services.AddSingleton<MqttsViewModel>(provider => 
-            new MqttsViewModel(
-                provider.GetRequiredService<ILogger<MqttsViewModel>>(),
-                provider.GetRequiredService<IDialogService>(),
-                provider.GetRequiredService<DataServices>(),
-                provider.GetRequiredService<IMqttAppService>(),
-                provider.GetRequiredService<IMapper>(),
-                provider.GetRequiredService<INavigationService>(),
-                provider.GetRequiredService<INotificationService>()
-            )
-        );
-        services.AddSingleton<LogHistoryViewModel>(provider =>
-            new LogHistoryViewModel(
-                provider.GetRequiredService<IMapper>(),
-                provider.GetRequiredService<INlogAppService>(),
-                provider.GetRequiredService<IDialogService>(),
-                provider.GetRequiredService<INotificationService>(),
-                provider.GetRequiredService<DataServices>(),
-                provider.GetRequiredService<IDataCenterService>()
-            )
-        );
+        services.AddSingleton<MqttsViewModel>();
+        services.AddSingleton<LogHistoryViewModel>();
         services.AddScoped<MqttServerDetailViewModel>();
         
         // 注册对话框视图模型

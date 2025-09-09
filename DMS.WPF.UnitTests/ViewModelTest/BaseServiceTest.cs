@@ -58,7 +58,7 @@ public class BaseServiceTest
         services.AddTransient<IMenuService, MenuService>();
         services.AddTransient<INavigationService, NavigationService>();
         services.AddTransient<DevicesViewModel>();
-        services.AddTransient<DataServices>();
+        // services.AddTransient<DataServices>();
         services.AddTransient<IDialogService, DialogService>();
         // services.AddTransient<IVariableAppService, VariableAppService>(); // 如果需要测试
         // VariableService，取消此行注释

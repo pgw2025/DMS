@@ -18,8 +18,9 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
 {
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
+    private readonly IDataStorageService _dataStorageService;
     private readonly INavigationService _navigationService;
-    public DataServices DataServices { get;  }
+    private readonly IWPFDataService _wpfDataService;
 
     [ObservableProperty]
     private DeviceItemViewModel _currentDevice;
@@ -28,15 +29,18 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     private VariableTableItemViewModel _selectedVariableTable;
 
     private readonly INotificationService _notificationService;
+    
+    
 
-    public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, INavigationService navigationService,
-                                 DataServices dataServices, INotificationService notificationService)
+    public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService,IDataStorageService dataStorageService ,INavigationService navigationService,
+                                 IWPFDataService wpfDataService, INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
+        _dataStorageService = dataStorageService;
         _navigationService = navigationService;
         _notificationService = notificationService;
-        DataServices = dataServices;
+        _wpfDataService = wpfDataService;
     }
 
     [RelayCommand]
@@ -64,8 +68,8 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                                  TargetViewKey = "VariableTableView"
                              };
 
-             if (await DataServices.AddVariableTable(_mapper.Map<VariableTableDto>(variableTableItemViewModel),
-                                                     tableMenu, true))
+             if (await _wpfDataService.VariableTableDataService.AddVariableTable(_mapper.Map<VariableTableDto>(variableTableItemViewModel),
+                                                    tableMenu, true))
              {
                  _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
              }
@@ -104,7 +108,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            if (await DataServices.UpdateVariableTable(variableTable))
+            if (await _wpfDataService.VariableDataService.UpdateVariableTable(variableTable))
             {
                 _notificationService.ShowSuccess($"编辑变量表成功：{variableTable.Name}");
             }
@@ -135,7 +139,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
             if (await _dialogService.ShowDialogAsync(viewModel))
             {
                 var tableName = SelectedVariableTable.Name;
-                if (await DataServices.DeleteVariableTable(SelectedVariableTable,true))
+                if (await _wpfDataService.VariableDataService.DeleteVariableTable(SelectedVariableTable,true))
                 {
                     _notificationService.ShowSuccess($"变量表：{tableName},删除成功。");
                 }
@@ -155,7 +159,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        var device = DataServices.Devices.FirstOrDefault(d => d.Id == menu.TargetId);
+        var device = _dataStorageService.Devices.FirstOrDefault(d => d.Id == menu.TargetId);
         if (device != null)
         {
             CurrentDevice = device;
@@ -166,8 +170,8 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     public void NavigateToVariableTable()
     {
         if (SelectedVariableTable == null) return;
-        var menu = DataServices.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu &&
-                                                          m.TargetId == SelectedVariableTable.Id);
+        var menu = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu &&
+                                                                 m.TargetId == SelectedVariableTable.Id);
         if (menu == null) return;
         _navigationService.NavigateToAsync(menu);
     }

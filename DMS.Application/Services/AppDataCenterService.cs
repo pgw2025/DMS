@@ -16,12 +16,13 @@ namespace DMS.Application.Services;
 
 /// <summary>
 /// 数据中心服务，负责管理所有的数据，包括设备、变量表、变量、菜单和日志。
-/// 实现 <see cref="IDataCenterService"/> 接口。
+/// 实现 <see cref="IAppDataCenterService"/> 接口。
 /// </summary>
-public class DataCenterService : IDataCenterService
+public class AppDataCenterService : IAppDataCenterService
 {
     private readonly IRepositoryManager _repositoryManager;
     private readonly IMapper _mapper;
+    private readonly IDataLoaderService _dataLoaderService;
     
     // 管理服务
     private readonly DeviceManagementService _deviceManagementService;
@@ -121,7 +122,8 @@ public class DataCenterService : IDataCenterService
     /// <param name="menuService">菜单服务实例。</param>
     /// <param name="mqttAppService">MQTT应用服务实例。</param>
     /// <param name="nlogAppService">Nlog应用服务实例。</param>
-    public DataCenterService(
+    /// <param name="dataLoaderService">数据加载服务实例。</param>
+    public AppDataCenterService(
         IRepositoryManager repositoryManager,
         IMapper mapper,
         IDeviceAppService deviceAppService,
@@ -129,10 +131,12 @@ public class DataCenterService : IDataCenterService
         IVariableAppService variableAppService,
         IMenuService menuService,
         IMqttAppService mqttAppService,
-        INlogAppService nlogAppService)
+        INlogAppService nlogAppService,
+        IDataLoaderService dataLoaderService)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
+        _dataLoaderService = dataLoaderService;
         
         // 初始化管理服务
         _deviceManagementService = new DeviceManagementService(deviceAppService, Devices);
@@ -534,109 +538,15 @@ public class DataCenterService : IDataCenterService
     {
         try
         {
-            // 清空现有数据
-            Devices.Clear();
-            VariableTables.Clear();
-            Variables.Clear();
-            Menus.Clear();
-            MenuTrees.Clear();
-            MqttServers.Clear();
-            Nlogs.Clear();
-
-            // 加载所有设备
-            var devices = await _repositoryManager.Devices.GetAllAsync();
-            var deviceDtos = _mapper.Map<List<DeviceDto>>(devices);
-
-            // 加载所有变量表
-            var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-            var variableTableDtos = _mapper.Map<List<VariableTableDto>>(variableTables);
-
-            // 加载所有变量
-            var variables = await _repositoryManager.Variables.GetAllAsync();
-            var variableDtos = _mapper.Map<List<VariableDto>>(variables);
-
-            // 加载所有菜单
-            var menus = await _repositoryManager.Menus.GetAllAsync();
-            var menuDtos = _mapper.Map<List<MenuBeanDto>>(menus);
-
-            var mqttServers = await LoadAllMqttServersAsync();
-            
-            // 加载所有日志
-            var nlogs = await LoadAllNlogsAsync();
-
-            var variableMqttAliases = await _repositoryManager.VariableMqttAliases.GetAllAsync();
-
-            // 建立设备与变量表的关联
-            foreach (var deviceDto in deviceDtos)
-            {
-                deviceDto.VariableTables = variableTableDtos
-                                           .Where(vt => vt.DeviceId == deviceDto.Id)
-                                           .ToList();
-
-                // 将设备添加到安全字典
-                Devices.TryAdd(deviceDto.Id, deviceDto);
-            }
-
-            // 建立变量表与变量的关联
-            foreach (var variableTableDto in variableTableDtos)
-            {
-                variableTableDto.Variables = variableDtos
-                                             .Where(v => v.VariableTableId == variableTableDto.Id)
-                                             .ToList();
-                if (Devices.TryGetValue(variableTableDto.DeviceId, out var deviceDto))
-                {
-                    variableTableDto.Device = deviceDto;
-                }
-
-                // 将变量表添加到安全字典
-                VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
-            }
-            
-            // 加载MQTT服务器数据到内存
-            foreach (var mqttServer in mqttServers)
-            {
-                MqttServers.TryAdd(mqttServer.Id, mqttServer);
-            }
-            
-            // 加载日志数据到内存
-            foreach (var nlog in nlogs)
-            {
-                Nlogs.TryAdd(nlog.Id, nlog);
-            }
-
-            // 将变量添加到安全字典
-            foreach (var variableDto in variableDtos)
-            {
-                if (VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-                {
-                    variableDto.VariableTable = variableTable;
-                }
-
-               // var alises= variableMqttAliases.FirstOrDefault(vm => vm.VariableId == variableDto.Id);
-               // if (alises != null)
-               // {
-               //
-               //     var variableMqttAliasDto = _mapper.Map<VariableMqttAliasDto>(alises);
-               //     variableMqttAliasDto.Variable = _mapper.Map<Variable>(variableDto) ;
-               //     if (MqttServers.TryGetValue(variableMqttAliasDto.MqttServerId, out var mqttServerDto))
-               //     {
-               //         variableMqttAliasDto.MqttServer = _mapper.Map<MqttServer>(mqttServerDto) ;
-               //         variableMqttAliasDto.MqttServerName = variableMqttAliasDto.MqttServer.ServerName;
-               //     }
-               //     
-               //     variableDto.MqttAliases.Add(variableMqttAliasDto);
-               // }
-
-                Variables.TryAdd(variableDto.Id, variableDto);
-            }
-
-            // 将菜单添加到安全字典
-            foreach (var menuDto in menuDtos)
-            {
-                Menus.TryAdd(menuDto.Id, menuDto);
-            }
-
-            
+            // 委托给数据加载服务加载所有数据
+            await _dataLoaderService.LoadAllDataToMemoryAsync(
+                Devices,
+                VariableTables,
+                Variables,
+                Menus,
+                MenuTrees,
+                MqttServers,
+                Nlogs);
 
             // 构建菜单树
             _menuManagementService.BuildMenuTree();
@@ -656,7 +566,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<DeviceDto>> LoadAllDevicesAsync()
     {
-        return await _deviceManagementService.GetAllDevicesAsync();
+        return await _dataLoaderService.LoadAllDevicesAsync();
     }
 
     /// <summary>
@@ -664,7 +574,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableTableDto>> LoadAllVariableTablesAsync()
     {
-        return await _variableTableManagementService.GetAllVariableTablesAsync();
+        return await _dataLoaderService.LoadAllVariableTablesAsync();
     }
 
     /// <summary>
@@ -672,7 +582,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<VariableDto>> LoadAllVariablesAsync()
     {
-        return await _variableManagementService.GetAllVariablesAsync();
+        return await _dataLoaderService.LoadAllVariablesAsync();
     }
 
     /// <summary>
@@ -680,7 +590,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<MenuBeanDto>> LoadAllMenusAsync()
     {
-        return await _menuManagementService.GetAllMenusAsync();
+        return await _dataLoaderService.LoadAllMenusAsync();
     }
 
     /// <summary>
@@ -688,7 +598,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<MqttServerDto>> LoadAllMqttServersAsync()
     {
-        return await _mqttManagementService.GetAllMqttServersAsync();
+        return await _dataLoaderService.LoadAllMqttServersAsync();
     }
     
     /// <summary>
@@ -696,7 +606,7 @@ public class DataCenterService : IDataCenterService
     /// </summary>
     public async Task<List<NlogDto>> LoadAllNlogsAsync()
     {
-        return await _logManagementService.GetAllNlogsAsync();
+        return await _dataLoaderService.LoadAllNlogsAsync();
     }
 
     #endregion

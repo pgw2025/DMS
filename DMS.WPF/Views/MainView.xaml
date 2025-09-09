@@ -63,7 +63,7 @@
             IsSettingsVisible="False"
             IsTabStop="False"
             MenuItemTemplate="{StaticResource NavigationViewMenuItem}"
-            MenuItemsSource="{Binding DataServices.MenuTrees}"
+            MenuItemsSource="{Binding MenuTrees}"
             PaneDisplayMode="Left"
             PaneTitle="设备管理系统"
             SelectionChanged="NavigationView_SelectionChanged"

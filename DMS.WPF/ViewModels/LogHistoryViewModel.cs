@@ -22,12 +22,13 @@ namespace DMS.WPF.ViewModels;
 
 partial class LogHistoryViewModel : ViewModelBase,IDisposable
 {
-    public DataServices DataServices { get; }
+    private readonly IWPFDataService _wpfDataService ;
     private readonly IMapper _mapper;
     private readonly INlogAppService _nlogAppService;
     private readonly IDialogService _dialogService;
+    private readonly IDataStorageService _dataStorageService;
     private readonly INotificationService _notificationService;
-    private readonly IDataCenterService _dataCenterService;
+    private readonly IAppDataCenterService _appDataCenterService;
 
     [ObservableProperty]
     private NlogItemViewModel _selectedLog;
@@ -47,23 +48,24 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
 
     public ObservableCollection<string> LogLevels { get; } = new ObservableCollection<string> { "Trace", "Debug", "Info", "Warn", "Error", "Fatal" };
 
-    public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, 
-                              INotificationService notificationService, DataServices dataServices, IDataCenterService dataCenterService)
+    public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, IDataStorageService dataStorageService
+                             , INotificationService notificationService, IWPFDataService wpfDataService, IAppDataCenterService appDataCenterService)
     {
         _mapper = mapper;
         _nlogAppService = nlogAppService;
         _dialogService = dialogService;
+        _dataStorageService = dataStorageService;
         _notificationService = notificationService;
-        DataServices = dataServices;
-        _dataCenterService = dataCenterService;
+        _wpfDataService = wpfDataService;
+        _appDataCenterService = appDataCenterService;
 
-        _logItemList = new ObservableList<NlogItemViewModel>(DataServices.Nlogs);
+        _logItemList = new ObservableList<NlogItemViewModel>(_dataStorageService.Nlogs);
         
         _synchronizedView = _logItemList.CreateView(v => v);
         LogItemListView = _synchronizedView.ToNotifyCollectionChanged();
         
         // 订阅日志变更事件
-        _dataCenterService.NlogChanged += OnNlogChanged;
+        _appDataCenterService.NlogChanged += _wpfDataService.LogDataService.OnNlogChanged;
     }
 
     /// <summary>
@@ -242,7 +244,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     public void Dispose()
     {
         // 取消订阅事件
-        _dataCenterService.NlogChanged -= OnNlogChanged;
+        _appDataCenterService.NlogChanged -= OnNlogChanged;
 
     }
 }

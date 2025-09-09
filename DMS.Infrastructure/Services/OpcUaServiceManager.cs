@@ -19,7 +19,7 @@ namespace DMS.Infrastructure.Services
     {
         private readonly ILogger<OpcUaServiceManager> _logger;
         private readonly IDataProcessingService _dataProcessingService;
-        private readonly IDataCenterService _dataCenterService;
+        private readonly IAppDataCenterService _appDataCenterService;
         private readonly OpcUaServiceOptions _options;
         private readonly ConcurrentDictionary<int, DeviceContext> _deviceContexts;
         private readonly SemaphoreSlim _semaphore;
@@ -28,12 +28,12 @@ namespace DMS.Infrastructure.Services
         public OpcUaServiceManager(
             ILogger<OpcUaServiceManager> logger,
             IDataProcessingService dataProcessingService,
-            IDataCenterService dataCenterService,
+            IAppDataCenterService appDataCenterService,
             IOptions<OpcUaServiceOptions> options)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
-            _dataCenterService = dataCenterService ?? throw new ArgumentNullException(nameof(dataCenterService));
+            _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _deviceContexts = new ConcurrentDictionary<int, DeviceContext>();
             _semaphore = new SemaphoreSlim(_options.MaxConcurrentConnections, _options.MaxConcurrentConnections);
@@ -308,7 +308,7 @@ namespace DMS.Infrastructure.Services
                             newValue,
                             variable.UpdatedAt);
                         
-                        _dataCenterService.OnVariableValueChanged( eventArgs);
+                        _appDataCenterService.OnVariableValueChanged( eventArgs);
 
                         // 推送到数据处理队列
                         await _dataProcessingService.EnqueueAsync(variable);

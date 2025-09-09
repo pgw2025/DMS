@@ -8,6 +8,7 @@ using System;
 using System.Threading.Tasks;
 using DMS.Application.Services;
 using DMS.WPF.Helper;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,20 +23,20 @@ public partial class SplashViewModel : ObservableObject
     private readonly ILogger<SplashViewModel> _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly IInitializeService _initializeService;
-    private readonly IDataCenterService _dataCenterService;
-    private readonly DataServices _dataServices;
+    private readonly IDataEventService _dataEventService;
+    private readonly IAppDataCenterService _appDataCenterService;
 
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
-    public SplashViewModel(ILogger<SplashViewModel> logger,IServiceProvider serviceProvider, IInitializeService initializeService,
-                           IDataCenterService dataCenterService, DataServices dataServices)
+    public SplashViewModel(ILogger<SplashViewModel> logger,IServiceProvider serviceProvider, IInitializeService initializeService,IDataEventService dataEventService,
+                           IAppDataCenterService appDataCenterService)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
         _initializeService = initializeService;
-        this._dataCenterService = dataCenterService;
-        _dataServices = dataServices;
+        _dataEventService = dataEventService;
+        this._appDataCenterService = appDataCenterService;
     }
 
     /// <summary>
@@ -51,7 +52,7 @@ public partial class SplashViewModel : ObservableObject
             _initializeService.InitializeTables();
             _initializeService.InitializeMenus();
             LoadingMessage = "正在加载系统配置...";
-            await _dataCenterService.LoadAllDataToMemoryAsync();
+            await _appDataCenterService.LoadAllDataToMemoryAsync();
 
             // 可以在这里添加加载配置的逻辑
             await Task.Delay(500); // 模拟耗时

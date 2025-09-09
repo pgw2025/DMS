@@ -23,7 +23,7 @@ namespace DMS.WPF.Services;
 public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, IDisposable
 {
     private readonly IMapper _mapper;
-    private readonly IDataCenterService _dataCenterService;
+    private readonly IAppDataCenterService _appDataCenterService;
     private readonly IMqttAppService _mqttAppService;
 
 
@@ -121,12 +121,12 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
     /// 初始化各个数据仓库。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="dataCenterService">数据服务中心实例。</param>
+    /// <param name="appDataCenterService">数据服务中心实例。</param>
     /// <param name="mqttAppService">MQTT应用服务实例。</param>
-    public DataServices(IMapper mapper, IDataCenterService dataCenterService, IMqttAppService mqttAppService)
+    public DataServices(IMapper mapper, IAppDataCenterService appDataCenterService, IMqttAppService mqttAppService)
     {
         _mapper = mapper;
-        _dataCenterService = dataCenterService;
+        _appDataCenterService = appDataCenterService;
         _mqttAppService = mqttAppService;
         Devices = new ObservableCollection<DeviceItemViewModel>();
         VariableTables = new ObservableCollection<VariableTableItemViewModel>();
@@ -137,10 +137,10 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         Nlogs = new ObservableCollection<NlogItemViewModel>();
         
         // 监听变量值变更事件
-        _dataCenterService.VariableValueChanged += OnVariableValueChanged;
-        _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+        _appDataCenterService.VariableValueChanged += OnVariableValueChanged;
+        _appDataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
-        _dataCenterService.NlogChanged += OnNlogChanged;
+        _appDataCenterService.NlogChanged += OnNlogChanged;
 
         // 注册消息接收
         // WeakReferenceMessenger.Register<LoadMessage>(this, (r, m) => r.Receive(m));
@@ -163,7 +163,7 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
     private void LoadAllDatas()
     {
 
-        foreach (var deviceDto in _dataCenterService.Devices.Values)
+        foreach (var deviceDto in _appDataCenterService.Devices.Values)
         {
             Devices.Add(_mapper.Map<DeviceItemViewModel>(deviceDto));
         }
@@ -179,30 +179,30 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
             }
         }
 
-        Menus = _mapper.Map<ObservableCollection<MenuItemViewModel>>(_dataCenterService.Menus.Values);
+        Menus = _mapper.Map<ObservableCollection<MenuItemViewModel>>(_appDataCenterService.Menus.Values);
         
         // 加载MQTT服务器数据
-        MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(_dataCenterService.MqttServers.Values);
+        MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(_appDataCenterService.MqttServers.Values);
         
         // 加载日志数据
-        Nlogs = _mapper.Map<ObservableCollection<NlogItemViewModel>>(_dataCenterService.Nlogs.Values);
+        Nlogs = _mapper.Map<ObservableCollection<NlogItemViewModel>>(_appDataCenterService.Nlogs.Values);
 
         BuildMenuTrees();
     }
 
     public async Task<CreateDeviceWithDetailsDto> AddDevice(CreateDeviceWithDetailsDto dto)
     {
-        var addDto = await _dataCenterService.CreateDeviceWithDetailsAsync(dto);
+        var addDto = await _appDataCenterService.CreateDeviceWithDetailsAsync(dto);
         //更新当前界面
         Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
         AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
         await AddVariableTable(addDto.VariableTable);
         AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
         //更新数据中心
-        _dataCenterService.AddDeviceToMemory(addDto.Device);
-        _dataCenterService.AddVariableTableToMemory(addDto.VariableTable);
-        _dataCenterService.AddMenuToMemory(addDto.DeviceMenu);
-        _dataCenterService.AddMenuToMemory(addDto.VariableTableMenu);
+        _appDataCenterService.AddDeviceToMemory(addDto.Device);
+        _appDataCenterService.AddVariableTableToMemory(addDto.VariableTable);
+        _appDataCenterService.AddMenuToMemory(addDto.DeviceMenu);
+        _appDataCenterService.AddMenuToMemory(addDto.VariableTableMenu);
 
         BuildMenuTrees();
 
@@ -213,12 +213,12 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
 
     public async Task<bool> DeleteDevice(DeviceItemViewModel device)
     {
-        if (!await _dataCenterService.DeleteDeviceByIdAsync(device.Id))
+        if (!await _appDataCenterService.DeleteDeviceByIdAsync(device.Id))
         {
             return false;
         }
 
-        _dataCenterService.RemoveDeviceFromMemory(device.Id);
+        _appDataCenterService.RemoveDeviceFromMemory(device.Id);
 
 
         // 1. 删除与设备关联的所有变量表及其变量
@@ -242,13 +242,13 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
 
     public async Task<bool> UpdateDevice(DeviceItemViewModel device)
     {
-        if (!_dataCenterService.Devices.TryGetValue(device.Id, out var deviceDto))
+        if (!_appDataCenterService.Devices.TryGetValue(device.Id, out var deviceDto))
         {
             return false;
         }
 
         _mapper.Map(device, deviceDto);
-        if (await _dataCenterService.UpdateDeviceAsync(deviceDto) > 0)
+        if (await _appDataCenterService.UpdateDeviceAsync(deviceDto) > 0)
         {
             var menu = Menus.FirstOrDefault(m =>
                                                 m.MenuType == MenuType.DeviceMenu &&
@@ -275,12 +275,12 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
             createDto.VariableTable = variableTableDto;
             createDto.DeviceId = variableTableDto.DeviceId;
             createDto.Menu = menuDto;
-            var resDto = await _dataCenterService.CreateVariableTableAsync(createDto);
+            var resDto = await _appDataCenterService.CreateVariableTableAsync(createDto);
             _mapper.Map(resDto.VariableTable, variableTableDto);
             AddMenuItem(_mapper.Map<MenuItemViewModel>(resDto.Menu));
         }
         
-        _dataCenterService.AddVariableTableToMemory(variableTableDto);
+        _appDataCenterService.AddVariableTableToMemory(variableTableDto);
 
         var device = Devices.FirstOrDefault(d => d.Id == variableTableDto.DeviceId);
         if (device != null)
@@ -302,10 +302,10 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
         }
 
         var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
-        if (await _dataCenterService.UpdateVariableTableAsync(variableTableDto) > 0)
+        if (await _appDataCenterService.UpdateVariableTableAsync(variableTableDto) > 0)
         {
             
-            _dataCenterService.UpdateVariableTableInMemory(variableTableDto);
+            _appDataCenterService.UpdateVariableTableInMemory(variableTableDto);
             
             var menu = Menus.FirstOrDefault(m =>
                                                              m.MenuType == MenuType.VariableTableMenu &&
@@ -330,7 +330,7 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
 
         if (isDeleteDb)
         {
-            if (!await _dataCenterService.DeleteVariableTableAsync(variableTable.Id))
+            if (!await _appDataCenterService.DeleteVariableTableAsync(variableTable.Id))
             {
                 return false;
             }
@@ -342,7 +342,7 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
             Variables.Remove(variable);
         }
         
-        _dataCenterService.RemoveVariableTableFromMemory(variableTable.Id);
+        _appDataCenterService.RemoveVariableTableFromMemory(variableTable.Id);
 
         var variableTableMenu
             = Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);
@@ -536,9 +536,9 @@ public partial class DataServices : ObservableObject, IRecipient<LoadMessage>, I
     public void Dispose()
     {
         // 取消事件订阅
-        if (_dataCenterService != null)
+        if (_appDataCenterService != null)
         {
-            _dataCenterService.VariableValueChanged -= OnVariableValueChanged;
+            _appDataCenterService.VariableValueChanged -= OnVariableValueChanged;
         }
     }
 }

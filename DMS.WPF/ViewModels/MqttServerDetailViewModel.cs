@@ -18,7 +18,6 @@ namespace DMS.WPF.ViewModels
     public partial class MqttServerDetailViewModel : ViewModelBase
     {
         private readonly ILogger<MqttServerDetailViewModel> _logger;
-        private readonly DataServices _dataServices;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
 
@@ -42,11 +41,10 @@ namespace DMS.WPF.ViewModels
         /// <param name="dataServices">数据服务。</param>
         /// <param name="dialogService">对话框服务。</param>
         /// <param name="notificationService">通知服务。</param>
-        public MqttServerDetailViewModel(ILogger<MqttServerDetailViewModel> logger, DataServices dataServices,
+        public MqttServerDetailViewModel(ILogger<MqttServerDetailViewModel> logger,
                                          IDialogService dialogService, INotificationService notificationService)
         {
             _logger = logger;
-            _dataServices = dataServices;
             _dialogService = dialogService;
             _notificationService = notificationService;
         }

@@ -20,8 +20,9 @@ namespace DMS.WPF.ViewModels;
 /// </summary>
 public partial class MainViewModel : ViewModelBase
 {
-    public  DataServices DataServices { get; }
     private readonly IDialogService _dialogService;
+    private readonly IWPFDataService _wpfDataService;
+    private readonly IDataStorageService _dataStorageService;
     private readonly INavigationService _navigationService;
     private readonly ILogger<MainViewModel> _logger;
 
@@ -35,7 +36,7 @@ public partial class MainViewModel : ViewModelBase
     /// 应用程序的菜单列表。
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<MenuBean> _menus;
+    private ObservableCollection<MenuItemViewModel> _menuTrees;
 
     /// <summary>
     /// 初始化 <see cref="MainViewModel"/> 类的新实例。
@@ -44,12 +45,15 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="dataServices">数据服务。</param>
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="logger">日志记录器。</param>
-    public MainViewModel(DataServices dataServices,INavigationService navigationService,
+    /// <param name="wpfDataService"></param>
+    public MainViewModel(IWPFDataService wpfDataService ,IDataStorageService dataStorageService,INavigationService navigationService,
                          ILogger<MainViewModel> logger)
     {
-        DataServices = dataServices;
+        _wpfDataService = wpfDataService;
+        _dataStorageService = dataStorageService;
         _navigationService = navigationService;
         _logger = logger;
+        MenuTrees = _dataStorageService.MenuTrees;
 
         CurrentViewModel = new HomeViewModel();
         CurrentViewModel.OnLoaded();

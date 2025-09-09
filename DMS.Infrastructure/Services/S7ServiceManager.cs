@@ -20,7 +20,7 @@ namespace DMS.Infrastructure.Services
     {
         private readonly ILogger<S7ServiceManager> _logger;
         private readonly IDataProcessingService _dataProcessingService;
-        private readonly IDataCenterService _dataCenterService;
+        private readonly IAppDataCenterService _appDataCenterService;
         private readonly IS7ServiceFactory _s7ServiceFactory;
         private readonly ConcurrentDictionary<int, S7DeviceContext> _deviceContexts;
         private readonly SemaphoreSlim _semaphore;
@@ -29,12 +29,12 @@ namespace DMS.Infrastructure.Services
         public S7ServiceManager(
             ILogger<S7ServiceManager> logger,
             IDataProcessingService dataProcessingService,
-            IDataCenterService dataCenterService,
+            IAppDataCenterService appDataCenterService,
             IS7ServiceFactory s7ServiceFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
-            _dataCenterService = dataCenterService ?? throw new ArgumentNullException(nameof(dataCenterService));
+            _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _s7ServiceFactory = s7ServiceFactory ?? throw new ArgumentNullException(nameof(s7ServiceFactory));
             _deviceContexts = new ConcurrentDictionary<int, S7DeviceContext>();
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10

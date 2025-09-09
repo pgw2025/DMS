@@ -22,7 +22,7 @@ namespace DMS.Infrastructure.Services;
 /// </summary>
 public class S7BackgroundService : BackgroundService
 {
-    private readonly IDataCenterService _dataCenterService;
+    private readonly IAppDataCenterService _appDataCenterService;
     private readonly IDataProcessingService _dataProcessingService;
     private readonly IChannelBus _channelBus;
     private readonly IMessenger _messenger;
@@ -39,19 +39,19 @@ public class S7BackgroundService : BackgroundService
     /// 构造函数，注入所需的服务
     /// </summary>
     public S7BackgroundService(
-        IDataCenterService dataCenterService,
+        IAppDataCenterService appDataCenterService,
         IDataProcessingService dataProcessingService,
         IChannelBus channelBus,
         IMessenger messenger,
         ILogger<S7BackgroundService> logger)
     {
-        _dataCenterService = dataCenterService;
+        _appDataCenterService = appDataCenterService;
         _dataProcessingService = dataProcessingService;
         _channelBus = channelBus;
         _messenger = messenger;
         _logger = logger;
 
-        _dataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
+        _appDataCenterService.OnLoadDataCompleted += OnLoadDataCompleted;
     }
 
     private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
@@ -73,7 +73,7 @@ public class S7BackgroundService : BackgroundService
                     break;
                 }
 
-                if (_dataCenterService.Devices.IsEmpty)
+                if (_appDataCenterService.Devices.IsEmpty)
                 {
                     _logger.LogInformation("没有可用的S7设备，等待设备列表更新...");
                     continue;
@@ -114,7 +114,7 @@ public class S7BackgroundService : BackgroundService
             _logger.LogInformation("开始加载S7设备....");
             
             // 获取所有激活的S7设备
-            var s7Devices = _dataCenterService
+            var s7Devices = _appDataCenterService
                            .Devices.Values.Where(d => d.Protocol == ProtocolType.S7 && d.IsActive == true)
                            .ToList();
 
@@ -134,7 +134,7 @@ public class S7BackgroundService : BackgroundService
             // 为每个设备创建或更新代理
             foreach (var deviceDto in s7Devices)
             {
-                if (!_dataCenterService.Devices.TryGetValue(deviceDto.Id, out var device))
+                if (!_appDataCenterService.Devices.TryGetValue(deviceDto.Id, out var device))
                     continue;
 
                 // 创建或更新设备代理

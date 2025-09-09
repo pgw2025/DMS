@@ -169,7 +169,7 @@
             Margin="20"
             IsItemClickEnabled="True"
             ItemTemplate="{StaticResource DeviceItemTemplate}"
-            ItemsSource="{Binding DataServices.Devices}"
+            ItemsSource="{Binding Devices}"
             SelectedItem="{Binding SelectedDevice}"
             SelectionMode="Single">
             <hc:Interaction.Triggers>

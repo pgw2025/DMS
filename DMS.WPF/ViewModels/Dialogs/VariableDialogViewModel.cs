@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
 
@@ -22,16 +23,19 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
 
     [ObservableProperty]
     private bool _hasError;
-    private readonly DataServices _dataServices;
+
+    private readonly IWPFDataService _wpfDataService;
+    private readonly IDataStorageService _dataStorageService;
     private readonly IVariableAppService _variableAppService;
     private readonly IMapper _mapper;
 
-    public VariableDialogViewModel(DataServices dataServices, IVariableAppService variableAppService, IMapper mapper)
+    public VariableDialogViewModel(IWPFDataService wpfDataService,IDataStorageService dataStorageService, IVariableAppService variableAppService, IMapper mapper)
     {
 
         Variable = new VariableItemViewModel();
 
-        this._dataServices = dataServices;
+        _wpfDataService = wpfDataService;
+        _dataStorageService = dataStorageService;
         this._variableAppService = variableAppService;
         this._mapper = mapper;
     }
@@ -78,7 +82,7 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
             return false;
         }
         //检查变量是否存在
-        var existVariables = _dataServices.Variables.Where(v => v.Name == Variable.Name || (v.Protocol == ProtocolType.S7 && v.S7Address == Variable.S7Address) || (v.Protocol == ProtocolType.OpcUa && v.OpcUaNodeId == Variable.OpcUaNodeId)).ToList();
+        var existVariables = _dataStorageService.Variables.Where(v => v.Name == Variable.Name || (v.Protocol == ProtocolType.S7 && v.S7Address == Variable.S7Address) || (v.Protocol == ProtocolType.OpcUa && v.OpcUaNodeId == Variable.OpcUaNodeId)).ToList();
         VariableItemViewModel existVariable = null;
         if (IsAddModel)
         {

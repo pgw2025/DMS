@@ -20,7 +20,7 @@ namespace DMS.Infrastructure.Services
     {
         private readonly ILogger<MqttServiceManager> _logger;
         private readonly IDataProcessingService _dataProcessingService;
-        private readonly IDataCenterService _dataCenterService;
+        private readonly IAppDataCenterService _appDataCenterService;
         private readonly IMqttServiceFactory _mqttServiceFactory;
         private readonly ConcurrentDictionary<int, MqttDeviceContext> _mqttContexts;
         private readonly SemaphoreSlim _semaphore;
@@ -29,12 +29,12 @@ namespace DMS.Infrastructure.Services
         public MqttServiceManager(
             ILogger<MqttServiceManager> logger,
             IDataProcessingService dataProcessingService,
-            IDataCenterService dataCenterService,
+            IAppDataCenterService appDataCenterService,
             IMqttServiceFactory mqttServiceFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
-            _dataCenterService = dataCenterService ?? throw new ArgumentNullException(nameof(dataCenterService));
+            _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _mqttServiceFactory = mqttServiceFactory ?? throw new ArgumentNullException(nameof(mqttServiceFactory));
             _mqttContexts = new ConcurrentDictionary<int, MqttDeviceContext>();
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10

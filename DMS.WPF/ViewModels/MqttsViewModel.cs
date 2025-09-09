@@ -18,8 +18,9 @@ namespace DMS.WPF.ViewModels;
 /// </summary>
 public partial class MqttsViewModel : ViewModelBase
 {
-    private readonly DataServices _dataServices;
+    private readonly IWPFDataService _wpfDataService;
     private readonly IMqttAppService _mqttAppService;
+    private readonly IDataStorageService _dataStorageService;
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
@@ -42,8 +43,9 @@ public partial class MqttsViewModel : ViewModelBase
     public MqttsViewModel(
         ILogger<MqttsViewModel> logger, 
         IDialogService dialogService, 
-        DataServices dataServices,
+        IWPFDataService wpfDataService,
         IMqttAppService mqttAppService,
+        IDataStorageService dataStorageService,
         IMapper mapper,
         INavigationService navigationService,
         INotificationService notificationService
@@ -51,13 +53,14 @@ public partial class MqttsViewModel : ViewModelBase
     {
         _logger = logger;
         _dialogService = dialogService;
-        _dataServices = dataServices;
+        _wpfDataService = wpfDataService;
         _mqttAppService = mqttAppService;
+        _dataStorageService = dataStorageService;
         _mapper = mapper;
         _navigationService = navigationService;
         _notificationService = notificationService;
         
-        Mqtts = _dataServices.MqttServers;
+        Mqtts = _dataStorageService.MqttServers;
     }
 
     /// <summary>
@@ -80,7 +83,7 @@ public partial class MqttsViewModel : ViewModelBase
                 return;
             }
 
-            var mqttItem = await _dataServices.AddMqttServer(_mqttAppService, mqtt);
+            var mqttItem = await _wpfDataService.MqttDataService.AddMqttServer(mqtt);
             _notificationService.ShowSuccess($"MQTT服务器添加成功：{mqttItem.ServerName}");
         }
         catch (Exception e)
@@ -108,7 +111,7 @@ public partial class MqttsViewModel : ViewModelBase
             if (await _dialogService.ShowDialogAsync(viewModel))
             {
                 var mqttName = SelectedMqtt.ServerName;
-                await _dataServices.DeleteMqttServer(_mqttAppService, SelectedMqtt);
+                await _wpfDataService.MqttDataService.DeleteMqttServer(SelectedMqtt);
                 _notificationService.ShowSuccess($"删除MQTT服务器成功,服务器名：{mqttName}");
             }
         }
@@ -146,7 +149,7 @@ public partial class MqttsViewModel : ViewModelBase
                 return;
             }
 
-            await _dataServices.UpdateMqttServer(_mqttAppService, mqtt);
+            await _wpfDataService.MqttDataService.UpdateMqttServer(mqtt);
             
             // 更新UI
             _mapper.Map(mqtt, SelectedMqtt);

@@ -1,3 +1,4 @@
+using System.Collections;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -6,14 +7,10 @@ using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
-using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace DMS.WPF.ViewModels;
 
@@ -82,7 +79,9 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// 初始化服务、数据仓库和变量数据集合视图。
     /// </summary>
     /// <param name="dialogService">对话服务接口的实例。</param>
-    private readonly DataServices _dataServices;
+    private readonly IWPFDataService _wpfDataService;
+
+    private readonly IDataStorageService _dataStorageService;
 
     private readonly ObservableList<VariableItemViewModel> _variableItemList;
     private readonly ISynchronizedView<VariableItemViewModel, VariableItemViewModel> _synchronizedView;
@@ -92,14 +91,15 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
                                   IMqttAliasAppService mqttAliasAppService, IMqttAppService mqttAppService,
-                                  DataServices dataServices, INotificationService notificationService)
+                                  IWPFDataService wpfDataService,IDataStorageService dataStorageService, INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
         _variableAppService = variableAppService;
         _mqttAliasAppService = mqttAliasAppService;
         _mqttAppService = mqttAppService;
-        _dataServices = dataServices;
+        _wpfDataService = wpfDataService;
+        _dataStorageService = dataStorageService;
         _notificationService = notificationService;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
 
@@ -402,7 +402,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             _mapper.Map(addVariable, variableItemViewModel);
             // // 更新当前页面显示的数据：将新变量添加到集合中
             _variableItemList.Add(variableItemViewModel);
-            _dataServices.AddVariable(variableItemViewModel);
+            _wpfDataService.VariableDataService.AddVariable(variableItemViewModel);
             //
             // // 显示成功通知
             _notificationService.ShowSuccess($"添加变量成功:{variableItemViewModel.Name}");
@@ -452,7 +452,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 foreach (var variable in variablesToDelete)
                 {
                     _variableItemList.Remove(variable);
-                    _dataServices.DeleteVariable(variable.Id);
+                    _wpfDataService.VariableDataService.DeleteVariable(variable.Id);
                 }
 
                 // 显示成功通知
@@ -592,7 +592,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             }
 
             int totalAffectedCount = 0;
-            
+
             // 为每个变量分配MQTT别名
             foreach (var editedVariableMqtt in editedVariableMqtts)
             {
@@ -602,7 +602,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                     editedVariableMqtt.Alias);
 
                 totalAffectedCount++;
-                
+
                 // 更新内存中的 Variable 对象
                 var originalVariable = validVariables.FirstOrDefault(v => v.Id == editedVariableMqtt.VariableId);
                 if (originalVariable == null)
@@ -612,23 +612,24 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
                 if (originalVariable.MqttAliases == null)
                 {
-                    originalVariable.MqttAliases = new ();
+                    originalVariable.MqttAliases = new();
                 }
 
                 // 检查是否已存在该变量与该MQTT服务器的关联
-                var existingVariableMqtt = originalVariable.MqttAliases.FirstOrDefault(vm => vm.MqttServerId == selectedMqtt.Id);
+                var existingVariableMqtt
+                    = originalVariable.MqttAliases.FirstOrDefault(vm => vm.MqttServerId == selectedMqtt.Id);
 
                 if (existingVariableMqtt == null)
                 {
                     // 如果不存在，则添加新的关联
                     var variableMqtt = new VariableMqttAliasItemViewModel
-                    {
-                        VariableId = originalVariable.Id,
-                        MqttServerId = selectedMqtt.Id,
-                        Alias = editedVariableMqtt.Alias,
-                        MqttServer = selectedMqtt,
-                        Variable = originalVariable
-                    };
+                                       {
+                                           VariableId = originalVariable.Id,
+                                           MqttServerId = selectedMqtt.Id,
+                                           Alias = editedVariableMqtt.Alias,
+                                           MqttServer = selectedMqtt,
+                                           Variable = originalVariable
+                                       };
                     // originalVariable.MqttAliases.Add(variableMqtt);
                 }
                 else
@@ -640,7 +641,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             if (totalAffectedCount > 0)
             {
-                _notificationService.ShowSuccess($"已成功为 {totalAffectedCount} 个变量添加/更新MQTT服务器: {selectedMqtt.ServerName} 的别名。");
+                _notificationService.ShowSuccess(
+                    $"已成功为 {totalAffectedCount} 个变量添加/更新MQTT服务器: {selectedMqtt.ServerName} 的别名。");
             }
             else
             {
@@ -726,7 +728,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        var varTable = _dataServices.VariableTables.FirstOrDefault(v => v.Id == menu.TargetId);
+        var varTable =_dataStorageService.VariableTables.FirstOrDefault(v => v.Id == menu.TargetId);
 
         if (varTable != null)
         {
