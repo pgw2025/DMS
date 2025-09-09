@@ -238,9 +238,10 @@ namespace DMS.Infrastructure.Services
             try
             {
                 var topic = context.MqttServer.PublishTopic;
-                var payload = variableMqtt.Variable.DataValue?.ToString() ?? string.Empty;
 
-                await context.MqttService.PublishAsync(topic, payload);
+                var sendMsg = $"{variableMqtt.Variable.Name}:{variableMqtt.Variable.DataValue}";
+
+                await context.MqttService.PublishAsync(topic, sendMsg);
                 _logger.LogDebug("成功向MQTT服务器 {ServerName} 发布变量 {VariableName} 的数据",
                     context.MqttServer.ServerName, variableMqtt.Variable.Name);
             }

@@ -4,6 +4,7 @@ using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
 using System.Collections.Concurrent;
 using DMS.Application.DTOs.Events;
+using DMS.Core.Models;
 
 namespace DMS.Application.Services;
 
@@ -85,6 +86,20 @@ public class DataLoaderService : IDataLoaderService
        foreach (var variableMqttAliasDto in variableMqttAliasDtos)
        {
            _appDataStorageService.VariableMqttAliases.TryAdd(variableMqttAliasDto.Id, variableMqttAliasDto);
+           if (_appDataStorageService.Variables.TryGetValue(variableMqttAliasDto.VariableId, out var variable))
+           {
+               variableMqttAliasDto.Variable = _mapper.Map<Variable>(variable);
+               variable.MqttAliases?.Add(variableMqttAliasDto);
+           }
+
+           if (_appDataStorageService.MqttServers.TryGetValue(variableMqttAliasDto.MqttServerId, out var mqttServer))
+           {
+               variableMqttAliasDto.MqttServer = _mapper.Map<MqttServer>(mqttServer);
+               variableMqttAliasDto.MqttServerName = variableMqttAliasDto.MqttServer.ServerName;
+               mqttServer.VariableAliases?.Add(variableMqttAliasDto);
+           }
+           
+           
        }
     }
 
