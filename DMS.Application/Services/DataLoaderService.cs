@@ -81,7 +81,7 @@ public class DataLoaderService : IDataLoaderService
         var mqttServerDtos = await LoadAllMqttServersAsync();
 
         // 加载所有日志
-        var nlogDtos = await LoadAllNlogsAsync();
+        var nlogDtos = await LoadAllNlogsAsync(100);
 
         // 获取变量MQTT别名
         var variableMqttAliases = await _repositoryManager.VariableMqttAliases.GetAllAsync();
@@ -191,8 +191,8 @@ public class DataLoaderService : IDataLoaderService
     /// <summary>
     /// 异步加载所有日志数据
     /// </summary>
-    public async Task<List<NlogDto>> LoadAllNlogsAsync()
+    public async Task<List<NlogDto>> LoadAllNlogsAsync(int count)
     {
-        return await _nlogAppService.GetAllLogsAsync();
+        return await _nlogAppService.GetLatestLogsAsync(count);
     }
 }

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Application.Interfaces;
 using DMS.WPF.Services;
 using System;
+using System.Data;
 using System.Threading.Tasks;
 using DMS.Application.Services;
 using DMS.WPF.Helper;
@@ -46,7 +47,6 @@ public partial class SplashViewModel : ObservableObject
     {
         try
         {
-            
             _logger.LogInformation("正在初始化数据库...");
             LoadingMessage = "正在初始化数据库...";
             _initializeService.InitializeTables();

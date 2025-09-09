@@ -42,7 +42,7 @@ public interface IDataLoaderService
     /// <summary>
     /// 异步加载所有日志数据
     /// </summary>
-    Task<List<NlogDto>> LoadAllNlogsAsync();
+    Task<List<NlogDto>> LoadAllNlogsAsync(int count);
 
     /// <summary>
     /// 当数据加载完成时触发

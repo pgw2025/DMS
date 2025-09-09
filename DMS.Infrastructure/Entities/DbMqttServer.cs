@@ -31,11 +31,13 @@ public class DbMqttServer
     /// <summary>
     /// 用户名
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string Username { get; set; }
 
     /// <summary>
     /// 密码
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string Password { get; set; }
 
     /// <summary>
@@ -46,11 +48,13 @@ public class DbMqttServer
     /// <summary>
     /// 订阅的主题
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string SubscribeTopic { get; set; }
 
     /// <summary>
     /// 发布的主题
     /// </summary>
+    [SugarColumn(IsNullable = true)]
     public string PublishTopic { get; set; }
 
     /// <summary>
