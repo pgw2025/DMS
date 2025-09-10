@@ -34,18 +34,12 @@ public class MqttPublishProcessor : IVariableProcessor
         }
         
         // 遍历所有关联的MQTT配置，并将其推入发送队列
-        foreach (var variableMqttAlias in variable.MqttAliases)
+        foreach (var variableMqttAliasDto in variable.MqttAliases)
         {
-            // 创建VariableMqtt对象
-            var variableMqtt = new VariableMqtt
-            {
-                Variable = _mapper.Map<Variable>(variable),
-                Mqtt = variableMqttAlias.MqttServer,
-                MqttId = variableMqttAlias.MqttServerId
-            };
-            
             // 发布变量数据到MQTT服务器
-            await _mqttServiceManager.PublishVariableDataAsync(variableMqtt);
+           var variableMqttAlias = _mapper.Map<VariableMqttAlias>(variableMqttAliasDto);
+           variableMqttAlias.Variable.DataValue=variable.DataValue;
+            await _mqttServiceManager.PublishVariableDataAsync(variableMqttAlias);
         }
     }
 }

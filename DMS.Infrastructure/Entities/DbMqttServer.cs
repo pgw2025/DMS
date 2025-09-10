@@ -84,4 +84,22 @@ public class DbMqttServer
     /// </summary>
     [SugarColumn(IsNullable = true)]
     public string MessageFormat { get; set; }
+
+    /// <summary>
+    /// 消息头格式
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string MessageHeader { get; set; }
+
+    /// <summary>
+    /// 消息内容格式
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string MessageContent { get; set; }
+
+    /// <summary>
+    /// 消息尾格式
+    /// </summary>
+    [SugarColumn(IsNullable = true)]
+    public string MessageFooter { get; set; }
 }

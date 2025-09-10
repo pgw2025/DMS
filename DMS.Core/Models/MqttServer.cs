@@ -49,6 +49,21 @@ public class MqttServer
     public string MessageFormat { get; set; }
 
     /// <summary>
+    /// 消息头格式。
+    /// </summary>
+    public string MessageHeader { get; set; }
+
+    /// <summary>
+    /// 消息内容格式。
+    /// </summary>
+    public string MessageContent { get; set; }
+
+    /// <summary>
+    /// 消息尾格式。
+    /// </summary>
+    public string MessageFooter { get; set; }
+
+    /// <summary>
     /// 与此服务器关联的所有变量别名。通过此集合可以反向查找关联的变量。
     /// </summary>
     public List<VariableMqttAlias> VariableAliases { get; set; } = new();

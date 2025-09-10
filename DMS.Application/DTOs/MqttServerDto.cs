@@ -22,5 +22,8 @@ public class MqttServerDto
     public DateTime? ConnectedAt { get; set; }
     public long ConnectionDuration { get; set; }
     public string MessageFormat { get; set; }
+    public string MessageHeader { get; set; }
+    public string MessageContent { get; set; }
+    public string MessageFooter { get; set; }
     public List<VariableMqttAliasDto> VariableAliases { get; set; } = new();
 }

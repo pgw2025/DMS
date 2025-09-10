@@ -44,6 +44,9 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Row 0 -->
@@ -102,10 +105,46 @@
                 Margin="0,15,0,0"
                 hc:InfoElement.Title="订阅主题:"
                 Text="{Binding MqttServer.SubscribeTopic, UpdateSourceTrigger=PropertyChanged}" />
-
+            
+            
+            <!-- Row 5 -->
+            <hc:TextBox
+                Grid.Row="4"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="消息头:"
+                Text="{Binding MqttServer.MessageHeader, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap"
+                AcceptsReturn="True"
+                VerticalContentAlignment="Top" />
+            
+            <hc:TextBox
+                Grid.Row="5"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="消息内容:"
+                Text="{Binding MqttServer.MessageContent, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap"
+                AcceptsReturn="True"
+                VerticalContentAlignment="Top" />
+            
+            <!-- Row 6 -->
+            <hc:TextBox
+                Grid.Row="6"
+                Grid.Column="0"
+                Grid.ColumnSpan="3"
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="消息尾:"
+                Text="{Binding MqttServer.MessageFooter, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap"
+                AcceptsReturn="True"
+                VerticalContentAlignment="Top" />
+            
             <!-- Row 4 -->
             <CheckBox
-                Grid.Row="4"
+                Grid.Row="7"
                 Grid.Column="0"
                 Margin="0,20,0,0"
                 Content="是否启用"

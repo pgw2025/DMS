@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DMS.Core.Models;
@@ -215,17 +216,17 @@ namespace DMS.Infrastructure.Services
         /// <summary>
         /// 发布变量数据到MQTT服务器
         /// </summary>
-        public async Task PublishVariableDataAsync(VariableMqtt variableMqtt, CancellationToken cancellationToken = default)
+        public async Task PublishVariableDataAsync(VariableMqttAlias variableMqtt, CancellationToken cancellationToken = default)
         {
-            if (variableMqtt?.Mqtt == null || variableMqtt.Variable == null)
+            if (variableMqtt?.MqttServer == null || variableMqtt.Variable == null)
             {
                 _logger.LogWarning("无效的VariableMqtt对象，跳过发布");
                 return;
             }
 
-            if (!_mqttContexts.TryGetValue(variableMqtt.Mqtt.Id, out var context))
+            if (!_mqttContexts.TryGetValue(variableMqtt.MqttServer.Id, out var context))
             {
-                _logger.LogWarning("未找到MQTT服务器 {MqttServerId}", variableMqtt.Mqtt.Id);
+                _logger.LogWarning("未找到MQTT服务器 {MqttServerId}", variableMqtt.MqttServer.Id);
                 return;
             }
 
@@ -239,17 +240,29 @@ namespace DMS.Infrastructure.Services
             {
                 var topic = context.MqttServer.PublishTopic;
 
-                var sendMsg = $"{variableMqtt.Variable.Name}:{variableMqtt.Variable.DataValue}";
+                var sendMsg = BuildSendMessage(variableMqtt);
 
                 await context.MqttService.PublishAsync(topic, sendMsg);
-                _logger.LogDebug("成功向MQTT服务器 {ServerName} 发布变量 {VariableName} 的数据",
-                    context.MqttServer.ServerName, variableMqtt.Variable.Name);
+                _logger.LogDebug("成功向MQTT服务器 {ServerName} 发布变量 {VariableName} 的数据：{sendMsg}",
+                    context.MqttServer.ServerName, variableMqtt.Variable.Name,sendMsg);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "向MQTT服务器 {ServerName} 发布变量 {VariableName} 数据时发生错误: {ErrorMessage}",
                     context.MqttServer.ServerName, variableMqtt.Variable.Name, ex.Message);
             }
+        }
+
+        private string BuildSendMessage(VariableMqttAlias variableMqtt)
+        {
+            StringBuilder sb = new StringBuilder();
+            var now = DateTime.Now;
+            var timestamp = ((DateTimeOffset)now).ToUnixTimeMilliseconds();
+            sb.Append(variableMqtt.MqttServer.MessageHeader.Replace("{timestamp}",timestamp.ToString()));
+            sb.Append(variableMqtt.MqttServer.MessageContent.Replace("{name}",variableMqtt.Alias).Replace("{value}",variableMqtt.Variable.DataValue));
+            sb.Append(variableMqtt.MqttServer.MessageFooter);
+
+            return sb.ToString();
         }
 
         /// <summary>

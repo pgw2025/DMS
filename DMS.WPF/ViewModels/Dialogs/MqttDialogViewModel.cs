@@ -37,7 +37,10 @@ public partial class MqttDialogViewModel : DialogViewModelBase<MqttServerItemVie
             CreatedAt = mqttServer.CreatedAt,
             ConnectedAt = mqttServer.ConnectedAt,
             ConnectionDuration = mqttServer.ConnectionDuration,
-            MessageFormat = mqttServer.MessageFormat
+            MessageFormat = mqttServer.MessageFormat,
+            MessageHeader = mqttServer.MessageHeader,
+            MessageContent = mqttServer.MessageContent,
+            MessageFooter = mqttServer.MessageFooter
         };
     }
 

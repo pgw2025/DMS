@@ -53,6 +53,15 @@ public partial class MqttServerItemViewModel : ObservableObject
     private string _messageFormat;
 
     [ObservableProperty]
+    private string _messageHeader;
+
+    [ObservableProperty]
+    private string _messageContent;
+
+    [ObservableProperty]
+    private string _messageFooter;
+
+    [ObservableProperty]
     private ObservableCollection<VariableMqttAliasItemViewModel> _variableAliases = new();
 
 
