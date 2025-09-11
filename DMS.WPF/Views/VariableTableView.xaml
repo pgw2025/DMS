@@ -208,6 +208,14 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                         </MenuItem.Icon>
                     </MenuItem>
+                    
+                    <MenuItem
+                        Command="{Binding ToHistoryCommand}"
+                        Header="查看历史记录">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.RowStyle>
@@ -300,7 +308,7 @@
                 <DataGridCheckBoxColumn Binding="{Binding IsAlarmEnabled}" Header="报警" />
                 <DataGridTextColumn Binding="{Binding AlarmMinValue}" Header="报警最小值" />
                 <DataGridTextColumn Binding="{Binding AlarmMaxValue}" Header="报警最大值" />
-            </DataGrid.Columns>
+                </DataGrid.Columns>
         </DataGrid>
     </DockPanel>
 

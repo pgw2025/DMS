@@ -109,4 +109,18 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
         var dbEntities = _mapper.Map<List<DbVariableHistory>>(entities);
         return base.AddBatchAsync(dbEntities);
     }
+    
+    /// <summary>
+    /// 根据变量ID获取历史记录
+    /// </summary>
+    /// <param name="variableId">变量ID</param>
+    /// <returns>变量历史记录列表</returns>
+    public async Task<List<VariableHistory>> GetByVariableIdAsync(int variableId)
+    {
+        var dbList = await Db.Queryable<DbVariableHistory>()
+                             .Where(h => h.VariableId == variableId)
+                             .OrderBy(h => h.Timestamp, SqlSugar.OrderByType.Desc)
+                             .ToListAsync();
+        return _mapper.Map<List<VariableHistory>>(dbList);
+    }
 }

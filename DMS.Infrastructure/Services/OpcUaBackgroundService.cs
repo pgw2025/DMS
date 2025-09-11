@@ -200,7 +200,11 @@ public class OpcUaBackgroundService : BackgroundService
         // 遍历_opcUaDevices中的所有设备，尝试连接
         foreach (var device in _opcUaDevices.Values.ToList())
         {
-            connectTasks.Add(ConnectSingleOpcUaDeviceAsync(device, stoppingToken));
+            if (device.IsActive)
+            {
+                connectTasks.Add(ConnectSingleOpcUaDeviceAsync(device, stoppingToken));
+            }
+            
         }
 
         await Task.WhenAll(connectTasks);

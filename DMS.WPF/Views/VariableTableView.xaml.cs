@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog;
 using DMS.Core.Enums;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.Views;
 
@@ -50,4 +51,5 @@ public partial class VariableTableView : UserControl
         IsLoadCompletion = true;
     }
     
+   
 }

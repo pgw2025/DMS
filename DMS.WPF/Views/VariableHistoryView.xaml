@@ -1,0 +1,100 @@
+<UserControl
+    x:Class="DMS.WPF.Views.VariableHistoryView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
+    xmlns:ex="clr-namespace:DMS.Extensions"
+    xmlns:helper="clr-namespace:DMS.WPF.Helper"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
+    d:DataContext="{d:DesignInstance vm:VariableHistoryViewModel}"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ex:BindingProxy x:Key="proxy" Data="{Binding}" />
+        <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <!--  标签字体的样式  -->
+        <Style x:Key="VarHistoryLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!--  值字体的样式  -->
+        <Style x:Key="VarHistoryValueStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinWidth" Value="100" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <ikw:SimpleStackPanel Margin="10" DockPanel.Dock="Top">
+            <!--  选择区域  -->
+            <GroupBox Header="选择条件">
+                <ikw:SimpleStackPanel Margin="5" Spacing="10">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="设备:" />
+                        <ComboBox
+                            MinWidth="150"
+                            DisplayMemberPath="Name"
+                            ItemsSource="{Binding Devices}"
+                            SelectedItem="{Binding SelectedDevice}" />
+
+                        <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="变量表:" />
+                        <ComboBox
+                            MinWidth="150"
+                            DisplayMemberPath="Name"
+                            ItemsSource="{Binding VariableTables}"
+                            SelectedItem="{Binding SelectedVariableTable}" />
+
+                        <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="变量:" />
+                        <ComboBox
+                            MinWidth="150"
+                            DisplayMemberPath="Name"
+                            ItemsSource="{Binding Variables}"
+                            SelectedItem="{Binding SelectedVariable}" />
+                    </ikw:SimpleStackPanel>
+
+                    <ikw:SimpleStackPanel
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="10">
+                        <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="搜索变量:" />
+                        <TextBox
+                            Width="200"
+                            ui:ControlHelper.PlaceholderText="搜索变量..."
+                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                    </ikw:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
+            </GroupBox>
+        </ikw:SimpleStackPanel>
+
+        <DataGrid
+            Margin="10"
+            AutoGenerateColumns="False"
+            CanUserDeleteRows="False"
+            CanUserSortColumns="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding VariableHistories}"
+            SelectionMode="Single"
+            Style="{StaticResource DataGridBaseStyle}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Value}" Header="值" />
+                <DataGridTextColumn
+                    Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss.fff}'}"
+                    Header="时间戳"
+                    IsReadOnly="True" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</UserControl>

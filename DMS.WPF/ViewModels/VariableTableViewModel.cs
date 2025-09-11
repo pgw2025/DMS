@@ -703,6 +703,18 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
     }
 
+    [RelayCommand]
+    private void ToHistory()
+    {
+        // 导航到历史记录视图
+        var navigationService = App.Current.Services.GetRequiredService<INavigationService>();
+        MenuItemViewModel viewModel=new MenuItemViewModel();
+        viewModel.TargetViewKey = "VariableHistoryView";
+        viewModel.MenuType = MenuType.VariableMenu;
+        viewModel.TargetId = SelectedVariable.Id;
+        navigationService.NavigateToAsync(viewModel);
+    }
+
     /// <summary>
     /// 当变量表的启用/禁用状态改变时调用。
     /// 更新数据库中变量表的激活状态，并显示相应的通知。

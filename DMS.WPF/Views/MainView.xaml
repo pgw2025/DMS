@@ -116,6 +116,10 @@
                         <DataTemplate DataType="{x:Type vm:VariableTableViewModel}">
                             <local:VariableTableView DataContext="{Binding}" />
                         </DataTemplate>
+                        <!--  设备变量历史记录页  -->
+                        <DataTemplate DataType="{x:Type vm:VariableHistoryViewModel}">
+                            <local:VariableHistoryView DataContext="{Binding}" />
+                        </DataTemplate>
                         <!--  Mqtt服务器详情页  -->
                         <!-- <DataTemplate DataType="{x:Type vm:MqttServerDetailViewModel}"> -->
                         <!--     <local:MqttServerDetailView DataContext="{Binding }"/> -->

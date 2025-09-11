@@ -279,6 +279,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<MqttsViewModel>();
         services.AddSingleton<LogHistoryViewModel>();
         services.AddScoped<MqttServerDetailViewModel>();
+        services.AddSingleton<VariableHistoryViewModel>();
         
         // 注册对话框视图模型
         services.AddTransient<DeviceDialogViewModel>();
@@ -300,6 +301,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<HomeView>();
         services.AddSingleton<DevicesView>();
         services.AddSingleton<VariableTableView>();
+        services.AddSingleton<VariableHistoryView>();
         services.AddSingleton<LogHistoryView>();
         services.AddScoped<DeviceDetailView>();
         services.AddScoped<MqttsView>();

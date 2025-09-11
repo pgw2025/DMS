@@ -285,4 +285,15 @@ public class VariableAppService : IVariableAppService
         // 如果找到了匹配的变量，返回第一个（也是唯一一个）
         return existingVariables.FirstOrDefault();
     }
+    
+    /// <summary>
+    /// 异步获取指定变量的历史记录。
+    /// </summary>
+    /// <param name="variableId">变量ID</param>
+    /// <returns>变量历史记录列表</returns>
+    public async Task<List<VariableHistoryDto>> GetVariableHistoriesAsync(int variableId)
+    {
+        var histories = await _repoManager.VariableHistories.GetByVariableIdAsync(variableId);
+        return _mapper.Map<List<VariableHistoryDto>>(histories);
+    }
 }

@@ -48,6 +48,24 @@ public class NavigationService : INavigationService
 
         mainViewModel.CurrentViewModel = viewModel;
     }
+    
+    /// <summary>
+    /// 导航到指定键的视图，并传递参数。
+    /// </summary>
+    public async Task NavigateToAsync(string viewKey, object parameter = null)
+    {
+        var mainViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
+        var viewModel = GetViewModelByKey(viewKey);
+        if (viewModel == null)
+        {
+            _notificationService.ShowError($"切换界面失败，没有找到界面：{viewKey}");
+            return;
+        }
+
+      
+
+        mainViewModel.CurrentViewModel = viewModel;
+    }
 
 
     private ViewModelBase GetViewModelByKey(string key)
@@ -66,6 +84,8 @@ public class NavigationService : INavigationService
                     return App.Current.Services.GetRequiredService<DataTransformViewModel>();
                 case "VariableTableView":
                     return App.Current.Services.GetRequiredService<VariableTableViewModel>();
+                case "VariableHistoryView":
+                    return App.Current.Services.GetRequiredService<VariableHistoryViewModel>();
                 case "LogHistoryView":
                     return App.Current.Services.GetRequiredService<LogHistoryViewModel>();
                 case "MqttsView":
