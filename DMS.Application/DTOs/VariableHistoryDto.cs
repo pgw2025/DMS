@@ -9,6 +9,7 @@ public class VariableHistoryDto
 {
     public long Id { get; set; }
     public int VariableId { get; set; }
+    public string VariableName { get; set; }
     public string Value { get; set; }
     public DateTime Timestamp { get; set; }
 }

@@ -70,11 +70,4 @@ public interface IVariableAppService
     /// <param name="variableToCheck">要检查的变量。</param>
     /// <returns>如果变量已存在则返回该变量，否则返回null。</returns>
     Task<VariableDto?> FindExistingVariableAsync(VariableDto variableToCheck);
-    
-    /// <summary>
-    /// 异步获取指定变量的历史记录。
-    /// </summary>
-    /// <param name="variableId">变量ID</param>
-    /// <returns>变量历史记录列表</returns>
-    Task<List<VariableHistoryDto>> GetVariableHistoriesAsync(int variableId);
 }

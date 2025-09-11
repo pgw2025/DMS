@@ -39,41 +39,22 @@
 
     <DockPanel>
         <ikw:SimpleStackPanel Margin="10" DockPanel.Dock="Top">
-            <!--  选择区域  -->
-            <GroupBox Header="选择条件">
+            <!--  搜索区域  -->
+            <GroupBox Header="搜索条件">
                 <ikw:SimpleStackPanel Margin="5" Spacing="10">
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="设备:" />
-                        <ComboBox
-                            MinWidth="150"
-                            DisplayMemberPath="Name"
-                            ItemsSource="{Binding Devices}"
-                            SelectedItem="{Binding SelectedDevice}" />
-
-                        <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="变量表:" />
-                        <ComboBox
-                            MinWidth="150"
-                            DisplayMemberPath="Name"
-                            ItemsSource="{Binding VariableTables}"
-                            SelectedItem="{Binding SelectedVariableTable}" />
-
-                        <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="变量:" />
-                        <ComboBox
-                            MinWidth="150"
-                            DisplayMemberPath="Name"
-                            ItemsSource="{Binding Variables}"
-                            SelectedItem="{Binding SelectedVariable}" />
-                    </ikw:SimpleStackPanel>
-
                     <ikw:SimpleStackPanel
-                        HorizontalAlignment="Right"
+                        HorizontalAlignment="Left"
                         Orientation="Horizontal"
                         Spacing="10">
                         <TextBlock Style="{StaticResource VarHistoryLabelStyle}" Text="搜索变量:" />
-                        <TextBox
+                        <ui:AutoSuggestBox
                             Width="200"
                             ui:ControlHelper.PlaceholderText="搜索变量..."
-                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                            ItemsSource="{Binding SuggestedVariables}"
+                            DisplayMemberPath="VariableName"
+                            IsSuggestionListOpen="{Binding IsSuggestionListOpen, Mode=TwoWay}"
+                            TextMemberPath="VariableName" />
                     </ikw:SimpleStackPanel>
                 </ikw:SimpleStackPanel>
             </GroupBox>
@@ -89,6 +70,7 @@
             SelectionMode="Single"
             Style="{StaticResource DataGridBaseStyle}">
             <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding VariableName}" Header="变量名" />
                 <DataGridTextColumn Binding="{Binding Value}" Header="值" />
                 <DataGridTextColumn
                     Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss.fff}'}"

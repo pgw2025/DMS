@@ -123,4 +123,64 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
                              .ToListAsync();
         return _mapper.Map<List<VariableHistory>>(dbList);
     }
+    
+    /// <summary>
+    /// 根据变量ID获取历史记录，支持条数限制和时间范围筛选
+    /// </summary>
+    /// <param name="variableId">变量ID</param>
+    /// <param name="limit">返回记录的最大数量，null表示无限制</param>
+    /// <param name="startTime">开始时间，null表示无限制</param>
+    /// <param name="endTime">结束时间，null表示无限制</param>
+    /// <returns>变量历史记录列表</returns>
+    public async Task<List<VariableHistory>> GetByVariableIdAsync(int variableId, int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
+    {
+        var query = Db.Queryable<DbVariableHistory>()
+                      .Where(h => h.VariableId == variableId);
+        
+        // 添加时间范围筛选
+        if (startTime.HasValue)
+            query = query.Where(h => h.Timestamp >= startTime.Value);
+        
+        if (endTime.HasValue)
+            query = query.Where(h => h.Timestamp <= endTime.Value);
+        
+        // 按时间倒序排列
+        query = query.OrderBy(h => h.Timestamp, SqlSugar.OrderByType.Desc);
+        
+        // 添加条数限制
+        if (limit.HasValue)
+            query = query.Take(limit.Value);
+        
+        var dbList = await query.ToListAsync();
+        return _mapper.Map<List<VariableHistory>>(dbList);
+    }
+    
+    /// <summary>
+    /// 获取所有历史记录，支持条数限制和时间范围筛选
+    /// </summary>
+    /// <param name="limit">返回记录的最大数量，null表示无限制</param>
+    /// <param name="startTime">开始时间，null表示无限制</param>
+    /// <param name="endTime">结束时间，null表示无限制</param>
+    /// <returns>所有历史记录列表</returns>
+    public new async Task<List<VariableHistory>> GetAllAsync(int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
+    {
+        var query = Db.Queryable<DbVariableHistory>();
+        
+        // 添加时间范围筛选
+        if (startTime.HasValue)
+            query = query.Where(h => h.Timestamp >= startTime.Value);
+        
+        if (endTime.HasValue)
+            query = query.Where(h => h.Timestamp <= endTime.Value);
+        
+        // 按时间倒序排列
+        query = query.OrderBy(h => h.Timestamp, SqlSugar.OrderByType.Desc);
+        
+        // 添加条数限制
+        if (limit.HasValue)
+            query = query.Take(limit.Value);
+        
+        var dbList = await query.ToListAsync();
+        return _mapper.Map<List<VariableHistory>>(dbList);
+    }
 }

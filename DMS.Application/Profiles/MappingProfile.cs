@@ -40,7 +40,9 @@ public class MappingProfile : Profile
             .ReverseMap();
 
         // VariableHistory 映射
-        CreateMap<VariableHistory, VariableHistoryDto>().ReverseMap();
+        CreateMap<VariableHistory, VariableHistoryDto>()
+            .ForMember(dest => dest.VariableName, opt => opt.MapFrom(src => src.Variable.Name))
+            .ReverseMap();
 
         // MenuBean 映射
         CreateMap<MenuBean, MenuBeanDto>().ReverseMap();

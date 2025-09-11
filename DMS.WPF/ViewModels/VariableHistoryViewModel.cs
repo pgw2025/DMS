@@ -9,35 +9,18 @@ using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
+using System.Linq;
 
 namespace DMS.WPF.ViewModels;
 
-partial class VariableHistoryViewModel : ViewModelBase,INavigatable
+partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 {
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
-    private readonly IVariableAppService _variableAppService;
+    private readonly IHistoryAppService _historyAppService;
     private readonly IWPFDataService _wpfDataService;
     private readonly IDataStorageService _dataStorageService;
     private readonly INotificationService _notificationService;
-
-    /// <summary>
-    /// 当前选中的设备
-    /// </summary>
-    [ObservableProperty]
-    private DeviceItemViewModel _selectedDevice;
-
-    /// <summary>
-    /// 当前选中的变量表
-    /// </summary>
-    [ObservableProperty]
-    private VariableTableItemViewModel _selectedVariableTable;
-
-    /// <summary>
-    /// 当前选中的变量
-    /// </summary>
-    [ObservableProperty]
-    private VariableItemViewModel _selectedVariable;
 
     /// <summary>
     /// 用于过滤变量的搜索文本
@@ -46,142 +29,87 @@ partial class VariableHistoryViewModel : ViewModelBase,INavigatable
     private string _searchText;
 
     /// <summary>
-    /// 所有设备列表
+    /// 是否打开建议列表
     /// </summary>
-    public NotifyCollectionChangedSynchronizedViewList<DeviceItemViewModel> Devices { get; }
+    [ObservableProperty]
+    private bool _isSuggestionListOpen;
 
     /// <summary>
-    /// 当前设备下的变量表列表
+    /// 建议的变量列表
     /// </summary>
-    public NotifyCollectionChangedSynchronizedViewList<VariableTableItemViewModel> VariableTables { get; }
-
+    [ObservableProperty]
+    private List<VariableHistoryDto> _suggestedVariables;
+    
     /// <summary>
-    /// 当前变量表下的变量列表
+    /// 历史记录条数限制
     /// </summary>
-    public NotifyCollectionChangedSynchronizedViewList<VariableItemViewModel> Variables { get; }
+    [ObservableProperty]
+    private int? _historyLimit;
+    
+    /// <summary>
+    /// 历史记录开始时间
+    /// </summary>
+    [ObservableProperty]
+    private DateTime? _startTime;
+    
+    /// <summary>
+    /// 历史记录结束时间
+    /// </summary>
+    [ObservableProperty]
+    private DateTime? _endTime;
 
     /// <summary>
     /// 变量历史记录列表
     /// </summary>
     public NotifyCollectionChangedSynchronizedViewList<VariableHistoryDto> VariableHistories { get; }
 
-    private readonly ObservableList<DeviceItemViewModel> _deviceItemList;
-    private readonly ObservableList<VariableTableItemViewModel> _variableTableItemList;
-    private readonly ObservableList<VariableItemViewModel> _variableItemList;
     private readonly ObservableList<VariableHistoryDto> _variableHistoryList;
-
-    private readonly ISynchronizedView<DeviceItemViewModel, DeviceItemViewModel> _deviceSynchronizedView;
-    private readonly ISynchronizedView<VariableTableItemViewModel, VariableTableItemViewModel> _variableTableSynchronizedView;
-    private readonly ISynchronizedView<VariableItemViewModel, VariableItemViewModel> _variableSynchronizedView;
     private readonly ISynchronizedView<VariableHistoryDto, VariableHistoryDto> _variableHistorySynchronizedView;
 
-    public VariableHistoryViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
+    /// <summary>
+    /// 所有变量的缓存列表，用于搜索
+    /// </summary>
+    private List<VariableHistoryDto> _allVariableHistories;
+
+    public VariableHistoryViewModel(IMapper mapper, IDialogService dialogService, IHistoryAppService historyAppService,
                                   IWPFDataService wpfDataService, IDataStorageService dataStorageService, INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
-        _variableAppService = variableAppService;
+        _historyAppService = historyAppService;
         _wpfDataService = wpfDataService;
         _dataStorageService = dataStorageService;
         _notificationService = notificationService;
 
-        _deviceItemList = new ObservableList<DeviceItemViewModel>();
-        _variableTableItemList = new ObservableList<VariableTableItemViewModel>();
-        _variableItemList = new ObservableList<VariableItemViewModel>();
         _variableHistoryList = new ObservableList<VariableHistoryDto>();
-
-        _deviceSynchronizedView = _deviceItemList.CreateView(v => v);
-        _variableTableSynchronizedView = _variableTableItemList.CreateView(v => v);
-        _variableSynchronizedView = _variableItemList.CreateView(v => v);
         _variableHistorySynchronizedView = _variableHistoryList.CreateView(v => v);
-
-        Devices = _deviceSynchronizedView.ToNotifyCollectionChanged();
-        VariableTables = _variableTableSynchronizedView.ToNotifyCollectionChanged();
-        Variables = _variableSynchronizedView.ToNotifyCollectionChanged();
         VariableHistories = _variableHistorySynchronizedView.ToNotifyCollectionChanged();
-    }
-
-
-
-    /// <summary>
-    /// 加载所有设备
-    /// </summary>
-    private void LoadDevices()
-    {
-        _deviceItemList.Clear();
-        _deviceItemList.AddRange(_dataStorageService.Devices);
+        _allVariableHistories = new List<VariableHistoryDto>();
+        _suggestedVariables = new List<VariableHistoryDto>();
+        
+        // 初始化默认值
+        _historyLimit = 1000; // 默认限制1000条记录
+        _startTime = null;
+        _endTime = null;
     }
 
     /// <summary>
-    /// 当选中的设备发生变化时
+    /// 加载所有变量的历史记录
     /// </summary>
-    /// <param name="value"></param>
-    partial void OnSelectedDeviceChanged(DeviceItemViewModel value)
-    {
-        if (value != null)
-        {
-            // 清空变量表和变量列表
-            _variableTableItemList.Clear();
-            _variableItemList.Clear();
-            _variableHistoryList.Clear();
-
-            // 加载选中设备下的变量表
-            _variableTableItemList.AddRange(value.VariableTables);
-            
-            // 清空选中项
-            SelectedVariableTable = null;
-            SelectedVariable = null;
-        }
-    }
-
-    /// <summary>
-    /// 当选中的变量表发生变化时
-    /// </summary>
-    /// <param name="value"></param>
-    partial void OnSelectedVariableTableChanged(VariableTableItemViewModel value)
-    {
-        if (value != null)
-        {
-            // 清空变量列表和历史记录
-            _variableItemList.Clear();
-            _variableHistoryList.Clear();
-
-            // 加载选中变量表下的变量
-            _variableItemList.AddRange(value.Variables);
-            
-            // 清空选中项
-            SelectedVariable = null;
-        }
-    }
-
-    /// <summary>
-    /// 当选中的变量发生变化时
-    /// </summary>
-    /// <param name="value"></param>
-    partial void OnSelectedVariableChanged(VariableItemViewModel value)
-    {
-        // if (value != null)
-        // {
-        //     // 加载选中变量的历史记录
-        //     LoadVariableHistories(value.Id);
-        // }
-        // else
-        // {
-        //     _variableHistoryList.Clear();
-        // }
-    }
-
-    /// <summary>
-    /// 加载变量的历史记录
-    /// </summary>
-    /// <param name="variableId"></param>
-    private async void LoadVariableHistories(int variableId)
+    /// <param name="limit">返回记录的最大数量，null表示无限制</param>
+    /// <param name="startTime">开始时间，null表示无限制</param>
+    /// <param name="endTime">结束时间，null表示无限制</param>
+    private async void LoadAllVariableHistories(int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
     {
         try
         {
             _variableHistoryList.Clear();
-            var histories = await _variableAppService.GetVariableHistoriesAsync(variableId);
-            _variableHistoryList.AddRange(histories);
+            var allHistories = await _historyAppService.GetAllVariableHistoriesAsync(limit, startTime, endTime);
+            _allVariableHistories = allHistories.ToList();
+            _variableHistoryList.AddRange(_allVariableHistories);
+            
+            // 更新建议列表
+            UpdateSuggestedVariables();
         }
         catch (Exception ex)
         {
@@ -191,49 +119,99 @@ partial class VariableHistoryViewModel : ViewModelBase,INavigatable
     }
 
     /// <summary>
-    /// 搜索变量
+    /// 更新建议的变量列表
+    /// </summary>
+    private void UpdateSuggestedVariables()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            // 如果搜索文本为空，显示所有唯一的变量名
+            _suggestedVariables = _allVariableHistories
+                                  .GroupBy(h => h.VariableName)
+                                  .Select(g => g.First())
+                                  .Take(10)
+                                  .ToList();
+        }
+        else
+        {
+            // 根据搜索文本过滤建议列表
+            _suggestedVariables = _allVariableHistories
+                                  .Where(h =>
+                                             h.VariableName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ==
+                                             true)
+                                  .GroupBy(h => h.VariableName)
+                                  .Select(g => g.First())
+                                  .Take(10)
+                                  .ToList();
+        }
+
+    }
+
+    /// <summary>
+    /// 搜索变量历史记录
     /// </summary>
     /// <param name="value"></param>
     partial void OnSearchTextChanged(string value)
     {
-        if (SelectedVariableTable == null) return;
+        // 更新建议列表
+        UpdateSuggestedVariables();
 
         if (string.IsNullOrWhiteSpace(SearchText))
         {
-            _variableSynchronizedView.ResetFilter();
+            // 如果搜索文本为空，显示所有历史记录
+            _variableHistoryList.Clear();
+            _variableHistoryList.AddRange(_allVariableHistories);
         }
         else
         {
-            _variableSynchronizedView.AttachFilter(FilterVariables);
-        }
-    }
+            // 根据搜索文本过滤历史记录
+            var filteredHistories = _allVariableHistories
+                                    .Where(h =>
+                                               h.VariableName?.Contains(
+                                                   SearchText, StringComparison.OrdinalIgnoreCase) == true)
+                                    .ToList();
 
-    /// <summary>
-    /// 过滤变量
-    /// </summary>
-    /// <param name="item"></param>
-    /// <returns></returns>
-    private bool FilterVariables(VariableItemViewModel item)
-    {
-        var searchTextLower = SearchText.ToLower();
-        return item.Name?.ToLower().Contains(searchTextLower) == true ||
-               item.Description?.ToLower().Contains(searchTextLower) == true ||
-               item.OpcUaNodeId?.ToLower().Contains(searchTextLower) == true ||
-               item.S7Address?.ToLower().Contains(searchTextLower) == true;
+            _variableHistoryList.Clear();
+            _variableHistoryList.AddRange(filteredHistories);
+        }
     }
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        
-        VariableItemViewModel variable =_dataStorageService.Variables.FirstOrDefault(v => v.Id == menu.TargetId);
-        if (variable!=null)
+        // 加载所有变量的历史记录
+        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
+    }
+    
+    /// <summary>
+    /// 重新加载历史记录，使用当前设置的限制和时间范围
+    /// </summary>
+    public void ReloadHistories()
+    {
+        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
+    }
+    
+    /// <summary>
+    /// 根据变量ID加载历史记录
+    /// </summary>
+    /// <param name="variableId">变量ID</param>
+    /// <param name="limit">返回记录的最大数量，null表示无限制</param>
+    /// <param name="startTime">开始时间，null表示无限制</param>
+    /// <param name="endTime">结束时间，null表示无限制</param>
+    public async Task LoadVariableHistoriesAsync(int variableId, int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
+    {
+        try
         {
-            // 直接设置选中的变量
-            SelectedVariable = variable;
-
+            _variableHistoryList.Clear();
+            var histories = await _historyAppService.GetVariableHistoriesAsync(variableId, limit, startTime, endTime);
+            _variableHistoryList.AddRange(histories);
             
-            // 加载历史记录
-            LoadVariableHistories(variable.Id);
+            // 更新建议列表
+            UpdateSuggestedVariables();
+        }
+        catch (Exception ex)
+        {
+            // 记录更详细的错误信息
+            _notificationService.ShowError($"加载变量历史记录失败: {ex.Message}", ex);
         }
     }
 }
