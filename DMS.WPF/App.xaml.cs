@@ -72,9 +72,9 @@ public partial class App : System.Windows.Application
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<MqttPublishProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
-            //dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
         }
         catch (Exception exception)
         {
