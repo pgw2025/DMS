@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -38,7 +39,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     /// 建议的变量列表
     /// </summary>
     [ObservableProperty]
-    private List<VariableHistoryDto> _suggestedVariables;
+    private ObservableCollection<VariableHistoryDto> _suggestedVariables;
     
     /// <summary>
     /// 历史记录条数限制
@@ -57,6 +58,12 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     /// </summary>
     [ObservableProperty]
     private DateTime? _endTime;
+    
+    /// <summary>
+    /// 选中的变量历史记录
+    /// </summary>
+    [ObservableProperty]
+    private VariableHistoryDto _selectedVariable;
 
     /// <summary>
     /// 变量历史记录列表
@@ -85,12 +92,13 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _variableHistorySynchronizedView = _variableHistoryList.CreateView(v => v);
         VariableHistories = _variableHistorySynchronizedView.ToNotifyCollectionChanged();
         _allVariableHistories = new List<VariableHistoryDto>();
-        _suggestedVariables = new List<VariableHistoryDto>();
+        _suggestedVariables = new ObservableCollection<VariableHistoryDto>();
         
         // 初始化默认值
         _historyLimit = 1000; // 默认限制1000条记录
         _startTime = null;
         _endTime = null;
+        _selectedVariable = new VariableHistoryDto();
     }
 
     /// <summary>
@@ -119,44 +127,80 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     }
 
     /// <summary>
-    /// 更新建议的变量列表
-    /// </summary>
-    private void UpdateSuggestedVariables()
+/// 更新建议的变量列表
+/// </summary>
+private void UpdateSuggestedVariables()
+{
+    // 清空现有建议列表
+    _suggestedVariables.Clear();
+
+    if (string.IsNullOrWhiteSpace(SearchText))
     {
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            // 如果搜索文本为空，显示所有唯一的变量名
-            _suggestedVariables = _allVariableHistories
-                                  .GroupBy(h => h.VariableName)
-                                  .Select(g => g.First())
-                                  .Take(10)
-                                  .ToList();
-        }
-        else
-        {
-            // 根据搜索文本过滤建议列表
-            _suggestedVariables = _allVariableHistories
-                                  .Where(h =>
-                                             h.VariableName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ==
-                                             true)
-                                  .GroupBy(h => h.VariableName)
-                                  .Select(g => g.First())
-                                  .Take(10)
-                                  .ToList();
-        }
+        // 如果搜索文本为空，显示所有唯一的变量名
+        var uniqueVariables = _allVariableHistories
+                             .GroupBy(h => h.VariableName)
+                             .Select(g => g.First())
+                             .Take(10)
+                             .ToList();
 
+        foreach (var variable in uniqueVariables)
+        {
+            _suggestedVariables.Add(variable);
+        }
     }
+    else
+    {
+        // 根据搜索文本过滤建议列表
+        var filteredVariables = _allVariableHistories
+                               .Where(h =>
+                                          h.VariableName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ==
+                                          true)
+                               .GroupBy(h => h.VariableName)
+                               .Select(g => g.First())
+                               .Take(10)
+                               .ToList();
 
+        foreach (var variable in filteredVariables)
+        {
+            _suggestedVariables.Add(variable);
+        }
+    }
+}
+
+    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
+    {
+        // 加载所有变量的历史记录
+        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
+    }
+    
     /// <summary>
-    /// 搜索变量历史记录
+    /// 重新加载历史记录命令
+    /// </summary>
+    [RelayCommand]
+    private void Reload()
+    {
+        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
+    }
+    
+    /// <summary>
+    /// 更新建议列表命令
+    /// </summary>
+    [RelayCommand]
+    private void UpdateSuggestions()
+    {
+        UpdateSuggestedVariables();
+    }
+    
+    /// <summary>
+    /// 当搜索文本改变时触发
     /// </summary>
     /// <param name="value"></param>
     partial void OnSearchTextChanged(string value)
     {
         // 更新建议列表
         UpdateSuggestedVariables();
-
-        if (string.IsNullOrWhiteSpace(SearchText))
+        
+        if (string.IsNullOrWhiteSpace(value))
         {
             // 如果搜索文本为空，显示所有历史记录
             _variableHistoryList.Clear();
@@ -168,18 +212,38 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             var filteredHistories = _allVariableHistories
                                     .Where(h =>
                                                h.VariableName?.Contains(
-                                                   SearchText, StringComparison.OrdinalIgnoreCase) == true)
+                                                   value, StringComparison.OrdinalIgnoreCase) == true)
                                     .ToList();
 
             _variableHistoryList.Clear();
             _variableHistoryList.AddRange(filteredHistories);
         }
     }
-
-    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
+    
+    /// <summary>
+    /// 根据搜索文本过滤历史记录
+    /// </summary>
+    /// <param name="searchText"></param>
+    private void FilterHistoriesBySearchText(string searchText)
     {
-        // 加载所有变量的历史记录
-        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            // 如果搜索文本为空，显示所有历史记录
+            _variableHistoryList.Clear();
+            _variableHistoryList.AddRange(_allVariableHistories);
+        }
+        else
+        {
+            // 根据搜索文本过滤历史记录
+            var filteredHistories = _allVariableHistories
+                                    .Where(h =>
+                                               h.VariableName?.Contains(
+                                                   searchText, StringComparison.OrdinalIgnoreCase) == true)
+                                    .ToList();
+
+            _variableHistoryList.Clear();
+            _variableHistoryList.AddRange(filteredHistories);
+        }
     }
     
     /// <summary>
