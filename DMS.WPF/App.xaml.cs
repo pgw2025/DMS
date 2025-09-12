@@ -294,6 +294,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<MqttDialogViewModel>();
         services.AddTransient<MqttSelectionDialogViewModel>();
         services.AddTransient<MqttAliasBatchEditDialogViewModel>();
+        services.AddTransient<HistorySettingsDialogViewModel>();
         
         // 注册View视图
         services.AddSingleton<SplashWindow>();

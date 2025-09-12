@@ -210,10 +210,19 @@
                     </MenuItem>
                     
                     <MenuItem
+                        Command="{Binding ChangeHistorySettingsCommand}"
+                        CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                        Header="修改历史记录">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    
+                    <MenuItem
                         Command="{Binding ToHistoryCommand}"
                         Header="查看历史记录">
                         <MenuItem.Icon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
                         </MenuItem.Icon>
                     </MenuItem>
                 </ContextMenu>

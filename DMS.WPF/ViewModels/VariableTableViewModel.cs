@@ -716,6 +716,55 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     }
 
     /// <summary>
+    /// 修改选定变量的历史记录设置。
+    /// </summary>
+    [RelayCommand]
+    public async Task ChangeHistorySettings(IList<object> variablesToChange)
+    {
+        // 过滤出有效的VariableItemViewModel对象
+        var validVariables = variablesToChange?.OfType<VariableItemViewModel>()
+                                              .ToList();
+
+        // 检查是否有变量被选中
+        if (validVariables == null || !validVariables.Any())
+        {
+            _notificationService.ShowInfo("请选择要修改历史记录设置的变量");
+            return;
+        }
+
+        // 显示历史记录设置对话框，并传入第一个变量的当前设置作为默认值
+        var viewModel = new HistorySettingsDialogViewModel(
+            validVariables.First().IsHistoryEnabled,
+            validVariables.First().HistoryDeadband);
+        var result = await _dialogService.ShowDialogAsync(viewModel);
+        
+        if (result != null)
+        {
+            // 更新所有选定变量的历史记录设置
+            foreach (var variable in validVariables)
+            {
+                variable.IsHistoryEnabled = result.IsHistoryEnabled;
+                variable.HistoryDeadband = result.HistoryDeadband;
+                variable.UpdatedAt = DateTime.Now;
+            }
+
+            // 批量更新数据库中的变量数据
+            var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
+            var updateResult = await _variableAppService.UpdateVariablesAsync(variableDtos);
+
+            if (updateResult > 0)
+            {
+                // 显示成功通知
+                _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的历史记录设置");
+            }
+            else
+            {
+                _notificationService.ShowError("更新历史记录设置失败");
+            }
+        }
+    }
+
+    /// <summary>
     /// 当变量表的启用/禁用状态改变时调用。
     /// 更新数据库中变量表的激活状态，并显示相应的通知。
     /// </summary>
