@@ -9,6 +9,13 @@ namespace DMS.Application.Services;
 /// </summary>
 public class EventService : IEventService
 {
+    private readonly IAppDataStorageService _appDataStorageService;
+
+    public EventService(IAppDataStorageService appDataStorageService)
+    {
+        _appDataStorageService = appDataStorageService;
+    }
+
     #region 设备事件
 
     /// <summary>
@@ -21,9 +28,16 @@ public class EventService : IEventService
     /// </summary>
     /// <param name="sender">事件发送者</param>
     /// <param name="e">设备状态改变事件参数</param>
-    public void RaiseDeviceStatusChanged(object sender, DeviceActiveChangedEventArgs e)
+    public void RaiseDeviceActiveChanged(object sender, DeviceActiveChangedEventArgs e)
     {
-        OnDeviceActiveChanged?.Invoke(sender, e);
+        if (_appDataStorageService.Devices.TryGetValue(e.DeviceId, out var device))
+        {
+            if (device.IsActive != e.NewStatus)
+            {
+                device.IsActive = e.NewStatus;
+                OnDeviceActiveChanged?.Invoke(sender, e);
+            }
+        }
     }
 
     #endregion

@@ -87,7 +87,7 @@ public partial class DeviceItemViewModel : ObservableObject
         if (Id > 0 && EventService != null )
         {
             // 发布设备状态改变事件
-            EventService.RaiseDeviceStatusChanged(this, new DeviceActiveChangedEventArgs(Id, Name, oldValue, newValue));
+            EventService.RaiseDeviceActiveChanged(this, new DeviceActiveChangedEventArgs(Id, Name, oldValue, newValue));
         }
     }
 

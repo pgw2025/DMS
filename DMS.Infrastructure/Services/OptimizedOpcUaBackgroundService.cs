@@ -5,11 +5,6 @@ using DMS.Core.Enums;
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DMS.Infrastructure.Services
 {
@@ -20,6 +15,7 @@ namespace DMS.Infrastructure.Services
     {
         private readonly IAppDataCenterService _appDataCenterService;
         private readonly IAppDataStorageService _appDataStorageService;
+        private readonly IEventService _eventService;
         private readonly IOpcUaServiceManager _opcUaServiceManager;
         private readonly ILogger<OptimizedOpcUaBackgroundService> _logger;
         private readonly SemaphoreSlim _reloadSemaphore = new SemaphoreSlim(0);
@@ -37,6 +33,8 @@ namespace DMS.Infrastructure.Services
 
             _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         }
+
+
 
         private void OnLoadDataCompleted(object sender, DataLoadCompletedEventArgs e)
         {
@@ -97,10 +95,10 @@ namespace DMS.Infrastructure.Services
             {
                 // 获取所有活动的OPC UA设备
                 var opcUaDevices = _appDataStorageService.Devices.Values
-                                                         .Where(d => d.Protocol == ProtocolType.OpcUa && d.IsActive)
+                                                         .Where(d => d.Protocol == ProtocolType.OpcUa )
                                                          .ToList();
 
-                _logger.LogInformation("找到 {DeviceCount} 个活动的OPC UA设备", opcUaDevices.Count);
+                _logger.LogInformation("找到 {DeviceCount} 个OPC UA设备", opcUaDevices.Count);
 
                 if (opcUaDevices.Count == 0)
                     return;

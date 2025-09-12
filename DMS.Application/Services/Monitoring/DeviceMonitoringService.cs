@@ -40,11 +40,7 @@ public class DeviceMonitoringService : IDeviceMonitoringService, IDisposable
     {
         if (_appDataStorageService.Devices.TryGetValue(e.DeviceId, out var device))
         {
-            if (device.IsActive != e.NewStatus)
-            {
-                device.IsActive = e.NewStatus;
-                _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(device);
-            }
+            _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(device);
         }
     }
 

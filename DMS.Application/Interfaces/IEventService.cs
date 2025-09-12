@@ -20,7 +20,7 @@ public interface IEventService
     /// </summary>
     /// <param name="sender">事件发送者</param>
     /// <param name="e">设备状态改变事件参数</param>
-    void RaiseDeviceStatusChanged(object sender, DeviceActiveChangedEventArgs e);
+    void RaiseDeviceActiveChanged(object sender, DeviceActiveChangedEventArgs e);
 
     #endregion
 
