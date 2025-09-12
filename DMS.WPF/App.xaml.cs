@@ -20,6 +20,7 @@ using DMS.WPF.Logging;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Dialogs;
+using DMS.WPF.ViewModels.Items;
 using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -44,15 +45,9 @@ public partial class App : System.Windows.Application
     public App()
     {
         Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                ConfigureServices(services);
-            })
-            .ConfigureLogging(loggingBuilder =>
-            {
-                ConfigureLogging(loggingBuilder);
-            })
-            .Build();
+                        .ConfigureServices((context, services) => { ConfigureServices(services); })
+                        .ConfigureLogging(loggingBuilder => { ConfigureLogging(loggingBuilder); })
+                        .Build();
         Services = Host.Services;
         _logger = Host.Services.GetRequiredService<ILogger<App>>();
     }
@@ -67,10 +62,8 @@ public partial class App : System.Windows.Application
         try
         {
             Host.Services.GetRequiredService<GrowlNotificationService>();
-            
-            // 初始化设备监控服务
-            Host.Services.GetRequiredService<DeviceMonitoringService>();
-            
+            Host.Services.GetRequiredService<IDeviceMonitoringService>();
+            DeviceItemViewModel.EventService = Host.Services.GetRequiredService<IEventService>();
             // 初始化数据处理链
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
@@ -84,7 +77,7 @@ public partial class App : System.Windows.Application
             var notificationService = Host.Services.GetRequiredService<INotificationService>();
             notificationService.ShowError($"加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}", exception);
         }
-        
+
         var splashWindow = Host.Services.GetRequiredService<SplashWindow>();
         splashWindow.Show();
     }
@@ -155,13 +148,14 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ILoggerFactory, NLogLoggerFactory>();
         services.AddSingleton<GrowlNotificationService>();
         services.AddSingleton<INotificationService, NotificationService>();
-        
+
         // 注册核心服务
         services.AddAutoMapper(cfg =>
         {
             // 最终解决方案：根据异常信息的建议，设置此标记以忽略重复的Profile加载。
             // 注意：此属性位于 Internal() 方法下。
-            cfg.Internal().AllowAdditiveTypeMapCreation = true;
+            cfg.Internal()
+               .AllowAdditiveTypeMapCreation = true;
 
             cfg.AddProfile(new DMS.Application.Profiles.MappingProfile());
             cfg.AddProfile(new DMS.Infrastructure.Profiles.MappingProfile());
@@ -180,16 +174,17 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IChannelBus, ChannelBus>();
         services.AddSingleton<IMessenger, Messenger>();
         services.AddHostedService<OptimizedS7BackgroundService>();
-        
-        
+
+
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
-        services.AddHostedService(provider => (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
+        services.AddHostedService(provider =>
+                                      (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
         services.AddSingleton<CheckValueChangedProcessor>();
         services.AddSingleton<LoggingProcessor>();
         services.AddSingleton<UpdateDbVariableProcessor>();
         services.AddSingleton<HistoryProcessor>();
         services.AddSingleton<MqttPublishProcessor>();
-        
+
         // 注册Core中的仓库
         services.AddSingleton<AppSettings>();
         services.AddSingleton<SqlSugarDbContext>(_ =>
@@ -197,7 +192,7 @@ public partial class App : System.Windows.Application
             var appSettings = new AppSettings { Database = { Database = "dms_test" } };
             return new SqlSugarDbContext(appSettings);
         });
-        
+
         services.AddSingleton<IInitializeRepository, InitializeRepository>();
         services.AddSingleton<IDeviceRepository, DeviceRepository>();
         services.AddSingleton<IVariableTableRepository, VariableTableRepository>();
@@ -214,14 +209,14 @@ public partial class App : System.Windows.Application
         services.AddTransient<IOpcUaService, OpcUaService>();
         services.AddTransient<IMqttService, MqttService>();
         services.AddTransient<IMqttServiceFactory, MqttServiceFactory>();
-        
+
         // 注册App服务\r\n
         services.AddSingleton<IInitializeService, InitializeService>();
         services.AddSingleton<IDeviceAppService, DeviceAppService>();
         services.AddSingleton<IVariableAppService, VariableAppService>();
         services.AddSingleton<IHistoryAppService, HistoryAppService>();
         services.AddSingleton<IVariableTableAppService, VariableTableAppService>();
-        services.AddSingleton<IMenuService, MenuService>();       
+        services.AddSingleton<IMenuService, MenuService>();
         services.AddSingleton<IAppDataCenterService, AppDataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
@@ -232,24 +227,22 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IMenuManagementService, MenuManagementService>();
         services.AddSingleton<IMqttManagementService, MqttManagementService>();
         services.AddSingleton<ILogManagementService, LogManagementService>();
-        
+
         services.AddSingleton<IDataLoaderService, DataLoaderService>();
         services.AddSingleton<INlogAppService, NlogAppService>();
-        
+        services.AddSingleton<IDeviceMonitoringService, DeviceMonitoringService>();
+
         // 注册MQTT服务管理器
         services.AddSingleton<IMqttServiceManager, MqttServiceManager>();
         services.AddSingleton<IMqttAliasAppService, MqttAliasAppService>();
         services.AddHostedService<MqttBackgroundService>();
-        
+
         // 注册WPF中的服务
         services.AddSingleton<IMqttAppService, MqttAppService>();
-        
+
         // 注册事件服务
-        services.AddSingleton<IEventService, EventService>();
-        
-        // 注册设备监控服务
-        services.AddSingleton<DeviceMonitoringService>();
-        
+        services.AddSingleton<DMS.Application.Interfaces.IEventService, DMS.Application.Services.EventService>();
+
         // 注册新的数据服务
         services.AddSingleton<IDeviceDataService, DeviceDataService>();
         services.AddSingleton<IVariableDataService, VariableDataService>();
@@ -259,34 +252,11 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ILogDataService, LogDataService>();
         services.AddSingleton<IDataEventService, DataEventService>();
         services.AddSingleton<IDataStorageService, DataStorageService>();
-        
+
         // 注册主数据服务
-        services.AddSingleton<IWPFDataService>(provider =>
-            new WPFDataService(
-                provider.GetRequiredService<IMapper>(),
-                provider.GetRequiredService<IAppDataCenterService>(),
-                provider.GetRequiredService<IDeviceDataService>(),
-                provider.GetRequiredService<IVariableDataService>(),
-                provider.GetRequiredService<IMenuDataService>(),
-                provider.GetRequiredService<IMqttDataService>(),
-                provider.GetRequiredService<ILogDataService>(),
-                provider.GetRequiredService<IVariableTableDataService>(),
-                provider.GetRequiredService<IEventService>()
-            ));
-        
-        // 保留原DataServices以保证现有代码兼容性（可选，建议逐步移除）
-        // services.AddSingleton<DataServices>(provider => 
-        //     new DataServices(
-        //         provider.GetRequiredService<IMapper>(),
-        //         provider.GetRequiredService<IAppDataCenterService>(),
-        //         provider.GetRequiredService<IMqttAppService>()
-        //     )
-        // );
-        
+        services.AddSingleton<IWPFDataService, WPFDataService>();
 
-        
 
-        
         // 注册视图模型
         services.AddSingleton<SplashViewModel>();
         services.AddSingleton<MainViewModel>();
@@ -301,7 +271,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<LogHistoryViewModel>();
         services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<VariableHistoryViewModel>();
-        
+
         // 注册对话框视图模型
         services.AddTransient<DeviceDialogViewModel>();
         services.AddTransient<ConfirmDialogViewModel>();
@@ -316,7 +286,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<MqttAliasBatchEditDialogViewModel>();
         services.AddTransient<HistorySettingsDialogViewModel>();
         services.AddTransient<AlarmSettingsDialogViewModel>();
-        
+
         // 注册View视图
         services.AddSingleton<SplashWindow>();
         services.AddSingleton<SettingView>();
@@ -332,7 +302,8 @@ public partial class App : System.Windows.Application
 
     private void ConfigureLogging(ILoggingBuilder loggingBuilder)
     {
-        LogManager.Setup().LoadConfigurationFromFile("Configurations/nlog.config");
+        LogManager.Setup()
+                  .LoadConfigurationFromFile("Configurations/nlog.config");
         loggingBuilder.ClearProviders();
         loggingBuilder.SetMinimumLevel(LogLevel.Trace);
         // loggingBuilder.addn; // 添加NLog作为日志提供者

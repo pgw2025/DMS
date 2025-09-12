@@ -1,6 +1,6 @@
 using System;
 
-namespace DMS.WPF.Events;
+namespace DMS.Application.Events;
 
 /// <summary>
 /// 变量值改变事件参数

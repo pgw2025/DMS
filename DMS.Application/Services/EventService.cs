@@ -1,26 +1,30 @@
 using System;
-using DMS.WPF.Events;
+using DMS.Application.Events;
+using DMS.Application.Interfaces;
 
-namespace DMS.WPF.Interfaces;
+namespace DMS.Application.Services;
 
 /// <summary>
-/// 事件服务接口，用于统一管理应用程序中的各种事件
+/// 事件服务实现类，用于统一管理应用程序中的各种事件
 /// </summary>
-public interface IEventService
+public class EventService : IEventService
 {
     #region 设备事件
 
     /// <summary>
     /// 设备状态改变事件
     /// </summary>
-    event EventHandler<DeviceActiveChangedEventArgs> DeviceStatusChanged;
+    public event EventHandler<DeviceActiveChangedEventArgs> OnDeviceActiveChanged;
 
     /// <summary>
     /// 触发设备状态改变事件
     /// </summary>
     /// <param name="sender">事件发送者</param>
     /// <param name="e">设备状态改变事件参数</param>
-    void RaiseDeviceStatusChanged(object sender, DeviceActiveChangedEventArgs e);
+    public void RaiseDeviceStatusChanged(object sender, DeviceActiveChangedEventArgs e)
+    {
+        OnDeviceActiveChanged?.Invoke(sender, e);
+    }
 
     #endregion
 
@@ -29,14 +33,17 @@ public interface IEventService
     /// <summary>
     /// 变量值改变事件
     /// </summary>
-    event EventHandler<VariableValueChangedEventArgs> VariableValueChanged;
+    public event EventHandler<VariableValueChangedEventArgs> VariableValueChanged;
 
     /// <summary>
     /// 触发变量值改变事件
     /// </summary>
     /// <param name="sender">事件发送者</param>
     /// <param name="e">变量值改变事件参数</param>
-    void RaiseVariableValueChanged(object sender, VariableValueChangedEventArgs e);
+    public void RaiseVariableValueChanged(object sender, VariableValueChangedEventArgs e)
+    {
+        VariableValueChanged?.Invoke(sender, e);
+    }
 
     #endregion
 
@@ -45,14 +52,17 @@ public interface IEventService
     /// <summary>
     /// MQTT连接状态改变事件
     /// </summary>
-    event EventHandler<MqttConnectionChangedEventArgs> MqttConnectionChanged;
+    public event EventHandler<MqttConnectionChangedEventArgs> MqttConnectionChanged;
 
     /// <summary>
     /// 触发MQTT连接状态改变事件
     /// </summary>
     /// <param name="sender">事件发送者</param>
     /// <param name="e">MQTT连接状态改变事件参数</param>
-    void RaiseMqttConnectionChanged(object sender, MqttConnectionChangedEventArgs e);
+    public void RaiseMqttConnectionChanged(object sender, MqttConnectionChangedEventArgs e)
+    {
+        MqttConnectionChanged?.Invoke(sender, e);
+    }
 
     #endregion
 }

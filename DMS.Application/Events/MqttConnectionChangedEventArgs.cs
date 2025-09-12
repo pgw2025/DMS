@@ -1,6 +1,6 @@
 using System;
 
-namespace DMS.WPF.Events;
+namespace DMS.Application.Events;
 
 /// <summary>
 /// MQTT连接状态改变事件参数

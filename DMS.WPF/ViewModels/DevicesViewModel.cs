@@ -64,9 +64,6 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         _deviceAppService = deviceAppService;
         _notificationService = notificationService;
         Devices = _dataStorageService.Devices;
-        
-        // 设置DeviceItemViewModel的静态服务引用
-        DeviceItemViewModel.EventService = wpfDataService.EventService;
     }
 
 

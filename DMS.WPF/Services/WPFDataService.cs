@@ -44,11 +44,6 @@ public class WPFDataService : IWPFDataService
     /// 日志数据服务。
     /// </summary>
     public ILogDataService LogDataService { get; }
-    
-    /// <summary>
-    /// 事件服务。
-    /// </summary>
-    public IEventService EventService { get; }
 
     /// <summary>
     /// WPFDataService 构造函数。
@@ -61,8 +56,7 @@ public class WPFDataService : IWPFDataService
         IMenuDataService menuDataService,
         IMqttDataService mqttDataService,
         ILogDataService logDataService, 
-        IVariableTableDataService variableTableDataService,
-        IEventService eventService)
+        IVariableTableDataService variableTableDataService)
     {
         _mapper = mapper;
         _appDataCenterService = appDataCenterService;
@@ -72,6 +66,5 @@ public class WPFDataService : IWPFDataService
         MqttDataService = mqttDataService;
         LogDataService = logDataService;
         VariableTableDataService = variableTableDataService;
-        EventService = eventService;
     }
 }

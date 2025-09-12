@@ -2,8 +2,9 @@
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DMS.Application.Events;
+using DMS.Application.Interfaces;
 using DMS.Core.Enums;
-using DMS.WPF.Events;
 using DMS.WPF.Interfaces;
 
 namespace DMS.WPF.ViewModels.Items;
@@ -83,7 +84,7 @@ public partial class DeviceItemViewModel : ObservableObject
     partial void OnIsActiveChanged(bool oldValue, bool newValue)
     {
         // 只有当设备ID有效且事件服务已初始化时才发布事件
-        if (Id > 0 && EventService != null)
+        if (Id > 0 && EventService != null )
         {
             // 发布设备状态改变事件
             EventService.RaiseDeviceStatusChanged(this, new DeviceActiveChangedEventArgs(Id, Name, oldValue, newValue));
