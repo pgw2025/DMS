@@ -68,6 +68,9 @@ public partial class App : System.Windows.Application
         {
             Host.Services.GetRequiredService<GrowlNotificationService>();
             
+            // 初始化设备监控服务
+            Host.Services.GetRequiredService<DeviceMonitoringService>();
+            
             // 初始化数据处理链
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
@@ -241,6 +244,12 @@ public partial class App : System.Windows.Application
         // 注册WPF中的服务
         services.AddSingleton<IMqttAppService, MqttAppService>();
         
+        // 注册事件服务
+        services.AddSingleton<IEventService, EventService>();
+        
+        // 注册设备监控服务
+        services.AddSingleton<DeviceMonitoringService>();
+        
         // 注册新的数据服务
         services.AddSingleton<IDeviceDataService, DeviceDataService>();
         services.AddSingleton<IVariableDataService, VariableDataService>();
@@ -252,7 +261,18 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IDataStorageService, DataStorageService>();
         
         // 注册主数据服务
-        services.AddSingleton<IWPFDataService, WPFDataService>();
+        services.AddSingleton<IWPFDataService>(provider =>
+            new WPFDataService(
+                provider.GetRequiredService<IMapper>(),
+                provider.GetRequiredService<IAppDataCenterService>(),
+                provider.GetRequiredService<IDeviceDataService>(),
+                provider.GetRequiredService<IVariableDataService>(),
+                provider.GetRequiredService<IMenuDataService>(),
+                provider.GetRequiredService<IMqttDataService>(),
+                provider.GetRequiredService<ILogDataService>(),
+                provider.GetRequiredService<IVariableTableDataService>(),
+                provider.GetRequiredService<IEventService>()
+            ));
         
         // 保留原DataServices以保证现有代码兼容性（可选，建议逐步移除）
         // services.AddSingleton<DataServices>(provider => 

@@ -3,6 +3,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Core.Enums;
+using DMS.WPF.Events;
+using DMS.WPF.Interfaces;
 
 namespace DMS.WPF.ViewModels.Items;
 
@@ -12,6 +14,9 @@ namespace DMS.WPF.ViewModels.Items;
 /// </summary>
 public partial class DeviceItemViewModel : ObservableObject
 {
+    // 用于访问事件服务的静态属性
+    public static IEventService EventService { get; set; }
+    
     public int Id { get; set; }
 
     [ObservableProperty]
@@ -69,6 +74,19 @@ public partial class DeviceItemViewModel : ObservableObject
         if (Protocol == ProtocolType.OpcUa)
         {
             OpcUaServerUrl="opc.tcp://" + IpAddress+":"+Port;
+        }
+    }
+
+    /// <summary>
+    /// 当IsActive属性改变时调用，用于发布设备状态改变事件
+    /// </summary>
+    partial void OnIsActiveChanged(bool oldValue, bool newValue)
+    {
+        // 只有当设备ID有效且事件服务已初始化时才发布事件
+        if (Id > 0 && EventService != null)
+        {
+            // 发布设备状态改变事件
+            EventService.RaiseDeviceStatusChanged(this, new DeviceActiveChangedEventArgs(Id, Name, oldValue, newValue));
         }
     }
 

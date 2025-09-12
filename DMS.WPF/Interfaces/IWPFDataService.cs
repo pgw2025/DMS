@@ -1,3 +1,5 @@
+using DMS.WPF.Interfaces;
+
 namespace DMS.WPF.Interfaces;
 
 /// <summary>
@@ -33,5 +35,10 @@ public interface IWPFDataService
     /// 日志数据服务。
     /// </summary>
     ILogDataService LogDataService { get; }
+    
+    /// <summary>
+    /// 事件服务。
+    /// </summary>
+    IEventService EventService { get; }
 
 }

@@ -44,9 +44,13 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// <summary>
     /// 初始化 <see cref="DevicesViewModel"/> 类的新实例。
     /// </summary>
-    /// <param name="logger">日志记录器。</param>
+    /// <param name="mapper">对象映射器。</param>
+    /// <param name="dataStorageService">数据存储服务。</param>
     /// <param name="dialogService">对话框服务。</param>
+    /// <param name="navigationService">导航服务。</param>
     /// <param name="wpfDataService">主数据服务。</param>
+    /// <param name="deviceAppService">设备应用服务。</param>
+    /// <param name="notificationService">通知服务。</param>
     public DevicesViewModel(IMapper mapper,IDataStorageService dataStorageService,
                             IDialogService dialogService, INavigationService navigationService,
                             IWPFDataService wpfDataService, IDeviceAppService deviceAppService,
@@ -60,6 +64,9 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         _deviceAppService = deviceAppService;
         _notificationService = notificationService;
         Devices = _dataStorageService.Devices;
+        
+        // 设置DeviceItemViewModel的静态服务引用
+        DeviceItemViewModel.EventService = wpfDataService.EventService;
     }
 
 
@@ -204,5 +211,15 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
+
+        
+    }
+
+    private void OnDeviceIsActiveChanged(object? sender, bool isActive)
+    {
+        if (sender is DeviceItemViewModel deviceItemViewModel)
+        {
+            
+        }
     }
 }
