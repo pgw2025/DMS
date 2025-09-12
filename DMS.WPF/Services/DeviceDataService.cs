@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
@@ -17,22 +19,54 @@ public class DeviceDataService : IDeviceDataService
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IAppDataStorageService _appDataStorageService;
     private readonly IDataStorageService _dataStorageService;
+    private readonly IEventService _eventService;
+    private readonly INotificationService _notificationService;
     private readonly IMenuDataService _menuDataService;
     private readonly IVariableDataService _variableDataService;
+    private readonly Dispatcher _uiDispatcher;
 
     /// <summary>
     /// DeviceDataService类的构造函数。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appDataCenterService">数据服务中心实例。</param>
-    public DeviceDataService(IMapper mapper, IAppDataCenterService appDataCenterService,IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService,IMenuDataService menuDataService,IVariableDataService variableDataService)
+    public DeviceDataService(IMapper mapper, IAppDataCenterService appDataCenterService,
+                             IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService,
+                             IEventService eventService,INotificationService notificationService,
+                             IMenuDataService menuDataService, IVariableDataService variableDataService)
     {
         _mapper = mapper;
         _appDataCenterService = appDataCenterService;
         _appDataStorageService = appDataStorageService;
         _dataStorageService = dataStorageService;
+        _eventService = eventService;
+        _notificationService = notificationService;
         _menuDataService = menuDataService;
         _variableDataService = variableDataService;
+        _uiDispatcher = Dispatcher.CurrentDispatcher;
+
+        _eventService.OnDeviceConnectChanged += OnDeviceConnectChanged;
+    }
+
+    private void OnDeviceConnectChanged(object? sender, DeviceConnectChangedEventArgs e)
+    {
+        _uiDispatcher.Invoke(() =>
+        {
+            var device = _dataStorageService.Devices.FirstOrDefault(d => d.Id == e.DeviceId);
+            if (device != null)
+            {
+                
+                device.IsRunning = e.NewStatus;
+                if (device.IsRunning)
+                {
+                    _notificationService.ShowSuccess($"设备：{device.Name},连接成功。");
+                }
+                else
+                {
+                    _notificationService.ShowSuccess($"设备：{device.Name},已断开连接。");
+                }
+            }
+        });
     }
 
     /// <summary>
@@ -44,7 +78,6 @@ public class DeviceDataService : IDeviceDataService
         {
             _dataStorageService.Devices.Add(_mapper.Map<DeviceItemViewModel>(deviceDto));
         }
-        
     }
 
     /// <summary>

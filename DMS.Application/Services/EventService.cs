@@ -22,6 +22,12 @@ public class EventService : IEventService
     /// 设备状态改变事件
     /// </summary>
     public event EventHandler<DeviceActiveChangedEventArgs> OnDeviceActiveChanged;
+    
+    /// <summary>
+    /// 设备运行改变事件
+    /// </summary>
+    public event EventHandler<DeviceConnectChangedEventArgs> OnDeviceConnectChanged;
+
 
     /// <summary>
     /// 触发设备状态改变事件
@@ -38,6 +44,17 @@ public class EventService : IEventService
                 OnDeviceActiveChanged?.Invoke(sender, e);
             }
         }
+    }
+
+    /// <summary>
+    /// 触发设备状态改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">设备状态改变事件参数</param>
+    public void RaiseDeviceConnectChanged(object sender, DeviceConnectChangedEventArgs e)
+    {
+        OnDeviceConnectChanged?.Invoke(sender, e);
+
     }
 
     #endregion

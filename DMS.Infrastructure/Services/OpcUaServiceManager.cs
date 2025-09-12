@@ -55,7 +55,7 @@ namespace DMS.Infrastructure.Services
             }
             else
             {
-               await DisconnectDeviceAsync(e.DeviceId, CancellationToken.None);
+                await DisconnectDeviceAsync(e.DeviceId, CancellationToken.None);
             }
         }
 
@@ -187,11 +187,16 @@ namespace DMS.Infrastructure.Services
                 if (context.OpcUaService.IsConnected)
                 {
                     context.IsConnected = true;
+                    context.Device.IsRunning = true;
+                    _eventService.RaiseDeviceConnectChanged(
+                        this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, true));
                     await SetupSubscriptionsAsync(context, cancellationToken);
                     _logger.LogInformation("设备 {DeviceName} 连接成功", context.Device.Name);
                 }
                 else
                 {
+                    _eventService.RaiseDeviceConnectChanged(
+                        this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, false));
                     _logger.LogWarning("设备 {DeviceName} 连接失败", context.Device.Name);
                 }
             }
@@ -200,6 +205,9 @@ namespace DMS.Infrastructure.Services
                 _logger.LogError(ex, "连接设备 {DeviceName} 时发生错误: {ErrorMessage}",
                                  context.Device.Name, ex.Message);
                 context.IsConnected = false;
+                context.Device.IsRunning = false;
+                _eventService.RaiseDeviceConnectChanged(
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, false));
             }
             finally
             {
@@ -220,6 +228,9 @@ namespace DMS.Infrastructure.Services
                 _logger.LogInformation("正在断开设备 {DeviceName} 的连接", context.Device.Name);
                 await context.OpcUaService.DisconnectAsync();
                 context.IsConnected = false;
+                context.Device.IsRunning = false;
+                _eventService.RaiseDeviceConnectChanged(
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, false));
                 _logger.LogInformation("设备 {DeviceName} 连接已断开", context.Device.Name);
             }
             catch (Exception ex)

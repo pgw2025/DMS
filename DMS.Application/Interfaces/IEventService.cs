@@ -55,4 +55,16 @@ public interface IEventService
     void RaiseMqttConnectionChanged(object sender, MqttConnectionChangedEventArgs e);
 
     #endregion
+
+    /// <summary>
+    /// 设备运行改变事件
+    /// </summary>
+    event EventHandler<DeviceConnectChangedEventArgs> OnDeviceConnectChanged;
+
+    /// <summary>
+    /// 触发设备状态改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">设备状态改变事件参数</param>
+    void RaiseDeviceConnectChanged(object sender, DeviceConnectChangedEventArgs e);
 }

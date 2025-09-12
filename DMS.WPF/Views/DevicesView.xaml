@@ -4,23 +4,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
-    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
+    xmlns:localConverters="clr-namespace:DMS.WPF.Converters"
     d:DataContext="{d:DesignInstance vm:DevicesViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="300"
     mc:Ignorable="d">
     <UserControl.Resources>
+        <localConverters:BooleanToBrushConverter x:Key="BooleanToBrushConverter" />
         <DataTemplate x:Key="DeviceItemTemplate">
             <Border
                 Margin="5"
                 Padding="15"
-                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
                 BorderBrush="{DynamicResource SystemControlHighlightBaseMediumLowBrush}"
                 BorderThickness="1"
-                CornerRadius="8">
+                CornerRadius="8"
+                Background="{Binding IsRunning, Converter={StaticResource BooleanToBrushConverter}, ConverterParameter='#FFA8E063|{DynamicResource SystemControlBackgroundAltHighBrush}'}">
                 <Border.Effect>
                     <DropShadowEffect
                         BlurRadius="5"
@@ -28,16 +29,8 @@
                         ShadowDepth="1"
                         Color="Black" />
                 </Border.Effect>
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                <Setter Property="Background" Value="Aquamarine" />
-                            </DataTrigger>
 
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
+
 
 
                 <Grid>
@@ -59,6 +52,7 @@
                             FontSize="20"
                             FontWeight="SemiBold"
                             Text="{Binding Name}" />
+
                     </DockPanel>
 
                     <!--  Row 1: Details with Icons  -->

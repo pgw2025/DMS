@@ -78,6 +78,11 @@ public partial class DeviceItemViewModel : ObservableObject
         }
     }
 
+    partial void OnIsRunningChanged(bool oldValue, bool newValue)
+    {
+        System.Console.WriteLine($"IsRunning changed from {oldValue} to {newValue} for device {Name}");
+    }
+
     /// <summary>
     /// 当IsActive属性改变时调用，用于发布设备状态改变事件
     /// </summary>
