@@ -219,6 +219,14 @@
                     </MenuItem>
                     
                     <MenuItem
+                        Command="{Binding ChangeAlarmSettingsCommand}"
+                        Header="修改报警设置">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    
+                    <MenuItem
                         Command="{Binding ToHistoryCommand}"
                         Header="查看历史记录">
                         <MenuItem.Icon>
