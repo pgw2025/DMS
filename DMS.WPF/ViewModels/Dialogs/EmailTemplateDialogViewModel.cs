@@ -86,19 +86,20 @@ namespace DMS.WPF.ViewModels.Dialogs
                     IsActive = IsActive
                 };
 
+                EmailTemplateDto resultTemplate;
                 if (_isEditMode)
                 {
-                    await _emailAppService.UpdateEmailTemplateAsync(_templateId, template);
+                    resultTemplate = await _emailAppService.UpdateEmailTemplateAsync(_templateId, template);
                     _notificationService.ShowSuccess("邮件模板更新成功");
                 }
                 else
                 {
-                    await _emailAppService.CreateEmailTemplateAsync(template);
+                    resultTemplate = await _emailAppService.CreateEmailTemplateAsync(template);
                     _notificationService.ShowSuccess("邮件模板创建成功");
                 }
 
                 CloseRequested?.Invoke(true);
-                await Close(new EmailTemplateDto());
+                await Close(resultTemplate);
             }
             catch (Exception ex)
             {

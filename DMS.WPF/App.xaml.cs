@@ -269,6 +269,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ILogDataService, LogDataService>();
         services.AddSingleton<IDataEventService, DataEventService>();
         services.AddSingleton<IDataStorageService, DataStorageService>();
+        services.AddSingleton<IEmailDataService, EmailDataService>();
 
         // 注册主数据服务
         services.AddSingleton<IWPFDataService, WPFDataService>();

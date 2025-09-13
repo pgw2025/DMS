@@ -15,6 +15,7 @@ namespace DMS.WPF.ViewModels
     public partial class EmailManagementViewModel : ViewModelBase
     {
         private readonly IEmailAppService _emailAppService;
+        private readonly IEmailDataService _emailDataService;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
 
@@ -32,12 +33,18 @@ namespace DMS.WPF.ViewModels
 
         public EmailManagementViewModel(
             IEmailAppService emailAppService,
+            IEmailDataService emailDataService,
             IDialogService dialogService,
             INotificationService notificationService)
         {
             _emailAppService = emailAppService;
+            _emailDataService = emailDataService;
             _dialogService = dialogService;
             _notificationService = notificationService;
+            
+            // 绑定数据集合
+            _emailAccounts = _emailDataService.EmailAccounts;
+            _emailTemplates = _emailDataService.EmailTemplates;
         }
 
         /// <summary>
@@ -48,13 +55,11 @@ namespace DMS.WPF.ViewModels
         {
             try
             {
-                // 加载邮件账户
-                var accounts = await _emailAppService.GetAllEmailAccountsAsync();
-                EmailAccounts = new ObservableCollection<EmailAccountDto>(accounts);
-
-                // 加载邮件模板
-                var templates = await _emailAppService.GetAllEmailTemplatesAsync();
-                EmailTemplates = new ObservableCollection<EmailTemplateDto>(templates);
+                // 使用EmailDataService加载所有邮件数据
+                _emailDataService.LoadAllEmailData();
+                
+                // 等待一段时间确保数据加载完成
+                await Task.Delay(100);
             }
             catch (Exception ex)
             {
@@ -75,6 +80,30 @@ namespace DMS.WPF.ViewModels
                 return;
             }
             
+            try
+            {
+                var request = new CreateEmailAccountRequest
+                {
+                    Name = emailAccountDto.Name,
+                    EmailAddress = emailAccountDto.EmailAddress,
+                    SmtpServer = emailAccountDto.SmtpServer,
+                    SmtpPort = emailAccountDto.SmtpPort,
+                    EnableSsl = emailAccountDto.EnableSsl,
+                    Username = emailAccountDto.Username,
+                    Password = emailAccountDto.Password,
+                    ImapServer = emailAccountDto.ImapServer,
+                    ImapPort = emailAccountDto.ImapPort,
+                    IsDefault = emailAccountDto.IsDefault,
+                    IsActive = emailAccountDto.IsActive
+                };
+                
+                await _emailDataService.AddEmailAccountAsync(request);
+                _notificationService.ShowSuccess("添加邮件账户成功");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError("添加邮件账户失败", ex);
+            }
         }
 
         /// <summary>
@@ -96,13 +125,37 @@ namespace DMS.WPF.ViewModels
                 return;
             }
 
-            // var dialog = _dialogService.CreateDialog<EmailAccountDialogViewModel>();
-            // dialog.SetEmailAccount(SelectedEmailAccount);
-            // var result = await dialog.ShowAsync();
-            // if (result == true)
-            // {
-            //     await LoadDataAsync();
-            // }
+            try
+            {
+                var request = new CreateEmailAccountRequest
+                {
+                    Name = emailAccountDto.Name,
+                    EmailAddress = emailAccountDto.EmailAddress,
+                    SmtpServer = emailAccountDto.SmtpServer,
+                    SmtpPort = emailAccountDto.SmtpPort,
+                    EnableSsl = emailAccountDto.EnableSsl,
+                    Username = emailAccountDto.Username,
+                    Password = emailAccountDto.Password,
+                    ImapServer = emailAccountDto.ImapServer,
+                    ImapPort = emailAccountDto.ImapPort,
+                    IsDefault = emailAccountDto.IsDefault,
+                    IsActive = emailAccountDto.IsActive
+                };
+                
+                var result = await _emailDataService.UpdateEmailAccountAsync(SelectedEmailAccount.Id, request);
+                if (result)
+                {
+                    _notificationService.ShowSuccess("更新邮件账户成功");
+                }
+                else
+                {
+                    _notificationService.ShowError("更新邮件账户失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError("更新邮件账户失败", ex);
+            }
         }
 
         /// <summary>
@@ -127,9 +180,15 @@ namespace DMS.WPF.ViewModels
             {
                 try
                 {
-                    await _emailAppService.DeleteEmailAccountAsync(SelectedEmailAccount.Id);
-                    _notificationService.ShowSuccess("删除成功");
-                    await LoadDataAsync();
+                    var result = await _emailDataService.DeleteEmailAccountAsync(SelectedEmailAccount.Id);
+                    if (result)
+                    {
+                        _notificationService.ShowSuccess("删除成功");
+                    }
+                    else
+                    {
+                        _notificationService.ShowError("删除失败");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -152,7 +211,7 @@ namespace DMS.WPF.ViewModels
 
             try
             {
-                var result = await _emailAppService.TestEmailAccountAsync(SelectedEmailAccount.Id);
+                var result = await _emailDataService.TestEmailAccountAsync(SelectedEmailAccount.Id);
                 if (result)
                 {
                     _notificationService.ShowSuccess("连接测试成功");
@@ -174,12 +233,22 @@ namespace DMS.WPF.ViewModels
         [RelayCommand]
         private async Task AddEmailTemplateAsync()
         {
-            // var dialog = _dialogService.CreateDialog<EmailTemplateDialogViewModel>();
-            // var result = await dialog.ShowAsync();
-            // if (result == true)
-            // {
-            //     await LoadDataAsync();
-            // }
+            var viewModel = App.Current.Services.GetRequiredService<EmailTemplateDialogViewModel>();
+            var emailTemplateDto = await _dialogService.ShowDialogAsync(viewModel);
+            if (emailTemplateDto == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var result = await _emailDataService.AddEmailTemplateAsync(emailTemplateDto);
+                _notificationService.ShowSuccess("添加邮件模板成功");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError("添加邮件模板失败", ex);
+            }
         }
 
         /// <summary>
@@ -194,13 +263,30 @@ namespace DMS.WPF.ViewModels
                 return;
             }
 
-            // var dialog = _dialogService.CreateDialog<EmailTemplateDialogViewModel>();
-            // dialog.SetEmailTemplate(SelectedEmailTemplate);
-            // var result = await dialog.ShowAsync();
-            // if (result == true)
-            // {
-            //     await LoadDataAsync();
-            // }
+            var viewModel = App.Current.Services.GetRequiredService<EmailTemplateDialogViewModel>();
+            viewModel.SetEmailTemplate(SelectedEmailTemplate);
+            var emailTemplateDto = await _dialogService.ShowDialogAsync(viewModel);
+            if (emailTemplateDto == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var result = await _emailDataService.UpdateEmailTemplateAsync(SelectedEmailTemplate.Id, emailTemplateDto);
+                if (result)
+                {
+                    _notificationService.ShowSuccess("更新邮件模板成功");
+                }
+                else
+                {
+                    _notificationService.ShowError("更新邮件模板失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError("更新邮件模板失败", ex);
+            }
         }
 
         /// <summary>
@@ -215,23 +301,31 @@ namespace DMS.WPF.ViewModels
                 return;
             }
 
-            // var confirmResult = await _dialogService.ShowConfirmDialogAsync(
-            //     "确认删除", 
-            //     $"确定要删除邮件模板 {SelectedEmailTemplate.Name} 吗？");
+            var confirmDialogViewModel = new ConfirmDialogViewModel(
+                "确认删除",
+                $"确定要删除邮件模板 {SelectedEmailTemplate.Name} 吗？", "删除");
 
-            // if (confirmResult == true)
-            // {
-            //     try
-            //     {
-            //         await _emailAppService.DeleteEmailTemplateAsync(SelectedEmailTemplate.Id);
-            //         _notificationService.ShowSuccess("删除成功");
-            //         await LoadDataAsync();
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         _notificationService.ShowError("删除失败", ex);
-            //     }
-            // }
+            var confirmResult = await _dialogService.ShowDialogAsync(confirmDialogViewModel);
+
+            if (confirmResult == true)
+            {
+                try
+                {
+                    var result = await _emailDataService.DeleteEmailTemplateAsync(SelectedEmailTemplate.Id);
+                    if (result)
+                    {
+                        _notificationService.ShowSuccess("删除成功");
+                    }
+                    else
+                    {
+                        _notificationService.ShowError("删除失败");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _notificationService.ShowError("删除失败", ex);
+                }
+            }
         }
     }
 }
