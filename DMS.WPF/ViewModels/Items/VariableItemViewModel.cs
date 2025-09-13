@@ -42,11 +42,43 @@ public partial class VariableItemViewModel : ObservableObject
     private string? _dataValue;
 
     /// <summary>
+    /// 获取或设置从设备读取到的数值。如果原始值是布尔类型，则True转换为1.0，False转换为0.0。
+    /// </summary>
+    [ObservableProperty]
+    private double _numericValue;
+
+    /// <summary>
     /// 获取或设置用于在界面上显示的值。
     /// 这可能是经过公式转换、格式化或添加了单位后的值。
     /// </summary>
     [ObservableProperty]
     private string? _displayValue;
+
+    partial void OnDataValueChanged(string? oldValue, string? newValue)
+    {
+        // 当DataValue发生变化时，更新NumericValue
+        if (string.IsNullOrEmpty(newValue))
+        {
+            NumericValue = 0.0;
+            return;
+        }
+
+        // 尝试将字符串转换为数值
+        if (double.TryParse(newValue, out double numericValue))
+        {
+            NumericValue = numericValue;
+        }
+        // 如果是布尔值
+        else if (bool.TryParse(newValue, out bool boolValue))
+        {
+            NumericValue = boolValue ? 1.0 : 0.0;
+        }
+        // 如果无法转换，保持为0.0
+        else
+        {
+            NumericValue = 0.0;
+        }
+    }
 
     /// <summary>
     /// 获取或设置此变量所属的变量表 (VariableTable) 的数据传输对象 (DTO)。

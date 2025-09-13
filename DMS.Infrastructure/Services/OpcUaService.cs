@@ -81,6 +81,30 @@ namespace DMS.Infrastructure.Services
         {
             if (_session != null)
             {
+                // 取消所有订阅
+                if (_subscription != null)
+                {
+                    try
+                    {
+                        // 删除服务器上的订阅
+                        _subscription.Delete(true);
+                        // 从会话中移除订阅
+                        _session.RemoveSubscription(_subscription);
+                        // 释放订阅资源
+                        _subscription.Dispose();
+                        _subscription = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"取消订阅时发生错误: {ex.Message}");
+                        // 即使取消订阅失败，也继续关闭会话
+                    }
+                }
+                
+                // 清理订阅节点跟踪字典
+                _subscribedNodes.Clear();
+
+                // 关闭会话
                 await _session.CloseAsync();
                 _session = null;
             }

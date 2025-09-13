@@ -100,6 +100,40 @@ public class Variable
     public string DataValue { get; set; }
 
     /// <summary>
+    /// 存储从设备读取到的最新数值。如果原始值是布尔类型，则True转换为1.0，False转换为0.0。
+    /// 此属性不应持久化到数据库，仅用于运行时。
+    /// </summary>
+    public double NumericValue { get; set; }
+
+    /// <summary>
+    /// 更新数值属性，根据DataValue的值进行转换。
+    /// </summary>
+    public void UpdateNumericValue()
+    {
+        if (string.IsNullOrEmpty(DataValue))
+        {
+            NumericValue = 0.0;
+            return;
+        }
+
+        // 尝试将字符串转换为数值
+        if (double.TryParse(DataValue, out double numericValue))
+        {
+            NumericValue = numericValue;
+        }
+        // 如果是布尔值
+        else if (bool.TryParse(DataValue, out bool boolValue))
+        {
+            NumericValue = boolValue ? 1.0 : 0.0;
+        }
+        // 如果无法转换，保持为0.0
+        else
+        {
+            NumericValue = 0.0;
+        }
+    }
+
+    /// <summary>
     /// 变量的通讯协议。
     /// </summary>
     public ProtocolType Protocol { get; set; }

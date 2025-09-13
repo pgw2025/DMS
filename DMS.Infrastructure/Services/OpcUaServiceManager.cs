@@ -336,6 +336,7 @@ namespace DMS.Infrastructure.Services
                         // 更新变量值
                         variable.DataValue = newValue;
                         variable.DisplayValue = newValue;
+                        variable.UpdateNumericValue(); // 更新数值属性
                         variable.UpdatedAt = DateTime.Now;
 
                         _logger.LogDebug($"节点：{variable.OpcUaNodeId}值发生了变化:{newValue}");
