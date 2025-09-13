@@ -54,6 +54,11 @@ public partial class VariableItemViewModel : ObservableObject
     [ObservableProperty]
     private string? _displayValue;
 
+    /// <summary>
+    /// 上一次的数值，用于死区报警计算
+    /// </summary>
+    private double _previousNumericValue;
+
     partial void OnDataValueChanged(string? oldValue, string? newValue)
     {
         // 当DataValue发生变化时，更新NumericValue
@@ -66,16 +71,22 @@ public partial class VariableItemViewModel : ObservableObject
         // 尝试将字符串转换为数值
         if (double.TryParse(newValue, out double numericValue))
         {
+            // 更新上一次的数值
+            _previousNumericValue = NumericValue;
             NumericValue = numericValue;
         }
         // 如果是布尔值
         else if (bool.TryParse(newValue, out bool boolValue))
         {
+            // 更新上一次的数值
+            _previousNumericValue = NumericValue;
             NumericValue = boolValue ? 1.0 : 0.0;
         }
         // 如果无法转换，保持为0.0
         else
         {
+            // 更新上一次的数值
+            _previousNumericValue = NumericValue;
             NumericValue = 0.0;
         }
     }
@@ -224,4 +235,45 @@ public partial class VariableItemViewModel : ObservableObject
     private OpcUaUpdateType _opcUaUpdateType;
 
     
+    /// <summary>
+    /// 上一次的布尔值，用于布尔值变化报警计算
+    /// </summary>
+    private bool? _previousBoolValue = null;
+    
+    /// <summary>
+    /// 检查死区报警和布尔值变化报警
+    /// </summary>
+    public void CheckAdvancedAlarms(VariableDto variable)
+    {
+        // 检查死区报警
+        if (variable.IsAlarmEnabled && variable.AlarmDeadband > 0)
+        {
+            double difference = Math.Abs(NumericValue - _previousNumericValue);
+            if (difference > variable.AlarmDeadband)
+            {
+                // 触发死区报警
+                // 这里可以触发一个事件或调用报警服务
+                // 为了简单起见，我们暂时只打印日志
+                Console.WriteLine($"变量 {variable.Name} 的值变化 {difference} 超过了死区 {variable.AlarmDeadband}。");
+            }
+        }
+        
+        // 检查布尔值变化报警
+        if (variable.IsAlarmEnabled && variable.DataType == DataType.Bool)
+        {
+            if (bool.TryParse(DataValue, out bool currentBoolValue))
+            {
+                // 如果上一次的值不为空，并且当前值与上一次的值不同，则触发报警
+                if (_previousBoolValue.HasValue && _previousBoolValue.Value != currentBoolValue)
+                {
+                    // 触发布尔值变化报警
+                    // 这里可以触发一个事件或调用报警服务
+                    // 为了简单起见，我们暂时只打印日志
+                    Console.WriteLine($"变量 {variable.Name} 的布尔值从 {_previousBoolValue.Value} 变化为 {currentBoolValue}。");
+                }
+                // 更新上一次的布尔值
+                _previousBoolValue = currentBoolValue;
+            }
+        }
+    }
 }

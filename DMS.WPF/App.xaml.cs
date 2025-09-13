@@ -71,12 +71,19 @@ public partial class App : System.Windows.Application
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<MqttPublishProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
+            // 添加报警处理器
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<DMS.Application.Services.Processors.AlarmProcessor>());
         }
         catch (Exception exception)
         {
             var notificationService = Host.Services.GetRequiredService<INotificationService>();
             notificationService.ShowError($"加载数据时发生错误，如果是连接字符串不正确，可以在设置界面更改：{exception.Message}", exception);
         }
+        
+        // 订阅报警事件
+        var alarmService = Host.Services.GetRequiredService<DMS.Application.Interfaces.IAlarmService>();
+        var alarmEventHandler = Host.Services.GetRequiredService<DMS.Application.EventHandlers.AlarmEventHandler>();
+        alarmService.OnAlarmTriggered += alarmEventHandler.HandleAlarm;
 
         var splashWindow = Host.Services.GetRequiredService<SplashWindow>();
         splashWindow.Show();
@@ -184,6 +191,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<UpdateDbVariableProcessor>();
         services.AddSingleton<HistoryProcessor>();
         services.AddSingleton<MqttPublishProcessor>();
+        // 注册报警服务和处理器
+        services.AddSingleton<DMS.Application.Interfaces.IAlarmService, DMS.Application.Services.AlarmService>();
+        services.AddSingleton<DMS.Application.Services.Processors.AlarmProcessor>();
+        services.AddSingleton<DMS.Application.EventHandlers.AlarmEventHandler>();
 
         // 注册Core中的仓库
         services.AddSingleton<AppSettings>();
@@ -204,6 +215,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IUserRepository, UserRepository>();
         services.AddSingleton<INlogRepository, NlogRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
+        services.AddSingleton<IAlarmHistoryRepository, AlarmHistoryRepository>(); // 添加这行
         services.AddSingleton<IExcelService, ExcelService>();
 
         services.AddTransient<IOpcUaService, OpcUaService>();

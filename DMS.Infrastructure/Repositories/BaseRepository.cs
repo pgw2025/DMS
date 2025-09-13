@@ -199,7 +199,7 @@ public abstract class BaseRepository<TEntity>
     /// </summary>
     /// <param name="number">要获取的实体数量。</param>
     /// <returns>包含指定数量实体对象的列表。</returns>
-    protected async Task<List<TEntity>> TakeAsync(int number)
+    public virtual async Task<List<TEntity>> TakeAsync(int number)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -208,6 +208,23 @@ public abstract class BaseRepository<TEntity>
         stopwatch.Stop();
         _logger.LogInformation($"TakeAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
         return entity;
+    }
+
+    /// <summary>
+    /// 异步根据主键 ID 删除单个实体。
+    /// </summary>
+    /// <param name="id">要删除的实体的主键 ID。</param>
+    /// <returns>返回受影响的行数。</returns>
+    public virtual async Task<int> DeleteByIdAsync(int id)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await Db.Deleteable<TEntity>()
+                             .In(id)
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        _logger.LogInformation($"DeleteById {typeof(TEntity).Name}, ID: {id}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
     }
 
     public async Task<bool> AddBatchAsync(List<TEntity> entities)
