@@ -46,6 +46,11 @@ public class InitializeRepository : IInitializeRepository
         _db.CodeFirst.InitTables<DbMqttServer>();
         _db.CodeFirst.InitTables<DbVariableMqttAlias>();
         _db.CodeFirst.InitTables<DbMenu>();
+        _db.CodeFirst.InitTables<DbNlog>();
+        _db.CodeFirst.InitTables<DbEmailAccount>();
+        _db.CodeFirst.InitTables<DbEmailMessage>();
+        _db.CodeFirst.InitTables<DbEmailTemplate>();
+        _db.CodeFirst.InitTables<DbEmailLog>();
     }
 
     /// <summary>
@@ -140,14 +145,20 @@ public class InitializeRepository : IInitializeRepository
                                },
                                new DbMenu
                                {
-                                   Id = 6, Header = "设置", Icon = "\uE713", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   Id = 6, Header = "邮件管理", Icon = "\uE715", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "EmailManagementView",
                                    DisplayOrder = 6
                                },
                                new DbMenu
                                {
-                                   Id = 7, Header = "关于", Icon = "\uE946", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "", DisplayOrder = 7
+                                   Id = 7, Header = "设置", Icon = "\uE713", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   DisplayOrder = 7
+                               },
+                               new DbMenu
+                               {
+                                   Id = 8, Header = "关于", Icon = "\uE946", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "", DisplayOrder = 8
                                } // 假设有一个AboutView
                            };
 

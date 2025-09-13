@@ -108,6 +108,10 @@
                         <DataTemplate DataType="{x:Type vm:LogHistoryViewModel}">
                             <local:LogHistoryView />
                         </DataTemplate>
+                        <!--  邮件管理页  -->
+                        <DataTemplate DataType="{x:Type vm:EmailManagementViewModel}">
+                            <local:EmailManagementView />
+                        </DataTemplate>
                         <!--  设备详情页  -->
                         <DataTemplate DataType="{x:Type vm:DeviceDetailViewModel}">
                             <local:DeviceDetailView />

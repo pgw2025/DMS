@@ -94,6 +94,8 @@ public class NavigationService : INavigationService
                     return App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
                 case "SettingView":
                     return App.Current.Services.GetRequiredService<SettingViewModel>();
+                case "EmailManagementView":
+                    return App.Current.Services.GetRequiredService<EmailManagementViewModel>();
                 default:
                     return null;
             }

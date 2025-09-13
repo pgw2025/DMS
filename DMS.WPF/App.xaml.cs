@@ -216,11 +216,16 @@ public partial class App : System.Windows.Application
         services.AddSingleton<INlogRepository, NlogRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IAlarmHistoryRepository, AlarmHistoryRepository>(); // 添加这行
+        services.AddSingleton<IEmailAccountRepository, EmailAccountRepository>();
+        services.AddSingleton<IEmailMessageRepository, EmailMessageRepository>();
+        services.AddSingleton<IEmailTemplateRepository, EmailTemplateRepository>();
+        services.AddSingleton<IEmailLogRepository, EmailLogRepository>();
         services.AddSingleton<IExcelService, ExcelService>();
 
         services.AddTransient<IOpcUaService, OpcUaService>();
         services.AddTransient<IMqttService, MqttService>();
         services.AddTransient<IMqttServiceFactory, MqttServiceFactory>();
+        services.AddTransient<IEmailService, EmailService>();
 
         // 注册App服务\r\n
         services.AddSingleton<IInitializeService, InitializeService>();
@@ -267,6 +272,8 @@ public partial class App : System.Windows.Application
 
         // 注册主数据服务
         services.AddSingleton<IWPFDataService, WPFDataService>();
+        services.AddSingleton<IEmailAppService, EmailAppService>();
+        services.AddSingleton<EmailFunctionalityTestService, EmailFunctionalityTestService>();
 
 
         // 注册视图模型
@@ -283,6 +290,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<LogHistoryViewModel>();
         services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<VariableHistoryViewModel>();
+        services.AddSingleton<EmailManagementViewModel>();
 
         // 注册对话框视图模型
         services.AddTransient<DeviceDialogViewModel>();
@@ -298,6 +306,8 @@ public partial class App : System.Windows.Application
         services.AddTransient<MqttAliasBatchEditDialogViewModel>();
         services.AddTransient<HistorySettingsDialogViewModel>();
         services.AddTransient<AlarmSettingsDialogViewModel>();
+        services.AddTransient<EmailAccountDialogViewModel>();
+        services.AddTransient<EmailTemplateDialogViewModel>();
 
         // 注册View视图
         services.AddSingleton<SplashWindow>();
@@ -310,6 +320,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<LogHistoryView>();
         services.AddScoped<DeviceDetailView>();
         services.AddScoped<MqttsView>();
+        services.AddSingleton<EmailManagementView>();
+
     }
 
     private void ConfigureLogging(ILoggingBuilder loggingBuilder)

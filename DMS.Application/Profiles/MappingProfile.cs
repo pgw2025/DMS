@@ -11,14 +11,9 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-
-
-
         CreateMap<Device, DeviceDto>()
             .ReverseMap();
           
-           
-
         // VariableTable 映射
         CreateMap<VariableTable, VariableTableDto>().ReverseMap();
 
@@ -26,11 +21,9 @@ public class MappingProfile : Profile
         CreateMap<Variable, VariableDto>()
             .ReverseMap();
 
-
         CreateMap<VariableDto, Variable>()
             .ReverseMap();
            
-
         // MqttServer 映射
         CreateMap<MqttServer, MqttServerDto>().ReverseMap();
 
@@ -50,5 +43,18 @@ public class MappingProfile : Profile
         // User 映射
         CreateMap<User, UserDto>().ReverseMap();
         CreateMap<Nlog, NlogDto>().ReverseMap();
+        
+        // 邮件相关映射
+        CreateMap<EmailAccount, EmailAccountDto>().ReverseMap();
+        CreateMap<EmailAccount, CreateEmailAccountRequest>().ReverseMap();
+        
+        CreateMap<EmailMessage, EmailMessageDto>().ReverseMap();
+        CreateMap<EmailMessage, SendEmailRequest>()
+            .ForMember(dest => dest.EmailAccountId, opt => opt.MapFrom(src => src.EmailAccountId))
+            .ReverseMap();
+            
+        CreateMap<EmailTemplate, EmailTemplateDto>().ReverseMap();
+        
+        CreateMap<EmailLog, EmailLogDto>().ReverseMap();
     }
 }

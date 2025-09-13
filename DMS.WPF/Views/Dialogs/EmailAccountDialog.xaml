@@ -1,0 +1,100 @@
+<ui:ContentDialog
+    x:Class="DMS.WPF.Views.Dialogs.EmailAccountDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+    Title="{Binding DialogTitle}"
+    d:DataContext="{d:DesignInstance Type=vm:EmailAccountDialogViewModel}"
+    CloseButtonCommand="{Binding CancelCommand}"
+    CloseButtonText="取消"
+    DefaultButton="Primary"
+    PrimaryButtonCommand="{Binding SaveCommand}"
+    PrimaryButtonText="保存"
+    mc:Ignorable="d">
+
+    <ui:ContentDialog.Resources>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+        </Style>
+    </ui:ContentDialog.Resources>
+
+    <ScrollViewer Margin="16">
+        <StackPanel>
+            <!-- 账户名称 -->
+            <hc:TextBox hc:InfoElement.Title="账户名称:" 
+                        Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                        Margin="0,0,0,15"/>
+
+            <!-- 邮箱地址 -->
+            <hc:TextBox hc:InfoElement.Title="邮箱地址:" 
+                        Text="{Binding EmailAddress, UpdateSourceTrigger=PropertyChanged}" 
+                        Margin="0,0,0,15"/>
+
+            <!-- SMTP服务器 -->
+            <hc:TextBox hc:InfoElement.Title="SMTP服务器:" 
+                        Text="{Binding SmtpServer, UpdateSourceTrigger=PropertyChanged}" 
+                        Margin="0,0,0,15"/>
+
+            <!-- SMTP端口 -->
+            <Grid Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="SMTP端口:" />
+                <hc:TextBox Grid.Column="1" Text="{Binding SmtpPort, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+
+            <!-- 启用SSL -->
+            <CheckBox Content="启用SSL" 
+                      IsChecked="{Binding EnableSsl}" 
+                      Margin="0,0,0,15"/>
+
+            <!-- 用户名 -->
+            <hc:TextBox hc:InfoElement.Title="用户名:" 
+                        Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                        Margin="0,0,0,15"/>
+
+            <!-- 密码 -->
+            <Grid Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="密码:" />
+                <PasswordBox x:Name="PasswordBox" Grid.Column="1" />
+            </Grid>
+
+            <!-- IMAP服务器 -->
+            <hc:TextBox hc:InfoElement.Title="IMAP服务器 (可选):" 
+                        Text="{Binding ImapServer, UpdateSourceTrigger=PropertyChanged}" 
+                        Margin="0,0,0,15"/>
+
+            <!-- IMAP端口 -->
+            <Grid Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Style="{StaticResource LabelStyle}" Text="IMAP端口:" />
+                <hc:TextBox Grid.Column="1" Text="{Binding ImapPort, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
+
+            <!-- 默认账户 -->
+            <CheckBox Content="默认账户" 
+                      IsChecked="{Binding IsDefault}" 
+                      Margin="0,0,0,15"/>
+
+            <!-- 启用 -->
+            <CheckBox Content="启用" 
+                      IsChecked="{Binding IsActive}" 
+                      Margin="0,0,0,15"/>
+        </StackPanel>
+    </ScrollViewer>
+</ui:ContentDialog>

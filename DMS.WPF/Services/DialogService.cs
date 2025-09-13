@@ -27,7 +27,8 @@ namespace DMS.WPF.Services
             { typeof(MqttSelectionDialogViewModel), typeof(MqttSelectionDialog) },
             { typeof(MqttAliasBatchEditDialogViewModel), typeof(MqttAliasBatchEditDialog) },
             { typeof(HistorySettingsDialogViewModel), typeof(HistorySettingsDialog) },
-            { typeof(AlarmSettingsDialogViewModel), typeof(AlarmSettingsDialog) }
+            { typeof(AlarmSettingsDialogViewModel), typeof(AlarmSettingsDialog) },
+            { typeof(EmailAccountDialogViewModel), typeof(EmailAccountDialog) }
             // Add other mappings here
             // ... other dialogs
         };

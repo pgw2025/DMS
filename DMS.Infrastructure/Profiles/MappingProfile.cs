@@ -37,5 +37,10 @@ public class MappingProfile : Profile
         CreateMap<DbNlog, Nlog>().ReverseMap();
         
         CreateMap<DbVariableHistory, VariableHistory>().ReverseMap();
+        
+        CreateMap<DbEmailAccount, EmailAccount>().ReverseMap();
+        CreateMap<DbEmailMessage, EmailMessage>().ReverseMap();
+        CreateMap<DbEmailLog, EmailLog>().ReverseMap();
+        CreateMap<DbEmailTemplate, EmailTemplate>().ReverseMap();
     }
 }
