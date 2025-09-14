@@ -1,6 +1,7 @@
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ViewModels.Triggers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.Services;
@@ -96,6 +97,8 @@ public class NavigationService : INavigationService
                     return App.Current.Services.GetRequiredService<SettingViewModel>();
                 case "EmailManagementView":
                     return App.Current.Services.GetRequiredService<EmailManagementViewModel>();
+                case "TriggersView":
+                    return App.Current.Services.GetRequiredService<TriggersViewModel>();
                 default:
                     return null;
             }

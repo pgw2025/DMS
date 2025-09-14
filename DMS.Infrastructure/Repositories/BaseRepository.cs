@@ -118,6 +118,23 @@ public abstract class BaseRepository<TEntity>
     }
 
     /// <summary>
+    /// 异步根据主键 ID (Guid类型) 获取单个实体。
+    /// </summary>
+    /// <param name="id">实体的主键 ID (Guid类型)。</param>
+    /// <returns>返回找到的实体，如果未找到则返回 null。</returns>
+    public virtual async Task<TEntity> GetByIdAsync(Guid id)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var entity = await Db.Queryable<TEntity>()
+                             .In(id)
+                             .FirstAsync();
+        stopwatch.Stop();
+        _logger.LogInformation($"GetById {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return entity;
+    }
+
+    /// <summary>
     /// 异步根据主键 ID 列表批量删除实体。
     /// </summary>
     /// <param name="ids">要删除的实体主键 ID 列表。</param>

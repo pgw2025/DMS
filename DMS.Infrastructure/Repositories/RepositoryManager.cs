@@ -3,7 +3,6 @@ using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Interfaces.Repositories.Triggers; // 引入新的接口
 using DMS.Infrastructure.Data;
-using DMS.Infrastructure.Repositories.Triggers; // 引入实现类所在的命名空间
 using SqlSugar;
 
 namespace DMS.Infrastructure.Repositories;

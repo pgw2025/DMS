@@ -8,6 +8,8 @@ using DMS.Application.DTOs.Triggers;
 using DMS.Application.Services.Triggers;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
+using DMS.WPF.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ViewModels.Triggers
 {
@@ -70,7 +72,10 @@ namespace DMS.WPF.ViewModels.Triggers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            var result = await _dialogService.ShowDialogAsync<TriggerEditorViewModel, TriggerDefinitionDto?>("编辑触发器", newTrigger);
+            TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
+            await viewModel.OnInitializedAsync(newTrigger);
+
+            var result = await _dialogService.ShowDialogAsync(viewModel);
             if (result != null)
             {
                 try
@@ -95,7 +100,7 @@ namespace DMS.WPF.ViewModels.Triggers
         {
             if (SelectedTrigger == null)
             {
-                _notificationService.ShowWarning("请先选择一个触发器");
+                _notificationService.ShowWarn("请先选择一个触发器");
                 return;
             }
 
@@ -117,8 +122,10 @@ namespace DMS.WPF.ViewModels.Triggers
                 CreatedAt = SelectedTrigger.CreatedAt,
                 UpdatedAt = SelectedTrigger.UpdatedAt
             };
+            TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
+            await viewModel.OnInitializedAsync(triggerToEdit);
 
-            var result = await _dialogService.ShowDialogAsync<TriggerEditorViewModel, TriggerDefinitionDto?>("编辑触发器", triggerToEdit);
+            var result = await _dialogService.ShowDialogAsync(viewModel);
             if (result != null)
             {
                 try
@@ -154,11 +161,11 @@ namespace DMS.WPF.ViewModels.Triggers
         {
             if (SelectedTrigger == null)
             {
-                _notificationService.ShowWarning("请先选择一个触发器");
+                _notificationService.ShowWarn("请先选择一个触发器");
                 return;
             }
 
-            var confirm = await _dialogService.ShowConfirmDialogAsync("确认删除", $"确定要删除触发器 '{SelectedTrigger.Description}' 吗？");
+            var confirm = await _dialogService.ShowDialogAsync(new ConfirmDialogViewModel("确认删除", $"确定要删除触发器 '{SelectedTrigger.Description}' 吗？","删除"));
             if (confirm)
             {
                 try

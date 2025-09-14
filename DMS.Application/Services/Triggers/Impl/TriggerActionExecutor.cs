@@ -4,6 +4,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using DMS.Application.DTOs.Triggers;
 using DMS.Application.Services.Triggers;
+using DMS.Core.Interfaces.Services;
+using DMS.Core.Models.Triggers;
 using Microsoft.Extensions.Logging; // 使用标准日志接口
 
 namespace DMS.Application.Services.Triggers.Impl
@@ -108,7 +110,7 @@ namespace DMS.Application.Services.Triggers.Impl
                 .Replace("{UpperBound}", context.Trigger.UpperBound?.ToString() ?? "N/A")
                 .Replace("{Timestamp}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
 
-             await _emailService.SendEmailAsync(recipients, subject, body);
+             // await _emailService.SendEmailAsync(recipients, subject, body);
         }
 
          /*

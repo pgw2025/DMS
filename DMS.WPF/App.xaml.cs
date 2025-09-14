@@ -4,8 +4,11 @@ using AutoMapper.Internal;
 using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Application.Services.Processors;
+using DMS.Application.Services.Triggers;
+using DMS.Application.Services.Triggers.Impl;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
+using DMS.Core.Interfaces.Repositories.Triggers;
 using DMS.Core.Interfaces.Services;
 using DMS.Infrastructure.Configuration;
 using DMS.Infrastructure.Configurations;
@@ -14,6 +17,7 @@ using DMS.Infrastructure.Interfaces;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Repositories;
 using DMS.Infrastructure.Services;
+using DMS.WPF.Converters;
 using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Logging;
@@ -21,12 +25,14 @@ using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ViewModels.Triggers;
 using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Web;
+using SqlSugar;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
@@ -204,6 +210,8 @@ public partial class App : System.Windows.Application
             return new SqlSugarDbContext(appSettings);
         });
 
+
+
         services.AddSingleton<IInitializeRepository, InitializeRepository>();
         services.AddSingleton<IDeviceRepository, DeviceRepository>();
         services.AddSingleton<IVariableTableRepository, VariableTableRepository>();
@@ -216,7 +224,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<INlogRepository, NlogRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IAlarmHistoryRepository, AlarmHistoryRepository>(); // 添加这行
-        services.AddSingleton<ITriggerRepository, SqlSugarTriggerRepository>(); // 注册触发器仓储
+        services.AddSingleton<ITriggerRepository, TriggerRepository>(); // 注册触发器仓储
         services.AddSingleton<IEmailAccountRepository, EmailAccountRepository>();
         services.AddSingleton<IEmailMessageRepository, EmailMessageRepository>();
         services.AddSingleton<IEmailTemplateRepository, EmailTemplateRepository>();
@@ -321,7 +329,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<AlarmSettingsDialogViewModel>();
         services.AddTransient<EmailAccountDialogViewModel>();
         services.AddTransient<EmailTemplateDialogViewModel>();
-        services.AddTransient<TriggerEditorViewModel>(); // 注册 TriggerEditorViewModel
+        services.AddTransient<TriggerDialogViewModel>(); // 注册 TriggerEditorViewModel
 
         // 注册View视图
         services.AddSingleton<SplashWindow>();
@@ -335,6 +343,7 @@ public partial class App : System.Windows.Application
         services.AddScoped<DeviceDetailView>();
         services.AddScoped<MqttsView>();
         services.AddSingleton<EmailManagementView>();
+        services.AddSingleton<TriggersView>(); // 注册 TriggersView
 
     }
 

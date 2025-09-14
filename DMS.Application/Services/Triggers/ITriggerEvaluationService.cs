@@ -14,6 +14,6 @@ namespace DMS.Application.Services.Triggers
         /// <param name="variableId">变量 ID</param>
         /// <param name="currentValue">变量的当前值</param>
         /// <returns>任务</returns>
-        Task EvaluateTriggersAsync(Guid variableId, object currentValue);
+        Task EvaluateTriggersAsync(int variableId, object currentValue);
     }
 }

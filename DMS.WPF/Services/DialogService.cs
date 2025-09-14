@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using DMS.WPF.Interfaces;
+using DMS.WPF.ViewModels.Triggers;
 using DMS.WPF.Views;
 using iNKORE.UI.WPF.Modern.Controls;
 
@@ -29,7 +30,8 @@ namespace DMS.WPF.Services
             { typeof(HistorySettingsDialogViewModel), typeof(HistorySettingsDialog) },
             { typeof(AlarmSettingsDialogViewModel), typeof(AlarmSettingsDialog) },
             { typeof(EmailAccountDialogViewModel), typeof(EmailAccountDialog) },
-            { typeof(EmailTemplateDialogViewModel), typeof(EmailTemplateDialog) }
+            { typeof(EmailTemplateDialogViewModel), typeof(EmailTemplateDialog) },
+            { typeof(TriggerDialogViewModel), typeof(TriggerDialog) }
             // Add other mappings here
             // ... other dialogs
         };

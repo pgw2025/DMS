@@ -1,21 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
-using System.Threading.Tasks;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DMS.Application.DTOs;
 using DMS.Application.DTOs.Triggers;
+using DMS.Application.Interfaces;
 using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
-using DMS.WPF.Services;
 
-namespace DMS.WPF.ViewModels.Triggers
+namespace DMS.WPF.ViewModels.Dialogs
 {
     /// <summary>
     /// 触发器编辑器视图模型
     /// </summary>
-    public partial class TriggerEditorViewModel : DialogViewModelBase<TriggerDefinitionDto?>
+    public partial class TriggerDialogViewModel : DialogViewModelBase<TriggerDefinitionDto?>
     {
         private readonly IVariableAppService _variableAppService; // To populate variable selection dropdown
         private readonly IDialogService _dialogService;
@@ -29,18 +27,15 @@ namespace DMS.WPF.ViewModels.Triggers
 
         // Properties for easier binding in XAML for SendEmail action config
         [ObservableProperty]
-        [Required(ErrorMessage = "收件人不能为空")]
         private string _emailRecipients = "";
 
         [ObservableProperty]
-        [Required(ErrorMessage = "邮件主题模板不能为空")]
         private string _emailSubjectTemplate = "";
 
         [ObservableProperty]
-        [Required(ErrorMessage = "邮件内容模板不能为空")]
         private string _emailBodyTemplate = "";
 
-        public TriggerEditorViewModel(
+        public TriggerDialogViewModel(
             IVariableAppService variableAppService,
             IDialogService dialogService,
             INotificationService notificationService)
@@ -54,7 +49,7 @@ namespace DMS.WPF.ViewModels.Triggers
         /// 初始化视图模型（传入待编辑的触发器）
         /// </summary>
         /// <param name="parameter">待编辑的触发器 DTO</param>
-        public override async Task OnInitializedAsync(object? parameter)
+        public async Task OnInitializedAsync(object? parameter)
         {
             if (parameter is TriggerDefinitionDto triggerDto)
             {
@@ -84,7 +79,7 @@ namespace DMS.WPF.ViewModels.Triggers
                     }
                     catch (Exception ex)
                     {
-                        _notificationService.ShowWarning($"无法解析邮件配置: {ex.Message}");
+                        _notificationService.ShowWarn($"无法解析邮件配置: {ex.Message}");
                     }
                 }
             }
@@ -97,7 +92,7 @@ namespace DMS.WPF.ViewModels.Triggers
         {
             try
             {
-                var variables = await _variableAppService.GetAllAsync();
+                var variables = await _variableAppService.GetAllVariablesAsync();
                 AvailableVariables = variables ?? new List<VariableDto>();
             }
             catch (Exception ex)
@@ -116,13 +111,13 @@ namespace DMS.WPF.ViewModels.Triggers
             // Basic validation
             if (Trigger.VariableId == Guid.Empty)
             {
-                _notificationService.ShowWarning("请选择关联的变量");
+                _notificationService.ShowWarn("请选择关联的变量");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(Trigger.Description))
             {
-                _notificationService.ShowWarning("请输入触发器描述");
+                _notificationService.ShowWarn("请输入触发器描述");
                 return;
             }
 
@@ -135,7 +130,7 @@ namespace DMS.WPF.ViewModels.Triggers
                 case ConditionType.NotEqualTo:
                     if (!Trigger.Threshold.HasValue)
                     {
-                        _notificationService.ShowWarning($"{Trigger.Condition} 条件需要设置阈值");
+                        _notificationService.ShowWarn($"{Trigger.Condition} 条件需要设置阈值");
                         return;
                     }
                     break;
@@ -143,12 +138,12 @@ namespace DMS.WPF.ViewModels.Triggers
                 case ConditionType.OutOfRange:
                     if (!Trigger.LowerBound.HasValue || !Trigger.UpperBound.HasValue)
                     {
-                        _notificationService.ShowWarning($"{Trigger.Condition} 条件需要设置下限和上限");
+                        _notificationService.ShowWarn($"{Trigger.Condition} 条件需要设置下限和上限");
                         return;
                     }
                     if (Trigger.LowerBound > Trigger.UpperBound)
                     {
-                        _notificationService.ShowWarning("下限必须小于或等于上限");
+                        _notificationService.ShowWarn("下限必须小于或等于上限");
                         return;
                     }
                     break;
@@ -159,19 +154,19 @@ namespace DMS.WPF.ViewModels.Triggers
             {
                 if (string.IsNullOrWhiteSpace(EmailRecipients))
                 {
-                    _notificationService.ShowWarning("请输入至少一个收件人邮箱地址");
+                    _notificationService.ShowWarn("请输入至少一个收件人邮箱地址");
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(EmailSubjectTemplate))
                 {
-                    _notificationService.ShowWarning("请输入邮件主题模板");
+                    _notificationService.ShowWarn("请输入邮件主题模板");
                     return;
                 }
 
                 if (string.IsNullOrWhiteSpace(EmailBodyTemplate))
                 {
-                    _notificationService.ShowWarning("请输入邮件内容模板");
+                    _notificationService.ShowWarn("请输入邮件内容模板");
                     return;
                 }
 
@@ -199,7 +194,7 @@ namespace DMS.WPF.ViewModels.Triggers
             }
 
             // Close dialog with the updated trigger DTO
-            await CloseDialogAsync(Trigger);
+            await Close(Trigger);
         }
 
         /// <summary>
@@ -208,7 +203,7 @@ namespace DMS.WPF.ViewModels.Triggers
         [RelayCommand]
         private async Task CancelAsync()
         {
-            await CloseDialogAsync(null); // Return null to indicate cancellation
+            await Close(null); // Return null to indicate cancellation
         }
     }
 }

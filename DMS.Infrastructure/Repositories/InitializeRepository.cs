@@ -51,6 +51,7 @@ public class InitializeRepository : IInitializeRepository
         _db.CodeFirst.InitTables<DbEmailMessage>();
         _db.CodeFirst.InitTables<DbEmailTemplate>();
         _db.CodeFirst.InitTables<DbEmailLog>();
+        _db.CodeFirst.InitTables<DbTriggerDefinition>();
     }
 
     /// <summary>
@@ -139,26 +140,32 @@ public class InitializeRepository : IInitializeRepository
                                },
                                new DbMenu
                                {
-                                   Id = 5, Header = "日志历史", Icon = "\uE7BA", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "LogHistoryView",
+                                   Id = 5, Header = "触发器", Icon = "\uE7BA", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "TriggersView",
                                    DisplayOrder = 5
                                },
                                new DbMenu
                                {
-                                   Id = 6, Header = "邮件管理", Icon = "\uE715", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "EmailManagementView",
+                                   Id = 6, Header = "日志历史", Icon = "\uE7BA", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "LogHistoryView",
                                    DisplayOrder = 6
                                },
                                new DbMenu
                                {
-                                   Id = 7, Header = "设置", Icon = "\uE713", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   Id = 7, Header = "邮件管理", Icon = "\uE715", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "EmailManagementView",
                                    DisplayOrder = 7
                                },
                                new DbMenu
                                {
-                                   Id = 8, Header = "关于", Icon = "\uE946", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "", DisplayOrder = 8
+                                   Id = 8, Header = "设置", Icon = "\uE713", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   DisplayOrder = 8
+                               },
+                               new DbMenu
+                               {
+                                   Id = 9, Header = "关于", Icon = "\uE946", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "", DisplayOrder = 9
                                } // 假设有一个AboutView
                            };
 

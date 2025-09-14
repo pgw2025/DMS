@@ -2,6 +2,7 @@ using System;
 using AutoMapper;
 using DMS.Infrastructure.Entities;
 using DMS.Core.Models;
+using DMS.Core.Models.Triggers;
 
 namespace DMS.Infrastructure.Profiles;
 
@@ -42,5 +43,17 @@ public class MappingProfile : Profile
         CreateMap<DbEmailMessage, EmailMessage>().ReverseMap();
         CreateMap<DbEmailLog, EmailLog>().ReverseMap();
         CreateMap<DbEmailTemplate, EmailTemplate>().ReverseMap();
+        
+        // --- 触发器映射 ---
+        CreateMap<DbTriggerDefinition, TriggerDefinition>()
+            .ForMember(dest => dest.SuppressionDuration, 
+                       opt => opt.MapFrom(src => src.SuppressionDurationTicks.HasValue ? 
+                                                 TimeSpan.FromTicks(src.SuppressionDurationTicks.Value) : 
+                                                 (TimeSpan?)null))
+            .ReverseMap()
+            .ForMember(dest => dest.SuppressionDurationTicks, 
+                       opt => opt.MapFrom(src => src.SuppressionDuration.HasValue ? 
+                                                 src.SuppressionDuration.Value.Ticks : 
+                                                 (long?)null));
     }
 }

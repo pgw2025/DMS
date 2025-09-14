@@ -5,7 +5,7 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:triggers="clr-namespace:DMS.Core.Models.Triggers;assembly=DMS.Core"
     xmlns:converters="clr-namespace:DMS.WPF.Converters"
-    xmlns:localConverters="clr-namespace:DMS.WPF.Converters" <!-- 引入本地转换器命名空间 -->
+    xmlns:localConverters="clr-namespace:DMS.WPF.Converters" 
     
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern">
     <Application.Resources>
