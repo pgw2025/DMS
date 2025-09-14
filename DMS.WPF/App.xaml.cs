@@ -275,6 +275,10 @@ public partial class App : System.Windows.Application
         services.AddTransient<EnumToVisibilityConverter>();
         services.AddTransient<NullableTimeSpanToSecondsConverter>();
         services.AddTransient<BooleanToBrushConverter>();
+        services.AddTransient<BoolToVisibilityConverter>();
+        services.AddTransient<CountToVisibilityConverter>();
+        services.AddTransient<BoolToStringConverter>();
+        services.AddTransient<BoolToColorConverter>();
 
         // 注册事件服务
         services.AddSingleton<DMS.Application.Interfaces.IEventService, DMS.Application.Services.EventService>();

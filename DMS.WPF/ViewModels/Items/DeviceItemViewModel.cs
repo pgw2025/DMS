@@ -97,5 +97,11 @@ public partial class DeviceItemViewModel : ObservableObject
     }
 
     public ObservableCollection<VariableTableItemViewModel> VariableTables { get; set; } = new();
+    
+    [ObservableProperty]
+    private bool _isConnected;
+    
+    [ObservableProperty]
+    private string _connectionStatus = "未连接";
 
 }

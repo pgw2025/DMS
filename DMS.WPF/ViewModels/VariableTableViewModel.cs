@@ -519,40 +519,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
     }
 
-    /// <summary>
-    /// 修改选定变量的OPC UA更新方式（轮询或订阅）。
-    /// </summary>
-    /// <param name="variablesToChange">要修改更新方式的变量数据列表。</param>
-    [RelayCommand]
-    public async Task ModifyOpcUaUpdateType(IList<object> variablesToChange)
-    {
-        // // 过滤出有效的VariableData对象
-        // var validVariables = variablesToChange?.OfType<Variable>()
-        //                                       .ToList();
-        //
-        // if (validVariables == null || !validVariables.Any())
-        // {
-        //     NotificationHelper.ShowInfo("请选择要修改更新方式的OPC UA变量");
-        //     return;
-        // }
-        //
-        //
-        // // 显示更新方式选择对话框
-        // var newUpdateType = await _dialogService.ShowOpcUaUpdateTypeDialog();
-        // if (newUpdateType.HasValue)
-        // {
-        //     // 更新所有选定变量的更新方式
-        //     foreach (var variable in validVariables)
-        //     {
-        //         variable.OpcUaUpdateType = newUpdateType.Value;
-        //     }
-        //
-        //     // 批量更新数据库
-        //     await _varDataRepository.UpdateAsync(validVariables);
-        //     NotificationHelper.ShowSuccess($"已成功为 {validVariables.Count} 个变量更新OPC UA更新方式。");
-        // }
-    }
-
+    
     /// <summary>
     /// 为选定的变量添加MQTT服务器。
     /// 此命令通常绑定到UI中的“添加MQTT服务器”按钮。
@@ -751,6 +718,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
             var updateResult = await _variableAppService.UpdateVariablesAsync(variableDtos);
+            
 
             if (updateResult > 0)
             {

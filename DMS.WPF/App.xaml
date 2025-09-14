@@ -26,6 +26,13 @@
             
             <!-- 添加缺失的转换器 -->
             <localConverters:EnumToVisibilityConverter x:Key="LocalEnumToVisibilityConverter"/>
+            <localConverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <localConverters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+            <localConverters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+            <localConverters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            
+            <!-- System Accent Color as Brush -->
+            <SolidColorBrush x:Key="SystemAccentColorBrush" Color="{DynamicResource SystemAccentColor}" />
             
             <!-- Enum Values for ComboBoxes -->
             <ObjectDataProvider x:Key="ConditionTypeEnum" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">

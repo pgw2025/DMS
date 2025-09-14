@@ -52,14 +52,25 @@
             <hc:TextBox
                 Grid.Row="0"
                 Grid.Column="0"
+                Margin="0,15,0,0"
                 hc:InfoElement.Title="设备名称:"
                 Text="{Binding Device.Name, UpdateSourceTrigger=PropertyChanged}" />
-
-            <hc:TextBox
+            <hc:ComboBox
+                x:Name="ProtocolComboBox"
                 Grid.Row="0"
                 Grid.Column="2"
-                hc:InfoElement.Title="设备描述:"
-                Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
+                Margin="0,15,0,0"
+                hc:InfoElement.Title="通讯协议:"
+                IsEnabled="{Binding IsAddMode}"
+                ItemsSource="{Binding Source={StaticResource ProtocolType}}"
+                SelectedItem="{Binding Device.Protocol}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </hc:ComboBox>
+          
 
             <!--  Row 1  -->
             <hc:TextBox
@@ -91,21 +102,12 @@
                 </ComboBox.ItemTemplate>
             </hc:ComboBox>
 
-            <hc:ComboBox
-                x:Name="ProtocolComboBox"
+            <hc:TextBox
                 Grid.Row="2"
-                Grid.Column="4"
+                Grid.Column="2"
                 Margin="0,15,0,0"
-                hc:InfoElement.Title="通讯协议:"
-                IsEnabled="{Binding IsAddMode}"
-                ItemsSource="{Binding Source={StaticResource ProtocolType}}"
-                SelectedItem="{Binding Device.Protocol}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource EnumDescriptionConverter}}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </hc:ComboBox>
+                hc:InfoElement.Title="设备描述:"
+                Text="{Binding Device.Description, UpdateSourceTrigger=PropertyChanged}" />
 
             <!--  Row 3  -->
             <CheckBox
@@ -116,7 +118,7 @@
                 IsChecked="{Binding Device.IsAddDefVarTable}" />
             <CheckBox
                 Grid.Row="3"
-                Grid.Column="4"
+                Grid.Column="2"
                 Margin="0,20,0,0"
                 Content="是否启用"
                 IsChecked="{Binding Device.IsActive}" />
