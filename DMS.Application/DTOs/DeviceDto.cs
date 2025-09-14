@@ -80,5 +80,5 @@ public class DeviceDto
     /// <summary>
     /// 设备关联的变量表集合
     /// </summary>
-    public List<VariableTableDto> VariableTables { get; set; }
+    public List<VariableTableDto> VariableTables { get; set; }=new List<VariableTableDto>();
 }

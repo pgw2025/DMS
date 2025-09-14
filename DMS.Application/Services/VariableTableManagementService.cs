@@ -78,10 +78,16 @@ public class VariableTableManagementService : IVariableTableManagementService
     /// </summary>
     public void AddVariableTableToMemory(VariableTableDto variableTableDto)
     {
+        // 添加null检查
+        if (variableTableDto == null)
+            return;
+
         DeviceDto deviceDto = null;
         if (_appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
         {
             deviceDto = device;
+            // 确保VariableTables不为null
+            device.VariableTables ??= new List<VariableTableDto>();
             device.VariableTables.Add(variableTableDto);
             variableTableDto.Device = device;
         }

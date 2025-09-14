@@ -89,13 +89,35 @@ public class DeviceDataService : IDeviceDataService
         //更新当前界面
         _dataStorageService.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
         _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
-        await _variableDataService.AddVariableTable(addDto.VariableTable);
-        _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
+        
+        // 添加null检查
+        if (addDto.VariableTable != null)
+        {
+            await _variableDataService.AddVariableTable(addDto.VariableTable);
+        }
+        
+        // 添加null检查
+        if (addDto.VariableTableMenu != null)
+        {
+            _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
+        }
+        
         //更新数据中心
         _appDataCenterService.DeviceManagementService.AddDeviceToMemory(addDto.Device);
-        _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(addDto.VariableTable);
+        
+        // 添加null检查
+        if (addDto.VariableTable != null)
+        {
+            _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(addDto.VariableTable);
+        }
+        
         _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.DeviceMenu);
-        _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.VariableTableMenu);
+        
+        // 添加null检查
+        if (addDto.VariableTableMenu != null)
+        {
+            _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.VariableTableMenu);
+        }
 
         _menuDataService.BuildMenuTrees();
 
