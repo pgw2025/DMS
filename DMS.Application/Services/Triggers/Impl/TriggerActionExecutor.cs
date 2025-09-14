@@ -113,22 +113,20 @@ namespace DMS.Application.Services.Triggers.Impl
              // await _emailService.SendEmailAsync(recipients, subject, body);
         }
 
-         /*
          private async Task ExecuteActivateAlarm(TriggerContext context)
          {
              var alarmId = $"trigger_{context.Trigger.Id}_{context.Variable.Id}";
              var message = $"Trigger '{context.Trigger.Description}' activated for variable '{context.Variable.Name}' with value '{context.CurrentValue}'.";
              // 假设 INotificationService 有 RaiseAlarmAsync 方法
-             await _notificationService.RaiseAlarmAsync(alarmId, message); 
+             // await _notificationService.RaiseAlarmAsync(alarmId, message); 
          }
 
          private async Task ExecuteWriteToLog(TriggerContext context)
          {
              var message = $"Trigger '{context.Trigger.Description}' activated for variable '{context.Variable.Name}' with value '{context.CurrentValue}'.";
              // 假设 ILoggingService 有 LogTriggerAsync 方法
-             await _loggingService.LogTriggerAsync(message); 
+             // await _loggingService.LogTriggerAsync(message); 
          }
-         */
 
         #endregion
     }

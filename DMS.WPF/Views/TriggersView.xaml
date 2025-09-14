@@ -4,18 +4,174 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      xmlns:hc="https://handyorg.github.io/handycontrol"
+      xmlns:converters="clr-namespace:DMS.WPF.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!-- Converters -->
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:BoolToStringConverter x:Key="BoolToStringConverter" />
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        
+        <!-- 触发器项模板 -->
+        <DataTemplate x:Key="TriggerItemTemplate">
+            <Border Background="White" 
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1" 
+                    CornerRadius="8"
+                    Margin="5"
+                    Padding="15">
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="2" 
+                                      BlurRadius="5" 
+                                      Opacity="0.1" 
+                                      Color="#888888"/>
+                </Border.Effect>
 
-    
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
+                    <!-- 触发器基本信息 -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 触发器描述和变量信息 -->
+                            <StackPanel Grid.Column="0">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <ui:FontIcon Glyph="&#xE76C;" 
+                                                 FontSize="20" 
+                                                 Foreground="{DynamicResource SystemAccentColorBrush}"
+                                                 Margin="0,0,8,0"/>
+                                    <TextBlock Text="{Binding Description}" 
+                                               FontWeight="SemiBold" 
+                                               FontSize="16" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:FontIcon Glyph="&#xE975;" 
+                                                 FontSize="14" 
+                                                 Foreground="#888888"
+                                                 Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding VariableId}" 
+                                               Foreground="#888888" 
+                                               FontSize="12"
+                                               Margin="0,0,15,0"/>
+
+                                    <Rectangle Width="1" 
+                                               Height="12" 
+                                               Fill="#CCCCCC" 
+                                               Margin="5,0"/>
+
+                                    <ui:FontIcon Glyph="&#xE76C;" 
+                                                 FontSize="14" 
+                                                 Foreground="#888888"
+                                                 Margin="10,0,5,0"/>
+                                    <TextBlock Text="{Binding Condition}" 
+                                               Foreground="#888888" 
+                                               FontSize="12"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- 状态指示器 -->
+                            <StackPanel Grid.Column="1" 
+                                        Orientation="Horizontal" 
+                                        VerticalAlignment="Top">
+                                <Border Background="{Binding IsActive, 
+                                                     Converter={StaticResource BoolToColorConverter}, 
+                                                     ConverterParameter='Green;Red'}"
+                                        CornerRadius="8"
+                                        Width="16"
+                                        Height="16"
+                                        Margin="0,0,10,0">
+                                    <Border.ToolTip>
+                                        <TextBlock Text="{Binding IsActive, 
+                                                                  Converter={StaticResource BoolToStringConverter}, 
+                                                                  ConverterParameter='已激活;未激活'}"/>
+                                    </Border.ToolTip>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- 触发器详细信息 -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- 左侧信息 -->
+                        <StackPanel Grid.Column="0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                <TextBlock Text="阈值/范围: " 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#666666" 
+                                           FontSize="12"/>
+                                <TextBlock Text="{Binding Threshold, StringFormat='{}{0:N2}'}" 
+                                           Foreground="#333333" 
+                                           FontSize="12"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="下限: " 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#666666" 
+                                           FontSize="12"/>
+                                <TextBlock Text="{Binding LowerBound, StringFormat='{}{0:N2}'}" 
+                                           Foreground="#333333" 
+                                           FontSize="12"
+                                           Margin="0,0,15,0"/>
+
+                                <TextBlock Text="上限: " 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#666666" 
+                                           FontSize="12"/>
+                                <TextBlock Text="{Binding UpperBound, StringFormat='{}{0:N2}'}" 
+                                           Foreground="#333333" 
+                                           FontSize="12"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- 右侧信息 -->
+                        <StackPanel Grid.Column="1">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                <TextBlock Text="动作: " 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#666666" 
+                                           FontSize="12"/>
+                                <TextBlock Text="{Binding Action}" 
+                                           Foreground="#333333" 
+                                           FontSize="12"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="最后触发: " 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#666666" 
+                                           FontSize="12"/>
+                                <TextBlock Text="{Binding LastTriggeredAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" 
+                                           Foreground="#333333" 
+                                           FontSize="12"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <StackPanel>
         <!-- Toolbar -->
-        <ui:CommandBar Grid.Row="0" DefaultLabelPosition="Right" IsOpen="False" Margin="0,0,0,10">
+        <ui:CommandBar DefaultLabelPosition="Right" IsOpen="False" Margin="0,0,0,10">
             <ui:AppBarButton Command="{Binding AddTriggerCommand}" Label="添加触发器">
                 <ui:AppBarButton.Icon>
                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
@@ -39,25 +195,19 @@
         </ui:CommandBar>
 
         <!-- Triggers List -->
-        <DataGrid Grid.Row="1" 
-                  ItemsSource="{Binding Triggers}" 
-                  SelectedItem="{Binding SelectedTrigger}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  SelectionMode="Single">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="描述" Binding="{Binding Description}" Width="*" />
-                <DataGridTextColumn Header="变量ID" Binding="{Binding VariableId}" Width="150" />
-                <DataGridTextColumn Header="条件" Binding="{Binding Condition}" Width="100" />
-                <DataGridTextColumn Header="阈值/范围" Binding="{Binding Threshold, StringFormat='{}{0:N2}'}" Width="100" />
-                <DataGridTextColumn Header="下限" Binding="{Binding LowerBound, StringFormat='{}{0:N2}'}" Width="100" />
-                <DataGridTextColumn Header="上限" Binding="{Binding UpperBound, StringFormat='{}{0:N2}'}" Width="100" />
-                <DataGridTextColumn Header="动作" Binding="{Binding Action}" Width="100" />
-                <DataGridTextColumn Header="激活" Binding="{Binding IsActive}" Width="60" />
-                <DataGridTextColumn Header="最后触发" Binding="{Binding LastTriggeredAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150" />
-                <DataGridTextColumn Header="创建时间" Binding="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150" />
-                <DataGridTextColumn Header="更新时间" Binding="{Binding UpdatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="150" />
-            </DataGrid.Columns>
-        </DataGrid>
-    </Grid>
+        <ui:GridView
+            x:Name="TriggersGridView"
+            Margin="20"
+            IsItemClickEnabled="True"
+            ItemTemplate="{StaticResource TriggerItemTemplate}"
+            ItemsSource="{Binding Triggers}" 
+            SelectedItem="{Binding SelectedTrigger}"
+            SelectionMode="Single">
+            <hc:Interaction.Triggers>
+                <hc:EventTrigger EventName="MouseDoubleClick">
+                    <hc:InvokeCommandAction Command="{Binding EditTriggerCommand}" />
+                </hc:EventTrigger>
+            </hc:Interaction.Triggers>
+        </ui:GridView>
+    </StackPanel>
 </UserControl>

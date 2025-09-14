@@ -42,59 +42,59 @@ namespace DMS.Application.Services.Triggers.Impl
         /// </summary>
         public async Task EvaluateTriggersAsync(int variableId, object currentValue)
         {
-            // try
-            // {
-                // var triggers = await _triggerManagementService.GetTriggersForVariableAsync(variableId);
+            try
+            {
+                var triggers = await _triggerManagementService.GetTriggersForVariableAsync(variableId);
                 // 注意：这里不再通过 _variableAppService 获取 VariableDto，
                 // 而是在调用 ExecuteActionAsync 时，由上层（DataEventService）提供。
                 // 如果需要 VariableDto 信息，可以在 ExecuteActionAsync 的 TriggerContext 中携带。
 
-                // _logger.LogDebug($"Evaluating {triggers.Count(t => t.IsActive)} active triggers for variable ID: {variableId}");
-                //
-                // foreach (var trigger in triggers.Where(t => t.IsActive))
-                // {
-                //     if (!IsWithinSuppressionWindow(trigger)) // Check suppression first
-                //     {
-                //         if (EvaluateCondition(trigger, currentValue))
-                //         {
-                //             // 创建一个临时的上下文对象，其中 VariableDto 可以为 null，
-                //             // 因为我们目前没有从 _variableAppService 获取它。
-                //             // 在实际应用中，你可能需要通过某种方式获取 VariableDto。
-                //             var context = new TriggerContext(trigger, currentValue, null); 
-                //
-                //             await _actionExecutor.ExecuteActionAsync(context);
-                //
-                //             // Update last triggered time and start suppression timer if needed
-                //             trigger.LastTriggeredAt = DateTime.UtcNow;
-                //             // For simplicity, we'll assume it's updated periodically or on next load.
-                //             // In a production scenario, you'd likely want to persist this back to the database.
-                //
-                //              // Start suppression timer if duration is set (in-memory suppression)
-                //              if (trigger.SuppressionDuration.HasValue)
-                //              {
-                //                 // 使用 ThreadingTimer 避免歧义
-                //                 var timer = new ThreadingTimer(_ =>
-                //                 {
-                //                     trigger.LastTriggeredAt = null; // Reset suppression flag after delay
-                //                     _logger.LogInformation($"Suppression lifted for trigger {trigger.Id}");
-                //                     // Note: Modifying 'trigger' directly affects the object in the list returned by GetTriggersForVariableAsync().
-                //                     // This works for in-memory state but won't persist changes. Consider updating DB explicitly if needed.
-                //                 }, null, trigger.SuppressionDuration.Value, Timeout.InfiniteTimeSpan); // Single shot timer
-                //                 
-                //                 // Replace any existing timer for this trigger ID
-                //                 _suppressionTimers.AddOrUpdate(trigger.Id, timer, (key, oldTimer) => {
-                //                     oldTimer?.Dispose();
-                //                     return timer;
-                //                 });
-                //              }
-                //         }
-                //      }
-            //     }
-            // }
-            // catch (Exception ex)
-            // {
-            //     _logger.LogError(ex, "An error occurred while evaluating triggers for variable ID: {VariableId}", variableId);
-            // }
+                _logger.LogDebug($"Evaluating {triggers.Count(t => t.IsActive)} active triggers for variable ID: {variableId}");
+
+                foreach (var trigger in triggers.Where(t => t.IsActive))
+                {
+                    if (!IsWithinSuppressionWindow(trigger)) // Check suppression first
+                    {
+                        if (EvaluateCondition(trigger, currentValue))
+                        {
+                            // 创建一个临时的上下文对象，其中 VariableDto 可以为 null，
+                            // 因为我们目前没有从 _variableAppService 获取它。
+                            // 在实际应用中，你可能需要通过某种方式获取 VariableDto。
+                            var context = new TriggerContext(trigger, currentValue, null); 
+
+                            await _actionExecutor.ExecuteActionAsync(context);
+
+                            // Update last triggered time and start suppression timer if needed
+                            trigger.LastTriggeredAt = DateTime.UtcNow;
+                            // For simplicity, we'll assume it's updated periodically or on next load.
+                            // In a production scenario, you'd likely want to persist this back to the database.
+
+                             // Start suppression timer if duration is set (in-memory suppression)
+                             if (trigger.SuppressionDuration.HasValue)
+                             {
+                                // 使用 ThreadingTimer 避免歧义
+                                var timer = new ThreadingTimer(_ =>
+                                {
+                                    trigger.LastTriggeredAt = null; // Reset suppression flag after delay
+                                    _logger.LogInformation($"Suppression lifted for trigger {trigger.Id}");
+                                    // Note: Modifying 'trigger' directly affects the object in the list returned by GetTriggersForVariableAsync().
+                                    // This works for in-memory state but won't persist changes. Consider updating DB explicitly if needed.
+                                }, null, trigger.SuppressionDuration.Value, Timeout.InfiniteTimeSpan); // Single shot timer
+                                
+                                // Replace any existing timer for this trigger ID
+                                _suppressionTimers.AddOrUpdate(trigger.Id, timer, (key, oldTimer) => {
+                                    oldTimer?.Dispose();
+                                    return timer;
+                                });
+                             }
+                        }
+                     }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while evaluating triggers for variable ID: {VariableId}", variableId);
+            }
         }
 
         /// <summary>
