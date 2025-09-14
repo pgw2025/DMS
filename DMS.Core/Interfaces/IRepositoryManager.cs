@@ -1,4 +1,5 @@
 using DMS.Core.Interfaces.Repositories;
+using DMS.Core.Interfaces.Repositories.Triggers; // 引入新的接口命名空间
 
 namespace DMS.Core.Interfaces;
 
@@ -53,6 +54,11 @@ public interface IRepositoryManager : IDisposable
     /// 获取Nlog日志仓储的实例。
     /// </summary>
     INlogRepository Nlogs { get; set; }
+
+    /// <summary>
+    /// 获取触发器仓储的实例。
+    /// </summary>
+    ITriggerRepository Triggers { get; set; }
 
     /// <summary>
     /// 初始化数据库

@@ -2,6 +2,10 @@
     x:Class="DMS.WPF.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:triggers="clr-namespace:DMS.Core.Models.Triggers;assembly=DMS.Core"
+    xmlns:converters="clr-namespace:DMS.WPF.Converters"
+    xmlns:localConverters="clr-namespace:DMS.WPF.Converters" <!-- 引入本地转换器命名空间 -->
     
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern">
     <Application.Resources>
@@ -15,6 +19,27 @@
                 <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
+            <!-- Converters -->
+            <converters:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
+            <converters:NullableTimeSpanToSecondsConverter x:Key="NullableTimeSpanToSecondsConverter"/>
+            <localConverters:BooleanToBrushConverter x:Key="BooleanToBrushConverter"/> <!-- 确保这个转换器也被引用 -->
+            
+            <!-- 添加缺失的转换器 -->
+            <localConverters:EnumToVisibilityConverter x:Key="LocalEnumToVisibilityConverter"/>
+            
+            <!-- Enum Values for ComboBoxes -->
+            <ObjectDataProvider x:Key="ConditionTypeEnum" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="triggers:ConditionType"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            
+            <ObjectDataProvider x:Key="ActionTypeEnum" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="triggers:ActionType"/>
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+            
         </ResourceDictionary>
 
     </Application.Resources>

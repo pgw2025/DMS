@@ -1,7 +1,9 @@
 using AutoMapper;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
+using DMS.Core.Interfaces.Repositories.Triggers; // 引入新的接口
 using DMS.Infrastructure.Data;
+using DMS.Infrastructure.Repositories.Triggers; // 引入实现类所在的命名空间
 using SqlSugar;
 
 namespace DMS.Infrastructure.Repositories;
@@ -28,6 +30,7 @@ public class RepositoryManager : IRepositoryManager
     /// <param name="variableHistories">变量历史仓储实例。</param>
     /// <param name="users">用户仓储实例。</param>
     /// <param name="nlogs">Nlog日志仓储实例。</param>
+    /// <param name="triggers">触发器仓储实例。</param>
     public RepositoryManager( SqlSugarDbContext dbContext,
         IInitializeRepository initializeRepository,
         IDeviceRepository devices,
@@ -38,7 +41,8 @@ public class RepositoryManager : IRepositoryManager
         IMenuRepository menus,
         IVariableHistoryRepository variableHistories,
         IUserRepository users,
-        INlogRepository nlogs)
+        INlogRepository nlogs,
+        ITriggerRepository triggers) // 新增参数
     {
         _dbContext = dbContext;
         InitializeRepository = initializeRepository;
@@ -51,6 +55,7 @@ public class RepositoryManager : IRepositoryManager
         VariableHistories = variableHistories;
         Users = users;
         Nlogs = nlogs;
+        Triggers = triggers; // 赋值
         
        _db = dbContext.GetInstance();
     }
@@ -99,6 +104,10 @@ public class RepositoryManager : IRepositoryManager
     /// 获取Nlog日志仓储实例。
     /// </summary>
     public INlogRepository Nlogs { get; set; }
+    /// <summary>
+    /// 获取触发器仓储实例。
+    /// </summary>
+    public ITriggerRepository Triggers { get; set; }
     /// <summary>
     /// 获取初始化仓储实例。
     /// </summary>

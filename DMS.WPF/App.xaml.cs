@@ -216,6 +216,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<INlogRepository, NlogRepository>();
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IAlarmHistoryRepository, AlarmHistoryRepository>(); // 添加这行
+        services.AddSingleton<ITriggerRepository, SqlSugarTriggerRepository>(); // 注册触发器仓储
         services.AddSingleton<IEmailAccountRepository, EmailAccountRepository>();
         services.AddSingleton<IEmailMessageRepository, EmailMessageRepository>();
         services.AddSingleton<IEmailTemplateRepository, EmailTemplateRepository>();
@@ -227,7 +228,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<IMqttServiceFactory, MqttServiceFactory>();
         services.AddTransient<IEmailService, EmailService>();
 
-        // 注册App服务\r\n
+        // 注册App服务
         services.AddSingleton<IInitializeService, InitializeService>();
         services.AddSingleton<IDeviceAppService, DeviceAppService>();
         services.AddSingleton<IVariableAppService, VariableAppService>();
@@ -244,6 +245,9 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IMenuManagementService, MenuManagementService>();
         services.AddSingleton<IMqttManagementService, MqttManagementService>();
         services.AddSingleton<ILogManagementService, LogManagementService>();
+        services.AddSingleton<ITriggerManagementService, TriggerManagementService>(); // 注册触发器管理服务
+        services.AddSingleton<ITriggerEvaluationService, TriggerEvaluationService>();   // 注册触发器评估服务
+        services.AddSingleton<ITriggerActionExecutor, TriggerActionExecutor>();       // 注册触发器动作执行器
 
         services.AddSingleton<IDataLoaderService, DataLoaderService>();
         services.AddSingleton<INlogAppService, NlogAppService>();
@@ -256,6 +260,13 @@ public partial class App : System.Windows.Application
 
         // 注册WPF中的服务
         services.AddSingleton<IMqttAppService, MqttAppService>();
+        services.AddSingleton<IEmailAppService, EmailAppService>();
+        services.AddSingleton<EmailFunctionalityTestService, EmailFunctionalityTestService>();
+
+        // 注册转换器 (Converters)
+        services.AddTransient<EnumToVisibilityConverter>();
+        services.AddTransient<NullableTimeSpanToSecondsConverter>();
+        services.AddTransient<BooleanToBrushConverter>();
 
         // 注册事件服务
         services.AddSingleton<DMS.Application.Interfaces.IEventService, DMS.Application.Services.EventService>();
@@ -292,6 +303,7 @@ public partial class App : System.Windows.Application
         services.AddScoped<MqttServerDetailViewModel>();
         services.AddSingleton<VariableHistoryViewModel>();
         services.AddSingleton<EmailManagementViewModel>();
+        services.AddSingleton<TriggersViewModel>(); // 注册 TriggersViewModel
 
         // 注册对话框视图模型
         services.AddTransient<DeviceDialogViewModel>();
@@ -309,6 +321,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<AlarmSettingsDialogViewModel>();
         services.AddTransient<EmailAccountDialogViewModel>();
         services.AddTransient<EmailTemplateDialogViewModel>();
+        services.AddTransient<TriggerEditorViewModel>(); // 注册 TriggerEditorViewModel
 
         // 注册View视图
         services.AddSingleton<SplashWindow>();
