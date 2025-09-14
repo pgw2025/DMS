@@ -40,7 +40,7 @@ namespace DMS.Infrastructure.Repositories
         /// <summary>
         /// 根据 ID 获取触发器定义
         /// </summary>
-        public async Task<TriggerDefinition?> GetByIdAsync(Guid id)
+        public async Task<TriggerDefinition?> GetByIdAsync(int id)
         {
             var dbTrigger = await base.GetByIdAsync(id);
             return _mapper.Map<TriggerDefinition>(dbTrigger);
@@ -67,7 +67,7 @@ namespace DMS.Infrastructure.Repositories
         /// <summary>
         /// 删除一个触发器定义
         /// </summary>
-        public async Task<bool> DeleteAsync(Guid id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -82,7 +82,7 @@ namespace DMS.Infrastructure.Repositories
         /// <summary>
         /// 获取与指定变量关联的所有触发器定义
         /// </summary>
-        public async Task<IEnumerable<TriggerDefinition>> GetByVariableIdAsync(Guid variableId)
+        public async Task<IEnumerable<TriggerDefinition>> GetByVariableIdAsync(int variableId)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();

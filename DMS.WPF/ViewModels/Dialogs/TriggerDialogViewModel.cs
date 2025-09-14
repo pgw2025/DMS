@@ -54,7 +54,7 @@ namespace DMS.WPF.ViewModels.Dialogs
             if (parameter is TriggerDefinitionDto triggerDto)
             {
                 Trigger = triggerDto;
-                Title = Trigger.Id == Guid.Empty ? "新建触发器" : "编辑触发器";
+                Title = Trigger.Id == default(int) ? "新建触发器" : "编辑触发器";
                 PrimaryButText = "保存";
                 
                 // Load available variables for selection dropdown
@@ -109,7 +109,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         private async Task SaveAsync()
         {
             // Basic validation
-            if (Trigger.VariableId == Guid.Empty)
+            if (Trigger.VariableId == default(int))
             {
                 _notificationService.ShowWarn("请选择关联的变量");
                 return;
@@ -187,10 +187,10 @@ namespace DMS.WPF.ViewModels.Dialogs
 
             // Set timestamps
             Trigger.UpdatedAt = DateTime.UtcNow;
-            if (Trigger.Id == Guid.Empty)
+            if (Trigger.Id == default(int))
             {
                 Trigger.CreatedAt = DateTime.UtcNow;
-                Trigger.Id = Guid.NewGuid();
+                Trigger.Id = 0; // 对于自增ID，设置为0让数据库自动生成
             }
 
             // Close dialog with the updated trigger DTO

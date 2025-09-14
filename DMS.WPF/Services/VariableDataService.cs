@@ -51,20 +51,39 @@ public class VariableDataService : IVariableDataService
     public async Task<bool> AddVariableTable(VariableTableDto variableTableDto,
                                              MenuBeanDto menuDto = null, bool isAddDb = false)
     {
+        // 添加null检查
         if (variableTableDto == null)
+            return false;
+
+        // 添加_appDataCenterService和_variableTableManagementService的null检查
+        if (_appDataCenterService == null || _appDataCenterService.VariableTableManagementService == null)
             return false;
 
         if (isAddDb && menuDto != null)
         {
+            // 添加null检查
+            if (_appDataCenterService.VariableTableManagementService == null)
+                return false;
+
             CreateVariableTableWithMenuDto createDto = new CreateVariableTableWithMenuDto();
             createDto.VariableTable = variableTableDto;
             createDto.DeviceId = variableTableDto.DeviceId;
             createDto.Menu = menuDto;
+            
+            // 添加null检查
+            if (_appDataCenterService.VariableTableManagementService == null)
+                return false;
+                
             var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
-            _mapper.Map(resDto.VariableTable, variableTableDto);
+            
+            // 添加null检查
+            if (resDto != null && resDto.VariableTable != null && variableTableDto != null)
+                _mapper.Map(resDto.VariableTable, variableTableDto);
         }
 
-        _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(variableTableDto);
+        // 添加null检查
+        if (_appDataCenterService.VariableTableManagementService != null && variableTableDto != null)
+            _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(variableTableDto);
 
         return true;
     }

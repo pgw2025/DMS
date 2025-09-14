@@ -1,6 +1,8 @@
 using AutoMapper;
 using DMS.Core.Models;
 using DMS.Application.DTOs;
+using DMS.Application.DTOs.Triggers;
+using DMS.Core.Models.Triggers;
 
 namespace DMS.Application.Profiles;
 
@@ -56,5 +58,6 @@ public class MappingProfile : Profile
         CreateMap<EmailTemplate, EmailTemplateDto>().ReverseMap();
         
         CreateMap<EmailLog, EmailLogDto>().ReverseMap();
+        CreateMap<TriggerDefinition, TriggerDefinitionDto>().ReverseMap();
     }
 }

@@ -63,7 +63,6 @@ namespace DMS.WPF.ViewModels.Triggers
         {
             var newTrigger = new TriggerDefinitionDto
             {
-                Id = Guid.NewGuid(),
                 IsActive = true,
                 Condition = Core.Models.Triggers.ConditionType.GreaterThan,
                 Action = Core.Models.Triggers.ActionType.SendEmail,

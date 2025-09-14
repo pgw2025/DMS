@@ -34,12 +34,12 @@ namespace DMS.Core.Models.Triggers
         /// <summary>
         /// 触发器唯一标识符
         /// </summary>
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public int Id { get; set; }
 
         /// <summary>
         /// 关联的变量 ID
         /// </summary>
-        public Guid VariableId { get; set; }
+        public int VariableId { get; set; }
 
         /// <summary>
         /// 触发器是否处于激活状态

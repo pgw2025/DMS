@@ -23,7 +23,7 @@ namespace DMS.Application.Services.Triggers.Impl
         private readonly ITriggerActionExecutor _actionExecutor;
         private readonly ILogger<TriggerEvaluationService> _logger; // 使用标准日志接口
         // 为每个触发器存储抑制定时器
-        private readonly ConcurrentDictionary<Guid, ThreadingTimer> _suppressionTimers = new();
+        private readonly ConcurrentDictionary<int, ThreadingTimer> _suppressionTimers = new();
 
         public TriggerEvaluationService(
             ITriggerManagementService triggerManagementService,

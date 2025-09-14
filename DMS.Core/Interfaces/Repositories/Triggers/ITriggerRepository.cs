@@ -21,7 +21,7 @@ namespace DMS.Core.Interfaces.Repositories.Triggers
         /// </summary>
         /// <param name="id">触发器 ID</param>
         /// <returns>触发器定义实体，如果未找到则返回 null</returns>
-        Task<TriggerDefinition?> GetByIdAsync(Guid id);
+        Task<TriggerDefinition?> GetByIdAsync(int id);
 
         /// <summary>
         /// 添加一个新的触发器定义
@@ -42,13 +42,13 @@ namespace DMS.Core.Interfaces.Repositories.Triggers
         /// </summary>
         /// <param name="id">要删除的触发器 ID</param>
         /// <returns>删除成功返回 true，否则返回 false</returns>
-        Task<bool> DeleteAsync(Guid id);
+        Task<bool> DeleteAsync(int id);
 
         /// <summary>
         /// 获取与指定变量关联的所有触发器定义
         /// </summary>
         /// <param name="variableId">变量 ID</param>
         /// <returns>该变量关联的触发器定义实体列表</returns>
-        Task<IEnumerable<TriggerDefinition>> GetByVariableIdAsync(Guid variableId);
+        Task<IEnumerable<TriggerDefinition>> GetByVariableIdAsync(int variableId);
     }
 }

@@ -83,21 +83,31 @@ public class VariableTableManagementService : IVariableTableManagementService
             return;
 
         DeviceDto deviceDto = null;
-        if (_appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
+        if (_appDataStorageService.Devices != null && 
+            _appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
         {
             deviceDto = device;
             // 确保VariableTables不为null
-            device.VariableTables ??= new List<VariableTableDto>();
+            if (device.VariableTables == null)
+                device.VariableTables = new List<VariableTableDto>();
+                
             device.VariableTables.Add(variableTableDto);
-            variableTableDto.Device = device;
+            
+            // 确保Device属性不为null
+            if (variableTableDto != null)
+                variableTableDto.Device = device;
         }
 
-        if (_variableTables.TryAdd(variableTableDto.Id, variableTableDto))
+        // 确保_variableTables和variableTableDto不为null
+        if (_variableTables != null && variableTableDto != null)
         {
-            OnVariableTableChanged?.Invoke(this,new VariableTableChangedEventArgs(
-                                       DataChangeType.Added,
-                                       variableTableDto,
-                                       deviceDto));
+            if (_variableTables.TryAdd(variableTableDto.Id, variableTableDto))
+            {
+                OnVariableTableChanged?.Invoke(this, new VariableTableChangedEventArgs(
+                                           DataChangeType.Added,
+                                           variableTableDto,
+                                           deviceDto));
+            }
         }
     }
 

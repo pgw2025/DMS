@@ -14,13 +14,13 @@ public class DbTriggerDefinition
     /// <summary>
     /// 触发器唯一标识符，主键。
     /// </summary>
-    [SugarColumn(IsPrimaryKey = true)]
-    public Guid Id { get; set; }
+    [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+    public int Id { get; set; }
 
     /// <summary>
     /// 关联的变量 ID。
     /// </summary>
-    public Guid VariableId { get; set; }
+    public int VariableId { get; set; }
 
     /// <summary>
     /// 触发器是否处于激活状态。

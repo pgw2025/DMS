@@ -35,7 +35,7 @@ namespace DMS.Application.Services.Triggers.Impl
         /// <summary>
         /// 根据 ID 获取触发器定义
         /// </summary>
-        public async Task<TriggerDefinitionDto?> GetTriggerByIdAsync(Guid id)
+        public async Task<TriggerDefinitionDto?> GetTriggerByIdAsync(int id)
         {
             var trigger = await _repositoryManager.Triggers.GetByIdAsync(id);
             return trigger != null ? _mapper.Map<TriggerDefinitionDto>(trigger) : null;
@@ -64,7 +64,7 @@ namespace DMS.Application.Services.Triggers.Impl
         /// <summary>
         /// 更新一个已存在的触发器定义
         /// </summary>
-        public async Task<TriggerDefinitionDto?> UpdateTriggerAsync(Guid id, TriggerDefinitionDto triggerDto)
+        public async Task<TriggerDefinitionDto?> UpdateTriggerAsync(int id, TriggerDefinitionDto triggerDto)
         {
             // 1. 获取现有实体
             var existingTrigger = await _repositoryManager.Triggers.GetByIdAsync(id);
@@ -90,7 +90,7 @@ namespace DMS.Application.Services.Triggers.Impl
         /// <summary>
         /// 删除一个触发器定义
         /// </summary>
-        public async Task<bool> DeleteTriggerAsync(Guid id)
+        public async Task<bool> DeleteTriggerAsync(int id)
         {
             return await _repositoryManager.Triggers.DeleteAsync(id);
         }
@@ -98,7 +98,7 @@ namespace DMS.Application.Services.Triggers.Impl
         /// <summary>
         /// 获取与指定变量关联的所有触发器定义
         /// </summary>
-        public async Task<List<TriggerDefinitionDto>> GetTriggersForVariableAsync(Guid variableId)
+        public async Task<List<TriggerDefinitionDto>> GetTriggersForVariableAsync(int variableId)
         {
             var triggers = await _repositoryManager.Triggers.GetByVariableIdAsync(variableId);
             return _mapper.Map<List<TriggerDefinitionDto>>(triggers);

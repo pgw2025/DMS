@@ -85,42 +85,67 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     public async Task<CreateDeviceWithDetailsDto> AddDevice(CreateDeviceWithDetailsDto dto)
     {
+        // 添加null检查
+        if (dto == null || _appDataCenterService == null || _appDataCenterService.DeviceManagementService == null)
+            return null;
+
         var addDto = await _appDataCenterService.DeviceManagementService.CreateDeviceWithDetailsAsync(dto);
-        //更新当前界面
-        _dataStorageService.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
-        _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
         
         // 添加null检查
-        if (addDto.VariableTable != null)
+        if (_dataStorageService != null && addDto != null && addDto.Device != null)
+        {
+            //更新当前界面
+            _dataStorageService.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
+        }
+        
+        // 添加null检查
+        if (_menuDataService != null && addDto != null && addDto.DeviceMenu != null)
+        {
+            _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
+        }
+        
+        // 添加null检查
+        if (addDto != null && addDto.VariableTable != null)
         {
             await _variableDataService.AddVariableTable(addDto.VariableTable);
         }
         
         // 添加null检查
-        if (addDto.VariableTableMenu != null)
+        if (_menuDataService != null && addDto != null && addDto.VariableTableMenu != null)
         {
             _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
         }
         
-        //更新数据中心
-        _appDataCenterService.DeviceManagementService.AddDeviceToMemory(addDto.Device);
+        // 添加null检查
+        if (_appDataCenterService.DeviceManagementService != null && addDto != null && addDto.Device != null)
+        {
+            //更新数据中心
+            _appDataCenterService.DeviceManagementService.AddDeviceToMemory(addDto.Device);
+        }
         
         // 添加null检查
-        if (addDto.VariableTable != null)
+        if (_appDataCenterService.VariableTableManagementService != null && addDto != null && addDto.VariableTable != null)
         {
             _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(addDto.VariableTable);
         }
         
-        _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.DeviceMenu);
+        // 添加null检查
+        if (_appDataCenterService.MenuManagementService != null && addDto != null && addDto.DeviceMenu != null)
+        {
+            _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.DeviceMenu);
+        }
         
         // 添加null检查
-        if (addDto.VariableTableMenu != null)
+        if (_appDataCenterService.MenuManagementService != null && addDto != null && addDto.VariableTableMenu != null)
         {
             _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.VariableTableMenu);
         }
 
-        _menuDataService.BuildMenuTrees();
-
+        // 添加null检查
+        if (_menuDataService != null)
+        {
+            _menuDataService.BuildMenuTrees();
+        }
 
         return addDto;
     }

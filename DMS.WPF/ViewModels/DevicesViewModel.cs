@@ -89,7 +89,16 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
 
             CreateDeviceWithDetailsDto dto = new CreateDeviceWithDetailsDto();
-            dto.Device = _mapper.Map<DeviceDto>(device);
+            // 添加null检查
+            if (_mapper != null)
+            {
+                dto.Device = _mapper.Map<DeviceDto>(device);
+            }
+            else
+            {
+                _notificationService?.ShowError("映射服务未初始化");
+                return;
+            }
 
 
             dto.DeviceMenu = new MenuBeanDto()
@@ -98,6 +107,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                  Icon = SegoeFluentIcons.Devices2.Glyph,
                                  TargetViewKey = "DeviceDetailView"
                              };
+
             if (device.IsAddDefVarTable)
             {
                 dto.VariableTable = new VariableTableDto()
@@ -116,14 +126,34 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
 
             // 添加设备
-            var addDto = await _wpfDataService.DeviceDataService.AddDevice(dto);
-
-            _notificationService.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
+            // 添加null检查
+            if (_wpfDataService != null && _wpfDataService.DeviceDataService != null)
+            {
+                var addDto = await _wpfDataService.DeviceDataService.AddDevice(dto);
+                
+                // 添加null检查
+                if (addDto != null && addDto.Device != null && _notificationService != null)
+                {
+                    _notificationService.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
+                }
+                else if (_notificationService != null)
+                {
+                    _notificationService.ShowError("设备添加失败");
+                }
+            }
+            else if (_notificationService != null)
+            {
+                _notificationService.ShowError("数据服务未初始化");
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            _notificationService.ShowError($"添加设备的过程中发生错误：{e.Message}", e);
+            // 添加null检查
+            if (_notificationService != null)
+            {
+                _notificationService.ShowError($"添加设备的过程中发生错误：{e.Message}", e);
+            }
         }
     }
 

@@ -100,10 +100,12 @@ public abstract class BaseRepository<TEntity>
         return entities;
     }
 
+   
+
     /// <summary>
-    /// 异步根据主键 ID 获取单个实体。
+    /// 异步根据主键 ID (int类型) 获取单个实体。
     /// </summary>
-    /// <param name="id">实体的主键 ID。</param>
+    /// <param name="id">实体的主键 ID (int类型)。</param>
     /// <returns>返回找到的实体，如果未找到则返回 null。</returns>
     public virtual async Task<TEntity> GetByIdAsync(int id)
     {
