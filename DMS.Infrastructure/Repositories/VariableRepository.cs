@@ -203,10 +203,11 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
 
     }
 
-    public Task<bool> AddBatchAsync(List<Variable> entities)
+    public async Task<List<Variable>> AddBatchAsync(List<Variable> entities)
     {
         var dbEntities = _mapper.Map<List<DbVariable>>(entities);
-        return base.AddBatchAsync(dbEntities);
+        var addedEntities = await base.AddBatchAsync(dbEntities);
+        return _mapper.Map<List<Variable>>(addedEntities);
     }
 
     /// <summary>

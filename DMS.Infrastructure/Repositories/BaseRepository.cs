@@ -246,13 +246,22 @@ public abstract class BaseRepository<TEntity>
         return result;
     }
 
-    public async Task<bool> AddBatchAsync(List<TEntity> entities)
+    public async Task<List<TEntity>> AddBatchAsync(List<TEntity> entities)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Insertable(entities).ExecuteCommandAsync();
+        var retrunEntities = new  List<TEntity>();
+        foreach (var entity in entities)
+        {
+            var result = await Db.Insertable(entity).ExecuteReturnEntityAsync();
+            retrunEntities.Add(result);
+        }
+
         stopwatch.Stop();
         _logger.LogInformation($"AddBatchAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
-        return result > 0;
+        
+       
+        
+        return retrunEntities;
     }
 }

@@ -104,10 +104,11 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
 
     }
 
-    public Task<bool> AddBatchAsync(List<VariableHistory> entities)
+    public async Task<List<VariableHistory>> AddBatchAsync(List<VariableHistory> entities)
     {
         var dbEntities = _mapper.Map<List<DbVariableHistory>>(entities);
-        return base.AddBatchAsync(dbEntities);
+        var addedEntities = await base.AddBatchAsync(dbEntities);
+        return _mapper.Map<List<VariableHistory>>(addedEntities);
     }
     
     /// <summary>

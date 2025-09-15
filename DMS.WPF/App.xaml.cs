@@ -79,6 +79,8 @@ public partial class App : System.Windows.Application
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
             // 添加报警处理器
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<DMS.Application.Services.Processors.AlarmProcessor>());
+            // 添加触发器处理器
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<TriggerProcessor>());
         }
         catch (Exception exception)
         {
@@ -201,6 +203,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DMS.Application.Interfaces.IAlarmService, DMS.Application.Services.AlarmService>();
         services.AddSingleton<DMS.Application.Services.Processors.AlarmProcessor>();
         services.AddSingleton<DMS.Application.EventHandlers.AlarmEventHandler>();
+        services.AddSingleton<TriggerProcessor>(); // 注册触发器处理器
 
         // 注册Core中的仓库
         services.AddSingleton<AppSettings>();

@@ -55,7 +55,7 @@ public interface IVariableAppService
     /// <summary>
     /// 异步批量导入变量。
     /// </summary>
-    Task<bool> BatchImportVariablesAsync(List<VariableDto> variables);
+    Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables);
 
     /// <summary>
     /// 检测一组变量是否已存在。

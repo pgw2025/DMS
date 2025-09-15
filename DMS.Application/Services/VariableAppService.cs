@@ -221,13 +221,13 @@ public class VariableAppService : IVariableAppService
         }
     }
 
-    public async Task<bool> BatchImportVariablesAsync(List<VariableDto> variables)
+    public async Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables)
     {
         try
         {
             var variableModels = _mapper.Map<List<Variable>>(variables);
-            var result = await _repoManager.Variables.AddBatchAsync(variableModels);
-            return result;
+            var addedVariables = await _repoManager.Variables.AddBatchAsync(variableModels);
+            return _mapper.Map<List<VariableDto>>(addedVariables);
         }
         catch (Exception ex)
         {

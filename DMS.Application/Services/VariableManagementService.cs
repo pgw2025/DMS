@@ -19,6 +19,7 @@ public class VariableManagementService : IVariableManagementService
 {
     private readonly IVariableAppService _variableAppService;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IDataProcessingService _dataProcessingService;
 
     /// <summary>
     /// 当变量数据发生变化时触发
@@ -31,10 +32,12 @@ public class VariableManagementService : IVariableManagementService
     public event EventHandler<VariableValueChangedEventArgs> OnVariableValueChanged;
 
     public VariableManagementService(IVariableAppService variableAppService,
-                                     IAppDataStorageService appDataStorageService)
+                                     IAppDataStorageService appDataStorageService,
+                                     IDataProcessingService dataProcessingService)
     {
         _variableAppService = variableAppService;
         _appDataStorageService = appDataStorageService;
+        _dataProcessingService = dataProcessingService;
     }
 
     /// <summary>
@@ -151,6 +154,7 @@ public class VariableManagementService : IVariableManagementService
 
     public void VariableValueChanged(VariableValueChangedEventArgs eventArgs)
     {
+        // 触发事件，通知DataEventService等监听者
         OnVariableValueChanged?.Invoke(this, eventArgs);
     }
 }

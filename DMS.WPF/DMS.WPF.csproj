@@ -176,7 +176,6 @@
 
   <ItemGroup>
     <Folder Include="ViewModels\Items\" />
-    <Folder Include="ViewModels\Triggers\" />
   </ItemGroup>
 
 

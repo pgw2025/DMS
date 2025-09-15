@@ -158,14 +158,20 @@ public class InitializeRepository : IInitializeRepository
                                },
                                new DbMenu
                                {
-                                   Id = 8, Header = "设置", Icon = "\uE713", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   Id = 8, Header = "变量历史", Icon = "\uE81C", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "VariableHistoryView",
                                    DisplayOrder = 8
                                },
                                new DbMenu
                                {
-                                   Id = 9, Header = "关于", Icon = "\uE946", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "", DisplayOrder = 9
+                                   Id = 9, Header = "设置", Icon = "\uE713", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   DisplayOrder = 9
+                               },
+                               new DbMenu
+                               {
+                                   Id = 10, Header = "关于", Icon = "\uE946", ParentId = 0,
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "", DisplayOrder = 10
                                } // 假设有一个AboutView
                            };
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DMS.Application.DTOs;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Infrastructure.Interfaces.Services;
@@ -19,6 +20,7 @@ namespace DMS.Infrastructure.Services
     public class S7ServiceManager : IS7ServiceManager
     {
         private readonly ILogger<S7ServiceManager> _logger;
+        private readonly IEventService _eventService;
         private readonly IDataProcessingService _dataProcessingService;
         private readonly IAppDataCenterService _appDataCenterService;
         private readonly IS7ServiceFactory _s7ServiceFactory;
@@ -28,11 +30,13 @@ namespace DMS.Infrastructure.Services
 
         public S7ServiceManager(
             ILogger<S7ServiceManager> logger,
+            IEventService eventService,
             IDataProcessingService dataProcessingService,
             IAppDataCenterService appDataCenterService,
             IS7ServiceFactory s7ServiceFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _eventService = eventService;
             _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
             _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _s7ServiceFactory = s7ServiceFactory ?? throw new ArgumentNullException(nameof(s7ServiceFactory));
@@ -167,18 +171,25 @@ namespace DMS.Infrastructure.Services
                 if (context.S7Service.IsConnected)
                 {
                     context.IsConnected = true;
+                    
+                   
                     _logger.LogInformation("设备 {DeviceName} 连接成功", context.Device.Name);
                 }
                 else
                 {
                     _logger.LogWarning("设备 {DeviceName} 连接失败", context.Device.Name);
                 }
+                _eventService.RaiseDeviceConnectChanged(
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, context.IsConnected));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "连接设备 {DeviceName} 时发生错误: {ErrorMessage}",
                     context.Device.Name, ex.Message);
                 context.IsConnected = false;
+                
+                _eventService.RaiseDeviceConnectChanged(
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, context.IsConnected));
             }
             finally
             {
@@ -199,6 +210,9 @@ namespace DMS.Infrastructure.Services
                 _logger.LogInformation("正在断开设备 {DeviceName} 的连接", context.Device.Name);
                 await context.S7Service.DisconnectAsync();
                 context.IsConnected = false;
+                
+                _eventService.RaiseDeviceConnectChanged(
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, context.IsConnected));
                 _logger.LogInformation("设备 {DeviceName} 连接已断开", context.Device.Name);
             }
             catch (Exception ex)

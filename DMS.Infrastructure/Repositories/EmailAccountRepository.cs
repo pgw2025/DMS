@@ -146,13 +146,19 @@ namespace DMS.Infrastructure.Repositories
         /// <summary>
         /// 异步批量添加实体。
         /// </summary>
-        public async Task<bool> AddBatchAsync(List<EmailAccount> entities)
+        public async Task<List<EmailAccount>> AddBatchAsync(List<EmailAccount> entities)
         {
             var dbEntities = _mapper.Map<List<DbEmailAccount>>(entities);
-            var result = await Db.Insertable(dbEntities)
-                .ExecuteCommandAsync();
+            var insertedEntities = new List<DbEmailAccount>();
             
-            return result > 0;
+            // 使用循环逐个插入实体，这样可以确保返回每个插入的实体
+            foreach (var entity in dbEntities)
+            {
+                var insertedEntity = await Db.Insertable(entity).ExecuteReturnEntityAsync();
+                insertedEntities.Add(insertedEntity);
+            }
+            
+            return _mapper.Map<List<EmailAccount>>(insertedEntities);
         }
     }
 }

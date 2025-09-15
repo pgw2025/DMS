@@ -105,10 +105,11 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
 
     }
 
-    public Task<bool> AddBatchAsync(List<VariableMqttAlias> entities)
+    public async Task<List<VariableMqttAlias>> AddBatchAsync(List<VariableMqttAlias> entities)
     {
         var dbEntities = _mapper.Map<List<DbVariableMqttAlias>>(entities);
-        return base.AddBatchAsync(dbEntities);
+        var addedEntities = await base.AddBatchAsync(dbEntities);
+        return _mapper.Map<List<VariableMqttAlias>>(addedEntities);
     }
 
     /// <summary>

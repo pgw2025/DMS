@@ -129,10 +129,11 @@ public class NlogRepository : BaseRepository<DbNlog>, INlogRepository
     /// 此方法主要用于满足接口契约，实际使用应谨慎。
     /// </summary>
     /// <param name="entities">要添加的Nlog日志实体列表。</param>
-    /// <returns>操作是否成功。</returns>
-    public new async Task<bool> AddBatchAsync(List<Core.Models.Nlog> entities)
+    /// <returns>添加的Nlog日志实体列表。</returns>
+    public new async Task<List<Core.Models.Nlog>> AddBatchAsync(List<Core.Models.Nlog> entities)
     {
         var dbEntities = _mapper.Map<List<DbNlog>>(entities);
-        return await base.AddBatchAsync(dbEntities);
+        var addedEntities = await base.AddBatchAsync(dbEntities);
+        return _mapper.Map<List<Core.Models.Nlog>>(addedEntities);
     }
 }

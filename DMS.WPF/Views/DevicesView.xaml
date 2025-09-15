@@ -98,7 +98,7 @@
                             <StackPanel Grid.Column="1" 
                                         Orientation="Horizontal" 
                                         VerticalAlignment="Top">
-                                <Border Background="{Binding IsConnected, 
+                                <Border Background="{Binding IsRunning, 
                                                      Converter={StaticResource BoolToColorConverter}, 
                                                      ConverterParameter='Green;Red'}"
                                         CornerRadius="8"
@@ -106,7 +106,7 @@
                                         Height="16"
                                         Margin="0,0,10,0">
                                     <Border.ToolTip>
-                                        <TextBlock Text="{Binding IsConnected, 
+                                        <TextBlock Text="{Binding IsRunning, 
                                                                   Converter={StaticResource BoolToStringConverter}, 
                                                                   ConverterParameter='已连接;未连接'}"/>
                                     </Border.ToolTip>
@@ -267,6 +267,7 @@
                         </Button>
                         
                         <Button Content="&#xE76C;"
+                                Command="{Binding EditDeviceCommand}"
                                 FontFamily="Segoe MDL2 Assets"
                                 FontSize="16"
                                 Width="36"
@@ -287,6 +288,7 @@
                                 ToolTip="监控设备"/>
                         
                         <Button Content="&#xE74D;"
+                                Command="{Binding DeleteDeviceCommand}"
                                 FontFamily="Segoe MDL2 Assets"
                                 FontSize="16"
                                 Width="36"
