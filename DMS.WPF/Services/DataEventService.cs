@@ -6,6 +6,7 @@ using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Events;
 using DMS.Core.Models;
 using DMS.Message;
 using DMS.WPF.Interfaces;
@@ -20,6 +21,7 @@ public class DataEventService : IDataEventService
 {
     private readonly IMapper _mapper;
     private readonly IDataStorageService _dataStorageService;
+    private readonly IEventService _eventService;
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IWPFDataService _wpfDataService;
 
@@ -28,16 +30,18 @@ public class DataEventService : IDataEventService
     /// </summary>
     public DataEventService(IMapper mapper,
         IDataStorageService dataStorageService, 
+        IEventService eventService,
         IAppDataCenterService appDataCenterService,
         IWPFDataService wpfDataService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
+        _eventService = eventService;
         _appDataCenterService = appDataCenterService;
         _wpfDataService = wpfDataService;
         
         // 监听变量值变更事件
-        _appDataCenterService.VariableManagementService.OnVariableValueChanged += OnVariableValueChanged;
+        _eventService.OnVariableValueChanged += OnVariableValueChanged;
         _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
         // _appDataCenterService.OnLogChanged += _logDataService.OnNlogChanged;

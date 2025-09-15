@@ -11,6 +11,8 @@ namespace DMS.Infrastructure.Services
     /// </summary>
     public class S7Service : IS7Service
     {
+        private const int ReadMultipleVarsCount = 10;
+        
         private Plc _plc;
         private readonly ILogger<S7Service> _logger;
 
@@ -91,13 +93,16 @@ namespace DMS.Infrastructure.Services
             {
                 throw new InvalidOperationException("PLC未连接");
             }
+            
 
             try
-            {
+            { 
+                var result = new Dictionary<string, object>();
                 var dataItems = addresses.Select(DataItem.FromAddress).ToList();
+
                 await _plc.ReadMultipleVarsAsync(dataItems);
 
-                var result = new Dictionary<string, object>();
+               
                 for (int i = 0; i < addresses.Count; i++)
                 {
                     result[addresses[i]] = dataItems[i].Value;

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
+using DMS.Core.Events;
 using DMS.Core.Models;
 
 namespace DMS.Application.Services;
@@ -56,16 +57,4 @@ public interface IVariableManagementService
     /// 在内存中删除变量
     /// </summary>
     void RemoveVariableFromMemory(int variableId, ConcurrentDictionary<int, VariableTableDto> variableTables);
-
-    void VariableValueChanged(VariableValueChangedEventArgs eventArgs);
-
-    /// <summary>
-    /// 当变量数据发生变化时触发
-    /// </summary>
-    event EventHandler<VariableChangedEventArgs> OnVariableChanged;
-
-    /// <summary>
-    /// 当变量数据发生变化时触发
-    /// </summary>
-    event EventHandler<VariableValueChangedEventArgs> OnVariableValueChanged;
 }

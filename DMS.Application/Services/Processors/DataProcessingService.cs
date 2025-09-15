@@ -50,14 +50,13 @@ public class DataProcessingService : BackgroundService, IDataProcessingService
     /// 将一个变量数据项异步推入处理队列。
     /// </summary>
     /// <param name="data">要入队的变量数据。</param>
-    public async ValueTask EnqueueAsync(VariableDto data)
+    public async ValueTask EnqueueAsync(VariableContext context)
     {
-        if (data == null)
+        if (context == null)
         {
             return;
         }
 
-        var context = new VariableContext(data);
         // 将数据项写入 Channel，供后台服务处理。
         await _queue.Writer.WriteAsync(context);
     }

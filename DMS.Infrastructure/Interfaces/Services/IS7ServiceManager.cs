@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DMS.Application.DTOs;
+using DMS.Infrastructure.Services;
 
 namespace DMS.Infrastructure.Interfaces.Services
 {
@@ -65,5 +66,10 @@ namespace DMS.Infrastructure.Interfaces.Services
         /// 批量断开设备连接
         /// </summary>
         Task DisconnectDevicesAsync(IEnumerable<int> deviceIds, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 获取所有监控的设备ID
+        /// </summary>
+        List<S7DeviceContext> GetAllDeviceContexts();
     }
 }

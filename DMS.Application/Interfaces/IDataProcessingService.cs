@@ -1,6 +1,7 @@
 using DMS.Core.Models;
 using System.Threading.Tasks;
 using DMS.Application.DTOs;
+using DMS.Application.Models;
 
 namespace DMS.Application.Interfaces;
 
@@ -21,5 +22,5 @@ public interface IDataProcessingService
     /// </summary>
     /// <param name="data">要入队的变量数据。</param>
     /// <returns>一个表示入队操作的 ValueTask。</returns>
-    ValueTask EnqueueAsync(VariableDto data);
+    ValueTask EnqueueAsync(VariableContext data);
 }

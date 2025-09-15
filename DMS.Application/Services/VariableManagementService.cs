@@ -1,14 +1,8 @@
-using AutoMapper;
+using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.DTOs.Events;
-using DMS.Core.Models;
 using DMS.Application.Interfaces;
-using DMS.Core.Interfaces;
-using DMS.Core.Enums;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System;
+using DMS.Core.Events;
 
 namespace DMS.Application.Services;
 
@@ -18,24 +12,18 @@ namespace DMS.Application.Services;
 public class VariableManagementService : IVariableManagementService
 {
     private readonly IVariableAppService _variableAppService;
+    private readonly IEventService _eventService;
     private readonly IAppDataStorageService _appDataStorageService;
     private readonly IDataProcessingService _dataProcessingService;
 
-    /// <summary>
-    /// 当变量数据发生变化时触发
-    /// </summary>
-    public event EventHandler<VariableChangedEventArgs> OnVariableChanged;
-
-    /// <summary>
-    /// 当变量数据发生变化时触发
-    /// </summary>
-    public event EventHandler<VariableValueChangedEventArgs> OnVariableValueChanged;
 
     public VariableManagementService(IVariableAppService variableAppService,
+                                     IEventService eventService,
                                      IAppDataStorageService appDataStorageService,
                                      IDataProcessingService dataProcessingService)
     {
         _variableAppService = variableAppService;
+        _eventService = eventService;
         _appDataStorageService = appDataStorageService;
         _dataProcessingService = dataProcessingService;
     }
@@ -111,7 +99,7 @@ public class VariableManagementService : IVariableManagementService
 
         if (_appDataStorageService.Variables.TryAdd(variableDto.Id, variableDto))
         {
-            OnVariableChanged?.Invoke(
+            _eventService.RaiseVariableChanged(
                 this, new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
         }
     }
@@ -129,7 +117,7 @@ public class VariableManagementService : IVariableManagementService
         }
 
         _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
-        OnVariableChanged?.Invoke(
+        _eventService.RaiseVariableChanged(
             this, new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
     }
 
@@ -147,14 +135,8 @@ public class VariableManagementService : IVariableManagementService
                 variableTable.Variables.Remove(variableDto);
             }
 
-            OnVariableChanged?.Invoke(
+            _eventService.RaiseVariableChanged(
                 this, new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
         }
-    }
-
-    public void VariableValueChanged(VariableValueChangedEventArgs eventArgs)
-    {
-        // 触发事件，通知DataEventService等监听者
-        OnVariableValueChanged?.Invoke(this, eventArgs);
     }
 }

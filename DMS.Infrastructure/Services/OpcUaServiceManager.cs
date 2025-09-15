@@ -3,13 +3,14 @@ using System.Diagnostics;
 using DMS.Application.DTOs;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
+using DMS.Application.Models;
 using DMS.Core.Enums;
 using DMS.Infrastructure.Configuration;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using VariableValueChangedEventArgs = DMS.Core.Models.VariableValueChangedEventArgs;
+using VariableValueChangedEventArgs = DMS.Core.Events.VariableValueChangedEventArgs;
 
 namespace DMS.Infrastructure.Services
 {
@@ -329,30 +330,8 @@ namespace DMS.Infrastructure.Services
                 {
                     if (context.Variables.TryGetValue(opcUaNode.NodeId.ToString(), out var variable))
                     {
-                        // 保存旧值
-                        var oldValue = variable.DataValue;
-                        var newValue = opcUaNode.Value.ToString();
-
-                        // 更新变量值
-                        variable.DataValue = newValue;
-                        variable.DisplayValue = newValue;
-                        variable.UpdateNumericValue(); // 更新数值属性
-                        variable.UpdatedAt = DateTime.Now;
-
-                        _logger.LogDebug($"节点：{variable.OpcUaNodeId}值发生了变化:{newValue}");
-
-                        // 触发变量值变更事件
-                        var eventArgs = new VariableValueChangedEventArgs(
-                            variable.Id,
-                            variable.Name,
-                            oldValue,
-                            newValue,
-                            variable.UpdatedAt);
-
-                        _appDataCenterService.VariableManagementService.VariableValueChanged(eventArgs);
-
                         // 推送到数据处理队列
-                        await _dataProcessingService.EnqueueAsync(variable);
+                        await _dataProcessingService.EnqueueAsync(new VariableContext(variable,opcUaNode.Value));
                         break;
                     }
                 }

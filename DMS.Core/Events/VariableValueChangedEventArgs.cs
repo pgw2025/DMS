@@ -1,4 +1,4 @@
-namespace DMS.Core.Models
+namespace DMS.Core.Events
 {
     /// <summary>
     /// 变量值变更事件参数

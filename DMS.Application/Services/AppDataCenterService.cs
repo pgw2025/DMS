@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using DMS.Core.Events;
 
 namespace DMS.Application.Services;
 

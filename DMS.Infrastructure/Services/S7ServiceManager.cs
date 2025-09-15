@@ -135,6 +135,13 @@ namespace DMS.Infrastructure.Services
         {
             return _deviceContexts.Keys.ToList();
         }
+        /// <summary>
+        /// 获取所有监控的设备ID
+        /// </summary>
+        public List<S7DeviceContext> GetAllDeviceContexts()
+        {
+            return _deviceContexts.Values.ToList();
+        }
 
         /// <summary>
         /// 连接设备

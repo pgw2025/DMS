@@ -72,6 +72,8 @@ public partial class App : System.Windows.Application
             DeviceItemViewModel.EventService = Host.Services.GetRequiredService<IEventService>();
             // 初始化数据处理链
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<ValueConvertProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateViewProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
@@ -194,6 +196,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IDataProcessingService, DataProcessingService>();
         services.AddHostedService(provider =>
                                       (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
+        services.AddSingleton<ValueConvertProcessor>();
+        services.AddSingleton<UpdateViewProcessor>();
         services.AddSingleton<CheckValueChangedProcessor>();
         services.AddSingleton<LoggingProcessor>();
         services.AddSingleton<UpdateDbVariableProcessor>();

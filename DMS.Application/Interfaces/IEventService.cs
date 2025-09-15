@@ -1,5 +1,7 @@
 using System;
+using DMS.Application.DTOs.Events;
 using DMS.Application.Events;
+using DMS.Core.Events;
 
 namespace DMS.Application.Interfaces;
 
@@ -29,7 +31,7 @@ public interface IEventService
     /// <summary>
     /// 变量值改变事件
     /// </summary>
-    event EventHandler<VariableValueChangedEventArgs> VariableValueChanged;
+    event EventHandler<VariableValueChangedEventArgs> OnVariableValueChanged;
 
     /// <summary>
     /// 触发变量值改变事件
@@ -67,4 +69,16 @@ public interface IEventService
     /// <param name="sender">事件发送者</param>
     /// <param name="e">设备状态改变事件参数</param>
     void RaiseDeviceConnectChanged(object sender, DeviceConnectChangedEventArgs e);
+
+    /// <summary>
+    /// 变量值改变事件
+    /// </summary>
+    event EventHandler<VariableChangedEventArgs> OnVariableChanged;
+
+    /// <summary>
+    /// 触发变量值改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">变量值改变事件参数</param>
+    void RaiseVariableChanged(object sender, VariableChangedEventArgs e);
 }

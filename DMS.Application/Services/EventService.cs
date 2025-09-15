@@ -1,6 +1,8 @@
 using System;
+using DMS.Application.DTOs.Events;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
+using DMS.Core.Events;
 
 namespace DMS.Application.Services;
 
@@ -60,11 +62,26 @@ public class EventService : IEventService
     #endregion
 
     #region 变量事件
+    /// <summary>
+    /// 变量值改变事件
+    /// </summary>
+    public event EventHandler<VariableChangedEventArgs> OnVariableChanged;
+    
+    /// <summary>
+    /// 触发变量值改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">变量值改变事件参数</param>
+    public void RaiseVariableChanged(object sender, VariableChangedEventArgs e)
+    {
+        OnVariableChanged?.Invoke(sender, e);
+    }
+
 
     /// <summary>
     /// 变量值改变事件
     /// </summary>
-    public event EventHandler<VariableValueChangedEventArgs> VariableValueChanged;
+    public event EventHandler<VariableValueChangedEventArgs> OnVariableValueChanged;
 
     /// <summary>
     /// 触发变量值改变事件
@@ -73,7 +90,7 @@ public class EventService : IEventService
     /// <param name="e">变量值改变事件参数</param>
     public void RaiseVariableValueChanged(object sender, VariableValueChangedEventArgs e)
     {
-        VariableValueChanged?.Invoke(sender, e);
+        OnVariableValueChanged?.Invoke(sender, e);
     }
 
     #endregion
