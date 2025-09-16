@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-
-namespace DMS.Application.DTOs.Events
+namespace DMS.Application.Events
 {
     /// <summary>
     /// 数据加载完成事件参数

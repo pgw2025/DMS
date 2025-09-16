@@ -1,8 +1,7 @@
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
-using System;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.Mqtt
 {
     /// <summary>
     /// MQTT服务工厂实现类，用于创建MQTT服务实例

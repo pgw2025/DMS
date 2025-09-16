@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
 using DMS.Application.Interfaces.Management;
 using DMS.Application.Services;
 using DMS.Core.Models;

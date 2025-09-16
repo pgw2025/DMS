@@ -1,22 +1,16 @@
-using System;
 using DMS.Core.Enums;
 
-namespace DMS.Application.DTOs.Events
+namespace DMS.Application.Events
 {
     /// <summary>
-    /// 设备变更事件参数
+    /// 数据变更事件参数基类
     /// </summary>
-    public class DeviceChangedEventArgs : System.EventArgs
+    public class DataChangedEventArgs : System.EventArgs
     {
         /// <summary>
         /// 变更类型
         /// </summary>
         public DataChangeType ChangeType { get; }
-
-        /// <summary>
-        /// 设备DTO
-        /// </summary>
-        public DeviceDto Device { get; }
 
         /// <summary>
         /// 变更时间
@@ -27,11 +21,9 @@ namespace DMS.Application.DTOs.Events
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
-        /// <param name="device">设备DTO</param>
-        public DeviceChangedEventArgs(DataChangeType changeType, DeviceDto device)
+        public DataChangedEventArgs(DataChangeType changeType)
         {
             ChangeType = changeType;
-            Device = device;
             ChangeTime = DateTime.Now;
         }
     }

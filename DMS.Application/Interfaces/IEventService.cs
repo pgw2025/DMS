@@ -1,5 +1,4 @@
 using System;
-using DMS.Application.DTOs.Events;
 using DMS.Application.Events;
 using DMS.Core.Events;
 
@@ -81,4 +80,11 @@ public interface IEventService
     /// <param name="sender">事件发送者</param>
     /// <param name="e">变量值改变事件参数</param>
     void RaiseVariableChanged(object sender, VariableChangedEventArgs e);
+
+    void RaiseVariableActiveChanged(object sender,VariablesActiveChangedEventArgs e);
+
+    /// <summary>
+    /// 变量启停改变事件
+    /// </summary>
+    event EventHandler<VariablesActiveChangedEventArgs> OnVariableActiveChanged;
 }

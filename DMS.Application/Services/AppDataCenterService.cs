@@ -1,6 +1,5 @@
 using AutoMapper;
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
 using DMS.Core.Models;
 using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
@@ -11,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using DMS.Application.Events;
 using DMS.Application.Interfaces.Management;
 using DMS.Core.Events;
 

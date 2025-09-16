@@ -1,11 +1,6 @@
-using System;
+﻿namespace DMS.Core.Events;
 
-namespace DMS.Application.Events;
-
-/// <summary>
-/// 设备状态改变事件参数
-/// </summary>
-public class DeviceActiveChangedEventArgs : EventArgs
+public class DeviceConnectChangedEventArgs
 {
     /// <summary>
     /// 设备ID
@@ -17,16 +12,10 @@ public class DeviceActiveChangedEventArgs : EventArgs
     /// </summary>
     public string DeviceName { get; }
 
-
     /// <summary>
     /// 新状态
     /// </summary>
     public bool NewStatus { get; }
-
-    /// <summary>
-    /// 状态改变时间
-    /// </summary>
-    public DateTime ChangeTime { get; }
 
     /// <summary>
     /// 初始化DeviceStatusChangedEventArgs类的新实例
@@ -35,11 +24,10 @@ public class DeviceActiveChangedEventArgs : EventArgs
     /// <param name="deviceName">设备名称</param>
     /// <param name="oldStatus">旧状态</param>
     /// <param name="newStatus">新状态</param>
-    public DeviceActiveChangedEventArgs(int deviceId, string deviceName, bool newStatus)
+    public DeviceConnectChangedEventArgs(int deviceId, string deviceName, bool newStatus)
     {
         DeviceId = deviceId;
         DeviceName = deviceName;
         NewStatus = newStatus;
-        ChangeTime = DateTime.Now;
     }
 }

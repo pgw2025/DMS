@@ -2,6 +2,7 @@ using DMS.Application.Interfaces;
 using DMS.Infrastructure.Configuration;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Services;
+using DMS.Infrastructure.Services.OpcUa;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.Infrastructure.Extensions

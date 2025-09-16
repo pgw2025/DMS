@@ -3,7 +3,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
 using System.Collections.Concurrent;
-using DMS.Application.DTOs.Events;
+using DMS.Application.Events;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Models;
 

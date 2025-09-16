@@ -2,8 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using DMS.Application.Events;
 using DMS.Application.Interfaces;
+using DMS.Core.Events;
 using DMS.Core.Models;
 using Microsoft.Extensions.Logging;
 

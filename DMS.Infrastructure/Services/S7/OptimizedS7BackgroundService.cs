@@ -1,21 +1,17 @@
 using System.Collections.Concurrent;
-using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
-using DMS.Application.Interfaces;
-using DMS.Core.Enums;
-using DMS.Core.Models;
-using Microsoft.Extensions.Hosting;
-using S7.Net;
-using S7.Net.Types;
-using DateTime = System.DateTime;
-using Microsoft.Extensions.Logging;
-using DMS.Core.Interfaces;
-using DMS.Infrastructure.Interfaces.Services;
 using System.Diagnostics;
-using System.Globalization;
+using DMS.Application.DTOs;
+using DMS.Application.Events;
+using DMS.Application.Interfaces;
 using DMS.Application.Models;
+using DMS.Core.Enums;
+using DMS.Core.Events;
+using DMS.Infrastructure.Interfaces.Services;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using DateTime = System.DateTime;
 
-namespace DMS.Infrastructure.Services;
+namespace DMS.Infrastructure.Services.S7;
 
 /// <summary>
 /// 优化的S7后台服务，继承自BackgroundService，用于在后台高效地轮询S7 PLC设备数据。
@@ -24,6 +20,7 @@ public class OptimizedS7BackgroundService : BackgroundService
 {
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IEventService _eventService;
     private readonly IDataProcessingService _dataProcessingService;
     private readonly IS7ServiceManager _s7ServiceManager;
     private readonly ILogger<OptimizedS7BackgroundService> _logger;
@@ -42,18 +39,22 @@ public class OptimizedS7BackgroundService : BackgroundService
     public OptimizedS7BackgroundService(
         IAppDataCenterService appDataCenterService,
         IAppDataStorageService appDataStorageService,
+        IEventService eventService,
         IDataProcessingService dataProcessingService,
         IS7ServiceManager s7ServiceManager,
         ILogger<OptimizedS7BackgroundService> logger)
     {
         _appDataCenterService = appDataCenterService;
         _appDataStorageService = appDataStorageService;
+        _eventService = eventService;
         _dataProcessingService = dataProcessingService;
         _s7ServiceManager = s7ServiceManager;
         _logger = logger;
 
         _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
+        
     }
+    
 
     private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
     {
@@ -245,10 +246,10 @@ public class OptimizedS7BackgroundService : BackgroundService
                     // 将更新后的数据推入处理队列。
                     await _dataProcessingService.EnqueueAsync(new VariableContext(variable, value));
                 }
-                else
-                {
-                    _logger.LogWarning($"未能从设备 {device.Name} 读取变量 {variable.S7Address} 的值");
-                }
+                // else
+                // {
+                //     _logger.LogWarning($"未能从设备 {device.Name} 读取变量 {variable.S7Address} 的值");
+                // }
             }
         }
         catch (Exception ex)

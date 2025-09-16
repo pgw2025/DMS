@@ -240,10 +240,8 @@
                     <!-- <Setter Property="Background" Value="#fff"/> -->
 
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsModified}" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource SecondaryRegionBrush}" />
-                            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-                            <Setter Property="FontWeight" Value="Bold" />
+                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
                         </DataTrigger>
 
                         <Trigger Property="IsMouseOver" Value="True">
@@ -293,6 +291,8 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
+                <DataGridCheckBoxColumn Binding="{Binding IsActive}" Header="启用" />
+                
                 <DataGridTemplateColumn Header="轮询间隔(毫秒)" SortMemberPath="PollingInterval">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -319,7 +319,7 @@
                     Header="更新时间"
                     IsReadOnly="True" />
                 <DataGridTextColumn Binding="{Binding ConversionFormula}" Header="转换规则" />
-                <DataGridCheckBoxColumn Binding="{Binding IsActive}" Header="启用" />
+                
                 <DataGridCheckBoxColumn Binding="{Binding IsHistoryEnabled}" Header="保存" />
                 <DataGridTextColumn Binding="{Binding HistoryDeadband}" Header="保存范围" />
                 <DataGridCheckBoxColumn Binding="{Binding IsAlarmEnabled}" Header="报警" />

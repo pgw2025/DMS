@@ -15,8 +15,8 @@ using DMS.WPF.ViewModels.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System;
+using DMS.Application.Events;
 using DMS.WPF.Services;
-using DMS.Application.DTOs.Events;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Enums;
 

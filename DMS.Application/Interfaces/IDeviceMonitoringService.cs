@@ -1,5 +1,4 @@
 using System;
-using DMS.Application.Events;
 
 namespace DMS.Application.Interfaces;
 

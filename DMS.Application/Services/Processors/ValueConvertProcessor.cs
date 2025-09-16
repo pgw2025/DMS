@@ -20,7 +20,7 @@ public class ValueConvertProcessor : IVariableProcessor
         ConvertS7ValueToStringAndNumeric(context.Data, context.NewValue);
         context.Data.UpdatedAt = DateTime.Now;
         // 如何值没有变化则中断处理
-        if (context.Data.DataValue!=oldValue)
+        if (context.Data.DataValue==oldValue)
         {
             context.IsHandled = true;
         }

@@ -3,8 +3,8 @@ using System.Windows.Threading;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
-using DMS.Application.Events;
 using DMS.Application.Interfaces;
+using DMS.Core.Events;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
 

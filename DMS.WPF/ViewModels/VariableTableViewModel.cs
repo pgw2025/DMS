@@ -6,6 +6,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Enums;
+using DMS.Core.Events;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
@@ -25,6 +26,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     private readonly IDialogService _dialogService;
 
     private readonly IVariableAppService _variableAppService;
+    private readonly IEventService _eventService;
     private readonly IMqttAliasAppService _mqttAliasAppService;
     private readonly IMqttAppService _mqttAppService;
 
@@ -91,12 +93,15 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     private readonly INotificationService _notificationService;
 
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
+                                  IEventService eventService,
                                   IMqttAliasAppService mqttAliasAppService, IMqttAppService mqttAppService,
-                                  IWPFDataService wpfDataService,IDataStorageService dataStorageService, INotificationService notificationService)
+                                  IWPFDataService wpfDataService, IDataStorageService dataStorageService,
+                                  INotificationService notificationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
         _variableAppService = variableAppService;
+        _eventService = eventService;
         _mqttAliasAppService = mqttAliasAppService;
         _mqttAppService = mqttAppService;
         _wpfDataService = wpfDataService;
@@ -262,7 +267,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             if (improtVariableDtos.Count != 0)
             {
-                var addVariableDtos  = await _variableAppService.BatchImportVariablesAsync(improtVariableDtos);
+                var addVariableDtos = await _variableAppService.BatchImportVariablesAsync(improtVariableDtos);
                 if (addVariableDtos is { Count: > 0 })
                 {
                     _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(addVariableDtos));
@@ -517,7 +522,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
     }
 
-    
+
     /// <summary>
     /// 为选定的变量添加MQTT服务器。
     /// 此命令通常绑定到UI中的“添加MQTT服务器”按钮。
@@ -658,6 +663,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             if (result > 0)
             {
+                _eventService.RaiseVariableActiveChanged(this,new VariablesActiveChangedEventArgs(validVariables.Select(v=>v.Id).ToList(),CurrentVariableTable.DeviceId,newIsActive.Value));
                 // 显示成功通知
                 _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的启用状态");
             }
@@ -673,7 +679,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         // 导航到历史记录视图
         var navigationService = App.Current.Services.GetRequiredService<INavigationService>();
-        MenuItemViewModel viewModel=new MenuItemViewModel();
+        MenuItemViewModel viewModel = new MenuItemViewModel();
         viewModel.TargetViewKey = "VariableHistoryView";
         viewModel.MenuType = MenuType.VariableMenu;
         viewModel.TargetId = SelectedVariable.Id;
@@ -699,10 +705,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
         // 显示历史记录设置对话框，并传入第一个变量的当前设置作为默认值
         var viewModel = new HistorySettingsDialogViewModel(
-            validVariables.First().IsHistoryEnabled,
-            validVariables.First().HistoryDeadband);
+            validVariables.First()
+                          .IsHistoryEnabled,
+            validVariables.First()
+                          .HistoryDeadband);
         var result = await _dialogService.ShowDialogAsync(viewModel);
-        
+
         if (result != null)
         {
             // 更新所有选定变量的历史记录设置
@@ -716,7 +724,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
             var updateResult = await _variableAppService.UpdateVariablesAsync(variableDtos);
-            
+
 
             if (updateResult > 0)
             {
@@ -749,11 +757,14 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
         // 显示报警设置对话框，并传入第一个变量的当前报警设置作为默认值
         var viewModel = new AlarmSettingsDialogViewModel(
-            validVariables.First().IsAlarmEnabled,
-            validVariables.First().AlarmMinValue,
-            validVariables.First().AlarmMaxValue);
+            validVariables.First()
+                          .IsAlarmEnabled,
+            validVariables.First()
+                          .AlarmMinValue,
+            validVariables.First()
+                          .AlarmMaxValue);
         var result = await _dialogService.ShowDialogAsync(viewModel);
-        
+
         if (result != null)
         {
             // 更新所有选定变量的报警设置
@@ -806,7 +817,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        if (_dataStorageService.VariableTables.TryGetValue(menu.TargetId,out var varTable))
+        if (_dataStorageService.VariableTables.TryGetValue(menu.TargetId, out var varTable))
         {
             CurrentVariableTable = varTable;
             // 根据变量表的协议类型设置对应的布尔属性

@@ -1,12 +1,12 @@
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.OpcUa
 {
     /// <summary>
     /// 优化后的OPC UA后台服务

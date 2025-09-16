@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.WPF.Interfaces;

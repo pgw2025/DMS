@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using DMS.Application.DTOs.Events;
+using DMS.Application.Events;
 using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.Interfaces;

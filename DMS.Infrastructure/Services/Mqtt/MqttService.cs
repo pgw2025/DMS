@@ -5,11 +5,8 @@ using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
-using MQTTnet.Client.Receiving;
-using System;
-using System.Threading.Tasks;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.Mqtt
 {
     /// <summary>
     /// MQTT服务实现类，用于与MQTT服务器进行通信

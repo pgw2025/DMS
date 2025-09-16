@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DMS.Application.DTOs;
 using DMS.Infrastructure.Services;
+using DMS.Infrastructure.Services.S7;
 
 namespace DMS.Infrastructure.Interfaces.Services
 {

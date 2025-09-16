@@ -1,18 +1,13 @@
-using DMS.Infrastructure.Interfaces.Services;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using DMS.Core.Models;
 using DMS.Application.Interfaces;
 using DMS.Core.Interfaces.Services;
+using DMS.Core.Models;
+using DMS.Infrastructure.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.Mqtt
 {
     /// <summary>
     /// MQTT服务管理器，负责管理MQTT连接和变量监控

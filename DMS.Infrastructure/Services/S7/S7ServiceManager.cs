@@ -1,18 +1,14 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using DMS.Application.DTOs;
-using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Events;
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
+using NPOI.HSSF.Record;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.S7
 {
     /// <summary>
     /// S7服务管理器，负责管理S7连接和变量监控
@@ -23,6 +19,7 @@ namespace DMS.Infrastructure.Services
         private readonly IEventService _eventService;
         private readonly IDataProcessingService _dataProcessingService;
         private readonly IAppDataCenterService _appDataCenterService;
+        private readonly IAppDataStorageService _appDataStorageService;
         private readonly IS7ServiceFactory _s7ServiceFactory;
         private readonly ConcurrentDictionary<int, S7DeviceContext> _deviceContexts;
         private readonly SemaphoreSlim _semaphore;
@@ -33,15 +30,44 @@ namespace DMS.Infrastructure.Services
             IEventService eventService,
             IDataProcessingService dataProcessingService,
             IAppDataCenterService appDataCenterService,
+            IAppDataStorageService appDataStorageService,
             IS7ServiceFactory s7ServiceFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _eventService = eventService;
-            _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
-            _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
+            _dataProcessingService
+                = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
+            _appDataCenterService
+                = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
+            _appDataStorageService = appDataStorageService;
             _s7ServiceFactory = s7ServiceFactory ?? throw new ArgumentNullException(nameof(s7ServiceFactory));
             _deviceContexts = new ConcurrentDictionary<int, S7DeviceContext>();
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10
+
+            _eventService.OnVariableActiveChanged += OnVariableActiveChanged;
+        }
+
+        private void OnVariableActiveChanged(object? sender, VariablesActiveChangedEventArgs e)
+        {
+            if (_deviceContexts.TryGetValue(e.DeviceId, out var s7DeviceContext))
+            {
+                
+                var variables = _appDataStorageService.Variables.Values.Where(v => e.VariableIds.Contains(v.Id))
+                                                      .ToList();
+                foreach (var variable in variables)
+                {
+                    if (e.NewStatus)
+                    {
+                        // 变量启用，从轮询列表中添加变量
+                        s7DeviceContext.Variables.AddOrUpdate(variable.S7Address,variable, (key, oldValue) => variable);
+                    }
+                    else
+                    {
+                        // 变量停用，从轮询列表中移除变量
+                        s7DeviceContext.Variables.Remove(variable.S7Address, out _);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -69,12 +95,12 @@ namespace DMS.Infrastructure.Services
             }
 
             var context = new S7DeviceContext
-            {
-                Device = device,
-                S7Service = _s7ServiceFactory.CreateService(),
-                Variables = new ConcurrentDictionary<string, VariableDto>(),
-                IsConnected = false
-            };
+                          {
+                              Device = device,
+                              S7Service = _s7ServiceFactory.CreateService(),
+                              Variables = new ConcurrentDictionary<string, VariableDto>(),
+                              IsConnected = false
+                          };
 
             _deviceContexts.AddOrUpdate(device.Id, context, (key, oldValue) => context);
             _logger.LogInformation("已添加设备 {DeviceId} 到监控列表", device.Id);
@@ -104,6 +130,7 @@ namespace DMS.Infrastructure.Services
                 {
                     context.Variables.AddOrUpdate(variable.S7Address, variable, (key, oldValue) => variable);
                 }
+
                 _logger.LogInformation("已更新设备 {DeviceId} 的变量列表，共 {Count} 个变量", deviceId, variables.Count);
             }
         }
@@ -135,6 +162,7 @@ namespace DMS.Infrastructure.Services
         {
             return _deviceContexts.Keys.ToList();
         }
+
         /// <summary>
         /// 获取所有监控的设备ID
         /// </summary>
@@ -155,13 +183,14 @@ namespace DMS.Infrastructure.Services
             try
             {
                 _logger.LogInformation("正在连接设备 {DeviceName} ({IpAddress}:{Port})",
-                    context.Device.Name, context.Device.IpAddress, context.Device.Port);
+                                       context.Device.Name, context.Device.IpAddress, context.Device.Port);
 
                 var stopwatch = Stopwatch.StartNew();
 
                 // 设置连接超时
                 using var timeoutToken = new CancellationTokenSource(5000); // 5秒超时
-                using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutToken.Token);
+                using var linkedToken
+                    = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutToken.Token);
 
                 var cpuType = ConvertCpuType(context.Device.CpuType);
                 await context.S7Service.ConnectAsync(
@@ -173,13 +202,13 @@ namespace DMS.Infrastructure.Services
 
                 stopwatch.Stop();
                 _logger.LogInformation("设备 {DeviceName} 连接耗时 {ElapsedMs} ms",
-                    context.Device.Name, stopwatch.ElapsedMilliseconds);
+                                       context.Device.Name, stopwatch.ElapsedMilliseconds);
 
                 if (context.S7Service.IsConnected)
                 {
                     context.IsConnected = true;
-                    
-                   
+
+
                     _logger.LogInformation("设备 {DeviceName} 连接成功", context.Device.Name);
                 }
                 else
@@ -190,15 +219,14 @@ namespace DMS.Infrastructure.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "连接设备 {DeviceName} 时发生错误: {ErrorMessage}",
-                    context.Device.Name, ex.Message);
+                                 context.Device.Name, ex.Message);
                 context.IsConnected = false;
-                
-               
             }
             finally
             {
                 _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  context.IsConnected));
+                    this,
+                    new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, context.IsConnected));
                 _semaphore.Release();
             }
         }
@@ -216,32 +244,33 @@ namespace DMS.Infrastructure.Services
                 _logger.LogInformation("正在断开设备 {DeviceName} 的连接", context.Device.Name);
                 await context.S7Service.DisconnectAsync();
                 context.IsConnected = false;
-                
+
                 _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  context.IsConnected));
+                    this,
+                    new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, context.IsConnected));
                 _logger.LogInformation("设备 {DeviceName} 连接已断开", context.Device.Name);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "断开设备 {DeviceName} 连接时发生错误: {ErrorMessage}",
-                    context.Device.Name, ex.Message);
+                                 context.Device.Name, ex.Message);
             }
         }
 
         /// <summary>
         /// 将字符串形式的CPU类型转换为S7.Net.CpuType枚举
         /// </summary>
-        private S7.Net.CpuType ConvertCpuType(CpuType cpuType)
+        private global::S7.Net.CpuType ConvertCpuType(CpuType cpuType)
         {
             return cpuType switch
-            {
-                CpuType.S7200 => S7.Net.CpuType.S7200,
-                CpuType.S7300 => S7.Net.CpuType.S7300,
-                CpuType.S7400 => S7.Net.CpuType.S7400,
-                CpuType.S71200 => S7.Net.CpuType.S71200,
-                CpuType.S71500 => S7.Net.CpuType.S71500,
-                _ => S7.Net.CpuType.S71200 // 默认值
-            };
+                   {
+                       CpuType.S7200 => global::S7.Net.CpuType.S7200,
+                       CpuType.S7300 => global::S7.Net.CpuType.S7300,
+                       CpuType.S7400 => global::S7.Net.CpuType.S7400,
+                       CpuType.S71200 => global::S7.Net.CpuType.S71200,
+                       CpuType.S71500 => global::S7.Net.CpuType.S71500,
+                       _ => global::S7.Net.CpuType.S71200 // 默认值
+                   };
         }
 
         /// <summary>
@@ -287,7 +316,8 @@ namespace DMS.Infrastructure.Services
         /// <summary>
         /// 批量断开设备连接
         /// </summary>
-        public async Task DisconnectDevicesAsync(IEnumerable<int> deviceIds, CancellationToken cancellationToken = default)
+        public async Task DisconnectDevicesAsync(IEnumerable<int> deviceIds,
+                                                 CancellationToken cancellationToken = default)
         {
             var disconnectTasks = new List<Task>();
 
@@ -319,7 +349,8 @@ namespace DMS.Infrastructure.Services
 
                 // 断开所有设备连接
                 var deviceIds = _deviceContexts.Keys.ToList();
-                DisconnectDevicesAsync(deviceIds).Wait(TimeSpan.FromSeconds(10));
+                DisconnectDevicesAsync(deviceIds)
+                    .Wait(TimeSpan.FromSeconds(10));
 
                 // 释放其他资源
                 _semaphore?.Dispose();

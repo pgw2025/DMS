@@ -33,7 +33,7 @@ public class HistoryProcessor : IVariableProcessor, IDisposable
         // 只有当数据需要保存时才记录历史
         if (!context.Data.IsHistoryEnabled) // 如果数据已经被其他处理器处理过或者不需要保存，则跳过
         {
-            _logger.LogDebug("变量 {VariableName} (ID: {VariableId}) 历史记录已禁用，跳过处理", context.Data.Name, context.Data.Id);
+            // _logger.LogDebug("变量 {VariableName} (ID: {VariableId}) 历史记录已禁用，跳过处理", context.Data.Name, context.Data.Id);
             return;
         }
 

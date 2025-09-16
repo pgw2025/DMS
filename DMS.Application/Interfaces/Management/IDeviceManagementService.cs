@@ -1,5 +1,5 @@
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
+using DMS.Application.Events;
 
 namespace DMS.Application.Interfaces.Management;
 

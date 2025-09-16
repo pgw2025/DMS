@@ -1,7 +1,7 @@
-using System;
+using DMS.Application.DTOs;
 using DMS.Core.Enums;
 
-namespace DMS.Application.DTOs.Events
+namespace DMS.Application.Events
 {
     /// <summary>
     /// 变量表变更事件参数

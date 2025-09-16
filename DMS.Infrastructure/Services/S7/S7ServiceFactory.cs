@@ -1,7 +1,7 @@
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.S7
 {
     /// <summary>
     /// S7服务工厂实现，用于创建S7Service实例

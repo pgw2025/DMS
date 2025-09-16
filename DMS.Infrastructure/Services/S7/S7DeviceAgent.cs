@@ -1,19 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using DMS.Application.DTOs;
 using DMS.Application.Models;
-using DMS.Core.Enums;
 using DMS.Core.Models;
 using DMS.Infrastructure.Interfaces;
-using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using S7.Net;
 using S7.Net.Types;
 using CpuType = DMS.Core.Enums.CpuType;
 using DateTime = System.DateTime;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.S7
 {
     /// <summary>
     /// S7设备代理类，专门负责与单个S7 PLC进行所有通信
@@ -57,16 +52,16 @@ namespace DMS.Infrastructure.Services
             }
         }
 
-        private S7.Net.CpuType ConvertCpuType(CpuType cpuType)
+        private global::S7.Net.CpuType ConvertCpuType(CpuType cpuType)
         {
             return cpuType switch
             {
-                CpuType.S7200 => S7.Net.CpuType.S7200,
-                CpuType.S7300 => S7.Net.CpuType.S7300,
-                CpuType.S7400 => S7.Net.CpuType.S7400,
-                CpuType.S71200 => S7.Net.CpuType.S71200,
-                CpuType.S71500 => S7.Net.CpuType.S71500,
-                _ => S7.Net.CpuType.S71200
+                CpuType.S7200 => global::S7.Net.CpuType.S7200,
+                CpuType.S7300 => global::S7.Net.CpuType.S7300,
+                CpuType.S7400 => global::S7.Net.CpuType.S7400,
+                CpuType.S71200 => global::S7.Net.CpuType.S71200,
+                CpuType.S71500 => global::S7.Net.CpuType.S71500,
+                _ => global::S7.Net.CpuType.S71200
             };
         }
 

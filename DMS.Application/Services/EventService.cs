@@ -1,5 +1,4 @@
 using System;
-using DMS.Application.DTOs.Events;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Events;
@@ -75,6 +74,16 @@ public class EventService : IEventService
     public void RaiseVariableChanged(object sender, VariableChangedEventArgs e)
     {
         OnVariableChanged?.Invoke(sender, e);
+    }
+
+    
+    /// <summary>
+    /// 变量启停改变事件
+    /// </summary>
+    public event EventHandler<VariablesActiveChangedEventArgs> OnVariableActiveChanged;
+    public void RaiseVariableActiveChanged(object sender, VariablesActiveChangedEventArgs e)
+    {
+        OnVariableActiveChanged?.Invoke(sender, e);
     }
 
 

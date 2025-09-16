@@ -1,10 +1,8 @@
+using System.Collections.Concurrent;
 using DMS.Core.Models;
 using DMS.Infrastructure.Interfaces.Services;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.Mqtt
 {
     /// <summary>
     /// MQTT设备上下文，用于存储单个MQTT服务器的连接信息和状态

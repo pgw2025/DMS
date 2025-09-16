@@ -1,5 +1,5 @@
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Management;
 using DMS.Core.Enums;

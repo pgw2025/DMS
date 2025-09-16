@@ -2,9 +2,9 @@
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Events;
 using DMS.WPF.Interfaces;
 
 namespace DMS.WPF.ViewModels.Items;

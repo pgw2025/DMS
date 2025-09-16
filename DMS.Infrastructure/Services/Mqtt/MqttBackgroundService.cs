@@ -1,18 +1,13 @@
+using System.Collections.Concurrent;
+using DMS.Application.Events;
+using DMS.Application.Interfaces;
+using DMS.Core.Interfaces.Services;
+using DMS.Core.Models;
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using DMS.Application.DTOs.Events;
-using DMS.Core.Models;
-using DMS.Application.Interfaces;
-using DMS.Core.Interfaces.Services;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.Mqtt
 {
     /// <summary>
     /// MQTT后台服务，负责管理MQTT连接和数据传输

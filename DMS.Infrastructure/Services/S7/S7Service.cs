@@ -1,10 +1,9 @@
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
-using NLog;
 using S7.Net;
 using S7.Net.Types;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.S7
 {
     /// <summary>
     /// S7服务实现类，用于与S7 PLC进行通信

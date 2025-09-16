@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using AutoMapper;
-using DMS.Application.DTOs.Events;
 using DMS.Application.Interfaces;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;

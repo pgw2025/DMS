@@ -3,7 +3,7 @@ using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Events;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Events;

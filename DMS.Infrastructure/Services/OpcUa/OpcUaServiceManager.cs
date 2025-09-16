@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using DMS.Application.DTOs;
-using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
 using DMS.Core.Enums;
+using DMS.Core.Events;
 using DMS.Infrastructure.Configuration;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VariableValueChangedEventArgs = DMS.Core.Events.VariableValueChangedEventArgs;
 
-namespace DMS.Infrastructure.Services
+namespace DMS.Infrastructure.Services.OpcUa
 {
     /// <summary>
     /// OPC UA服务管理器，负责管理OPC UA连接、订阅和变量监控
