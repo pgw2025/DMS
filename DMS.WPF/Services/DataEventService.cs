@@ -70,8 +70,8 @@ public class DataEventService : IDataEventService
         App.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
             // 查找并更新对应的变量
-            var variableToUpdate = _dataStorageService.Variables.FirstOrDefault(v => v.Id == e.VariableId);
-            if (variableToUpdate != null)
+            
+            if (_dataStorageService.Variables.TryGetValue(e.VariableId,out var variableToUpdate))
             {
                 variableToUpdate.DataValue = e.NewValue;
                 variableToUpdate.DisplayValue = e.NewValue;

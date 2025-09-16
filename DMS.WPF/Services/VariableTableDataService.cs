@@ -34,9 +34,9 @@ public class VariableTableDataService : IVariableTableDataService
     {
         foreach (var device in _dataStorageService.Devices)
         {
-            foreach (var variableTable in device.VariableTables)
+            foreach (var variableTable in device.Value.VariableTables)
             {
-                _dataStorageService.VariableTables.Add(variableTable);
+                _dataStorageService.VariableTables.Add(variableTable.Id,variableTable);
             }
         }
     }
@@ -117,7 +117,7 @@ public class VariableTableDataService : IVariableTableDataService
         // 删除与当前变量表关联的所有变量
         foreach (var variable in variableTable.Variables)
         {
-            _dataStorageService.Variables.Remove(variable);
+            _dataStorageService.Variables.Remove(variable.Id);
         }
 
         _appDataCenterService.VariableTableManagementService.RemoveVariableTableFromMemory(variableTable.Id);
@@ -126,7 +126,7 @@ public class VariableTableDataService : IVariableTableDataService
             =_dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);
         _menuDataService.DeleteMenuItem(variableTableMenu);
         // 删除变量表
-        _dataStorageService.VariableTables.Remove(variableTable);
+        _dataStorageService.VariableTables.Remove(variableTable.Id);
         variableTable.Device.VariableTables.Remove(variableTable);
         return true;
     }

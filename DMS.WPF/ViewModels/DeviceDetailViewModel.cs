@@ -159,8 +159,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        var device = _dataStorageService.Devices.FirstOrDefault(d => d.Id == menu.TargetId);
-        if (device != null)
+        if (_dataStorageService.Devices.TryGetValue(menu.TargetId,out var device))
         {
             CurrentDevice = device;
         }

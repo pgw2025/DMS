@@ -83,7 +83,7 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
             return false;
         }
         //检查变量是否存在
-        var existVariables = _dataStorageService.Variables.Where(v => v.Name == Variable.Name || (v.Protocol == ProtocolType.S7 && v.S7Address == Variable.S7Address) || (v.Protocol == ProtocolType.OpcUa && v.OpcUaNodeId == Variable.OpcUaNodeId)).ToList();
+        var existVariables = _dataStorageService.Variables.Where(v => v.Value.Name == Variable.Name || (v.Value.Protocol == ProtocolType.S7 && v.Value.S7Address == Variable.S7Address) || (v.Value.Protocol == ProtocolType.OpcUa && v.Value.OpcUaNodeId == Variable.OpcUaNodeId)).Select(v=>v.Value).ToList();
         VariableItemViewModel existVariable = null;
         if (IsAddModel)
         {
@@ -92,6 +92,7 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
         else
         {
             existVariable = existVariables.FirstOrDefault(v => v.Id != Variable.Id);
+            
         }
 
         if (existVariable != null)

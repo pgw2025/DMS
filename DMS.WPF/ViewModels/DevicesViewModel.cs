@@ -11,6 +11,7 @@ using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using ObservableCollections;
 
 namespace DMS.WPF.ViewModels;
 
@@ -31,7 +32,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 设备列表。
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<DeviceItemViewModel> _devices;
+    private INotifyCollectionChangedSynchronizedViewList<DeviceItemViewModel> _devices;
 
 
     /// <summary>
@@ -52,7 +53,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// <param name="wpfDataService">主数据服务。</param>
     /// <param name="deviceAppService">设备应用服务。</param>
     /// <param name="notificationService">通知服务。</param>
-    public DevicesViewModel(IMapper mapper,IDataStorageService dataStorageService,
+    public DevicesViewModel(IMapper mapper, IDataStorageService dataStorageService,
                             IDialogService dialogService, INavigationService navigationService,
                             IWPFDataService wpfDataService, IDeviceAppService deviceAppService,
                             INotificationService notificationService)
@@ -64,7 +65,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         _wpfDataService = wpfDataService;
         _deviceAppService = deviceAppService;
         _notificationService = notificationService;
-        Devices = _dataStorageService.Devices;
+        Devices = _dataStorageService.Devices.ToNotifyCollectionChanged(x => x.Value);
     }
 
 
@@ -131,7 +132,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             if (_wpfDataService != null && _wpfDataService.DeviceDataService != null)
             {
                 var addDto = await _wpfDataService.DeviceDataService.AddDevice(dto);
-                
+
                 // 添加null检查
                 if (addDto != null && addDto.Device != null && _notificationService != null)
                 {
@@ -239,15 +240,12 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-
-        
     }
 
     private void OnDeviceIsActiveChanged(object? sender, bool isActive)
     {
         if (sender is DeviceItemViewModel deviceItemViewModel)
         {
-            
         }
     }
 }

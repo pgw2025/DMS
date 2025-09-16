@@ -52,8 +52,8 @@ public class DeviceDataService : IDeviceDataService
     {
         _uiDispatcher.Invoke(() =>
         {
-            var device = _dataStorageService.Devices.FirstOrDefault(d => d.Id == e.DeviceId);
-            if (device != null)
+            
+            if (_dataStorageService.Devices.TryGetValue(e.DeviceId,out DeviceItemViewModel device))
             {
                 
                 device.IsRunning = e.NewStatus;
@@ -76,7 +76,7 @@ public class DeviceDataService : IDeviceDataService
     {
         foreach (var deviceDto in _appDataStorageService.Devices.Values)
         {
-            _dataStorageService.Devices.Add(_mapper.Map<DeviceItemViewModel>(deviceDto));
+            _dataStorageService.Devices.Add(deviceDto.Id,_mapper.Map<DeviceItemViewModel>(deviceDto));
         }
     }
 
@@ -95,7 +95,7 @@ public class DeviceDataService : IDeviceDataService
         if (_dataStorageService != null && addDto != null && addDto.Device != null)
         {
             //更新当前界面
-            _dataStorageService.Devices.Add(_mapper.Map<DeviceItemViewModel>(addDto.Device));
+            _dataStorageService.Devices.Add(addDto.Device.Id,_mapper.Map<DeviceItemViewModel>(addDto.Device));
         }
         
         // 添加null检查
@@ -163,9 +163,8 @@ public class DeviceDataService : IDeviceDataService
         _appDataCenterService.DeviceManagementService.RemoveDeviceFromMemory(device.Id);
 
         // 删除设备
-        _dataStorageService.Devices.Remove(device);
-
-        return true;
+        
+        return _dataStorageService.Devices.Remove(device.Id);
     }
 
     /// <summary>

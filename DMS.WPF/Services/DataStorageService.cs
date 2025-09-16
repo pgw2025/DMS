@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
+using ObservableCollections;
 
 namespace DMS.WPF.Services;
 
@@ -11,17 +12,17 @@ public class DataStorageService : IDataStorageService
     /// <summary>
     /// 设备列表。
     /// </summary>
-    public ObservableCollection<DeviceItemViewModel> Devices { get; set; }
+    public ObservableDictionary<int,DeviceItemViewModel> Devices { get; set; }
 
     /// <summary>
     /// 设备列表。
     /// </summary>
-    public ObservableCollection<VariableTableItemViewModel> VariableTables { get; set; }
+    public new ObservableDictionary<int,VariableTableItemViewModel> VariableTables { get; set; }
 
     /// <summary>
     /// 变量数据列表。
     /// </summary>
-    public ObservableCollection<VariableItemViewModel> Variables { get; set; }
+    public ObservableDictionary<int,VariableItemViewModel> Variables { get; set; }
 
 
     /// <summary>
@@ -46,9 +47,9 @@ public class DataStorageService : IDataStorageService
 
     public DataStorageService()
     {
-        Devices=new ObservableCollection<DeviceItemViewModel>();
-        VariableTables = new ObservableCollection<VariableTableItemViewModel>();
-        Variables=new ObservableCollection<VariableItemViewModel>();
+        Devices=new ObservableDictionary<int,DeviceItemViewModel>();
+        VariableTables = new ObservableDictionary<int,VariableTableItemViewModel>();
+        Variables=new ObservableDictionary<int,VariableItemViewModel>();
         MqttServers=new ObservableCollection<MqttServerItemViewModel>();
         Menus=new ObservableCollection<MenuItemViewModel>();
         MenuTrees=new ObservableCollection<MenuItemViewModel>();

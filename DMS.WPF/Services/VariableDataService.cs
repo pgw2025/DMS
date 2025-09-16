@@ -38,9 +38,9 @@ public class VariableDataService : IVariableDataService
     {
         foreach (var variableTable in _dataStorageService.VariableTables)
         {
-            foreach (var variable in variableTable.Variables)
+            foreach (var variable in variableTable.Value.Variables)
             {
-                _dataStorageService.Variables.Add(variable);
+                _dataStorageService.Variables.Add(variable.Id,variable);
             }
         }
     }
@@ -130,13 +130,13 @@ public class VariableDataService : IVariableDataService
         // 删除与当前变量表关联的所有变量
         foreach (var variable in variableTable.Variables)
         {
-            _dataStorageService.Variables.Remove(variable);
+            _dataStorageService.Variables.Remove(variable.Id);
         }
 
         _appDataCenterService.VariableTableManagementService.RemoveVariableTableFromMemory(variableTable.Id);
 
         // 删除变量表
-        _dataStorageService.VariableTables.Remove(variableTable);
+        _dataStorageService.VariableTables.Remove(variableTable.Id);
         variableTable.Device.VariableTables.Remove(variableTable);
         return true;
     }
@@ -151,7 +151,7 @@ public class VariableDataService : IVariableDataService
             return;
         }
 
-        _dataStorageService.Variables.Add(variableItem);
+        _dataStorageService.Variables.Add(variableItem.Id,variableItem);
     }
 
     /// <summary>
@@ -159,16 +159,16 @@ public class VariableDataService : IVariableDataService
     /// </summary>
     public void DeleteVariable(int id)
     {
-        var variableItem = _dataStorageService.Variables.FirstOrDefault(v => v.Id == id);
-        if (variableItem == null)
+        if (!_dataStorageService.Variables.TryGetValue(id,out var variableItem))
         {
             return;
         }
 
-        var variableTable = _dataStorageService.VariableTables.FirstOrDefault(vt => vt.Id == variableItem.VariableTableId);
+        if (_dataStorageService.VariableTables.TryGetValue(variableItem.VariableTableId, out var variableTable))
+        {
+             variableTable.Variables.Remove(variableItem);
+        }
 
-        variableTable.Variables.Remove(variableItem);
-
-        _dataStorageService.Variables.Remove(variableItem);
+        _dataStorageService.Variables.Remove(variableItem.Id);
     }
 }

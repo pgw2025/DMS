@@ -138,20 +138,20 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
         if (!string.IsNullOrWhiteSpace(SearchText))
         {
-            // 根据搜索文本过滤建议列表
-            var filteredVariables = _dataStorageService.Variables
-                                                       .Where(v =>
-                                                                  v.Name?.Contains(
-                                                                      SearchText, StringComparison.OrdinalIgnoreCase) ==
-                                                                  true)
-                                                       .Select(v => v.Name)
-                                                       .Take(10)
-                                                       .ToList();
-
-            foreach (var variable in filteredVariables)
-            {
-                _suggestedVariables.Add(variable);
-            }
+            // // 根据搜索文本过滤建议列表
+            // var filteredVariables = _dataStorageService.Variables
+            //                                            .Where(v =>
+            //                                                       v.Name?.Contains(
+            //                                                           SearchText, StringComparison.OrdinalIgnoreCase) ==
+            //                                                       true)
+            //                                            .Select(v => v.Name)
+            //                                            .Take(10)
+            //                                            .ToList();
+            //
+            // foreach (var variable in filteredVariables)
+            // {
+            //     _suggestedVariables.Add(variable);
+            // }
         }
     }
 

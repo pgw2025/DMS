@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using DMS.WPF.ViewModels.Items;
+using ObservableCollections;
 
 namespace DMS.WPF.Interfaces;
 
@@ -8,17 +10,17 @@ public interface IDataStorageService
     /// <summary>
     /// 设备列表。
     /// </summary>
-    ObservableCollection<DeviceItemViewModel> Devices { get; set; }
+    ObservableDictionary<int, DeviceItemViewModel> Devices { get; set; }
 
     /// <summary>
     /// 设备列表。
     /// </summary>
-    ObservableCollection<VariableTableItemViewModel> VariableTables { get; set; }
+    ObservableDictionary<int, VariableTableItemViewModel> VariableTables { get; set; }
 
     /// <summary>
     /// 变量数据列表。
     /// </summary>
-    ObservableCollection<VariableItemViewModel> Variables { get; set; }
+    ObservableDictionary<int, VariableItemViewModel> Variables { get; set; }
 
     /// <summary>
     /// MQTT服务器列表。

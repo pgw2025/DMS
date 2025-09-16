@@ -806,9 +806,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        var varTable =_dataStorageService.VariableTables.FirstOrDefault(v => v.Id == menu.TargetId);
-
-        if (varTable != null)
+        if (_dataStorageService.VariableTables.TryGetValue(menu.TargetId,out var varTable))
         {
             CurrentVariableTable = varTable;
             // 根据变量表的协议类型设置对应的布尔属性
