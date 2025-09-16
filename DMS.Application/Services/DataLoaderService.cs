@@ -4,6 +4,7 @@ using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
 using System.Collections.Concurrent;
 using DMS.Application.DTOs.Events;
+using DMS.Application.Interfaces.Database;
 using DMS.Core.Models;
 
 namespace DMS.Application.Services;

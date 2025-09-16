@@ -11,6 +11,7 @@ using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
 using System.Linq;
+using DMS.Application.Interfaces.Database;
 
 namespace DMS.WPF.ViewModels;
 

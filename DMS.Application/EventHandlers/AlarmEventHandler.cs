@@ -1,5 +1,6 @@
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Application.Interfaces.Database;
 using DMS.Core.Events;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;

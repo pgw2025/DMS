@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Application.DTOs.Triggers;
+using DMS.Application.DTOs;
 using DMS.Application.Services.Triggers;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DMS.Application.DTOs.Triggers;
+using DMS.Application.DTOs;
 
 namespace DMS.Application.Services.Triggers
 {

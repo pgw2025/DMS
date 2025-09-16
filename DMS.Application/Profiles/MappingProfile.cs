@@ -1,7 +1,6 @@
 using AutoMapper;
 using DMS.Core.Models;
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Triggers;
 using DMS.Core.Models.Triggers;
 
 namespace DMS.Application.Profiles;

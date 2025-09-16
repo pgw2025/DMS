@@ -5,6 +5,7 @@ using DMS.Application.Interfaces;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
 using System.Collections.ObjectModel;
+using DMS.Application.Interfaces.Database;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ViewModels

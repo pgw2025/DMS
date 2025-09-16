@@ -1,6 +1,5 @@
 using System;
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Triggers;
 
 namespace DMS.Application.Services.Triggers
 {

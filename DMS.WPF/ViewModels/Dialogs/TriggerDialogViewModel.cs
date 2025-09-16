@@ -3,8 +3,8 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
-using DMS.Application.DTOs.Triggers;
 using DMS.Application.Interfaces;
+using DMS.Application.Interfaces.Database;
 using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
 

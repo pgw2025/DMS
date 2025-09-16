@@ -17,6 +17,8 @@ using System.Collections.ObjectModel;
 using System;
 using DMS.WPF.Services;
 using DMS.Application.DTOs.Events;
+using DMS.Application.Interfaces.Database;
+using DMS.Core.Enums;
 
 namespace DMS.WPF.ViewModels;
 

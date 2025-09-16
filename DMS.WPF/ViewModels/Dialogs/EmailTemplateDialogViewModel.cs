@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Application.Interfaces.Database;
 using DMS.WPF.Interfaces;
 
 namespace DMS.WPF.ViewModels.Dialogs

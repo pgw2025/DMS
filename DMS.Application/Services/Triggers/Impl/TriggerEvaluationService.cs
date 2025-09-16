@@ -3,10 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DMS.Application.DTOs;
 // 明确指定 Timer 类型，避免歧义
 using ThreadingTimer = System.Threading.Timer;
 using TimersTimer = System.Timers.Timer;
-using DMS.Application.DTOs.Triggers;
 using DMS.Application.Services.Triggers;
 using DMS.Core.Models.Triggers;
 using Microsoft.Extensions.Logging; // 使用 Microsoft.Extensions.Logging.ILogger

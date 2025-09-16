@@ -186,8 +186,6 @@ namespace DMS.Infrastructure.Services
                 {
                     _logger.LogWarning("设备 {DeviceName} 连接失败", context.Device.Name);
                 }
-                _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, context.IsConnected));
             }
             catch (Exception ex)
             {
@@ -195,11 +193,12 @@ namespace DMS.Infrastructure.Services
                     context.Device.Name, ex.Message);
                 context.IsConnected = false;
                 
-                _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, context.IsConnected));
+               
             }
             finally
             {
+                _eventService.RaiseDeviceConnectChanged(
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  context.IsConnected));
                 _semaphore.Release();
             }
         }
@@ -219,7 +218,7 @@ namespace DMS.Infrastructure.Services
                 context.IsConnected = false;
                 
                 _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, context.IsConnected));
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  context.IsConnected));
                 _logger.LogInformation("设备 {DeviceName} 连接已断开", context.Device.Name);
             }
             catch (Exception ex)

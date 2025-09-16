@@ -189,17 +189,18 @@ namespace DMS.Infrastructure.Services
                 {
                     context.IsConnected = true;
                     context.Device.IsRunning = true;
-                    _eventService.RaiseDeviceConnectChanged(
-                        this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, true));
                     await SetupSubscriptionsAsync(context, cancellationToken);
                     _logger.LogInformation("设备 {DeviceName} 连接成功", context.Device.Name);
                 }
                 else
                 {
-                    _eventService.RaiseDeviceConnectChanged(
-                        this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, false));
+                    context.IsConnected = false;
+                    context.Device.IsRunning = false;
                     _logger.LogWarning("设备 {DeviceName} 连接失败", context.Device.Name);
                 }
+                
+                _eventService.RaiseDeviceConnectChanged(
+                                         this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  context.IsConnected));
             }
             catch (Exception ex)
             {
@@ -208,7 +209,7 @@ namespace DMS.Infrastructure.Services
                 context.IsConnected = false;
                 context.Device.IsRunning = false;
                 _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, false));
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  false));
             }
             finally
             {
@@ -231,7 +232,7 @@ namespace DMS.Infrastructure.Services
                 context.IsConnected = false;
                 context.Device.IsRunning = false;
                 _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, false, false));
+                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  false));
                 _logger.LogInformation("设备 {DeviceName} 连接已断开", context.Device.Name);
             }
             catch (Exception ex)
@@ -269,16 +270,13 @@ namespace DMS.Infrastructure.Services
                         "为设备 {DeviceName} 设置PollingInterval {PollingInterval} 的订阅，变量数: {VariableCount}",
                         context.Device.Name, pollingInterval, variables.Count);
 
-                    // 根据PollingInterval计算发布间隔和采样间隔（毫秒）
-                    var publishingInterval = GetPublishingIntervalFromPollLevel(pollingInterval);
-                    // var samplingInterval = GetSamplingIntervalFromPollLevel(pollLevel);
 
                     var opcUaNodes = variables
                                      .Select(v => new OpcUaNode { NodeId = v.OpcUaNodeId })
                                      .ToList();
 
                     context.OpcUaService.SubscribeToNode(opcUaNodes, HandleDataChanged,
-                                                         publishingInterval, publishingInterval);
+                                                         pollingInterval, pollingInterval);
                 }
 
                 _logger.LogInformation("设备 {DeviceName} 订阅设置完成", context.Device.Name);

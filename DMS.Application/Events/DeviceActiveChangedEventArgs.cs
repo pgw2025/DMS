@@ -17,10 +17,6 @@ public class DeviceActiveChangedEventArgs : EventArgs
     /// </summary>
     public string DeviceName { get; }
 
-    /// <summary>
-    /// 旧状态
-    /// </summary>
-    public bool OldStatus { get; }
 
     /// <summary>
     /// 新状态
@@ -39,11 +35,10 @@ public class DeviceActiveChangedEventArgs : EventArgs
     /// <param name="deviceName">设备名称</param>
     /// <param name="oldStatus">旧状态</param>
     /// <param name="newStatus">新状态</param>
-    public DeviceActiveChangedEventArgs(int deviceId, string deviceName, bool oldStatus, bool newStatus)
+    public DeviceActiveChangedEventArgs(int deviceId, string deviceName, bool newStatus)
     {
         DeviceId = deviceId;
         DeviceName = deviceName;
-        OldStatus = oldStatus;
         NewStatus = newStatus;
         ChangeTime = DateTime.Now;
     }

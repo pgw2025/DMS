@@ -2,7 +2,11 @@
 using AutoMapper;
 using AutoMapper.Internal;
 using DMS.Application.Interfaces;
+using DMS.Application.Interfaces.Database;
+using DMS.Application.Interfaces.Management;
 using DMS.Application.Services;
+using DMS.Application.Services.Database;
+using DMS.Application.Services.Management;
 using DMS.Application.Services.Processors;
 using DMS.Application.Services.Triggers;
 using DMS.Application.Services.Triggers.Impl;

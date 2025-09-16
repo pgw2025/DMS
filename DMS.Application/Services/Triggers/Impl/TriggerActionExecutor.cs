@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
-using DMS.Application.DTOs.Triggers;
 using DMS.Application.Services.Triggers;
 using DMS.Core.Interfaces.Services;
 using DMS.Core.Models.Triggers;

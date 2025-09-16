@@ -6,6 +6,7 @@ using DMS.WPF.ViewModels.Items;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using DMS.Application.Interfaces.Database;
 
 namespace DMS.WPF.ViewModels.Dialogs
 {

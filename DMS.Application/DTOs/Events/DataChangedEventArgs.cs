@@ -1,4 +1,5 @@
 using System;
+using DMS.Core.Enums;
 
 namespace DMS.Application.DTOs.Events
 {

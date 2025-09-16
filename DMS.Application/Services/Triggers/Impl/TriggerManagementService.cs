@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using DMS.Application.DTOs.Triggers;
+using DMS.Application.DTOs;
 using DMS.Application.Services.Triggers;
 using DMS.Core.Interfaces;
 using DMS.Core.Models.Triggers;
