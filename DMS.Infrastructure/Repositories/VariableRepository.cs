@@ -38,7 +38,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     /// <returns>成功添加或更新关联的数量。</returns>
      public async Task<int> AddMqttToVariablesAsync(IEnumerable<VariableMqtt> variableMqttList)
     {
-        await Db.BeginTranAsync();
+        await _dbContext.GetInstance().BeginTranAsync();
 
         try
         {
@@ -47,7 +47,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
             var mqttIds = variableMqttList.Select(vm => vm.Mqtt.Id).Distinct().ToList();
 
             // 1. 一次性查询所有相关的现有别名
-            var existingAliases = await Db.Queryable<DbVariableMqtt>()
+            var existingAliases = await _dbContext.GetInstance().Queryable<DbVariableMqtt>()
                                           .Where(it => variableIds.Contains(it.VariableId) && mqttIds.Contains(it.MqttId))
                                           .ToListAsync();
 
@@ -87,24 +87,24 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
             // 2. 批量更新
             if (toUpdate.Any())
             {
-                var updateResult = await Db.Updateable(toUpdate).ExecuteCommandAsync();
+                var updateResult = await _dbContext.GetInstance().Updateable(toUpdate).ExecuteCommandAsync();
                 affectedCount += updateResult;
             }
 
             // 3. 批量插入
             if (toInsert.Any())
             {
-                var insertResult = await Db.Insertable(toInsert).ExecuteCommandAsync();
+                var insertResult = await _dbContext.GetInstance().Insertable(toInsert).ExecuteCommandAsync();
                 affectedCount += insertResult;
             }
 
-            await Db.CommitTranAsync();
+            await _dbContext.GetInstance().CommitTranAsync();
             //_logger.LogInformation($"成功为 {variableMqttList.Count()} 个变量请求添加/更新了MQTT服务器关联，实际影响 {affectedCount} 个。");
             return affectedCount;
         }
         catch (Exception ex)
         {
-            await Db.RollbackTranAsync();
+            await _dbContext.GetInstance().RollbackTranAsync();
             //_logger.LogError(ex, $"为变量添加MQTT服务器关联时发生错误: {ex.Message}");
             // 根据需要，可以向上层抛出异常
             throw;
@@ -167,7 +167,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbVariable() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbVariable() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbVariable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -183,7 +183,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable<DbVariable>()
+        var result = await _dbContext.GetInstance().Deleteable<DbVariable>()
                              .In(ids)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
@@ -217,7 +217,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     /// <returns>找到的变量实体，如果不存在则返回null。</returns>
     public async Task<Variable?> GetByOpcUaNodeIdAsync(string opcUaNodeId)
     {
-        var dbVariable = await Db.Queryable<DbVariable>()
+        var dbVariable = await _dbContext.GetInstance().Queryable<DbVariable>()
                                  .Where(v => v.OpcUaNodeId == opcUaNodeId)
                                  .FirstAsync();
         return dbVariable == null ? null : _mapper.Map<Variable>(dbVariable);
@@ -230,7 +230,7 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     /// <returns>找到的变量实体列表。</returns>
     public async Task<List<Variable>> GetByOpcUaNodeIdsAsync(List<string> opcUaNodeIds)
     {
-        var dbVariables = await Db.Queryable<DbVariable>()
+        var dbVariables = await _dbContext.GetInstance().Queryable<DbVariable>()
                                   .Where(v => opcUaNodeIds.Contains(v.OpcUaNodeId))
                                   .ToListAsync();
         return _mapper.Map<List<Variable>>(dbVariables);

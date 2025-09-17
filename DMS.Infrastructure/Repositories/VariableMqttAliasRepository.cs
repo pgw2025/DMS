@@ -86,7 +86,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbVariableMqttAlias() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbVariableMqttAlias() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbVariableMqttAlias)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -118,7 +118,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     public async Task<List<VariableMqttAlias>> GetAliasesForVariableAsync(int variableId)
     {
         // 查询别名关联，并包含关联的Variable和MqttServer信息
-        var dbList = await Db.Queryable<DbVariableMqttAlias>()
+        var dbList = await _dbContext.GetInstance().Queryable<DbVariableMqttAlias>()
             .Where(x => x.VariableId == variableId)
             .ToListAsync();
         
@@ -126,11 +126,11 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
         var variableIds = dbList.Select(x => x.VariableId).Distinct().ToList();
         var mqttServerIds = dbList.Select(x => x.MqttServerId).Distinct().ToList();
         
-        var variables = await Db.Queryable<DbVariable>()
+        var variables = await _dbContext.GetInstance().Queryable<DbVariable>()
             .In(x => x.Id, variableIds)
             .ToListAsync();
             
-        var mqttServers = await Db.Queryable<DbMqttServer>()
+        var mqttServers = await _dbContext.GetInstance().Queryable<DbMqttServer>()
             .In(x => x.Id, mqttServerIds)
             .ToListAsync();
             
@@ -161,7 +161,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// </summary>
     public async Task<VariableMqttAlias> GetByVariableAndServerAsync(int variableId, int mqttServerId)
     {
-        var dbAlias = await Db.Queryable<DbVariableMqttAlias>()
+        var dbAlias = await _dbContext.GetInstance().Queryable<DbVariableMqttAlias>()
             .Where(x => x.VariableId == variableId && x.MqttServerId == mqttServerId)
             .FirstAsync();
             
@@ -169,11 +169,11 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
             return null;
             
         // 手动加载关联的Variable和MqttServer实体
-        var variable = await Db.Queryable<DbVariable>()
+        var variable = await _dbContext.GetInstance().Queryable<DbVariable>()
             .Where(x => x.Id == variableId)
             .FirstAsync();
             
-        var mqttServer = await Db.Queryable<DbMqttServer>()
+        var mqttServer = await _dbContext.GetInstance().Queryable<DbMqttServer>()
             .Where(x => x.Id == mqttServerId)
             .FirstAsync();
             

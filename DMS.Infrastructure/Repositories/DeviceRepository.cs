@@ -84,7 +84,7 @@ public class DeviceRepository : BaseRepository<DbDevice>, IDeviceRepository
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbDevice() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbDevice() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbDevice)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");

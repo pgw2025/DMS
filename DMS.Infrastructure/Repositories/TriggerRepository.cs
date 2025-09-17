@@ -71,7 +71,7 @@ namespace DMS.Infrastructure.Repositories
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var rowsAffected = await Db.Deleteable<DbTriggerDefinition>()
+            var rowsAffected = await _dbContext.GetInstance().Deleteable<DbTriggerDefinition>()
                                        .In(id)
                                        .ExecuteCommandAsync();
             stopwatch.Stop();
@@ -86,7 +86,7 @@ namespace DMS.Infrastructure.Repositories
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var dbList = await Db.Queryable<DbTriggerDefinition>()
+            var dbList = await _dbContext.GetInstance().Queryable<DbTriggerDefinition>()
                                  .Where(t => t.VariableId == variableId)
                                  .ToListAsync();
             stopwatch.Stop();

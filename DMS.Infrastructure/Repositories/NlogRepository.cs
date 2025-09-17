@@ -32,7 +32,7 @@ public class NlogRepository : BaseRepository<DbNlog>, INlogRepository
     /// </summary>
     public async Task DeleteAllAsync()
     {
-        await Db.Deleteable<DbNlog>().ExecuteCommandAsync();
+        await _dbContext.GetInstance().Deleteable<DbNlog>().ExecuteCommandAsync();
     }
 
     // Nlog 通常是只读或追加的日志，因此像 AddAsync, UpdateAsync, DeleteAsync 这样的修改方法

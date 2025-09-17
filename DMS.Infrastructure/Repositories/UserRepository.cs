@@ -86,7 +86,7 @@ public class UserRepository : BaseRepository<DbUser>, IUserRepository
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbUser() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbUser() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbUser)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");

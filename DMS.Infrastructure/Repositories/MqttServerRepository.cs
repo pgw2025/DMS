@@ -83,7 +83,7 @@ public class MqttServerRepository : BaseRepository<DbMqttServer>, IMqttServerRep
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbMqttServer() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbMqttServer() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbMqttServer)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");

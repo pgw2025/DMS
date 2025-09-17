@@ -85,7 +85,7 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbVariableTable() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbVariableTable() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbVariableTable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -120,7 +120,7 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable<DbVariableTable>()
+        var result = await _dbContext.GetInstance().Deleteable<DbVariableTable>()
                              .Where(it => it.DeviceId == deviceId)
                              .ExecuteCommandAsync();
         stopwatch.Stop();

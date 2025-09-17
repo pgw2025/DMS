@@ -25,24 +25,6 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     private readonly INotificationService _notificationService;
 
     /// <summary>
-    /// 用于过滤变量的搜索文本
-    /// </summary>
-    [ObservableProperty]
-    private string _searchText;
-
-    /// <summary>
-    /// 是否打开建议列表
-    /// </summary>
-    [ObservableProperty]
-    private bool _isSuggestionListOpen;
-
-    /// <summary>
-    /// 建议的变量列表
-    /// </summary>
-    [ObservableProperty]
-    private ObservableCollection<string> _suggestedVariables;
-
-    /// <summary>
     /// 历史记录条数限制
     /// </summary>
     [ObservableProperty]
@@ -64,7 +46,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     /// 选中的变量历史记录
     /// </summary>
     [ObservableProperty]
-    private VariableHistoryDto _selectedVariable;
+    private VariableItemViewModel _currentVariable;
 
     /// <summary>
     /// 变量历史记录列表
@@ -94,13 +76,11 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _variableHistorySynchronizedView = _variableHistoryList.CreateView(v => v);
         VariableHistories = _variableHistorySynchronizedView.ToNotifyCollectionChanged();
         _allVariableHistories = new List<VariableHistoryDto>();
-        _suggestedVariables = new ObservableCollection<string>();
 
         // 初始化默认值
         _historyLimit = 1000; // 默认限制1000条记录
         _startTime = null;
         _endTime = null;
-        _selectedVariable = new VariableHistoryDto();
     }
 
     /// <summary>
@@ -109,17 +89,16 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     /// <param name="limit">返回记录的最大数量，null表示无限制</param>
     /// <param name="startTime">开始时间，null表示无限制</param>
     /// <param name="endTime">结束时间，null表示无限制</param>
-    private async void LoadAllVariableHistories(int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
+    private async void LoadAllVariableHistories(int variableId,int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
     {
+
+        
         try
         {
             _variableHistoryList.Clear();
-            var allHistories = await _historyAppService.GetAllVariableHistoriesAsync(limit, startTime, endTime);
+            var allHistories = await _historyAppService.GetVariableHistoriesAsync(variableId,limit, startTime, endTime);
             _allVariableHistories = allHistories.ToList();
             _variableHistoryList.AddRange(_allVariableHistories);
-
-            // 更新建议列表
-            UpdateSuggestedVariables();
         }
         catch (Exception ex)
         {
@@ -128,37 +107,17 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         }
     }
 
-    /// <summary>
-    /// 更新建议的变量列表
-    /// </summary>
-    private void UpdateSuggestedVariables()
-    {
-        // 清空现有建议列表
-        _suggestedVariables.Clear();
-
-        if (!string.IsNullOrWhiteSpace(SearchText))
-        {
-            // // 根据搜索文本过滤建议列表
-            // var filteredVariables = _dataStorageService.Variables
-            //                                            .Where(v =>
-            //                                                       v.Name?.Contains(
-            //                                                           SearchText, StringComparison.OrdinalIgnoreCase) ==
-            //                                                       true)
-            //                                            .Select(v => v.Name)
-            //                                            .Take(10)
-            //                                            .ToList();
-            //
-            // foreach (var variable in filteredVariables)
-            // {
-            //     _suggestedVariables.Add(variable);
-            // }
-        }
-    }
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        // 加载所有变量的历史记录
-        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
+        if (_dataStorageService.Variables.TryGetValue(menu.TargetId, out VariableItemViewModel variableItem))
+        {
+            CurrentVariable = variableItem;
+            // 加载所有变量的历史记录
+            LoadAllVariableHistories(variableItem.Id,HistoryLimit, StartTime, EndTime);
+            
+        }
+        
     }
 
     /// <summary>
@@ -167,49 +126,13 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     private void Reload()
     {
-        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
-    }
-
-    /// <summary>
-    /// 更新建议列表命令
-    /// </summary>
-    [RelayCommand]
-    private void UpdateSuggestions()
-    {
-        UpdateSuggestedVariables();
-    }
-
-    /// <summary>
-    /// 当搜索文本改变时触发
-    /// </summary>
-    /// <param name="value"></param>
-    partial void OnSearchTextChanged(string value)
-    {
-        // 添加调试信息
-        System.Diagnostics.Debug.WriteLine($"OnSearchTextChanged called with value: '{value}'");
+        if (CurrentVariable!=null)
+        {
+            LoadAllVariableHistories( CurrentVariable.Id,HistoryLimit, StartTime, EndTime);
+        }
         
-        // 更新建议列表
-        UpdateSuggestedVariables();
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            // 如果搜索文本为空，显示所有历史记录
-            _variableHistoryList.Clear();
-            _variableHistoryList.AddRange(_allVariableHistories);
-        }
-        else
-        {
-            // 根据搜索文本过滤历史记录
-            var filteredHistories = _allVariableHistories
-                                    .Where(h =>
-                                               h.VariableName?.Contains(
-                                                   value, StringComparison.OrdinalIgnoreCase) == true)
-                                    .ToList();
-
-            _variableHistoryList.Clear();
-            _variableHistoryList.AddRange(filteredHistories);
-        }
     }
+
 
     /// <summary>
     /// 根据搜索文本过滤历史记录
@@ -238,14 +161,6 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     }
 
     /// <summary>
-    /// 重新加载历史记录，使用当前设置的限制和时间范围
-    /// </summary>
-    public void ReloadHistories()
-    {
-        LoadAllVariableHistories(HistoryLimit, StartTime, EndTime);
-    }
-
-    /// <summary>
     /// 根据变量ID加载历史记录
     /// </summary>
     /// <param name="variableId">变量ID</param>
@@ -260,9 +175,6 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             _variableHistoryList.Clear();
             var histories = await _historyAppService.GetVariableHistoriesAsync(variableId, limit, startTime, endTime);
             _variableHistoryList.AddRange(histories);
-
-            // 更新建议列表
-            UpdateSuggestedVariables();
         }
         catch (Exception ex)
         {

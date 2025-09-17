@@ -85,7 +85,7 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbVariableHistory() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbVariableHistory() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbVariableHistory)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -118,7 +118,7 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
     /// <returns>变量历史记录列表</returns>
     public async Task<List<VariableHistory>> GetByVariableIdAsync(int variableId)
     {
-        var dbList = await Db.Queryable<DbVariableHistory>()
+        var dbList = await _dbContext.GetInstance().Queryable<DbVariableHistory>()
                              .Where(h => h.VariableId == variableId)
                              .OrderBy(h => h.Timestamp, SqlSugar.OrderByType.Desc)
                              .ToListAsync();
@@ -135,7 +135,7 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
     /// <returns>变量历史记录列表</returns>
     public async Task<List<VariableHistory>> GetByVariableIdAsync(int variableId, int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
     {
-        var query = Db.Queryable<DbVariableHistory>()
+        var query = _dbContext.GetInstance().Queryable<DbVariableHistory>()
                       .Where(h => h.VariableId == variableId);
         
         // 添加时间范围筛选
@@ -165,7 +165,7 @@ public class VariableHistoryRepository : BaseRepository<DbVariableHistory>, IVar
     /// <returns>所有历史记录列表</returns>
     public new async Task<List<VariableHistory>> GetAllAsync(int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
     {
-        var query = Db.Queryable<DbVariableHistory>();
+        var query = _dbContext.GetInstance().Queryable<DbVariableHistory>();
         
         // 添加时间范围筛选
         if (startTime.HasValue)

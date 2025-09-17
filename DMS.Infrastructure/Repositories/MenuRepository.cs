@@ -37,7 +37,7 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var dbMenuTree = await Db.Queryable<DbMenu>()
+        var dbMenuTree = await _dbContext.GetInstance().Queryable<DbMenu>()
                                  .ToTreeAsync(dm => dm.Childrens, dm => dm.ParentId, 0);
         stopwatch.Stop();
         _logger.LogInformation($"获取菜单树耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -99,7 +99,7 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(new DbMenu { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbMenu { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbMenu)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -116,11 +116,11 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
         var stopwatch = new Stopwatch();
         stopwatch.Start();
         int delConut = 0;
-        var childList = await Db.Queryable<DbMenu>()
+        var childList = await _dbContext.GetInstance().Queryable<DbMenu>()
                                 .ToChildListAsync(c => c.ParentId, id);
-        delConut = await Db.Deleteable<DbMenu>(childList)
+        delConut = await _dbContext.GetInstance().Deleteable<DbMenu>(childList)
                            .ExecuteCommandAsync();
-        delConut += await Db.Deleteable<DbMenu>()
+        delConut += await _dbContext.GetInstance().Deleteable<DbMenu>()
                             .Where(m => m.Id == id)
                             .ExecuteCommandAsync();
         stopwatch.Stop();
@@ -138,13 +138,13 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var menu = await Db.Queryable<DbMenu>().FirstAsync(m => m.MenuType == menuType && m.TargetId == targetId);
+        var menu = await _dbContext.GetInstance().Queryable<DbMenu>().FirstAsync(m => m.MenuType == menuType && m.TargetId == targetId);
         if (menu == null) return 0;
-        var childList = await Db.Queryable<DbMenu>()
+        var childList = await _dbContext.GetInstance().Queryable<DbMenu>()
             .ToChildListAsync(c => c.ParentId, menu.Id);
-        var delConut = await Db.Deleteable<DbMenu>(childList)
+        var delConut = await _dbContext.GetInstance().Deleteable<DbMenu>(childList)
             .ExecuteCommandAsync();
-        delConut += await Db.Deleteable<DbMenu>()
+        delConut += await _dbContext.GetInstance().Deleteable<DbMenu>()
             .Where(m => m.Id == menu.Id)
             .ExecuteCommandAsync();
         stopwatch.Stop();
@@ -160,7 +160,7 @@ public class MenuRepository : BaseRepository<DbMenu>, IMenuRepository
     /// <returns>对应的菜单实体，如果不存在则为null。</returns>
     public async Task<MenuBean> GetMenuByTargetIdAsync(MenuType menuType, int targetId)
     {
-        var dbMenu = await Db.Queryable<DbMenu>().FirstAsync(m => m.MenuType == menuType && m.TargetId == targetId);
+        var dbMenu = await _dbContext.GetInstance().Queryable<DbMenu>().FirstAsync(m => m.MenuType == menuType && m.TargetId == targetId);
         return _mapper.Map<MenuBean>(dbMenu);
     }
 

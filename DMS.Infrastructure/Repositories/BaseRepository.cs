@@ -14,7 +14,7 @@ namespace DMS.Infrastructure.Repositories;
 public abstract class BaseRepository<TEntity>
     where TEntity : class, new()
 {
-    private readonly SqlSugarDbContext _dbContext;
+    protected readonly SqlSugarDbContext _dbContext;
     protected readonly ILogger<BaseRepository<TEntity>> _logger;
 
     /// <summary>
@@ -45,7 +45,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Insertable(entity)
+        var result = await _dbContext.GetInstance().Insertable(entity)
                              .ExecuteReturnEntityAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Add {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -61,7 +61,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Updateable(entity)
+        var result = await _dbContext.GetInstance().Updateable(entity)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Update {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -77,7 +77,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable(entity)
+        var result = await _dbContext.GetInstance().Deleteable(entity)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -93,7 +93,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entities = await Db.Queryable<TEntity>()
+        var entities = await _dbContext.GetInstance().Queryable<TEntity>()
                                .ToListAsync();
         stopwatch.Stop();
         _logger.LogInformation($"GetAll {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -111,7 +111,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entity = await Db.Queryable<TEntity>()
+        var entity = await _dbContext.GetInstance().Queryable<TEntity>()
                              .In(id)
                              .FirstAsync();
         stopwatch.Stop();
@@ -128,7 +128,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entity = await Db.Queryable<TEntity>()
+        var entity = await _dbContext.GetInstance().Queryable<TEntity>()
                              .In(id)
                              .FirstAsync();
         stopwatch.Stop();
@@ -145,7 +145,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable<TEntity>()
+        var result = await _dbContext.GetInstance().Deleteable<TEntity>()
                              .In(ids)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
@@ -162,7 +162,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entity = await Db.Queryable<TEntity>()
+        var entity = await _dbContext.GetInstance().Queryable<TEntity>()
                              .FirstAsync(expression);
         stopwatch.Stop();
         _logger.LogInformation($"GetByCondition {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -178,7 +178,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Queryable<TEntity>()
+        var result = await _dbContext.GetInstance().Queryable<TEntity>()
                              .AnyAsync(expression);
         stopwatch.Stop();
         _logger.LogInformation($"Exists {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -191,7 +191,7 @@ public abstract class BaseRepository<TEntity>
     /// <returns>表示异步操作的任务。</returns>
     public async Task BeginTranAsync()
     {
-        await Db.BeginTranAsync();
+        await _dbContext.GetInstance().BeginTranAsync();
     }
 
     /// <summary>
@@ -200,7 +200,7 @@ public abstract class BaseRepository<TEntity>
     /// <returns>表示异步操作的任务。</returns>
     public async Task CommitTranAsync()
     {
-        await Db.CommitTranAsync();
+        await _dbContext.GetInstance().CommitTranAsync();
     }
 
 
@@ -210,7 +210,7 @@ public abstract class BaseRepository<TEntity>
     /// <returns>表示异步操作的任务。</returns>
     public async Task RollbackTranAsync()
     {
-        await Db.RollbackTranAsync();
+        await _dbContext.GetInstance().RollbackTranAsync();
     }
 
     /// <summary>
@@ -222,7 +222,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var entity = await Db.Queryable<TEntity>().Take(number).ToListAsync();
+        var entity = await _dbContext.GetInstance().Queryable<TEntity>().Take(number).ToListAsync();
                             
         stopwatch.Stop();
         _logger.LogInformation($"TakeAsync {typeof(TEntity).Name}耗时：{stopwatch.ElapsedMilliseconds}ms");
@@ -238,7 +238,7 @@ public abstract class BaseRepository<TEntity>
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await Db.Deleteable<TEntity>()
+        var result = await _dbContext.GetInstance().Deleteable<TEntity>()
                              .In(id)
                              .ExecuteCommandAsync();
         stopwatch.Stop();
@@ -253,7 +253,7 @@ public abstract class BaseRepository<TEntity>
         var retrunEntities = new  List<TEntity>();
         foreach (var entity in entities)
         {
-            var result = await Db.Insertable(entity).ExecuteReturnEntityAsync();
+            var result = await _dbContext.GetInstance().Insertable(entity).ExecuteReturnEntityAsync();
             retrunEntities.Add(result);
         }
 
