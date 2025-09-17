@@ -1,22 +1,16 @@
-using System.Collections;
-using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
-using DMS.Core.Models;
+using DMS.Application.Interfaces.Database;
+using DMS.Core.Events;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
-using Microsoft.Extensions.DependencyInjection;
-using ObservableCollections;
-using System.Linq;
-using DMS.Application.Interfaces.Database;
-using System.Collections.Generic;
 using LiveCharts;
-using LiveCharts.Wpf;
-using System;
 using LiveCharts.Defaults;
+using LiveCharts.Wpf;
+using ObservableCollections;
 
 namespace DMS.WPF.ViewModels;
 
@@ -27,6 +21,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     private readonly IHistoryAppService _historyAppService;
     private readonly IWPFDataService _wpfDataService;
     private readonly IDataStorageService _dataStorageService;
+    private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
 
     /// <summary>
@@ -77,6 +72,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     public VariableHistoryViewModel(IMapper mapper, IDialogService dialogService, IHistoryAppService historyAppService,
                                     IWPFDataService wpfDataService, IDataStorageService dataStorageService,
+                                    IEventService eventService, 
                                     INotificationService notificationService)
     {
         _mapper = mapper;
@@ -84,6 +80,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _historyAppService = historyAppService;
         _wpfDataService = wpfDataService;
         _dataStorageService = dataStorageService;
+        _eventService = eventService;
         _notificationService = notificationService;
 
         _variableHistoryList = new ObservableList<VariableHistoryDto>();
@@ -100,6 +97,25 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         LineAxisX = new AxesCollection { new Axis() };
         LineAxisY = new AxesCollection { new Axis() };
         LineSeriesCollection = new SeriesCollection();
+
+        _eventService.OnVariableValueChanged += OnVariableValueChanged;
+    }
+
+    private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
+    {
+        if (e.VariableId!= CurrentVariable.Id)
+        {
+            return;
+        }
+        
+        var variableHistory = new VariableHistoryDto()
+                              {
+                                  VariableId = CurrentVariable.Id,
+                                  Timestamp = DateTime.Now,
+                                  Value = e.NewValue
+                              };
+        _variableHistoryList.Add(variableHistory);
+        
     }
 
     /// <summary>
