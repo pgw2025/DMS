@@ -165,6 +165,7 @@
 	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.5" />
 	  <PackageReference Include="NLog" Version="6.0.0" />
 	  <PackageReference Include="ObservableCollections" Version="3.3.4" />
+	  <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
   </ItemGroup>
 
 

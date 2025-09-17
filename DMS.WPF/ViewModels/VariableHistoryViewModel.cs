@@ -12,6 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
 using System.Linq;
 using DMS.Application.Interfaces.Database;
+using System.Collections.Generic;
+using LiveCharts;
+using LiveCharts.Wpf;
+using System;
+using LiveCharts.Defaults;
 
 namespace DMS.WPF.ViewModels;
 
@@ -53,6 +58,15 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     /// </summary>
     public NotifyCollectionChangedSynchronizedViewList<VariableHistoryDto> VariableHistories { get; }
 
+    // 折线图相关属性
+    public SeriesCollection LineSeriesCollection { get; set; }
+    
+    [ObservableProperty] 
+    private AxesCollection _lineAxisX;
+    
+    [ObservableProperty] 
+    private AxesCollection _lineAxisY;
+
     private readonly ObservableList<VariableHistoryDto> _variableHistoryList;
     private readonly ISynchronizedView<VariableHistoryDto, VariableHistoryDto> _variableHistorySynchronizedView;
 
@@ -81,6 +95,11 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _historyLimit = 1000; // 默认限制1000条记录
         _startTime = null;
         _endTime = null;
+        
+        // 初始化图表属性
+        LineAxisX = new AxesCollection { new Axis() };
+        LineAxisY = new AxesCollection { new Axis() };
+        LineSeriesCollection = new SeriesCollection();
     }
 
     /// <summary>
@@ -89,16 +108,19 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     /// <param name="limit">返回记录的最大数量，null表示无限制</param>
     /// <param name="startTime">开始时间，null表示无限制</param>
     /// <param name="endTime">结束时间，null表示无限制</param>
-    private async void LoadAllVariableHistories(int variableId,int? limit = null, DateTime? startTime = null, DateTime? endTime = null)
+    private async void LoadAllVariableHistories(int variableId, int? limit = null, DateTime? startTime = null,
+                                                DateTime? endTime = null)
     {
-
-        
         try
         {
             _variableHistoryList.Clear();
-            var allHistories = await _historyAppService.GetVariableHistoriesAsync(variableId,limit, startTime, endTime);
+            var allHistories
+                = await _historyAppService.GetVariableHistoriesAsync(variableId, limit, startTime, endTime);
             _allVariableHistories = allHistories.ToList();
             _variableHistoryList.AddRange(_allVariableHistories);
+
+            // 更新图表数据
+            UpdateChartData();
         }
         catch (Exception ex)
         {
@@ -114,10 +136,8 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         {
             CurrentVariable = variableItem;
             // 加载所有变量的历史记录
-            LoadAllVariableHistories(variableItem.Id,HistoryLimit, StartTime, EndTime);
-            
+            LoadAllVariableHistories(variableItem.Id, HistoryLimit, StartTime, EndTime);
         }
-        
     }
 
     /// <summary>
@@ -126,11 +146,10 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     private void Reload()
     {
-        if (CurrentVariable!=null)
+        if (CurrentVariable != null)
         {
-            LoadAllVariableHistories( CurrentVariable.Id,HistoryLimit, StartTime, EndTime);
+            LoadAllVariableHistories(CurrentVariable.Id, HistoryLimit, StartTime, EndTime);
         }
-        
     }
 
 
@@ -175,11 +194,80 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             _variableHistoryList.Clear();
             var histories = await _historyAppService.GetVariableHistoriesAsync(variableId, limit, startTime, endTime);
             _variableHistoryList.AddRange(histories);
+
+            // 更新图表数据
+            UpdateChartData();
         }
         catch (Exception ex)
         {
             // 记录更详细的错误信息
             _notificationService.ShowError($"加载变量历史记录失败: {ex.Message}", ex);
         }
+    }
+
+    /// <summary>
+    /// 更新图表数据
+    /// </summary>
+    private void UpdateChartData()
+    {
+        if (_variableHistoryList == null || _variableHistoryList.Count == 0)
+        {
+            // 清空图表数据
+            LineSeriesCollection?.Clear();
+            OnPropertyChanged(nameof(LineSeriesCollection));
+            return;
+        }
+
+        // 创建数值点集合
+        var values = new ChartValues<DateTimePoint>();
+
+        foreach (var history in _variableHistoryList)
+        {
+            // 尝试将值转换为double
+            if (double.TryParse(history.Value, out double value))
+            {
+                values.Add(new DateTimePoint(history.Timestamp, value));
+            }
+        }
+
+        // 确保LineSeriesCollection已初始化
+        if (LineSeriesCollection == null)
+        {
+            LineSeriesCollection = new SeriesCollection();
+        }
+
+        // 清空旧数据并添加新系列
+        LineSeriesCollection.Clear();
+        LineSeriesCollection.Add(new LineSeries
+        {
+            Title = "变量值",
+            Values = values,
+            PointGeometry = null, // 不显示数据点，只显示线条
+            LineSmoothness = 0.5, // 设置线条平滑度
+            StrokeThickness = 2
+        });
+
+        // 确保坐标轴集合已初始化
+        if (LineAxisX == null || LineAxisX.Count == 0)
+        {
+            LineAxisX = new AxesCollection { new Axis() };
+        }
+        if (LineAxisY == null || LineAxisY.Count == 0)
+        {
+            LineAxisY = new AxesCollection { new Axis() };
+        }
+
+        // 设置坐标轴
+        // X轴使用时间格式化
+        LineAxisX[0].LabelFormatter = value => new DateTime((long)value).ToString("MM-dd HH:mm:ss");
+
+        // Y轴使用数值格式化
+        LineAxisY[0].Title = "值";
+        LineAxisY[0].LabelFormatter = value => value.ToString("F2");
+
+        // 通知属性更改
+        OnPropertyChanged(nameof(LineSeriesCollection));
+        OnPropertyChanged(nameof(LineAxisX));
+        OnPropertyChanged(nameof(LineAxisY));
     }
 }

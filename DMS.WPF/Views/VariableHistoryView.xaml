@@ -15,6 +15,7 @@
     xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
     xmlns:converters="clr-namespace:DMS.WPF.Converters"
+    xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     d:DataContext="{d:DesignInstance vm:VariableHistoryViewModel}"
     d:DesignHeight="600"
     d:DesignWidth="800"
@@ -142,23 +143,32 @@
             </Border>
         </StackPanel>
 
-        <!-- 变量历史记录列表 -->
-        <DataGrid
-            Margin="20"
-            AutoGenerateColumns="False"
-            CanUserDeleteRows="False"
-            CanUserSortColumns="True"
-            IsReadOnly="True"
-            ItemsSource="{Binding VariableHistories}"
-            SelectionMode="Single"
-            Style="{StaticResource DataGridBaseStyle}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Value}" Header="值" />
-                <DataGridTextColumn
-                    Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
-                    Header="时间戳"
-                    IsReadOnly="True" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- 变量历史记录列表和图表 -->
+        <hc:TabControl Margin="20">
+            <hc:TabItem Header="数据表格">
+                <DataGrid
+                    AutoGenerateColumns="False"
+                    CanUserDeleteRows="False"
+                    CanUserSortColumns="True"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding VariableHistories}"
+                    SelectionMode="Single"
+                    Style="{StaticResource DataGridBaseStyle}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Value}" Header="值" />
+                        <DataGridTextColumn
+                            Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
+                            Header="时间戳"
+                            IsReadOnly="True" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </hc:TabItem>
+            <hc:TabItem Header="数据图表">
+                <lvc:CartesianChart Series="{Binding LineSeriesCollection}" 
+                                    AxisX="{Binding LineAxisX}" 
+                                    AxisY="{Binding LineAxisY}"
+                                    Margin="10"/>
+            </hc:TabItem>
+        </hc:TabControl>
     </DockPanel>
 </UserControl>
