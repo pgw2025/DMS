@@ -4,6 +4,7 @@ using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Core.Enums;
 using DMS.Core.Events;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
@@ -19,6 +20,7 @@ public class DeviceDataService : IDeviceDataService
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IAppDataStorageService _appDataStorageService;
     private readonly IDataStorageService _dataStorageService;
+    private readonly IVariableTableDataService _variableTableDataService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
     private readonly IMenuDataService _menuDataService;
@@ -31,7 +33,7 @@ public class DeviceDataService : IDeviceDataService
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appDataCenterService">数据服务中心实例。</param>
     public DeviceDataService(IMapper mapper, IAppDataCenterService appDataCenterService,
-                             IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService,
+                             IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService,IVariableTableDataService variableTableDataService,
                              IEventService eventService, INotificationService notificationService,
                              IMenuDataService menuDataService, IVariableDataService variableDataService)
     {
@@ -39,6 +41,7 @@ public class DeviceDataService : IDeviceDataService
         _appDataCenterService = appDataCenterService;
         _appDataStorageService = appDataStorageService;
         _dataStorageService = dataStorageService;
+        _variableTableDataService = variableTableDataService;
         _eventService = eventService;
         _notificationService = notificationService;
         _menuDataService = menuDataService;
@@ -138,16 +141,30 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     public async Task<bool> DeleteDevice(DeviceItemViewModel device)
     {
+        
+        //从数据库删除设备相关数据
         if (!await _appDataCenterService.DeviceManagementService.DeleteDeviceByIdAsync(device.Id))
         {
             return false;
         }
-
+        //从Application项目删除设备相关数据
         _appDataCenterService.DeviceManagementService.RemoveDeviceFromMemory(device.Id);
+        
 
-        // 删除设备
+        // 从界面删除设备相关数据集
+        foreach (var variableTable in device.VariableTables)
+        {
+            await  _variableTableDataService.DeleteVariableTable(variableTable);
+        }
 
-        return _dataStorageService.Devices.Remove(device.Id);
+        var deviceMenu= _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu && m.TargetId == device.Id);
+        if (deviceMenu != null)
+        {
+            _menuDataService.DeleteMenuItem(deviceMenu);
+        }
+        _dataStorageService.Devices.Remove(device.Id);
+
+        return true;
     }
 
     /// <summary>

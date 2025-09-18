@@ -120,6 +120,7 @@ public class VariableTableDataService : IVariableTableDataService
         }
 
         _appDataCenterService.VariableTableManagementService.RemoveVariableTableFromMemory(variableTable.Id);
+        // 删除变量表界面相关的菜单
 
         var variableTableMenu
             =_dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);

@@ -3,8 +3,6 @@ using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
-
-
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +15,7 @@ namespace DMS.Infrastructure.Repositories;
 public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariableTableRepository
 {
     private readonly IMapper _mapper;
+    private readonly IVariableRepository _variableRepository;
 
     /// <summary>
     /// 构造函数，注入 AutoMapper 和 SqlSugarDbContext。
@@ -24,10 +23,26 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
     /// <param name="logger">日志记录器实例。</param>
-    public VariableTableRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<VariableTableRepository> logger)
+    public VariableTableRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<VariableTableRepository> logger,
+                                   IVariableRepository variableRepository)
         : base(dbContext, logger)
     {
         _mapper = mapper;
+        _variableRepository = variableRepository;
+    }
+
+    /// <summary>
+    /// 异步根据ID获取单个变量表。
+    /// </summary>
+    /// <param name="id">变量表的唯一标识符。</param>
+    /// <returns>对应的变量表实体，如果不存在则为null。</returns>
+    public async Task<List<VariableTable>> GetByDeviceIdAsync(int deviceId)
+    {
+        var variableTables = await _dbContext.GetInstance()
+                                             .Queryable<DbVariableTable>()
+                                             .Where(d => d.DeviceId == deviceId)
+                                             .ToListAsync();
+        return _mapper.Map<List<VariableTable>>(variableTables);
     }
 
     /// <summary>
@@ -67,15 +82,23 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     /// </summary>
     /// <param name="entity">要更新的变量表实体。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> UpdateAsync(VariableTable entity) => await base.UpdateAsync(_mapper.Map<DbVariableTable>(entity));
+    public async Task<int> UpdateAsync(VariableTable entity) =>
+        await base.UpdateAsync(_mapper.Map<DbVariableTable>(entity));
 
     /// <summary>
     /// 异步删除变量表。
     /// </summary>
     /// <param name="entity">要删除的变量表实体。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> DeleteAsync(VariableTable entity) => await base.DeleteAsync(_mapper.Map<DbVariableTable>(entity));
-    
+    public async Task<int> DeleteAsync(VariableTable entity)
+    {
+        //删除变量表中的所有变量
+        await  _variableRepository.DeleteByVariableTableIdAsync(entity.Id);
+        //删除变量表
+        return   await base.DeleteAsync(_mapper.Map<DbVariableTable>(entity));
+    }
+        
+
     /// <summary>
     /// 异步根据ID删除变量表。
     /// </summary>
@@ -85,13 +108,17 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await _dbContext.GetInstance().Deleteable(new DbVariableTable() { Id = id })
-                             .ExecuteCommandAsync();
+        //删除变量表中的所有变量
+        await  _variableRepository.DeleteByVariableTableIdAsync(id);
+        //删除变量表
+        var result = await _dbContext.GetInstance()
+                                     .Deleteable(new DbVariableTable() { Id = id })
+                                     .ExecuteCommandAsync();
         stopwatch.Stop();
         _logger.LogInformation($"Delete {typeof(DbVariableTable)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
-    
+
     /// <summary>
     /// 异步获取指定数量的变量表。
     /// </summary>
@@ -101,7 +128,6 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     {
         var dbList = await base.TakeAsync(number);
         return _mapper.Map<List<VariableTable>>(dbList);
-
     }
 
     public async Task<List<VariableTable>> AddBatchAsync(List<VariableTable> entities)
@@ -120,9 +146,14 @@ public class VariableTableRepository : BaseRepository<DbVariableTable>, IVariabl
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await _dbContext.GetInstance().Deleteable<DbVariableTable>()
-                             .Where(it => it.DeviceId == deviceId)
-                             .ExecuteCommandAsync();
+        int result = 0;
+        var variableTables = await GetByDeviceIdAsync(deviceId);
+        foreach (var variableTable in variableTables)
+        {
+          var res=  await DeleteByIdAsync(variableTable.Id);
+          result += res;
+        }
+
         stopwatch.Stop();
         _logger.LogInformation($"Delete VariableTable by DeviceId={deviceId}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;

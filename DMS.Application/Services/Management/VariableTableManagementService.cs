@@ -15,7 +15,6 @@ public class VariableTableManagementService : IVariableTableManagementService
 {
     private readonly IVariableTableAppService _variableTableAppService;
     private readonly IAppDataStorageService _appDataStorageService;
-    private readonly ConcurrentDictionary<int, VariableTableDto> _variableTables;
 
     /// <summary>
     /// 当变量表数据发生变化时触发
@@ -95,16 +94,13 @@ public class VariableTableManagementService : IVariableTableManagementService
         }
 
         // 确保_variableTables和variableTableDto不为null
-        if (_variableTables != null && variableTableDto != null)
-        {
-            if (_variableTables.TryAdd(variableTableDto.Id, variableTableDto))
+            if (_appDataStorageService.VariableTables.TryAdd(variableTableDto.Id, variableTableDto))
             {
                 OnVariableTableChanged?.Invoke(this, new VariableTableChangedEventArgs(
                                            DataChangeType.Added,
                                            variableTableDto,
                                            deviceDto));
             }
-        }
     }
 
     /// <summary>
@@ -118,7 +114,7 @@ public class VariableTableManagementService : IVariableTableManagementService
             deviceDto = device;
         }
 
-        _variableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
+        _appDataStorageService.VariableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
         OnVariableTableChanged?.Invoke(this,new VariableTableChangedEventArgs(
                                          DataChangeType.Updated,
                                          variableTableDto,
@@ -130,7 +126,7 @@ public class VariableTableManagementService : IVariableTableManagementService
     /// </summary>
     public void RemoveVariableTableFromMemory(int variableTableId)
     {
-        if (_variableTables.TryRemove(variableTableId, out var variableTableDto))
+        if (_appDataStorageService.VariableTables.TryRemove(variableTableId, out var variableTableDto))
         {
             DeviceDto deviceDto = null;
             if (variableTableDto != null && _appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))

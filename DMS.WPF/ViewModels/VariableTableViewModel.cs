@@ -247,6 +247,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             var improtVariableDtos = _mapper.Map<List<VariableDto>>(improtVariable);
             foreach (var variableDto in improtVariableDtos)
             {
+                variableDto.IsActive = true;
                 variableDto.CreatedAt = DateTime.Now;
                 variableDto.UpdatedAt = DateTime.Now;
                 variableDto.VariableTableId = CurrentVariableTable.Id;

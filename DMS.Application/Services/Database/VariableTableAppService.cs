@@ -153,7 +153,7 @@ namespace DMS.Application.Services.Database
                 }
 
                 // 删除关联的变量
-                await _repositoryManager.Variables.DeleteByIdAsync(id);
+                await _repositoryManager.Variables.DeleteByVariableTableIdAsync(id);
 
                 // 删除关联的MQTT别名
                 // await _repositoryManager.VariableMqttAlias.DeleteByVariableTableIdAsync(id);

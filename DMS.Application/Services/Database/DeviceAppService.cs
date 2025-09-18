@@ -188,6 +188,8 @@ public class DeviceAppService : IDeviceAppService
 
             // 删除关联的变量表
             await _repoManager.VariableTables.DeleteByDeviceIdAsync(deviceId);
+            // 删除关联的变量
+            await _repoManager.Variables.DeleteByVariableTableIdAsync(deviceId);
             
             // 删除关联的菜单树
             await _repoManager.Menus.DeleteMenuTreeByTargetIdAsync(MenuType.DeviceMenu,deviceId);

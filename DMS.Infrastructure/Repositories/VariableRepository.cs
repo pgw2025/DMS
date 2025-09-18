@@ -29,88 +29,6 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     }
 
 
-    /*
-    /// <summary>
-    /// 为变量添加MQTT服务器关联，并指定别名。（此方法当前被注释，可能为待实现或废弃功能）
-    /// </summary>
-    /// <param name="variableMqttList"></param>
-    /// <param name="variableDatas">要添加MQTT服务器的变量数据列表。</param>
-    /// <returns>成功添加或更新关联的数量。</returns>
-     public async Task<int> AddMqttToVariablesAsync(IEnumerable<VariableMqtt> variableMqttList)
-    {
-        await _dbContext.GetInstance().BeginTranAsync();
-
-        try
-        {
-            int affectedCount = 0;
-            var variableIds = variableMqttList.Select(vm => vm.Variable.Id).Distinct().ToList();
-            var mqttIds = variableMqttList.Select(vm => vm.Mqtt.Id).Distinct().ToList();
-
-            // 1. 一次性查询所有相关的现有别名
-            var existingAliases = await _dbContext.GetInstance().Queryable<DbVariableMqtt>()
-                                          .Where(it => variableIds.Contains(it.VariableId) && mqttIds.Contains(it.MqttId))
-                                          .ToListAsync();
-
-            var existingAliasesDict = existingAliases
-                .ToDictionary(a => (a.VariableId, a.Mqtt.Id), a => a);
-
-            var toInsert = new List<DbVariableMqtt>();
-            var toUpdate = new List<DbVariableMqtt>();
-
-            foreach (var variableMqtt in variableMqttList)
-            {
-                var key = (variableMqtt.Variable.Id, variableMqtt.Mqtt.Id);
-                if (existingAliasesDict.TryGetValue(key, out var existingAlias))
-                {
-                    // 如果存在但别名不同，则准备更新
-                    // if (existingAlias.MqttAlias != variableMqtt.MqttAlias)
-                    // {
-                    //     existingAlias.MqttAlias = variableMqtt.MqttAlias;
-                    //     existingAlias.UpdateTime = DateTime.Now;
-                    //     toUpdate.Add(existingAlias);
-                    // }
-                }
-                else
-                {
-                    // 如果不存在，则准备插入
-                    toInsert.Add(new DbVariableMqtt
-                    {
-                        VariableId = variableMqtt.Variable.Id,
-                        MqttId = variableMqtt.Mqtt.Id,
-                        // MqttAlias = variableMqtt.MqttAlias,
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now
-                    });
-                }
-            }
-
-            // 2. 批量更新
-            if (toUpdate.Any())
-            {
-                var updateResult = await _dbContext.GetInstance().Updateable(toUpdate).ExecuteCommandAsync();
-                affectedCount += updateResult;
-            }
-
-            // 3. 批量插入
-            if (toInsert.Any())
-            {
-                var insertResult = await _dbContext.GetInstance().Insertable(toInsert).ExecuteCommandAsync();
-                affectedCount += insertResult;
-            }
-
-            await _dbContext.GetInstance().CommitTranAsync();
-            //_logger.LogInformation($"成功为 {variableMqttList.Count()} 个变量请求添加/更新了MQTT服务器关联，实际影响 {affectedCount} 个。");
-            return affectedCount;
-        }
-        catch (Exception ex)
-        {
-            await _dbContext.GetInstance().RollbackTranAsync();
-            //_logger.LogError(ex, $"为变量添加MQTT服务器关联时发生错误: {ex.Message}");
-            // 根据需要，可以向上层抛出异常
-            throw;
-        }
-    }
-*/
     /// <summary>
     /// 异步根据ID获取单个变量。
     /// </summary>
@@ -157,6 +75,23 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
     /// <returns>受影响的行数。</returns>
     public async Task<int> DeleteAsync(Variable entity) => await base.DeleteAsync(_mapper.Map<DbVariable>(entity));
     
+    
+    /// <summary>
+    /// 异步根据变量表ID删除变量。
+    /// </summary>
+    /// <param name="variableTableId">变量表的唯一标识符。</param>
+    /// <returns>受影响的行数。</returns>
+    public async Task<int> DeleteByVariableTableIdAsync(int variableTableId)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var result = await _dbContext.GetInstance().Deleteable<DbVariable>()
+                             .Where(v => v.VariableTableId == variableTableId)
+                             .ExecuteCommandAsync();
+        stopwatch.Stop();
+        _logger.LogInformation($"Delete {typeof(DbVariable)} by VariableTableId={variableTableId}, Count={result}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
     
     /// <summary>
     /// 异步根据ID删除变量。

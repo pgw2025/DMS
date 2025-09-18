@@ -163,10 +163,14 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 删除设备命令。
     /// </summary>
     [RelayCommand]
-    private async Task DeleteDevice()
+    private async Task DeleteDevice(DeviceItemViewModel parmDeviceItem)
     {
         try
         {
+            if (parmDeviceItem != null)
+            {
+                SelectedDevice = parmDeviceItem;
+            }
             if (SelectedDevice == null)
             {
                 _notificationService.ShowError("你没有选择任何设备，请选择设备后再点击删除设备");
@@ -193,10 +197,15 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 编辑设备命令。
     /// </summary>
     [RelayCommand]
-    private async Task EditDevice()
+    private async Task EditDevice(DeviceItemViewModel parmDeviceItem)
     {
         try
         {
+            if (parmDeviceItem != null)
+            {
+                SelectedDevice = parmDeviceItem;
+            }
+            
             if (SelectedDevice == null)
             {
                 _notificationService.ShowError("你没有选择任何设备，请选择设备后再点击编辑设备");

@@ -6,6 +6,13 @@ namespace DMS.Core.Interfaces.Repositories
     public interface IVariableRepository:IBaseRepository<Variable>
     {
         /// <summary>
+        /// 异步根据变量表ID删除变量。
+        /// </summary>
+        /// <param name="variableTableId">变量表的唯一标识符。</param>
+        /// <returns>受影响的行数。</returns>
+        Task<int> DeleteByVariableTableIdAsync(int variableTableId);
+        
+        /// <summary>
         /// 异步根据OPC UA NodeId获取单个变量实体。
         /// </summary>
         /// <param name="opcUaNodeId">OPC UA NodeId。</param>
