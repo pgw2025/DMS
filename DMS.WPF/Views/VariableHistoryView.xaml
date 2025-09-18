@@ -100,45 +100,7 @@
                                 Margin="10,0,0,0"/>
                     </ikw:SimpleStackPanel>
                     
-                    <!-- 选中变量详细信息 -->
-                    <Border Background="#F8F8F8" 
-                            BorderBrush="#E0E0E0" 
-                            BorderThickness="1" 
-                            CornerRadius="6"
-                            Padding="15">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="变量ID:" 
-                                       Foreground="#666666" FontSize="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentVariable.Id}" 
-                                       FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
-                            
-                            <TextBlock Grid.Row="0" Grid.Column="2" Text="变量名:" 
-                                       Foreground="#666666" FontSize="14" VerticalAlignment="Center" Margin="10,0,5,0"/>
-                            <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding CurrentVariable.Name}" 
-                                       FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
-                            
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="当前值:" 
-                                       Foreground="#666666" FontSize="14" VerticalAlignment="Center" Margin="0,5,5,0"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentVariable.DataValue}" 
-                                       FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,5,0,0"/>
-                            
-                            <TextBlock Grid.Row="1" Grid.Column="2" Text="更新时间:" 
-                                       Foreground="#666666" FontSize="14" VerticalAlignment="Center" Margin="10,5,5,0"/>
-                            <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding CurrentVariable.UpdatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" 
-                                       FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,5,0,0"/>
-                        </Grid>
-                    </Border>
+          
                 </ikw:SimpleStackPanel>
             </Border>
         </StackPanel>

@@ -4,300 +4,327 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:localConverters="clr-namespace:DMS.WPF.Converters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
-    xmlns:localConverters="clr-namespace:DMS.WPF.Converters"
     d:DataContext="{d:DesignInstance vm:DevicesViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="300"
     mc:Ignorable="d">
     <UserControl.Resources>
         <localConverters:BooleanToBrushConverter x:Key="BooleanToBrushConverter" />
-        
-        <!-- 添加需要的转换器 -->
+
+        <!--  添加需要的转换器  -->
         <localConverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <localConverters:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
         <localConverters:BoolToStringConverter x:Key="BoolToStringConverter" />
         <localConverters:BoolToColorConverter x:Key="BoolToColorConverter" />
-        
-        <!-- 设备项模板 -->
+
+        <!--  设备项模板  -->
         <DataTemplate x:Key="DeviceItemTemplate">
-            <Border Background="White" 
-                    BorderBrush="#E0E0E0" 
-                    BorderThickness="1" 
-                    CornerRadius="8"
-                    Margin="5"
-                    Padding="15">
+            <Border
+                Margin="5"
+                Padding="15"
+                Background="White"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1"
+                CornerRadius="8">
                 <Border.Effect>
-                    <DropShadowEffect ShadowDepth="2" 
-                                      BlurRadius="5" 
-                                      Opacity="0.1" 
-                                      Color="#888888"/>
+                    <DropShadowEffect
+                        BlurRadius="5"
+                        Opacity="0.1"
+                        ShadowDepth="2"
+                        Color="#888888" />
                 </Border.Effect>
-                
+
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    
-                    <!-- 设备基本信息区域 -->
+
+                    <!--  设备基本信息区域  -->
                     <StackPanel Grid.Row="0" Margin="0,0,0,15">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            
-                            <!-- 设备名称和描述 -->
+
+                            <!--  设备名称和描述  -->
                             <StackPanel Grid.Column="0">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                                    <ui:FontIcon Glyph="&#xE975;" 
-                                                 FontSize="20" 
-                                                 Foreground="{DynamicResource SystemAccentColorBrush}"
-                                                 Margin="0,0,8,0"/>
-                                    <TextBlock Text="{Binding Name}" 
-                                               FontWeight="SemiBold" 
-                                               FontSize="16" 
-                                               VerticalAlignment="Center"/>
+                                <StackPanel Margin="0,0,0,5" Orientation="Horizontal">
+                                    <ui:FontIcon
+                                        Margin="0,0,8,0"
+                                        FontSize="20"
+                                        Foreground="{DynamicResource SystemAccentColorBrush}"
+                                        Glyph="&#xE975;" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        Text="{Binding Name}" />
                                 </StackPanel>
-                                
-                                <TextBlock Text="{Binding Description}" 
-                                           Foreground="#666666" 
-                                           FontSize="13" 
-                                           TextWrapping="Wrap"
-                                           Margin="0,0,0,8"/>
-                                
+
+                                <TextBlock
+                                    Margin="0,0,0,8"
+                                    FontSize="13"
+                                    Foreground="#666666"
+                                    Text="{Binding Description}"
+                                    TextWrapping="Wrap" />
+
                                 <StackPanel Orientation="Horizontal">
-                                    <ui:FontIcon Glyph="&#xE76C;" 
-                                                 FontSize="14" 
-                                                 Foreground="#888888"
-                                                 Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding DeviceType}" 
-                                               Foreground="#888888" 
-                                               FontSize="12"/>
-                                    
-                                    <Rectangle Width="1" 
-                                               Height="12" 
-                                               Fill="#CCCCCC" 
-                                               Margin="10,0"/>
-                                    
-                                    <ui:FontIcon Glyph="&#xE8F4;" 
-                                                 FontSize="14" 
-                                                 Foreground="#888888"
-                                                 Margin="10,0,5,0"/>
-                                    <TextBlock Text="{Binding ConnectionStatus}" 
-                                               Foreground="#888888" 
-                                               FontSize="12"/>
+                                    <ui:FontIcon
+                                        Margin="0,0,5,0"
+                                        FontSize="14"
+                                        Foreground="#888888"
+                                        Glyph="&#xE76C;" />
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="#888888"
+                                        Text="{Binding DeviceType}" />
+
+                                    <Rectangle
+                                        Width="1"
+                                        Height="12"
+                                        Margin="10,0"
+                                        Fill="#CCCCCC" />
+
+                                    <ui:FontIcon
+                                        Margin="10,0,5,0"
+                                        FontSize="14"
+                                        Foreground="#888888"
+                                        Glyph="&#xE8F4;" />
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="#888888"
+                                        Text="{Binding ConnectionStatus}" />
                                 </StackPanel>
                             </StackPanel>
-                            
-                            <!-- 状态指示器 -->
-                            <StackPanel Grid.Column="1" 
-                                        Orientation="Horizontal" 
-                                        VerticalAlignment="Top">
-                                <Border Background="{Binding IsRunning, 
-                                                     Converter={StaticResource BoolToColorConverter}, 
-                                                     ConverterParameter='Green;Red'}"
-                                        CornerRadius="8"
-                                        Width="16"
-                                        Height="16"
-                                        Margin="0,0,10,0">
+
+                            <!--  状态指示器  -->
+                            <StackPanel
+                                Grid.Column="1"
+                                VerticalAlignment="Top"
+                                Orientation="Horizontal">
+                                <Border
+                                    Width="16"
+                                    Height="16"
+                                    Margin="0,0,10,0"
+                                    Background="{Binding IsRunning, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green;Red'}"
+                                    CornerRadius="8">
                                     <Border.ToolTip>
-                                        <TextBlock Text="{Binding IsRunning, 
-                                                                  Converter={StaticResource BoolToStringConverter}, 
-                                                                  ConverterParameter='已连接;未连接'}"/>
+                                        <TextBlock Text="{Binding IsRunning, Converter={StaticResource BoolToStringConverter}, ConverterParameter='已连接;未连接'}" />
                                     </Border.ToolTip>
                                 </Border>
-                                
-                                <ToggleButton x:Name="ExpandToggleButton"
-                                              Style="{StaticResource DefaultToggleButtonStyle}"
-                                              Content="&#xE70D;"
-                                              FontFamily="Segoe MDL2 Assets"
-                                              FontSize="16"
-                                              Foreground="#666666"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              IsChecked="True"
-                                              ToolTip="展开/收起变量表"/>
+
+                                <ToggleButton
+                                    x:Name="ExpandToggleButton"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Content="&#xE70D;"
+                                    FontFamily="Segoe MDL2 Assets"
+                                    FontSize="16"
+                                    Foreground="#666666"
+                                    IsChecked="True"
+                                    Style="{StaticResource DefaultToggleButtonStyle}"
+                                    ToolTip="展开/收起变量表" />
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-                    
-                    <!-- 变量表列表区域 -->
+
+                    <!--  变量表列表区域  -->
                     <StackPanel Grid.Row="1" Margin="0,0,0,15">
-                        <Border Background="#F8F8F8" 
-                                BorderBrush="#E0E0E0" 
-                                BorderThickness="1" 
-                                CornerRadius="6"
-                                Visibility="{Binding ElementName=ExpandToggleButton, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Border
+                            Background="#F8F8F8"
+                            BorderBrush="#E0E0E0"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Visibility="{Binding ElementName=ExpandToggleButton, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
                             <StackPanel>
-                                <!-- 变量表标题 -->
-                                <Border Background="#F0F0F0" 
-                                        BorderBrush="#E0E0E0" 
-                                        BorderThickness="0,0,0,1" 
-                                        CornerRadius="6,6,0,0"
-                                        Padding="12,8">
+                                <!--  变量表标题  -->
+                                <Border
+                                    Padding="12,8"
+                                    Background="#F0F0F0"
+                                    BorderBrush="#E0E0E0"
+                                    BorderThickness="0,0,0,1"
+                                    CornerRadius="6,6,0,0">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        
-                                        <TextBlock Grid.Column="0"
-                                                   Text="变量表列表" 
-                                                   FontWeight="SemiBold" 
-                                                   FontSize="14" 
-                                                   Foreground="#333333"/>
-                                        
-                                        <Button Grid.Column="1"
-                                                Style="{StaticResource DefaultButtonStyle}"
-                                                Content="&#xE710;"
-                                                FontFamily="Segoe MDL2 Assets"
-                                                FontSize="14"
-                                                Width="28"
-                                                Height="28"
-                                                Padding="0"
-                                                ToolTip="添加变量表"/>
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            Foreground="#333333"
+                                            Text="变量表列表" />
+
+                                        <Button
+                                            Grid.Column="1"
+                                            Width="28"
+                                            Height="28"
+                                            Padding="0"
+                                            Content="&#xE710;"
+                                            FontFamily="Segoe MDL2 Assets"
+                                            FontSize="14"
+                                            Style="{StaticResource DefaultButtonStyle}"
+                                            ToolTip="添加变量表" />
                                     </Grid>
                                 </Border>
-                                
-                                <!-- 变量表列表 -->
-                                <ItemsControl ItemsSource="{Binding VariableTables}" 
-                                              Margin="0">
+
+                                <!--  变量表列表  -->
+                                <ItemsControl Margin="0" ItemsSource="{Binding VariableTables}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="White" 
-                                                    BorderBrush="#EEEEEE" 
-                                                    BorderThickness="0,0,0,1"
-                                                    Padding="12,10">
+                                            <Border
+                                                Padding="12,10"
+                                                Background="White"
+                                                BorderBrush="#EEEEEE"
+                                                BorderThickness="0,0,0,1">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
-                                                    
+
                                                     <StackPanel Grid.Column="0">
-                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
-                                                            <ui:FontIcon Glyph="&#xE8EC;" 
-                                                                         FontSize="14" 
-                                                                         Foreground="{DynamicResource SystemAccentColorBrush}"
-                                                                         Margin="0,0,6,0"/>
-                                                            <TextBlock Text="{Binding Name}" 
-                                                                       FontWeight="SemiBold" 
-                                                                       FontSize="13"/>
+                                                        <StackPanel Margin="0,0,0,3" Orientation="Horizontal">
+                                                            <ui:FontIcon
+                                                                Margin="0,0,6,0"
+                                                                FontSize="14"
+                                                                Foreground="{DynamicResource SystemAccentColorBrush}"
+                                                                Glyph="&#xE8EC;" />
+                                                            <TextBlock
+                                                                FontSize="13"
+                                                                FontWeight="SemiBold"
+                                                                Text="{Binding Name}" />
                                                         </StackPanel>
-                                                        
-                                                        <TextBlock Text="{Binding Description}" 
-                                                                   Foreground="#888888" 
-                                                                   FontSize="11" 
-                                                                   TextWrapping="Wrap"
-                                                                   MaxWidth="300"/>
+
+                                                        <TextBlock
+                                                            MaxWidth="300"
+                                                            FontSize="11"
+                                                            Foreground="#888888"
+                                                            Text="{Binding Description}"
+                                                            TextWrapping="Wrap" />
                                                     </StackPanel>
-                                                    
-                                                    <StackPanel Grid.Column="1" 
-                                                                Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Variables.Count}" 
-                                                                   Foreground="#666666" 
-                                                                   FontSize="12"
-                                                                   VerticalAlignment="Center"
-                                                                   Margin="0,0,5,0"/>
-                                                        <TextBlock Text="变量" 
-                                                                   Foreground="#888888" 
-                                                                   FontSize="12"
-                                                                   VerticalAlignment="Center"/>
-                                                        
-                                                        <Button Content="&#xE76C;"
-                                                                FontFamily="Segoe MDL2 Assets"
-                                                                FontSize="14"
-                                                                Width="26"
-                                                                Height="26"
-                                                                Margin="8,0,0,0"
-                                                                Padding="0"
-                                                                Style="{StaticResource DefaultButtonStyle}"
-                                                                ToolTip="编辑变量表"/>
-                                                                
-                                                        <Button Content="&#xE74D;"
-                                                                FontFamily="Segoe MDL2 Assets"
-                                                                FontSize="14"
-                                                                Width="26"
-                                                                Height="26"
-                                                                Margin="4,0,0,0"
-                                                                Padding="0"
-                                                                Style="{StaticResource DefaultButtonStyle}"
-                                                                ToolTip="删除变量表"/>
+
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                        <TextBlock
+                                                            Margin="0,0,5,0"
+                                                            VerticalAlignment="Center"
+                                                            FontSize="12"
+                                                            Foreground="#666666"
+                                                            Text="{Binding Variables.Count}" />
+                                                        <TextBlock
+                                                            VerticalAlignment="Center"
+                                                            FontSize="12"
+                                                            Foreground="#888888"
+                                                            Text="变量" />
+
+                                                        <Button
+                                                            Width="26"
+                                                            Height="26"
+                                                            Margin="8,0,0,0"
+                                                            Padding="0"
+                                                            Content="&#xE76C;"
+                                                            FontFamily="Segoe MDL2 Assets"
+                                                            FontSize="14"
+                                                            Style="{StaticResource DefaultButtonStyle}"
+                                                            ToolTip="编辑变量表" />
+
+                                                        <Button
+                                                            Width="26"
+                                                            Height="26"
+                                                            Margin="4,0,0,0"
+                                                            Padding="0"
+                                                            Content="&#xE74D;"
+                                                            FontFamily="Segoe MDL2 Assets"
+                                                            FontSize="14"
+                                                            Style="{StaticResource DefaultButtonStyle}"
+                                                            ToolTip="删除变量表" />
                                                     </StackPanel>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                
-                                <!-- 空状态提示 -->
-                                <TextBlock Text="暂无变量表" 
-                                           Foreground="#AAAAAA" 
-                                           FontSize="13" 
-                                           HorizontalAlignment="Center"
-                                           Padding="20,15"
-                                           Visibility="{Binding VariableTables.Count, 
-                                                               Converter={StaticResource CountToVisibilityConverter}}"/>
+
+                                <!--  空状态提示  -->
+                                <TextBlock
+                                    Padding="20,15"
+                                    HorizontalAlignment="Center"
+                                    FontSize="13"
+                                    Foreground="#AAAAAA"
+                                    Text="暂无变量表"
+                                    Visibility="{Binding VariableTables.Count, Converter={StaticResource CountToVisibilityConverter}}" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
-                    
-                    <!-- 操作按钮区域 -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="&#xE8A5;"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="16"
-                                Width="36"
-                                Height="36"
-                                Margin="0,0,8,0"
-                                Padding="0"
-                                Style="{StaticResource AccentButtonStyle}"
-                                ToolTip="连接设备">
+
+                    <!--  操作按钮区域  -->
+                    <StackPanel
+                        Grid.Row="2"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                        <Button
+                            Width="36"
+                            Height="36"
+                            Margin="0,0,8,0"
+                            Padding="0"
+                            Content="&#xE8A5;"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="16"
+                            Style="{StaticResource AccentButtonStyle}"
+                            ToolTip="连接设备">
                             <Button.Effect>
-                                <DropShadowEffect ShadowDepth="1" 
-                                                  BlurRadius="3" 
-                                                  Opacity="0.2" 
-                                                  Color="{DynamicResource SystemAccentColor}"/>
+                                <DropShadowEffect
+                                    BlurRadius="3"
+                                    Opacity="0.2"
+                                    ShadowDepth="1"
+                                    Color="{DynamicResource SystemAccentColor}" />
                             </Button.Effect>
                         </Button>
-                        
-                        <Button Content="&#xE76C;"
-                                Command="{Binding EditDeviceCommand}"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="16"
-                                Width="36"
-                                Height="36"
-                                Margin="0,0,8,0"
-                                Padding="0"
-                                Style="{StaticResource DefaultButtonStyle}"
-                                ToolTip="编辑设备"/>
-                        
-                        <Button Content="&#xE896;"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="16"
-                                Width="36"
-                                Height="36"
-                                Margin="0,0,8,0"
-                                Padding="0"
-                                Style="{StaticResource DefaultButtonStyle}"
-                                ToolTip="监控设备"/>
-                        
-                        <Button Content="&#xE74D;"
-                                Command="{Binding DeleteDeviceCommand}"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="16"
-                                Width="36"
-                                Height="36"
-                                Padding="0"
-                                Style="{StaticResource DefaultButtonStyle}"
-                                ToolTip="删除设备">
+
+                        <Button
+                            Width="36"
+                            Height="36"
+                            Margin="0,0,8,0"
+                            Padding="0"
+                            Command="{Binding EditDeviceCommand}"
+                            Content="&#xE76C;"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="16"
+                            Style="{StaticResource DefaultButtonStyle}"
+                            ToolTip="编辑设备" />
+
+                        <Button
+                            Width="36"
+                            Height="36"
+                            Margin="0,0,8,0"
+                            Padding="0"
+                            Content="&#xE896;"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="16"
+                            Style="{StaticResource DefaultButtonStyle}"
+                            ToolTip="监控设备" />
+
+                        <Button
+                            Width="36"
+                            Height="36"
+                            Padding="0"
+                            Command="{Binding DeleteDeviceCommand}"
+                            Content="&#xE74D;"
+                            FontFamily="Segoe MDL2 Assets"
+                            FontSize="16"
+                            Style="{StaticResource DefaultButtonStyle}"
+                            ToolTip="删除设备">
                             <Button.Foreground>
-                                <SolidColorBrush Color="#D32F2F"/>
+                                <SolidColorBrush Color="#D32F2F" />
                             </Button.Foreground>
                         </Button>
                     </StackPanel>

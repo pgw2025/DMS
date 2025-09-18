@@ -32,7 +32,7 @@ public class DeviceDataService : IDeviceDataService
     /// <param name="appDataCenterService">数据服务中心实例。</param>
     public DeviceDataService(IMapper mapper, IAppDataCenterService appDataCenterService,
                              IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService,
-                             IEventService eventService,INotificationService notificationService,
+                             IEventService eventService, INotificationService notificationService,
                              IMenuDataService menuDataService, IVariableDataService variableDataService)
     {
         _mapper = mapper;
@@ -52,10 +52,10 @@ public class DeviceDataService : IDeviceDataService
     {
         _uiDispatcher.Invoke(() =>
         {
-            
-            if (_dataStorageService.Devices.TryGetValue(e.DeviceId,out DeviceItemViewModel device))
+
+            if (_dataStorageService.Devices.TryGetValue(e.DeviceId, out DeviceItemViewModel device))
             {
-                
+
                 device.IsRunning = e.NewStatus;
                 if (device.IsRunning)
                 {
@@ -76,7 +76,7 @@ public class DeviceDataService : IDeviceDataService
     {
         foreach (var deviceDto in _appDataStorageService.Devices.Values)
         {
-            _dataStorageService.Devices.Add(deviceDto.Id,_mapper.Map<DeviceItemViewModel>(deviceDto));
+            _dataStorageService.Devices.Add(deviceDto.Id, _mapper.Map<DeviceItemViewModel>(deviceDto));
         }
     }
 
@@ -86,66 +86,49 @@ public class DeviceDataService : IDeviceDataService
     public async Task<CreateDeviceWithDetailsDto> AddDevice(CreateDeviceWithDetailsDto dto)
     {
         // 添加null检查
-        if (dto == null || _appDataCenterService == null || _appDataCenterService.DeviceManagementService == null)
+        if (dto == null)
             return null;
 
         var addDto = await _appDataCenterService.DeviceManagementService.CreateDeviceWithDetailsAsync(dto);
-        
-        // 添加null检查
-        if (_dataStorageService != null && addDto != null && addDto.Device != null)
-        {
-            //更新当前界面
-            _dataStorageService.Devices.Add(addDto.Device.Id,_mapper.Map<DeviceItemViewModel>(addDto.Device));
-        }
-        
-        // 添加null检查
-        if (_menuDataService != null && addDto != null && addDto.DeviceMenu != null)
-        {
-            _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
-        }
-        
-        // 添加null检查
-        if (addDto != null && addDto.VariableTable != null)
-        {
-            await _variableDataService.AddVariableTable(addDto.VariableTable);
-        }
-        
-        // 添加null检查
-        if (_menuDataService != null && addDto != null && addDto.VariableTableMenu != null)
-        {
-            _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
-        }
-        
-        // 添加null检查
-        if (_appDataCenterService.DeviceManagementService != null && addDto != null && addDto.Device != null)
-        {
-            //更新数据中心
-            _appDataCenterService.DeviceManagementService.AddDeviceToMemory(addDto.Device);
-        }
-        
-        // 添加null检查
-        if (_appDataCenterService.VariableTableManagementService != null && addDto != null && addDto.VariableTable != null)
-        {
-            _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(addDto.VariableTable);
-        }
-        
-        // 添加null检查
-        if (_appDataCenterService.MenuManagementService != null && addDto != null && addDto.DeviceMenu != null)
-        {
-            _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.DeviceMenu);
-        }
-        
-        // 添加null检查
-        if (_appDataCenterService.MenuManagementService != null && addDto != null && addDto.VariableTableMenu != null)
-        {
-            _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.VariableTableMenu);
-        }
 
         // 添加null检查
-        if (_menuDataService != null)
+        if (addDto == null && addDto.Device == null)
         {
-            _menuDataService.BuildMenuTrees();
+            return null;
         }
+
+        //给界面添加设备
+        _dataStorageService.Devices.Add(addDto.Device.Id, _mapper.Map<DeviceItemViewModel>(addDto.Device));
+        //更新数据中心
+        _appDataCenterService.DeviceManagementService.AddDeviceToMemory(addDto.Device);
+
+        // 给界面添加设备菜单
+        if (addDto.DeviceMenu != null)
+        {
+            _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
+            _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.DeviceMenu);
+            
+        }
+
+
+        // 添加变量表和变量表菜单
+        if (addDto.VariableTable != null)
+        {
+            await _variableDataService.AddVariableTableToView(addDto.VariableTable);
+            _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(addDto.VariableTable);
+
+            if (addDto.VariableTable != null && addDto.VariableTableMenu != null)
+            {
+                _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
+                _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.VariableTableMenu);
+            }
+
+
+        }
+
+
+        // 添加null检查
+        _menuDataService.BuildMenuTrees();
 
         return addDto;
     }
@@ -163,7 +146,7 @@ public class DeviceDataService : IDeviceDataService
         _appDataCenterService.DeviceManagementService.RemoveDeviceFromMemory(device.Id);
 
         // 删除设备
-        
+
         return _dataStorageService.Devices.Remove(device.Id);
     }
 

@@ -18,8 +18,7 @@ public interface IVariableDataService
     /// <summary>
     /// 添加变量表。
     /// </summary>
-    Task<bool> AddVariableTable(VariableTableDto variableTableDto,
-        MenuBeanDto menuDto = null, bool isAddDb = false);
+    Task<bool> AddVariableTableToView(VariableTableDto tableDto);
 
     /// <summary>
     /// 更新变量表。

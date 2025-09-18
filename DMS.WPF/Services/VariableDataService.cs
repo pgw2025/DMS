@@ -1,10 +1,11 @@
-using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
+using System.Collections.ObjectModel;
 
 namespace DMS.WPF.Services;
 
@@ -24,7 +25,7 @@ public class VariableDataService : IVariableDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appDataCenterService">数据服务中心实例。</param>
-    public VariableDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataCenterService appDataCenterService)
+    public VariableDataService(IMapper mapper, IDataStorageService dataStorageService, IAppDataCenterService appDataCenterService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
@@ -40,7 +41,7 @@ public class VariableDataService : IVariableDataService
         {
             foreach (var variable in variableTable.Value.Variables)
             {
-                _dataStorageService.Variables.Add(variable.Id,variable);
+                _dataStorageService.Variables.Add(variable.Id, variable);
             }
         }
     }
@@ -48,43 +49,20 @@ public class VariableDataService : IVariableDataService
     /// <summary>
     /// 添加变量表。
     /// </summary>
-    public async Task<bool> AddVariableTable(VariableTableDto variableTableDto,
-                                             MenuBeanDto menuDto = null, bool isAddDb = false)
+    public async Task<bool> AddVariableTableToView(VariableTableDto tableDto)
     {
         // 添加null检查
-        if (variableTableDto == null)
+        if (tableDto == null || tableDto.DeviceId==0)
             return false;
 
-        // 添加_appDataCenterService和_variableTableManagementService的null检查
-        if (_appDataCenterService == null || _appDataCenterService.VariableTableManagementService == null)
-            return false;
-
-        if (isAddDb && menuDto != null)
+        if (_dataStorageService.Devices.TryGetValue(tableDto.DeviceId, out var device))
         {
-            // 添加null检查
-            if (_appDataCenterService.VariableTableManagementService == null)
-                return false;
-
-            CreateVariableTableWithMenuDto createDto = new CreateVariableTableWithMenuDto();
-            createDto.VariableTable = variableTableDto;
-            createDto.DeviceId = variableTableDto.DeviceId;
-            createDto.Menu = menuDto;
-            
-            // 添加null检查
-            if (_appDataCenterService.VariableTableManagementService == null)
-                return false;
-                
-            var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
-            
-            // 添加null检查
-            if (resDto != null && resDto.VariableTable != null && variableTableDto != null)
-                _mapper.Map(resDto.VariableTable, variableTableDto);
+            var variableTableItem = _mapper.Map<VariableTableItemViewModel>(tableDto);
+            device.VariableTables.Add(variableTableItem);
+            _dataStorageService.VariableTables.TryAdd(variableTableItem.Id,variableTableItem);
         }
 
-        // 添加null检查
-        if (_appDataCenterService.VariableTableManagementService != null && variableTableDto != null)
-            _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(variableTableDto);
-
+    
         return true;
     }
 
@@ -151,7 +129,7 @@ public class VariableDataService : IVariableDataService
             return;
         }
 
-        _dataStorageService.Variables.Add(variableItem.Id,variableItem);
+        _dataStorageService.Variables.Add(variableItem.Id, variableItem);
     }
 
     /// <summary>
@@ -159,14 +137,14 @@ public class VariableDataService : IVariableDataService
     /// </summary>
     public void DeleteVariable(int id)
     {
-        if (!_dataStorageService.Variables.TryGetValue(id,out var variableItem))
+        if (!_dataStorageService.Variables.TryGetValue(id, out var variableItem))
         {
             return;
         }
 
         if (_dataStorageService.VariableTables.TryGetValue(variableItem.VariableTableId, out var variableTable))
         {
-             variableTable.Variables.Remove(variableItem);
+            variableTable.Variables.Remove(variableItem);
         }
 
         _dataStorageService.Variables.Remove(variableItem.Id);
