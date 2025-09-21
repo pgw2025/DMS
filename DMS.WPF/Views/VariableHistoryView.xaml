@@ -15,7 +15,7 @@
     xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
     xmlns:converters="clr-namespace:DMS.WPF.Converters"
-    xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
     d:DataContext="{d:DesignInstance vm:VariableHistoryViewModel}"
     d:DesignHeight="600"
     d:DesignWidth="800"
@@ -106,8 +106,11 @@
         </StackPanel>
 
         <!-- 变量历史记录列表和图表 -->
-        <hc:TabControl Margin="20">
-            <hc:TabItem Header="数据表格">
+        <TabControl Margin="20">
+            <TabItem Header="数据表格">
+                <ui:TabItemHelper.Icon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                </ui:TabItemHelper.Icon>
                 <DataGrid
                     AutoGenerateColumns="False"
                     CanUserDeleteRows="False"
@@ -124,13 +127,16 @@
                             IsReadOnly="True" />
                     </DataGrid.Columns>
                 </DataGrid>
-            </hc:TabItem>
-            <hc:TabItem Header="数据图表">
-                <lvc:CartesianChart Series="{Binding LineSeriesCollection}" 
-                                    AxisX="{Binding LineAxisX}" 
-                                    AxisY="{Binding LineAxisY}"
-                                    Margin="10"/>
-            </hc:TabItem>
-        </hc:TabControl>
+            </TabItem>
+            <TabItem Header="数据图表">
+                <ui:TabItemHelper.Icon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                </ui:TabItemHelper.Icon>
+                <lvc:CartesianChart ZoomMode="X" Series="{Binding LineSeriesCollection}" 
+                     XAxes="{Binding LineAxisX}" 
+                     YAxes="{Binding LineAxisY}"
+                     Margin="10"/>
+            </TabItem>
+        </TabControl>
     </DockPanel>
 </UserControl>

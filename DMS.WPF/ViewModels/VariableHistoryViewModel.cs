@@ -1,3 +1,4 @@
+using System.Windows.Media;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -7,10 +8,13 @@ using DMS.Application.Interfaces.Database;
 using DMS.Core.Events;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
-using LiveCharts;
-using LiveCharts.Defaults;
-using LiveCharts.Wpf;
+using LiveChartsCore;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
+using LiveChartsCore.SkiaSharpView.WPF;
 using ObservableCollections;
+using SkiaSharp;
 
 namespace DMS.WPF.ViewModels;
 
@@ -54,13 +58,13 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     public NotifyCollectionChangedSynchronizedViewList<VariableHistoryDto> VariableHistories { get; }
 
     // 折线图相关属性
-    public SeriesCollection LineSeriesCollection { get; set; }
+    public ISeries[] LineSeriesCollection { get; set; }
     
     [ObservableProperty] 
-    private AxesCollection _lineAxisX;
+    private Axis[] _lineAxisX;
     
     [ObservableProperty] 
-    private AxesCollection _lineAxisY;
+    private Axis[] _lineAxisY;
 
     private readonly ObservableList<VariableHistoryDto> _variableHistoryList;
     private readonly ISynchronizedView<VariableHistoryDto, VariableHistoryDto> _variableHistorySynchronizedView;
@@ -89,21 +93,21 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _allVariableHistories = new List<VariableHistoryDto>();
 
         // 初始化默认值
-        _historyLimit = 1000; // 默认限制1000条记录
+        _historyLimit = 50; // 默认限制1000条记录
         _startTime = null;
         _endTime = null;
         
         // 初始化图表属性
-        LineAxisX = new AxesCollection { new Axis() };
-        LineAxisY = new AxesCollection { new Axis() };
-        LineSeriesCollection = new SeriesCollection();
+        LineAxisX = new Axis[] { new Axis() };
+        LineAxisY = new Axis[] { new Axis() };
+        LineSeriesCollection = new ISeries[0];
 
         _eventService.OnVariableValueChanged += OnVariableValueChanged;
     }
 
     private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
-        if (e.VariableId!= CurrentVariable.Id)
+        if (e.VariableId != CurrentVariable.Id)
         {
             return;
         }
@@ -116,6 +120,8 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
                               };
         _variableHistoryList.Add(variableHistory);
         
+        // 更新图表数据
+        UpdateChartData();
     }
 
     /// <summary>
@@ -229,14 +235,14 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         if (_variableHistoryList == null || _variableHistoryList.Count == 0)
         {
             // 清空图表数据
-            LineSeriesCollection?.Clear();
+            LineSeriesCollection = new ISeries[0];
             OnPropertyChanged(nameof(LineSeriesCollection));
             return;
         }
 
         // 创建数值点集合
-        var values = new ChartValues<DateTimePoint>();
-
+        var values = new List<DateTimePoint>();
+        
         foreach (var history in _variableHistoryList)
         {
             // 尝试将值转换为double
@@ -246,40 +252,35 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             }
         }
 
-        // 确保LineSeriesCollection已初始化
-        if (LineSeriesCollection == null)
+        // 创建线性序列
+        var series = new LineSeries<DateTimePoint>
         {
-            LineSeriesCollection = new SeriesCollection();
-        }
-
-        // 清空旧数据并添加新系列
-        LineSeriesCollection.Clear();
-        LineSeriesCollection.Add(new LineSeries
-        {
-            Title = "变量值",
+            Name = "变量值",
             Values = values,
-            PointGeometry = null, // 不显示数据点，只显示线条
-            LineSmoothness = 0.5, // 设置线条平滑度
-            StrokeThickness = 2
-        });
+            Fill = null,
+            Stroke = new SolidColorPaint(new SKColor(41, 128, 185)) { StrokeThickness = 2 },
+            GeometrySize = 0 // 不显示数据点，只显示线条
+        };
 
-        // 确保坐标轴集合已初始化
-        if (LineAxisX == null || LineAxisX.Count == 0)
+        // 更新序列集合
+        LineSeriesCollection = new ISeries[] { series };
+
+        // 更新坐标轴
+        LineAxisX = new Axis[]
         {
-            LineAxisX = new AxesCollection { new Axis() };
-        }
-        if (LineAxisY == null || LineAxisY.Count == 0)
+            new Axis
+            {
+                Labeler = value => new DateTime((long)value).ToString("MM-dd HH:mm:ss")
+            }
+        };
+
+        LineAxisY = new Axis[]
         {
-            LineAxisY = new AxesCollection { new Axis() };
-        }
-
-        // 设置坐标轴
-        // X轴使用时间格式化
-        LineAxisX[0].LabelFormatter = value => new DateTime((long)value).ToString("MM-dd HH:mm:ss");
-
-        // Y轴使用数值格式化
-        LineAxisY[0].Title = "值";
-        LineAxisY[0].LabelFormatter = value => value.ToString("F2");
+            new Axis
+            {
+                Name = "值"
+            }
+        };
 
         // 通知属性更改
         OnPropertyChanged(nameof(LineSeriesCollection));
