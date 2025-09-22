@@ -52,6 +52,7 @@ public class InitializeRepository : IInitializeRepository
         _db.CodeFirst.InitTables<DbEmailTemplate>();
         _db.CodeFirst.InitTables<DbEmailLog>();
         _db.CodeFirst.InitTables<DbTriggerDefinition>();
+        _db.CodeFirst.InitTables<DbTriggerVariable>();
     }
 
     /// <summary>

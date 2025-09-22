@@ -83,7 +83,7 @@ namespace DMS.Infrastructure.Repositories
                     VariableId = variableId
                 }).ToList();
                 
-                await _dbContext.GetInstance().Insertable(triggerVariables).ExecuteCommandAsync();
+                await _dbContext.GetInstance().Insertable<DbTriggerVariable>(triggerVariables).ExecuteCommandAsync();
             }
             
             return _mapper.Map(dbTrigger, trigger);

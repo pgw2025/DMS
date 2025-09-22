@@ -9,13 +9,14 @@
                   xmlns:hc="https://handyorg.github.io/handycontrol"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:converters="clr-namespace:DMS.WPF.Converters"
+                  xmlns:items="clr-namespace:DMS.WPF.ViewModels.Items"
                   Title="{Binding Title}"
                   mc:Ignorable="d"
-                  d:DesignHeight="600"
+                  d:DesignHeight="700"
                   d:DesignWidth="600"
                   d:DataContext="{d:DesignInstance vmd:TriggerDialogViewModel}"
                   MinWidth="500"
-                  MinHeight="500"
+                  MinHeight="600"
                   PrimaryButtonText="{Binding PrimaryButText}"
                   CloseButtonText="取消"
                   PrimaryButtonCommand="{Binding SaveCommand}"
@@ -24,6 +25,7 @@
 
     <ui:ContentDialog.Resources>
         <converters:EnumToVisibilityConverter x:Key="LocalEnumToVisibilityConverter" />
+        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
         <ex:EnumBindingSource x:Key="ConditionTypeEnum"
                               EnumType="{x:Type enums:ConditionType}" />
         <ex:EnumBindingSource x:Key="ActionTypeEnum"
@@ -36,24 +38,6 @@
             <GroupBox Header="基本信息"
                       Padding="5">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel>
-                            <hc:TextBox hc:InfoElement.Title="搜索变量:"
-                                        Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged }">
-                            </hc:TextBox>
-                            <DataGrid 
-                                AutoGenerateColumns="False"
-                                CanUserAddRows="False"
-                                ItemsSource="{Binding SelectedVariables}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Binding="{Binding Name}" Header="变量名"></DataGridTextColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-
-                        </StackPanel>
-
-                    </StackPanel>
-
                     <DockPanel Margin="0,0,0,5">
                         <Label Content="描述:"
                                Width="100"
@@ -65,7 +49,81 @@
 
                     <CheckBox Content="激活"
                               IsChecked="{Binding Trigger.IsActive}"
-                              Margin="0,0,0,5" />
+                              Margin="0,0,0,10" />
+                              
+                    <!-- Selected Variables Section -->
+                    <Label Content="已选择的变量:" 
+                           FontWeight="Bold"
+                           Margin="0,0,0,5"/>
+                    <Border BorderBrush="LightGray" BorderThickness="1" 
+                            Padding="5" 
+                            Margin="0,0,0,10"
+                            Background="WhiteSmoke">
+                        <WrapPanel x:Name="SelectedVariablesPanel">
+                            <ItemsControl ItemsSource="{Binding SelectedVariables}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type items:VariableItemViewModel}">
+                                        <Border Background="LightBlue" 
+                                                CornerRadius="3" 
+                                                Margin="2"
+                                                Padding="5,2">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" 
+                                                           VerticalAlignment="Center" 
+                                                           Margin="0,0,5,0"/>
+                                                <Button Content="×" 
+                                                        FontSize="12" 
+                                                        FontWeight="Bold"
+                                                        Background="Transparent" 
+                                                        BorderThickness="0"
+                                                        Padding="2"
+                                                        Click="RemoveVariableButton_Click"
+                                                        Tag="{Binding}"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="暂无选择的变量" 
+                                       FontStyle="Italic" 
+                                       Foreground="Gray"
+                                       Visibility="{Binding SelectedVariables.Count, Converter={StaticResource IntToVisibilityConverter}, ConverterParameter=0}"/>
+                        </WrapPanel>
+                    </Border>
+                    
+                    <!-- Variable Search Section -->
+                    <Label Content="搜索变量:" 
+                           FontWeight="Bold"
+                           Margin="0,0,0,5"/>
+                    <TextBox x:Name="SearchTextBox"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,5"
+                             ui:ControlHelper.PlaceholderText="输入变量名称进行搜索"/>
+                             
+                    <Border BorderBrush="LightGray" 
+                            BorderThickness="1" 
+                            Height="150"
+                            Margin="0,0,0,10">
+                        <ListBox x:Name="VariableListBox"
+                                 ItemsSource="{Binding FilteredVariables}"
+                                 SelectionMode="Single"
+                                 MouseDoubleClick="VariableListBox_MouseDoubleClick">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type items:VariableItemViewModel}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                                        <TextBlock Text=" - " />
+                                        <TextBlock Text="{Binding Description}" FontStyle="Italic" Foreground="Gray"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Border>
                 </StackPanel>
             </GroupBox>
 

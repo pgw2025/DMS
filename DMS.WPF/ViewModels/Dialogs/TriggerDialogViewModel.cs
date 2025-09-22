@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text.Json;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -30,10 +31,13 @@ namespace DMS.WPF.ViewModels.Dialogs
         private TriggerDefinitionDto _trigger = new();
 
         [ObservableProperty]
-        private List<VariableDto> _availableVariables = new();
+        private List<VariableItemViewModel> _availableVariables = new();
         
         [ObservableProperty]
         private ObservableCollection<VariableItemViewModel> _selectedVariables = new();
+        
+        [ObservableProperty]
+        private ObservableCollection<VariableItemViewModel> _filteredVariables = new();
 
         // Properties for easier binding in XAML for SendEmail action config
         [ObservableProperty]
@@ -59,17 +63,65 @@ namespace DMS.WPF.ViewModels.Dialogs
 
         partial void OnSearchTextChanged(string searchText)
         {
-            SelectedVariables.Clear();
-            foreach (var variableKv in _dataStorageService.Variables)
+            UpdateFilteredVariables();
+        }
+        
+        private void UpdateFilteredVariables()
+        {
+            FilteredVariables.Clear();
+            
+            // 如果没有搜索文本，显示所有可用变量
+            if (string.IsNullOrEmpty(SearchText))
             {
-                if (variableKv.Value.Name.Contains(SearchText))
+                foreach (var variable in AvailableVariables)
                 {
-                    SelectedVariables.Add(variableKv.Value);
+                    // 只显示未被选中的变量
+                    if (!SelectedVariables.Contains(variable))
+                    {
+                        FilteredVariables.Add(variable);
+                    }
+                }
+            }
+            else
+            {
+                // 根据搜索文本过滤变量
+                foreach (var variable in AvailableVariables)
+                {
+                    // 只显示未被选中的变量且名称包含搜索文本的变量
+                    if (!SelectedVariables.Contains(variable) && 
+                        variable.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                    {
+                        FilteredVariables.Add(variable);
+                    }
                 }
             }
         }
         
+        /// <summary>
+        /// 将变量添加到选中列表
+        /// </summary>
+        /// <param name="variable">要添加的变量</param>
+        public void AddVariable(VariableItemViewModel variable)
+        {
+            if (!SelectedVariables.Contains(variable))
+            {
+                SelectedVariables.Add(variable);
+                UpdateFilteredVariables();
+            }
+        }
         
+        /// <summary>
+        /// 从选中列表中移除变量
+        /// </summary>
+        /// <param name="variable">要移除的变量</param>
+        public void RemoveVariable(VariableItemViewModel variable)
+        {
+            if (SelectedVariables.Contains(variable))
+            {
+                SelectedVariables.Remove(variable);
+                UpdateFilteredVariables();
+            }
+        }
 
         /// <summary>
         /// 初始化视图模型（传入待编辑的触发器）
@@ -94,10 +146,13 @@ namespace DMS.WPF.ViewModels.Dialogs
                         var variable = AvailableVariables.FirstOrDefault(v => v.Id == variableId);
                         if (variable != null)
                         {
-                            // SelectedVariables.Add(variable);
+                            SelectedVariables.Add(variable);
                         }
                     }
                 }
+                
+                // 初始化过滤后的变量列表
+                UpdateFilteredVariables();
 
                 // Parse action configuration if it's SendEmail
                 if (Trigger.Action == ActionType.SendEmail && !string.IsNullOrEmpty(Trigger.ActionConfigurationJson))
@@ -131,13 +186,14 @@ namespace DMS.WPF.ViewModels.Dialogs
         {
             try
             {
-                var variables = await _variableAppService.GetAllVariablesAsync();
-                AvailableVariables = variables ?? new List<VariableDto>();
+                // 使用数据存储服务中的变量列表
+                AvailableVariables = new List<VariableItemViewModel>(_dataStorageService.Variables.Select(kvp => kvp.Value));
+                UpdateFilteredVariables();
             }
             catch (Exception ex)
             {
                 _notificationService.ShowError($"加载变量列表失败: {ex.Message}");
-                AvailableVariables = new List<VariableDto>();
+                AvailableVariables = new List<VariableItemViewModel>();
             }
         }
 
