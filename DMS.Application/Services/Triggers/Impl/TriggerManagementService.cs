@@ -109,6 +109,10 @@ namespace DMS.Application.Services.Triggers.Impl
         /// </summary>
         private void ValidateTriggerDto(TriggerDefinitionDto dto)
         {
+            // 检查是否至少关联了一个变量
+            if (dto.VariableIds == null || !dto.VariableIds.Any())
+                throw new ArgumentException("触发器必须至少关联一个变量。");
+
             // 添加必要的验证逻辑
             switch (dto.Condition)
             {

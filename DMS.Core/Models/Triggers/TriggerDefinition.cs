@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace DMS.Core.Models.Triggers
 {
@@ -37,9 +38,9 @@ namespace DMS.Core.Models.Triggers
         public int Id { get; set; }
 
         /// <summary>
-        /// 关联的变量 ID
+        /// 关联的变量列表
         /// </summary>
-        public int VariableId { get; set; }
+        public List<int> VariableIds { get; set; } = new List<int>();
 
         /// <summary>
         /// 触发器是否处于激活状态

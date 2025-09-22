@@ -34,6 +34,16 @@ namespace DMS.Infrastructure.Repositories
         public async Task<IEnumerable<TriggerDefinition>> GetAllAsync()
         {
             var dbList = await base.GetAllAsync();
+            // 加载关联的变量ID
+            foreach (var dbTrigger in dbList)
+            {
+                var variableIds = await _dbContext.GetInstance()
+                    .Queryable<DbTriggerVariable>()
+                    .Where(tv => tv.TriggerDefinitionId == dbTrigger.Id)
+                    .Select(tv => tv.VariableId)
+                    .ToListAsync();
+                dbTrigger.VariableIds = variableIds;
+            }
             return _mapper.Map<List<TriggerDefinition>>(dbList);
         }
 
@@ -43,6 +53,16 @@ namespace DMS.Infrastructure.Repositories
         public async Task<TriggerDefinition?> GetByIdAsync(int id)
         {
             var dbTrigger = await base.GetByIdAsync(id);
+            if (dbTrigger != null)
+            {
+                // 加载关联的变量ID
+                var variableIds = await _dbContext.GetInstance()
+                    .Queryable<DbTriggerVariable>()
+                    .Where(tv => tv.TriggerDefinitionId == dbTrigger.Id)
+                    .Select(tv => tv.VariableId)
+                    .ToListAsync();
+                dbTrigger.VariableIds = variableIds;
+            }
             return _mapper.Map<TriggerDefinition>(dbTrigger);
         }
 
@@ -51,7 +71,21 @@ namespace DMS.Infrastructure.Repositories
         /// </summary>
         public async Task<TriggerDefinition> AddAsync(TriggerDefinition trigger)
         {
-            var dbTrigger = await base.AddAsync(_mapper.Map<DbTriggerDefinition>(trigger));
+            var dbTrigger = _mapper.Map<DbTriggerDefinition>(trigger);
+            dbTrigger = await base.AddAsync(dbTrigger);
+            
+            // 保存关联的变量ID
+            if (trigger.VariableIds != null && trigger.VariableIds.Any())
+            {
+                var triggerVariables = trigger.VariableIds.Select(variableId => new DbTriggerVariable
+                {
+                    TriggerDefinitionId = dbTrigger.Id,
+                    VariableId = variableId
+                }).ToList();
+                
+                await _dbContext.GetInstance().Insertable(triggerVariables).ExecuteCommandAsync();
+            }
+            
             return _mapper.Map(dbTrigger, trigger);
         }
 
@@ -60,8 +94,33 @@ namespace DMS.Infrastructure.Repositories
         /// </summary>
         public async Task<TriggerDefinition?> UpdateAsync(TriggerDefinition trigger)
         {
-            var rowsAffected = await base.UpdateAsync(_mapper.Map<DbTriggerDefinition>(trigger));
-            return rowsAffected > 0 ? trigger : null;
+            var dbTrigger = _mapper.Map<DbTriggerDefinition>(trigger);
+            var rowsAffected = await base.UpdateAsync(dbTrigger);
+            
+            if (rowsAffected > 0)
+            {
+                // 删除旧的关联关系
+                await _dbContext.GetInstance()
+                    .Deleteable<DbTriggerVariable>()
+                    .Where(tv => tv.TriggerDefinitionId == dbTrigger.Id)
+                    .ExecuteCommandAsync();
+                
+                // 插入新的关联关系
+                if (trigger.VariableIds != null && trigger.VariableIds.Any())
+                {
+                    var triggerVariables = trigger.VariableIds.Select(variableId => new DbTriggerVariable
+                    {
+                        TriggerDefinitionId = dbTrigger.Id,
+                        VariableId = variableId
+                    }).ToList();
+                    
+                    await _dbContext.GetInstance().Insertable(triggerVariables).ExecuteCommandAsync();
+                }
+                
+                return trigger;
+            }
+            
+            return null;
         }
 
         /// <summary>
@@ -71,6 +130,14 @@ namespace DMS.Infrastructure.Repositories
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+            
+            // 先删除关联的变量关系
+            await _dbContext.GetInstance()
+                .Deleteable<DbTriggerVariable>()
+                .Where(tv => tv.TriggerDefinitionId == id)
+                .ExecuteCommandAsync();
+            
+            // 再删除触发器本身
             var rowsAffected = await _dbContext.GetInstance().Deleteable<DbTriggerDefinition>()
                                        .In(id)
                                        .ExecuteCommandAsync();
@@ -86,9 +153,34 @@ namespace DMS.Infrastructure.Repositories
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var dbList = await _dbContext.GetInstance().Queryable<DbTriggerDefinition>()
-                                 .Where(t => t.VariableId == variableId)
-                                 .ToListAsync();
+            
+            // 先查询关联表获取触发器ID
+            var triggerIds = await _dbContext.GetInstance()
+                .Queryable<DbTriggerVariable>()
+                .Where(tv => tv.VariableId == variableId)
+                .Select(tv => tv.TriggerDefinitionId)
+                .ToListAsync();
+            
+            // 再查询触发器定义
+            var dbList = new List<DbTriggerDefinition>();
+            if (triggerIds.Any())
+            {
+                dbList = await _dbContext.GetInstance().Queryable<DbTriggerDefinition>()
+                                     .In(it => it.Id, triggerIds)
+                                     .ToListAsync();
+                
+                // 加载每个触发器的变量ID列表
+                foreach (var dbTrigger in dbList)
+                {
+                    var variableIds = await _dbContext.GetInstance()
+                        .Queryable<DbTriggerVariable>()
+                        .Where(tv => tv.TriggerDefinitionId == dbTrigger.Id)
+                        .Select(tv => tv.VariableId)
+                        .ToListAsync();
+                    dbTrigger.VariableIds = variableIds;
+                }
+            }
+            
             stopwatch.Stop();
             _logger.LogInformation($"GetByVariableId {typeof(DbTriggerDefinition).Name},VariableId={variableId},耗时：{stopwatch.ElapsedMilliseconds}ms");
             return _mapper.Map<List<TriggerDefinition>>(dbList);

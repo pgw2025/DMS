@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -5,8 +6,10 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
+using DMS.Core.Interfaces;
 using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels.Dialogs
 {
@@ -17,13 +20,20 @@ namespace DMS.WPF.ViewModels.Dialogs
     {
         private readonly IVariableAppService _variableAppService; // To populate variable selection dropdown
         private readonly IDialogService _dialogService;
+        private readonly IDataStorageService _dataStorageService;
         private readonly INotificationService _notificationService;
+
+        [ObservableProperty]
+        private string _searchText = "";
 
         [ObservableProperty]
         private TriggerDefinitionDto _trigger = new();
 
         [ObservableProperty]
         private List<VariableDto> _availableVariables = new();
+        
+        [ObservableProperty]
+        private ObservableCollection<VariableItemViewModel> _selectedVariables = new();
 
         // Properties for easier binding in XAML for SendEmail action config
         [ObservableProperty]
@@ -38,12 +48,28 @@ namespace DMS.WPF.ViewModels.Dialogs
         public TriggerDialogViewModel(
             IVariableAppService variableAppService,
             IDialogService dialogService,
+            IDataStorageService dataStorageService,
             INotificationService notificationService)
         {
             _variableAppService = variableAppService ?? throw new ArgumentNullException(nameof(variableAppService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+            _dataStorageService = dataStorageService;
             _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
         }
+
+        partial void OnSearchTextChanged(string searchText)
+        {
+            SelectedVariables.Clear();
+            foreach (var variableKv in _dataStorageService.Variables)
+            {
+                if (variableKv.Value.Name.Contains(SearchText))
+                {
+                    SelectedVariables.Add(variableKv.Value);
+                }
+            }
+        }
+        
+        
 
         /// <summary>
         /// 初始化视图模型（传入待编辑的触发器）
@@ -59,6 +85,19 @@ namespace DMS.WPF.ViewModels.Dialogs
                 
                 // Load available variables for selection dropdown
                 await LoadVariablesAsync();
+                
+                // Load selected variables
+                if (Trigger.VariableIds != null && Trigger.VariableIds.Any())
+                {
+                    foreach (var variableId in Trigger.VariableIds)
+                    {
+                        var variable = AvailableVariables.FirstOrDefault(v => v.Id == variableId);
+                        if (variable != null)
+                        {
+                            // SelectedVariables.Add(variable);
+                        }
+                    }
+                }
 
                 // Parse action configuration if it's SendEmail
                 if (Trigger.Action == ActionType.SendEmail && !string.IsNullOrEmpty(Trigger.ActionConfigurationJson))
@@ -109,9 +148,9 @@ namespace DMS.WPF.ViewModels.Dialogs
         private async Task SaveAsync()
         {
             // Basic validation
-            if (Trigger.VariableId == default(int))
+            if (SelectedVariables == null || !SelectedVariables.Any())
             {
-                _notificationService.ShowWarn("请选择关联的变量");
+                _notificationService.ShowWarn("请至少选择一个关联的变量");
                 return;
             }
 
@@ -120,6 +159,9 @@ namespace DMS.WPF.ViewModels.Dialogs
                 _notificationService.ShowWarn("请输入触发器描述");
                 return;
             }
+
+            // 设置选中的变量ID
+            Trigger.VariableIds = SelectedVariables.Select(v => v.Id).ToList();
 
             // Validate condition-specific fields
             switch (Trigger.Condition)

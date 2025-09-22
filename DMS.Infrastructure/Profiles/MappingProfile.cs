@@ -50,10 +50,12 @@ public class MappingProfile : Profile
                        opt => opt.MapFrom(src => src.SuppressionDurationTicks.HasValue ? 
                                                  TimeSpan.FromTicks(src.SuppressionDurationTicks.Value) : 
                                                  (TimeSpan?)null))
+            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds))
             .ReverseMap()
             .ForMember(dest => dest.SuppressionDurationTicks, 
                        opt => opt.MapFrom(src => src.SuppressionDuration.HasValue ? 
                                                  src.SuppressionDuration.Value.Ticks : 
-                                                 (long?)null));
+                                                 (long?)null))
+            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds));
     }
 }

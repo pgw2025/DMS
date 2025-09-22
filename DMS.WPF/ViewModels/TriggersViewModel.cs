@@ -107,7 +107,7 @@ namespace DMS.WPF.ViewModels.Triggers
             var triggerToEdit = new TriggerDefinitionDto
             {
                 Id = SelectedTrigger.Id,
-                VariableId = SelectedTrigger.VariableId,
+                VariableIds = new List<int>(SelectedTrigger.VariableIds),
                 IsActive = SelectedTrigger.IsActive,
                 Condition = SelectedTrigger.Condition,
                 Threshold = SelectedTrigger.Threshold,

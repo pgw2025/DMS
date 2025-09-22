@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DMS.Core.Models.Triggers;
 using SqlSugar;
 using SqlSugar.DbConvert;
@@ -16,11 +17,6 @@ public class DbTriggerDefinition
     /// </summary>
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
     public int Id { get; set; }
-
-    /// <summary>
-    /// 关联的变量 ID。
-    /// </summary>
-    public int VariableId { get; set; }
 
     /// <summary>
     /// 触发器是否处于激活状态。
@@ -96,4 +92,10 @@ public class DbTriggerDefinition
     /// 最后更新时间。
     /// </summary>
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    
+    /// <summary>
+    /// 关联的变量 ID 列表（通过中间表关联）。
+    /// </summary>
+    [SugarColumn(IsIgnore = true)]
+    public List<int> VariableIds { get; set; } = new List<int>();
 }

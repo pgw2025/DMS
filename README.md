@@ -43,3 +43,13 @@ opcUaService.Disconnect();
 ### Testing
 
 Unit tests for the OPC UA service are included in the `DMS.Infrastructure.UnitTests` project. Run them using your preferred test runner.
+
+## Trigger System
+
+The trigger system has been updated to support associating triggers with multiple variables instead of just one. This allows for more flexible trigger configurations where a single trigger can monitor multiple variables.
+
+### Key Changes
+- Modified `TriggerDefinition` to use a list of variable IDs instead of a single variable ID
+- Added a new `TriggerVariables` table to maintain the many-to-many relationship between triggers and variables
+- Updated the UI to support selecting multiple variables when creating or editing triggers
+- Updated all related services and repositories to handle the new many-to-many relationship

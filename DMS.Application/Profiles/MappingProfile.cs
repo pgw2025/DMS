@@ -57,6 +57,9 @@ public class MappingProfile : Profile
         CreateMap<EmailTemplate, EmailTemplateDto>().ReverseMap();
         
         CreateMap<EmailLog, EmailLogDto>().ReverseMap();
-        CreateMap<TriggerDefinition, TriggerDefinitionDto>().ReverseMap();
+        CreateMap<TriggerDefinition, TriggerDefinitionDto>()
+            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds))
+            .ReverseMap()
+            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds));
     }
 }
