@@ -53,4 +53,9 @@ public class AppDataStorageService : IAppDataStorageService
     /// 安全字典，用于存储所有日志数据
     /// </summary>
     public ConcurrentDictionary<int, NlogDto> Nlogs { get; } = new();
+    
+    /// <summary>
+    /// 安全字典，用于存储所有触发器定义数据
+    /// </summary>
+    public ConcurrentDictionary<int, TriggerDefinitionDto> Triggers { get; } = new();
 }

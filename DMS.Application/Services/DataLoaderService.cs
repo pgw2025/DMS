@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using DMS.Application.Events;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Models;
+using DMS.Core.Models.Triggers;
+using DMS.Application.Services.Triggers;
 
 namespace DMS.Application.Services;
 
@@ -23,6 +25,7 @@ public class DataLoaderService : IDataLoaderService
     private readonly IMenuService _menuService;
     private readonly IMqttAppService _mqttAppService;
     private readonly INlogAppService _nlogAppService;
+    private readonly ITriggerManagementService _triggerManagementService; // 添加触发器管理服务
 
     /// <summary>
     /// 当数据加载完成时触发
@@ -39,7 +42,8 @@ public class DataLoaderService : IDataLoaderService
         IVariableAppService variableAppService,
         IMenuService menuService,
         IMqttAppService mqttAppService,
-        INlogAppService nlogAppService)
+        INlogAppService nlogAppService,
+        ITriggerManagementService triggerManagementService) // 添加触发器管理服务参数
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
@@ -50,6 +54,7 @@ public class DataLoaderService : IDataLoaderService
         _menuService = menuService;
         _mqttAppService = mqttAppService;
         _nlogAppService = nlogAppService;
+        _triggerManagementService = triggerManagementService; // 初始化触发器管理服务
     }
 
 
@@ -75,8 +80,25 @@ public class DataLoaderService : IDataLoaderService
 
         // 获取变量MQTT别名
         await LoadAllVariableMqttAliases();
+        
+        // 加载所有触发器
+        await LoadAllTriggersAsync();
 
         OnLoadDataCompleted?.Invoke(this, new DataLoadCompletedEventArgs(true, "数据加载成功"));
+    }
+
+    /// <summary>
+    /// 异步加载所有触发器数据
+    /// </summary>
+    public async Task LoadAllTriggersAsync()
+    {
+        _appDataStorageService.Triggers.Clear();
+        var triggers = await _triggerManagementService.GetAllTriggersAsync();
+        // 加载触发器数据到内存
+        foreach (var trigger in triggers)
+        {
+            _appDataStorageService.Triggers.TryAdd(trigger.Id, trigger);
+        }
     }
 
     private async Task LoadAllVariableMqttAliases()
