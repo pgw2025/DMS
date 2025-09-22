@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using DMS.Application.DTOs;
 
-namespace DMS.Application.Services.Triggers
+namespace DMS.Application.Services.Management
 {
     /// <summary>
     /// 触发器管理服务接口 (负责 CRUD 操作)

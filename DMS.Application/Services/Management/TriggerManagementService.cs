@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Application.Services.Triggers;
 using DMS.Core.Interfaces;
 using DMS.Core.Models.Triggers;
 
-namespace DMS.Application.Services.Triggers.Impl
+namespace DMS.Application.Services.Management
 {
     /// <summary>
     /// 触发器管理服务实现

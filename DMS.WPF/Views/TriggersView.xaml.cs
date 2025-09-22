@@ -1,5 +1,5 @@
 using System.Windows.Controls;
-using DMS.WPF.ViewModels.Triggers;
+using DMS.WPF.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.Views

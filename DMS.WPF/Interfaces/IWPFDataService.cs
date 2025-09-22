@@ -36,4 +36,8 @@ public interface IWPFDataService
     /// </summary>
     ILogDataService LogDataService { get; }
 
+    /// <summary>
+    /// 触发器数据服务。
+    /// </summary>
+    ITriggerDataService TriggerDataService { get; }
 }

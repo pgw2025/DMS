@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces.Management;
 using DMS.Application.Services;
+using DMS.Application.Services.Management;
 using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces;
@@ -17,5 +18,6 @@ public interface IAppDataCenterService
     IVariableManagementService VariableManagementService { get; set; }
     IVariableTableManagementService VariableTableManagementService { get; set; }
     IDeviceManagementService DeviceManagementService { get; set; }
+    ITriggerManagementService TriggerManagementService { get; set; } // 添加触发器管理服务
     IDataLoaderService DataLoaderService { get; set; }
 }

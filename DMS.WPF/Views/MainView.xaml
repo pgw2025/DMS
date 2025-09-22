@@ -12,7 +12,6 @@
     xmlns:tb="http://hardcodet.net/taskbar"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
-    xmlns:vmt="clr-namespace:DMS.WPF.ViewModels.Triggers"
     Title="设备管理系统"
     Width="1080"
     Height="800"
@@ -114,7 +113,7 @@
                             <local:EmailManagementView />
                         </DataTemplate>
                         <!--  触发器管理页  -->
-                        <DataTemplate DataType="{x:Type vmt:TriggersViewModel}">
+                        <DataTemplate DataType="{x:Type vm:TriggersViewModel}">
                             <local:TriggersView/>
                         </DataTemplate>
                         <!--  设备详情页  -->

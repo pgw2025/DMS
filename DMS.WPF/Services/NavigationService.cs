@@ -1,7 +1,6 @@
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Items;
-using DMS.WPF.ViewModels.Triggers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.Services;

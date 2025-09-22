@@ -45,6 +45,11 @@ public class WPFDataService : IWPFDataService
     public ILogDataService LogDataService { get; }
 
     /// <summary>
+    /// 触发器数据服务。
+    /// </summary>
+    public ITriggerDataService TriggerDataService { get; }
+
+    /// <summary>
     /// WPFDataService 构造函数。
     /// </summary>
     public WPFDataService(
@@ -55,7 +60,8 @@ public class WPFDataService : IWPFDataService
         IMenuDataService menuDataService,
         IMqttDataService mqttDataService,
         ILogDataService logDataService, 
-        IVariableTableDataService variableTableDataService)
+        IVariableTableDataService variableTableDataService,
+        ITriggerDataService triggerDataService)
     {
         _mapper = mapper;
         _appDataCenterService = appDataCenterService;
@@ -65,5 +71,6 @@ public class WPFDataService : IWPFDataService
         MqttDataService = mqttDataService;
         LogDataService = logDataService;
         VariableTableDataService = variableTableDataService;
+        TriggerDataService = triggerDataService;
     }
 }

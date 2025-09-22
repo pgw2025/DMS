@@ -32,7 +32,6 @@ using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
-using DMS.WPF.ViewModels.Triggers;
 using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -304,6 +303,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IMenuDataService, MenuDataService>();
         services.AddSingleton<IMqttDataService, MqttDataService>();
         services.AddSingleton<ILogDataService, LogDataService>();
+        services.AddSingleton<ITriggerDataService, TriggerDataService>(); // 注册触发器数据服务
         services.AddSingleton<IDataEventService, DataEventService>();
         services.AddSingleton<IDataStorageService, DataStorageService>();
         services.AddSingleton<IEmailDataService, EmailDataService>();

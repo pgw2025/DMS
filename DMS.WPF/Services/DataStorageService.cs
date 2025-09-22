@@ -45,6 +45,11 @@ public class DataStorageService : IDataStorageService
     /// </summary>
     public ObservableCollection<NlogItemViewModel> Nlogs { get; set; }
 
+    /// <summary>
+    /// 触发器列表。
+    /// </summary>
+    public ObservableDictionary<int, TriggerItemViewModel> Triggers { get; set; }
+
     public DataStorageService()
     {
         Devices=new ObservableDictionary<int,DeviceItemViewModel>();
@@ -54,6 +59,7 @@ public class DataStorageService : IDataStorageService
         Menus=new ObservableCollection<MenuItemViewModel>();
         MenuTrees=new ObservableCollection<MenuItemViewModel>();
         Nlogs=new ObservableCollection<NlogItemViewModel>();
+        Triggers = new ObservableDictionary<int, TriggerItemViewModel>();
         
     }
 

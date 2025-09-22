@@ -17,7 +17,7 @@ namespace DMS.WPF.ViewModels.Dialogs
     /// <summary>
     /// 触发器编辑器视图模型
     /// </summary>
-    public partial class TriggerDialogViewModel : DialogViewModelBase<TriggerDefinitionDto?>
+    public partial class TriggerDialogViewModel : DialogViewModelBase<TriggerItemViewModel?>
     {
         private readonly IVariableAppService _variableAppService; // To populate variable selection dropdown
         private readonly IDialogService _dialogService;
@@ -28,7 +28,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         private string _searchText = "";
 
         [ObservableProperty]
-        private TriggerDefinitionDto _trigger = new();
+        private TriggerItemViewModel _trigger = new();
 
         [ObservableProperty]
         private List<VariableItemViewModel> _availableVariables = new();
@@ -129,9 +129,9 @@ namespace DMS.WPF.ViewModels.Dialogs
         /// <param name="parameter">待编辑的触发器 DTO</param>
         public async Task OnInitializedAsync(object? parameter)
         {
-            if (parameter is TriggerDefinitionDto triggerDto)
+            if (parameter is TriggerItemViewModel triggerItemViewModel)
             {
-                Trigger = triggerDto;
+                Trigger = triggerItemViewModel;
                 Title = Trigger.Id == default(int) ? "新建触发器" : "编辑触发器";
                 PrimaryButText = "保存";
                 
@@ -217,7 +217,10 @@ namespace DMS.WPF.ViewModels.Dialogs
             }
 
             // 设置选中的变量ID
-            Trigger.VariableIds = SelectedVariables.Select(v => v.Id).ToList();
+            foreach (var selectedVariable in SelectedVariables)
+            {
+                Trigger.VariableIds.Add(selectedVariable.Id);
+            }
 
             // Validate condition-specific fields
             switch (Trigger.Condition)

@@ -12,6 +12,7 @@ using System;
 using System.Linq;
 using DMS.Application.Events;
 using DMS.Application.Interfaces.Management;
+using DMS.Application.Services.Management;
 using DMS.Core.Events;
 
 namespace DMS.Application.Services;
@@ -77,7 +78,8 @@ public class AppDataCenterService : IAppDataCenterService
         IVariableManagementService variableManagementService,
         IMenuManagementService menuManagementService,
         IMqttManagementService mqttManagementService,
-        ILogManagementService logManagementService
+        ILogManagementService logManagementService,
+        ITriggerManagementService triggerManagementService // 添加触发器管理服务
         )
     {
         _repositoryManager = repositoryManager;
@@ -91,6 +93,7 @@ public class AppDataCenterService : IAppDataCenterService
         MenuManagementService = menuManagementService;
         MqttManagementService = mqttManagementService;
         LogManagementService = logManagementService;
+        TriggerManagementService = triggerManagementService; // 初始化触发器管理服务
     }
 
     public ILogManagementService LogManagementService { get; set; }
@@ -104,6 +107,8 @@ public class AppDataCenterService : IAppDataCenterService
     public IVariableTableManagementService VariableTableManagementService { get; set; }
 
     public IDeviceManagementService DeviceManagementService { get; set; }
+
+    public ITriggerManagementService TriggerManagementService { get; set; } // 添加触发器管理服务
 
     public IDataLoaderService DataLoaderService { get; set; }
 }

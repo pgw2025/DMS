@@ -1,59 +1,47 @@
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
-using DMS.Application.Services.Triggers;
 using DMS.WPF.Interfaces;
-using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
+using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
+using ObservableCollections;
 
-namespace DMS.WPF.ViewModels.Triggers
+namespace DMS.WPF.ViewModels
 {
     /// <summary>
     /// 触发器管理视图模型
     /// </summary>
     public partial class TriggersViewModel : ViewModelBase
     {
-        private readonly ITriggerManagementService _triggerManagementService;
+        private readonly ITriggerDataService _triggerDataService;
+        private readonly IDataStorageService _dataStorageService;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
 
         [ObservableProperty]
-        private ObservableCollection<TriggerDefinitionDto> _triggers = new();
+        private ObservableDictionary<int, TriggerItemViewModel> _triggers ;
 
         [ObservableProperty]
-        private TriggerDefinitionDto? _selectedTrigger;
+        private TriggerItemViewModel? _selectedTrigger;
 
         public TriggersViewModel(
-            ITriggerManagementService triggerManagementService,
+            ITriggerDataService triggerDataService,
+            IDataStorageService dataStorageService,
             IDialogService dialogService,
             INotificationService notificationService)
         {
-            _triggerManagementService = triggerManagementService ?? throw new ArgumentNullException(nameof(triggerManagementService));
+            _triggerDataService = triggerDataService ?? throw new ArgumentNullException(nameof(triggerDataService));
+            _dataStorageService = dataStorageService ?? throw new ArgumentNullException(nameof(dataStorageService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            
+            // 初始化时加载触发器数据
+            Triggers=_dataStorageService.Triggers;
         }
 
-        /// <summary>
-        /// 加载所有触发器
-        /// </summary>
-        [RelayCommand]
-        private async Task LoadTriggersAsync()
-        {
-            try
-            {
-                var triggerList = await _triggerManagementService.GetAllTriggersAsync();
-                Triggers = new ObservableCollection<TriggerDefinitionDto>(triggerList);
-            }
-            catch (Exception ex)
-            {
-                _notificationService.ShowError($"加载触发器失败: {ex.Message}");
-            }
-        }
+  
 
         /// <summary>
         /// 添加新触发器
@@ -61,14 +49,14 @@ namespace DMS.WPF.ViewModels.Triggers
         [RelayCommand]
         private async Task AddTriggerAsync()
         {
-            var newTrigger = new TriggerDefinitionDto
-            {
-                IsActive = true,
-                Condition = Core.Models.Triggers.ConditionType.GreaterThan,
-                Action = Core.Models.Triggers.ActionType.SendEmail,
-                Description = "新建触发器",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+            var newTrigger = new TriggerItemViewModel()
+                {
+                    IsActive = true,
+                    Condition = Core.Models.Triggers.ConditionType.GreaterThan,
+                    Action = Core.Models.Triggers.ActionType.SendEmail,
+                    Description = "新建触发器",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
             };
 
             TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
@@ -79,10 +67,18 @@ namespace DMS.WPF.ViewModels.Triggers
             {
                 try
                 {
-                    var createdTrigger = await _triggerManagementService.CreateTriggerAsync(result);
-                    Triggers.Add(createdTrigger);
-                    SelectedTrigger = createdTrigger;
-                    _notificationService.ShowSuccess("触发器创建成功");
+                    // 使用TriggerDataService添加触发器
+                    var createdTrigger = await _triggerDataService.AddTrigger(newTrigger);
+                    
+                    if (createdTrigger != null )
+                    {
+                        // 触发器已添加到数据存储中，只需更新本地集合
+                        _notificationService.ShowSuccess("触发器创建成功");
+                    }
+                    else
+                    {
+                        _notificationService.ShowError("触发器创建失败");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -121,6 +117,7 @@ namespace DMS.WPF.ViewModels.Triggers
                 CreatedAt = SelectedTrigger.CreatedAt,
                 UpdatedAt = SelectedTrigger.UpdatedAt
             };
+            
             TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
             await viewModel.OnInitializedAsync(triggerToEdit);
 
@@ -129,20 +126,15 @@ namespace DMS.WPF.ViewModels.Triggers
             {
                 try
                 {
-                    var updatedTrigger = await _triggerManagementService.UpdateTriggerAsync(result.Id, result);
-                    if (updatedTrigger != null)
+                    // 使用TriggerDataService更新触发器
+                    var updatedTrigger = await _triggerDataService.UpdateTrigger(SelectedTrigger);
+                    if (updatedTrigger)
                     {
-                        var index = Triggers.IndexOf(SelectedTrigger);
-                        if (index >= 0)
-                        {
-                            Triggers[index] = updatedTrigger;
-                        }
-                        SelectedTrigger = updatedTrigger;
                         _notificationService.ShowSuccess("触发器更新成功");
                     }
                     else
                     {
-                        _notificationService.ShowError("触发器更新失败，未找到对应记录");
+                        _notificationService.ShowError("触发器更新失败");
                     }
                 }
                 catch (Exception ex)
@@ -169,11 +161,10 @@ namespace DMS.WPF.ViewModels.Triggers
             {
                 try
                 {
-                    var success = await _triggerManagementService.DeleteTriggerAsync(SelectedTrigger.Id);
+                    // 使用TriggerDataService删除触发器
+                    var success = await _triggerDataService.DeleteTrigger(SelectedTrigger);
                     if (success)
                     {
-                        Triggers.Remove(SelectedTrigger);
-                        SelectedTrigger = Triggers.FirstOrDefault();
                         _notificationService.ShowSuccess("触发器删除成功");
                     }
                     else
@@ -188,13 +179,5 @@ namespace DMS.WPF.ViewModels.Triggers
             }
         }
 
-        /// <summary>
-        /// 视图加载时执行的命令
-        /// </summary>
-        [RelayCommand]
-        private async Task OnLoadedAsync()
-        {
-            await LoadTriggersCommand.ExecuteAsync(null);
-        }
     }
 }

@@ -41,4 +41,9 @@ public interface IDataStorageService
     /// 日志列表。
     /// </summary>
     ObservableCollection<NlogItemViewModel> Nlogs { get; set; }
+
+    /// <summary>
+    /// 触发器列表。
+    /// </summary>
+    ObservableDictionary<int, TriggerItemViewModel> Triggers { get; set; }
 }

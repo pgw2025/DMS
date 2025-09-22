@@ -1,12 +1,6 @@
+using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.Views.Dialogs;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Windows;
-using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Triggers;
-using DMS.WPF.Views;
 using iNKORE.UI.WPF.Modern.Controls;
 
 namespace DMS.WPF.Services
