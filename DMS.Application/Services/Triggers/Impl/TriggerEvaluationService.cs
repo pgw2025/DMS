@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DMS.Application.DTOs;
+using DMS.Application.Interfaces.Management;
 using DMS.Application.Services.Management;
 // 明确指定 Timer 类型，避免歧义
 using ThreadingTimer = System.Threading.Timer;

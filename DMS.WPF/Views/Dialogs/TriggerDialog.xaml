@@ -26,6 +26,7 @@
     <ui:ContentDialog.Resources>
         <converters:EnumToVisibilityConverter x:Key="LocalEnumToVisibilityConverter" />
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
+        <converters:EmptyCollectionToVisibilityConverter x:Key="EmptyCollectionToVisibilityConverter" />
         <ex:EnumBindingSource x:Key="ConditionTypeEnum"
                               EnumType="{x:Type enums:ConditionType}" />
         <ex:EnumBindingSource x:Key="ActionTypeEnum"
@@ -92,7 +93,7 @@
                             <TextBlock Text="暂无选择的变量" 
                                        FontStyle="Italic" 
                                        Foreground="Gray"
-                                       Visibility="{Binding SelectedVariables.Count, Converter={StaticResource IntToVisibilityConverter}, ConverterParameter=0}"/>
+                                       Visibility="{Binding SelectedVariables, Converter={StaticResource EmptyCollectionToVisibilityConverter}}"/>
                         </WrapPanel>
                     </Border>
                     

@@ -1,5 +1,7 @@
 using AutoMapper;
 using DMS.Application.DTOs;
+using DMS.Application.Interfaces;
+using DMS.Application.Interfaces.Management;
 using DMS.Application.Services.Triggers;
 using DMS.Core.Interfaces;
 using DMS.Core.Models.Triggers;
@@ -13,11 +15,13 @@ namespace DMS.Application.Services.Management
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
+        private readonly IAppDataStorageService _appDataStorageService;
 
-        public TriggerManagementService(IRepositoryManager repositoryManager, IMapper mapper)
+        public TriggerManagementService(IRepositoryManager repositoryManager, IMapper mapper, IAppDataStorageService appDataStorageService)
         {
             _repositoryManager = repositoryManager ?? throw new ArgumentNullException(nameof(repositoryManager));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _appDataStorageService = appDataStorageService ?? throw new ArgumentNullException(nameof(appDataStorageService));
         }
 
         /// <summary>
@@ -55,7 +59,12 @@ namespace DMS.Application.Services.Management
             var createdTrigger = await _repositoryManager.Triggers.AddAsync(triggerEntity);
 
             // 4. 转换回 DTO 并返回
-            return _mapper.Map<TriggerDefinitionDto>(createdTrigger);
+            var result = _mapper.Map<TriggerDefinitionDto>(createdTrigger);
+            
+            // 5. 同步更新AppDataStorageService中的Triggers字典
+            _appDataStorageService.Triggers[result.Id] = result;
+
+            return result;
         }
 
         /// <summary>
@@ -81,7 +90,12 @@ namespace DMS.Application.Services.Management
                 return null;
 
             // 5. 转换回 DTO 并返回
-            return _mapper.Map<TriggerDefinitionDto>(updatedTrigger);
+            var result = _mapper.Map<TriggerDefinitionDto>(updatedTrigger);
+            
+            // 6. 同步更新AppDataStorageService中的Triggers字典
+            _appDataStorageService.Triggers[result.Id] = result;
+
+            return result;
         }
 
         /// <summary>
@@ -89,7 +103,15 @@ namespace DMS.Application.Services.Management
         /// </summary>
         public async Task<bool> DeleteTriggerAsync(int id)
         {
-            return await _repositoryManager.Triggers.DeleteAsync(id);
+            var result = await _repositoryManager.Triggers.DeleteAsync(id);
+            
+            // 如果删除成功，也从AppDataStorageService中的Triggers字典中移除
+            if (result)
+            {
+                _appDataStorageService.Triggers.TryRemove(id, out _);
+            }
+            
+            return result;
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using DMS.Core.Interfaces;
 using System.Collections.Concurrent;
 using DMS.Application.Events;
 using DMS.Application.Interfaces.Database;
+using DMS.Application.Interfaces.Management;
 using DMS.Application.Services.Management;
 using DMS.Core.Models;
 using DMS.Core.Models.Triggers;
