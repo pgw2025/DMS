@@ -37,23 +37,7 @@ public interface IDeviceManagementService
     /// </summary>
     Task ToggleDeviceActiveStateAsync(int id);
 
-    /// <summary>
-    /// 在内存中添加设备
-    /// 注意：此方法通常由其他操作（如CreateDeviceWithDetailsAsync）自动调用，一般不需要直接调用
-    /// </summary>
-    void AddDeviceToMemory(DeviceDto deviceDto);
-
-    /// <summary>
-    /// 在内存中更新设备
-    /// 注意：此方法通常由其他操作（如UpdateDeviceAsync）自动调用，一般不需要直接调用
-    /// </summary>
-    void UpdateDeviceInMemory(DeviceDto deviceDto);
-
-    /// <summary>
-    /// 在内存中删除设备
-    /// 注意：此方法通常由其他操作（如DeleteDeviceByIdAsync）自动调用，一般不需要直接调用
-    /// </summary>
-    void RemoveDeviceFromMemory(int deviceId);
+    
 
   
 }

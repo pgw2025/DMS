@@ -49,7 +49,10 @@ public class DeviceManagementService : IDeviceManagementService
         // 创建成功后，将设备添加到内存中
         if (result?.Device != null)
         {
-            AddDeviceToMemory(result.Device);
+            if (_appDataStorageService.Devices.TryAdd(result.Device.Id, result.Device))
+            {
+                _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Added, result.Device));
+            }
         }
         
         return result;
@@ -65,7 +68,8 @@ public class DeviceManagementService : IDeviceManagementService
         // 更新成功后，更新内存中的设备
         if (result > 0 && deviceDto != null)
         {
-            UpdateDeviceInMemory(deviceDto);
+            _appDataStorageService.Devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
+            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
         }
         
         return result;
@@ -82,7 +86,22 @@ public class DeviceManagementService : IDeviceManagementService
         // 删除成功后，从内存中移除设备
         if (result && device != null)
         {
-            RemoveDeviceFromMemory(deviceId);
+            if (_appDataStorageService.Devices.TryGetValue(deviceId, out var deviceDto))
+            {
+                foreach (var variableTable in deviceDto.VariableTables)
+                {
+                    foreach (var variable in variableTable.Variables)
+                    {
+                        _appDataStorageService.Variables.TryRemove(variable.Id, out _);
+                    }
+
+                    _appDataStorageService.VariableTables.TryRemove(variableTable.Id, out _);
+                }
+
+                _appDataStorageService.Devices.TryRemove(deviceId, out _);
+
+                _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
+            }
         }
         
         return result;
@@ -99,52 +118,12 @@ public class DeviceManagementService : IDeviceManagementService
         var device = await _deviceAppService.GetDeviceByIdAsync(id);
         if (device != null)
         {
-            UpdateDeviceInMemory(device);
+            _appDataStorageService.Devices.AddOrUpdate(device.Id, device, (key, oldValue) => device);
+            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Updated, device));
         }
     }
 
-    /// <summary>
-    /// 在内存中添加设备
-    /// </summary>
-    public void AddDeviceToMemory(DeviceDto deviceDto)
-    {
-        if (_appDataStorageService.Devices.TryAdd(deviceDto.Id, deviceDto))
-        {
-            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Added, deviceDto));
-        }
-    }
-
-    /// <summary>
-    /// 在内存中更新设备
-    /// </summary>
-    public void UpdateDeviceInMemory(DeviceDto deviceDto)
-    {
-        _appDataStorageService.Devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
-        _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
-    }
-
-    /// <summary>
-    /// 在内存中删除设备
-    /// </summary>
-    public void RemoveDeviceFromMemory(int deviceId)
-    {
-        if (_appDataStorageService.Devices.TryGetValue(deviceId, out var deviceDto))
-        {
-            foreach (var variableTable in deviceDto.VariableTables)
-            {
-                foreach (var variable in variableTable.Variables)
-                {
-                    _appDataStorageService.Variables.TryRemove(variable.Id, out _);
-                }
-
-                _appDataStorageService.VariableTables.TryRemove(variableTable.Id, out _);
-            }
-
-            _appDataStorageService.Devices.TryRemove(deviceId, out _);
-
-            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
-        }
-    }
+    
 
 
 }
