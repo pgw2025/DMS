@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using DMS.Application.DTOs;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
 using DMS.Core.Enums;
@@ -10,7 +11,6 @@ using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using VariableValueChangedEventArgs = DMS.Core.Events.VariableValueChangedEventArgs;
 
 namespace DMS.Infrastructure.Services.OpcUa
 {
@@ -46,6 +46,7 @@ namespace DMS.Infrastructure.Services.OpcUa
             _semaphore = new SemaphoreSlim(_options.MaxConcurrentConnections, _options.MaxConcurrentConnections);
 
             _eventService.OnDeviceActiveChanged += OnDeviceActiveChanged;
+            _eventService.OnDeviceChanged += OnDeviceChanged;
         }
 
         private async void OnDeviceActiveChanged(object? sender, DeviceActiveChangedEventArgs e)
@@ -57,6 +58,165 @@ namespace DMS.Infrastructure.Services.OpcUa
             else
             {
                 await DisconnectDeviceAsync(e.DeviceId, CancellationToken.None);
+            }
+        }
+
+        private void OnDeviceChanged(object? sender, DeviceChangedEventArgs e)
+        {
+            switch (e.ChangeType)
+            {
+                case DataChangeType.Added:
+                    // 当设备被添加时，加载并连接该设备
+                    HandleDeviceAdded(e.Device);
+                    break;
+                case DataChangeType.Updated:
+                    // 当设备被更新时，更新其配置
+                    HandleDeviceUpdated(e.Device);
+                    break;
+                case DataChangeType.Deleted:
+                    // 当设备被删除时，移除设备监控
+                    HandleDeviceRemoved(e.Device.Id);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 处理设备添加事件
+        /// </summary>
+        private void HandleDeviceAdded(DeviceDto device)
+        {
+            if (device == null)
+            {
+                _logger.LogWarning("HandleDeviceAdded: 接收到空设备对象");
+                return;
+            }
+
+            // 检查设备协议是否为OPC UA
+            if (device.Protocol != Core.Enums.ProtocolType.OpcUa)
+            {
+                _logger.LogInformation("设备 {DeviceId} ({DeviceName}) 不是OPC UA协议，跳过加载", 
+                    device.Id, device.Name);
+                return;
+            }
+
+            try
+            {
+                _logger.LogInformation("处理设备添加事件: {DeviceId} ({DeviceName})", 
+                    device.Id, device.Name);
+
+                // 添加设备到监控列表
+                AddDevice(device);
+
+                // 如果设备是激活状态，则尝试连接
+                if (device.IsActive)
+                {
+                    // 使用Task.Run来避免阻塞事件处理
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await ConnectDeviceAsync(device.Id, CancellationToken.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "连接新添加的设备 {DeviceId} ({DeviceName}) 时发生错误", 
+                                device.Id, device.Name);
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "处理设备添加事件时发生错误: {DeviceId} ({DeviceName})", 
+                    device?.Id, device?.Name);
+            }
+        }
+
+        /// <summary>
+        /// 处理设备更新事件
+        /// </summary>
+        private void HandleDeviceUpdated(DeviceDto device)
+        {
+            if (device == null)
+            {
+                _logger.LogWarning("HandleDeviceUpdated: 接收到空设备对象");
+                return;
+            }
+
+            // 检查设备协议是否为OPC UA
+            if (device.Protocol != Core.Enums.ProtocolType.OpcUa)
+            {
+                _logger.LogInformation("设备 {DeviceId} ({DeviceName}) 不是OPC UA协议，跳过更新", 
+                    device.Id, device.Name);
+                return;
+            }
+
+            try
+            {
+                _logger.LogInformation("处理设备更新事件: {DeviceId} ({DeviceName})", 
+                    device.Id, device.Name);
+
+                // 先移除旧设备配置
+                if (_deviceContexts.TryGetValue(device.Id, out var oldContext))
+                {
+                    // 断开旧连接
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await DisconnectDeviceAsync(device.Id, CancellationToken.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "断开旧设备 {DeviceId} ({DeviceName}) 连接时发生错误", 
+                                device.Id, device.Name);
+                        }
+                    });
+                }
+
+                // 添加更新后的设备
+                AddDevice(device);
+
+                // 如果设备是激活状态，则尝试连接
+                if (device.IsActive)
+                {
+                    // 使用Task.Run来避免阻塞事件处理
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await ConnectDeviceAsync(device.Id, CancellationToken.None);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "连接更新后的设备 {DeviceId} ({DeviceName}) 时发生错误", 
+                                device.Id, device.Name);
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "处理设备更新事件时发生错误: {DeviceId} ({DeviceName})", 
+                    device?.Id, device?.Name);
+            }
+        }
+
+        /// <summary>
+        /// 处理设备删除事件
+        /// </summary>
+        private async void HandleDeviceRemoved(int deviceId)
+        {
+            try
+            {
+                _logger.LogInformation("处理设备删除事件: {DeviceId}", deviceId);
+
+                // 从监控列表中移除设备
+                await RemoveDeviceAsync(deviceId, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "处理设备删除事件时发生错误: {DeviceId}", deviceId);
             }
         }
 
