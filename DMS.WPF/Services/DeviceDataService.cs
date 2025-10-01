@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Events;
@@ -132,6 +133,7 @@ public class DeviceDataService : IDeviceDataService
 
         // 添加null检查
         _menuDataService.BuildMenuTrees();
+        
 
         return addDto;
     }
@@ -152,7 +154,8 @@ public class DeviceDataService : IDeviceDataService
         
 
         // 从界面删除设备相关数据集
-        foreach (var variableTable in device.VariableTables)
+        var variableTablesCopy = device.VariableTables.ToList();
+        foreach (var variableTable in variableTablesCopy)
         {
             await  _variableTableDataService.DeleteVariableTable(variableTable);
         }
@@ -163,6 +166,7 @@ public class DeviceDataService : IDeviceDataService
             _menuDataService.DeleteMenuItem(deviceMenu);
         }
         _dataStorageService.Devices.Remove(device.Id);
+        
 
         return true;
     }

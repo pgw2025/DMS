@@ -137,6 +137,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 if (addDto != null && addDto.Device != null && _notificationService != null)
                 {
                     _notificationService.ShowSuccess($"设备添加成功：{addDto.Device.Name}");
+                    
                 }
                 else if (_notificationService != null)
                 {
