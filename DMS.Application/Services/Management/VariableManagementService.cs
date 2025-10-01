@@ -51,7 +51,27 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public async Task<VariableDto> CreateVariableAsync(VariableDto variableDto)
     {
-        return await _variableAppService.CreateVariableAsync(variableDto);
+        var result = await _variableAppService.CreateVariableAsync(variableDto);
+        
+        // 创建成功后，将变量添加到内存中
+        if (result != null)
+        {
+            VariableTableDto variableTableDto = null;
+            if (_appDataStorageService.VariableTables.TryGetValue(result.VariableTableId, out var variableTable))
+            {
+                variableTableDto = variableTable;
+                result.VariableTable = variableTableDto;
+                variableTable.Variables.Add(result);
+            }
+
+            if (_appDataStorageService.Variables.TryAdd(result.Id, result))
+            {
+                _eventService.RaiseVariableChanged(
+                    this, new VariableChangedEventArgs(DataChangeType.Added, result, variableTableDto));
+            }
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -59,7 +79,23 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public async Task<int> UpdateVariableAsync(VariableDto variableDto)
     {
-        return await _variableAppService.UpdateVariableAsync(variableDto);
+        var result = await _variableAppService.UpdateVariableAsync(variableDto);
+        
+        // 更新成功后，更新内存中的变量
+        if (result > 0 && variableDto != null)
+        {
+            VariableTableDto variableTableDto = null;
+            if (_appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+            {
+                variableTableDto = variableTable;
+            }
+
+            _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
+            _eventService.RaiseVariableChanged(
+                this, new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -67,7 +103,26 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public async Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos)
     {
-        return await _variableAppService.UpdateVariablesAsync(variableDtos);
+        var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
+        
+        // 批量更新成功后，更新内存中的变量
+        if (result > 0 && variableDtos != null)
+        {
+            foreach (var variableDto in variableDtos)
+            {
+                VariableTableDto variableTableDto = null;
+                if (_appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                {
+                    variableTableDto = variableTable;
+                }
+
+                _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
+                _eventService.RaiseVariableChanged(
+                    this, new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
+            }
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -75,7 +130,27 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public async Task<bool> DeleteVariableAsync(int id)
     {
-        return await _variableAppService.DeleteVariableAsync(id);
+        var variable = await _variableAppService.GetVariableByIdAsync(id); // 获取变量信息用于内存删除
+        var result = await _variableAppService.DeleteVariableAsync(id);
+        
+        // 删除成功后，从内存中移除变量
+        if (result && variable != null)
+        {
+            if (_appDataStorageService.Variables.TryRemove(id, out var variableDto))
+            {
+                VariableTableDto variableTableDto = null;
+                if (variableDto != null && _appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                {
+                    variableTableDto = variableTable;
+                    variableTable.Variables.Remove(variableDto);
+                }
+
+                _eventService.RaiseVariableChanged(
+                    this, new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
+            }
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -83,62 +158,30 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public async Task<bool> DeleteVariablesAsync(List<int> ids)
     {
-        return await _variableAppService.DeleteVariablesAsync(ids);
-    }
-
-    /// <summary>
-    /// 在内存中添加变量
-    /// </summary>
-    public void AddVariableToMemory(VariableDto variableDto, ConcurrentDictionary<int, VariableTableDto> variableTables)
-    {
-        VariableTableDto variableTableDto = null;
-        if (variableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+        var result = await _variableAppService.DeleteVariablesAsync(ids);
+        
+        // 批量删除成功后，从内存中移除变量
+        if (result && ids != null)
         {
-            variableTableDto = variableTable;
-            variableDto.VariableTable = variableTableDto;
-            variableTable.Variables.Add(variableDto);
-        }
-
-        if (_appDataStorageService.Variables.TryAdd(variableDto.Id, variableDto))
-        {
-            _eventService.RaiseVariableChanged(
-                this, new VariableChangedEventArgs(DataChangeType.Added, variableDto, variableTableDto));
-        }
-    }
-
-    /// <summary>
-    /// 在内存中更新变量
-    /// </summary>
-    public void UpdateVariableInMemory(VariableDto variableDto,
-                                       ConcurrentDictionary<int, VariableTableDto> variableTables)
-    {
-        VariableTableDto variableTableDto = null;
-        if (variableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
-        {
-            variableTableDto = variableTable;
-        }
-
-        _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
-        _eventService.RaiseVariableChanged(
-            this, new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
-    }
-
-    /// <summary>
-    /// 在内存中删除变量
-    /// </summary>
-    public void RemoveVariableFromMemory(int variableId, ConcurrentDictionary<int, VariableTableDto> variableTables)
-    {
-        if (_appDataStorageService.Variables.TryRemove(variableId, out var variableDto))
-        {
-            VariableTableDto variableTableDto = null;
-            if (variableDto != null && variableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+            foreach (var id in ids)
             {
-                variableTableDto = variableTable;
-                variableTable.Variables.Remove(variableDto);
-            }
+                if (_appDataStorageService.Variables.TryRemove(id, out var variableDto))
+                {
+                    VariableTableDto variableTableDto = null;
+                    if (variableDto != null && _appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                    {
+                        variableTableDto = variableTable;
+                        variableTable.Variables.Remove(variableDto);
+                    }
 
-            _eventService.RaiseVariableChanged(
-                this, new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
+                    _eventService.RaiseVariableChanged(
+                        this, new VariableChangedEventArgs(DataChangeType.Deleted, variableDto, variableTableDto));
+                }
+            }
         }
+        
+        return result;
     }
+
+    
 }

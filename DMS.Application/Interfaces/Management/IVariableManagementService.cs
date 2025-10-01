@@ -39,19 +39,4 @@ public interface IVariableManagementService
     /// 异步批量删除变量。
     /// </summary>
     Task<bool> DeleteVariablesAsync(List<int> ids);
-
-    /// <summary>
-    /// 在内存中添加变量
-    /// </summary>
-    void AddVariableToMemory(VariableDto variableDto, ConcurrentDictionary<int, VariableTableDto> variableTables);
-
-    /// <summary>
-    /// 在内存中更新变量
-    /// </summary>
-    void UpdateVariableInMemory(VariableDto variableDto, ConcurrentDictionary<int, VariableTableDto> variableTables);
-
-    /// <summary>
-    /// 在内存中删除变量
-    /// </summary>
-    void RemoveVariableFromMemory(int variableId, ConcurrentDictionary<int, VariableTableDto> variableTables);
 }
