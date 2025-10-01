@@ -12,16 +12,16 @@ public interface IEventService
     #region 设备事件
 
     /// <summary>
-    /// 设备状态改变事件
+    /// 设备状态改变事件（统一事件，处理激活状态和连接状态变化）
     /// </summary>
-    event EventHandler<DeviceActiveChangedEventArgs> OnDeviceActiveChanged;
+    event EventHandler<DeviceStateChangedEventArgs> OnDeviceStateChanged;
 
     /// <summary>
     /// 触发设备状态改变事件
     /// </summary>
     /// <param name="sender">事件发送者</param>
     /// <param name="e">设备状态改变事件参数</param>
-    void RaiseDeviceActiveChanged(object sender, DeviceActiveChangedEventArgs e);
+    void RaiseDeviceStateChanged(object sender, DeviceStateChangedEventArgs e);
 
     /// <summary>
     /// 设备添加事件
@@ -69,17 +69,7 @@ public interface IEventService
 
     #endregion
 
-    /// <summary>
-    /// 设备运行改变事件
-    /// </summary>
-    event EventHandler<DeviceConnectChangedEventArgs> OnDeviceConnectChanged;
-
-    /// <summary>
-    /// 触发设备状态改变事件
-    /// </summary>
-    /// <param name="sender">事件发送者</param>
-    /// <param name="e">设备状态改变事件参数</param>
-    void RaiseDeviceConnectChanged(object sender, DeviceConnectChangedEventArgs e);
+    
 
     /// <summary>
     /// 变量值改变事件

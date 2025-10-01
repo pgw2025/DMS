@@ -45,19 +45,30 @@ namespace DMS.Infrastructure.Services.OpcUa
             _deviceContexts = new ConcurrentDictionary<int, DeviceContext>();
             _semaphore = new SemaphoreSlim(_options.MaxConcurrentConnections, _options.MaxConcurrentConnections);
 
-            _eventService.OnDeviceActiveChanged += OnDeviceActiveChanged;
+            _eventService.OnDeviceStateChanged += OnDeviceStateChanged;
             _eventService.OnDeviceChanged += OnDeviceChanged;
         }
 
-        private async void OnDeviceActiveChanged(object? sender, DeviceActiveChangedEventArgs e)
+        private async void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
         {
-            if (e.NewStatus)
+            switch (e.StateType)
             {
-                await ConnectDeviceAsync(e.DeviceId, CancellationToken.None);
-            }
-            else
-            {
-                await DisconnectDeviceAsync(e.DeviceId, CancellationToken.None);
+                case Core.Enums.DeviceStateType.Active:
+                    // 处理激活状态变化
+                    if (e.StateValue)
+                    {
+                        await ConnectDeviceAsync(e.DeviceId, CancellationToken.None);
+                    }
+                    else
+                    {
+                        await DisconnectDeviceAsync(e.DeviceId, CancellationToken.None);
+                    }
+                    break;
+                
+                case Core.Enums.DeviceStateType.Connection:
+                    // 处理连接状态变化（通常由底层连接过程触发）
+                    // 在OPC UA服务中，这可能是内部状态更新
+                    break;
             }
         }
 
@@ -359,8 +370,8 @@ namespace DMS.Infrastructure.Services.OpcUa
                     _logger.LogWarning("设备 {DeviceName} 连接失败", context.Device.Name);
                 }
                 
-                _eventService.RaiseDeviceConnectChanged(
-                                         this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  context.IsConnected));
+                _eventService.RaiseDeviceStateChanged(
+                                         this, new DeviceStateChangedEventArgs(context.Device.Id, context.Device.Name,  context.IsConnected, Core.Enums.DeviceStateType.Connection));
             }
             catch (Exception ex)
             {
@@ -368,8 +379,8 @@ namespace DMS.Infrastructure.Services.OpcUa
                                  context.Device.Name, ex.Message);
                 context.IsConnected = false;
                 context.Device.IsRunning = false;
-                _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  false));
+                _eventService.RaiseDeviceStateChanged(
+                    this, new DeviceStateChangedEventArgs(context.Device.Id, context.Device.Name,  false, Core.Enums.DeviceStateType.Connection));
             }
             finally
             {
@@ -391,8 +402,8 @@ namespace DMS.Infrastructure.Services.OpcUa
                 await context.OpcUaService.DisconnectAsync();
                 context.IsConnected = false;
                 context.Device.IsRunning = false;
-                _eventService.RaiseDeviceConnectChanged(
-                    this, new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name,  false));
+                _eventService.RaiseDeviceStateChanged(
+                    this, new DeviceStateChangedEventArgs(context.Device.Id, context.Device.Name,  false, Core.Enums.DeviceStateType.Connection));
                 _logger.LogInformation("设备 {DeviceName} 连接已断开", context.Device.Name);
             }
             catch (Exception ex)

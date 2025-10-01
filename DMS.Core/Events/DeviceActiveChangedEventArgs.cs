@@ -2,7 +2,9 @@ namespace DMS.Core.Events;
 
 /// <summary>
 /// 设备状态改变事件参数
+/// 已弃用：请使用 DeviceStateChangedEventArgs 替代
 /// </summary>
+[Obsolete("Use DeviceStateChangedEventArgs instead")]
 public class DeviceActiveChangedEventArgs : EventArgs
 {
     /// <summary>

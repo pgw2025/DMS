@@ -49,28 +49,32 @@ public class DeviceDataService : IDeviceDataService
         _variableDataService = variableDataService;
         _uiDispatcher = Dispatcher.CurrentDispatcher;
 
-        _eventService.OnDeviceConnectChanged += OnDeviceConnectChanged;
+        _eventService.OnDeviceStateChanged += OnDeviceStateChanged;
     }
 
-    private void OnDeviceConnectChanged(object? sender, DeviceConnectChangedEventArgs e)
+    private void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
     {
-        _uiDispatcher.Invoke(() =>
+        // 只处理连接状态变化
+        if (e.StateType == Core.Enums.DeviceStateType.Connection)
         {
-
-            if (_dataStorageService.Devices.TryGetValue(e.DeviceId, out DeviceItemViewModel device))
+            _uiDispatcher.Invoke(() =>
             {
 
-                device.IsRunning = e.NewStatus;
-                if (device.IsRunning)
+                if (_dataStorageService.Devices.TryGetValue(e.DeviceId, out DeviceItemViewModel device))
                 {
-                    _notificationService.ShowSuccess($"设备：{device.Name},连接成功。");
+
+                    device.IsRunning = e.StateValue;
+                    if (device.IsRunning)
+                    {
+                        _notificationService.ShowSuccess($"设备：{device.Name},连接成功。");
+                    }
+                    else
+                    {
+                        _notificationService.ShowSuccess($"设备：{device.Name},已断开连接。");
+                    }
                 }
-                else
-                {
-                    _notificationService.ShowSuccess($"设备：{device.Name},已断开连接。");
-                }
-            }
-        });
+            });
+        }
     }
 
     /// <summary>

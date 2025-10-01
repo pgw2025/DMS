@@ -224,9 +224,9 @@ namespace DMS.Infrastructure.Services.S7
             }
             finally
             {
-                _eventService.RaiseDeviceConnectChanged(
+                _eventService.RaiseDeviceStateChanged(
                     this,
-                    new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, context.IsConnected));
+                    new DeviceStateChangedEventArgs(context.Device.Id, context.Device.Name, context.IsConnected, Core.Enums.DeviceStateType.Connection));
                 _semaphore.Release();
             }
         }
@@ -245,9 +245,9 @@ namespace DMS.Infrastructure.Services.S7
                 await context.S7Service.DisconnectAsync();
                 context.IsConnected = false;
 
-                _eventService.RaiseDeviceConnectChanged(
+                _eventService.RaiseDeviceStateChanged(
                     this,
-                    new DeviceConnectChangedEventArgs(context.Device.Id, context.Device.Name, context.IsConnected));
+                    new DeviceStateChangedEventArgs(context.Device.Id, context.Device.Name, context.IsConnected, Core.Enums.DeviceStateType.Connection));
                 _logger.LogInformation("设备 {DeviceName} 连接已断开", context.Device.Name);
             }
             catch (Exception ex)

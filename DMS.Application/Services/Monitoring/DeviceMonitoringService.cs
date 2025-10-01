@@ -33,23 +33,27 @@ public class DeviceMonitoringService : IDeviceMonitoringService, IDisposable
         _eventService = eventService;
         _appDataStorageService = appDataStorageService;
         _appDataCenterService = appDataCenterService;
-        _eventService.OnDeviceActiveChanged += OnDeviceActiveChanged;
+        _eventService.OnDeviceStateChanged += OnDeviceStateChanged;
     }
 
-    private void OnDeviceActiveChanged(object? sender, DeviceActiveChangedEventArgs e)
+    private void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
     {
-        if (_appDataStorageService.Devices.TryGetValue(e.DeviceId, out var device))
+        // 只处理激活状态变化事件
+        if (e.StateType == Core.Enums.DeviceStateType.Active)
         {
-            // 更新设备激活状态 - 同时更新数据库和内存
-            _ = Task.Run(async () =>
+            if (_appDataStorageService.Devices.TryGetValue(e.DeviceId, out var device))
             {
-                await _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(device);
-            });
+                // 更新设备激活状态 - 同时更新数据库和内存
+                _ = Task.Run(async () =>
+                {
+                    await _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(device);
+                });
+            }
         }
     }
 
     public void Dispose()
     {
-        _eventService.OnDeviceActiveChanged -= OnDeviceActiveChanged;
+        _eventService.OnDeviceStateChanged -= OnDeviceStateChanged;
     }
 }

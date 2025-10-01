@@ -91,8 +91,8 @@ public partial class DeviceItemViewModel : ObservableObject
         // 只有当设备ID有效且事件服务已初始化时才发布事件
         if (Id > 0 && EventService != null )
         {
-            // 发布设备状态改变事件
-            EventService.RaiseDeviceActiveChanged(this, new DeviceActiveChangedEventArgs(Id, Name, newValue));
+            // 发布设备状态改变事件（使用统一的事件类型）
+            EventService.RaiseDeviceStateChanged(this, new DeviceStateChangedEventArgs(Id, Name, newValue, Core.Enums.DeviceStateType.Active));
         }
     }
 
