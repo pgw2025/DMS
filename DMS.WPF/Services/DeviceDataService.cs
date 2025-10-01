@@ -103,8 +103,6 @@ public class DeviceDataService : IDeviceDataService
 
         //给界面添加设备
         _dataStorageService.Devices.Add(addDto.Device.Id, _mapper.Map<DeviceItemViewModel>(addDto.Device));
-        //更新数据中心
-        _appDataCenterService.DeviceManagementService.AddDeviceToMemory(addDto.Device);
 
         // 给界面添加设备菜单
         if (addDto.DeviceMenu != null)
@@ -144,13 +142,11 @@ public class DeviceDataService : IDeviceDataService
     public async Task<bool> DeleteDevice(DeviceItemViewModel device)
     {
         
-        //从数据库删除设备相关数据
+        //从数据库和内存中删除设备相关数据
         if (!await _appDataCenterService.DeviceManagementService.DeleteDeviceByIdAsync(device.Id))
         {
             return false;
         }
-        //从Application项目删除设备相关数据
-        _appDataCenterService.DeviceManagementService.RemoveDeviceFromMemory(device.Id);
         
 
         // 从界面删除设备相关数据集
@@ -184,6 +180,7 @@ public class DeviceDataService : IDeviceDataService
         _mapper.Map(device, deviceDto);
         if (await _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(deviceDto) > 0)
         {
+            // 更新数据库后会自动更新内存，无需额外操作
             return true;
         }
 

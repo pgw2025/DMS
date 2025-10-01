@@ -40,7 +40,11 @@ public class DeviceMonitoringService : IDeviceMonitoringService, IDisposable
     {
         if (_appDataStorageService.Devices.TryGetValue(e.DeviceId, out var device))
         {
-            _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(device);
+            // 更新设备激活状态 - 同时更新数据库和内存
+            _ = Task.Run(async () =>
+            {
+                await _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(device);
+            });
         }
     }
 

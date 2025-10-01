@@ -47,7 +47,15 @@ public class DeviceManagementService : IDeviceManagementService
     /// </summary>
     public async Task<CreateDeviceWithDetailsDto> CreateDeviceWithDetailsAsync(CreateDeviceWithDetailsDto dto)
     {
-        return await _deviceAppService.CreateDeviceWithDetailsAsync(dto);
+        var result = await _deviceAppService.CreateDeviceWithDetailsAsync(dto);
+        
+        // 创建成功后，将设备添加到内存中
+        if (result?.Device != null)
+        {
+            AddDeviceToMemory(result.Device);
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -55,7 +63,15 @@ public class DeviceManagementService : IDeviceManagementService
     /// </summary>
     public async Task<int> UpdateDeviceAsync(DeviceDto deviceDto)
     {
-        return await _deviceAppService.UpdateDeviceAsync(deviceDto);
+        var result = await _deviceAppService.UpdateDeviceAsync(deviceDto);
+        
+        // 更新成功后，更新内存中的设备
+        if (result > 0 && deviceDto != null)
+        {
+            UpdateDeviceInMemory(deviceDto);
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -63,7 +79,16 @@ public class DeviceManagementService : IDeviceManagementService
     /// </summary>
     public async Task<bool> DeleteDeviceByIdAsync(int deviceId)
     {
-        return await _deviceAppService.DeleteDeviceByIdAsync(deviceId);
+        var device = await _deviceAppService.GetDeviceByIdAsync(deviceId); // 获取设备信息用于内存删除
+        var result = await _deviceAppService.DeleteDeviceByIdAsync(deviceId);
+        
+        // 删除成功后，从内存中移除设备
+        if (result && device != null)
+        {
+            RemoveDeviceFromMemory(deviceId);
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -72,6 +97,13 @@ public class DeviceManagementService : IDeviceManagementService
     public async Task ToggleDeviceActiveStateAsync(int id)
     {
         await _deviceAppService.ToggleDeviceActiveStateAsync(id);
+        
+        // 更新内存中的设备状态
+        var device = await _deviceAppService.GetDeviceByIdAsync(id);
+        if (device != null)
+        {
+            UpdateDeviceInMemory(device);
+        }
     }
 
     /// <summary>
