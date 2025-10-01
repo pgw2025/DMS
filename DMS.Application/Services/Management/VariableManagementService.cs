@@ -154,6 +154,27 @@ public class VariableManagementService : IVariableManagementService
     }
 
     /// <summary>
+    /// 异步批量导入变量。
+    /// </summary>
+    public async Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables)
+    {
+        var result = await _variableAppService.BatchImportVariablesAsync(variables);
+        
+        // 批量导入成功后，触发批量导入事件
+        if (result != null && result.Any())
+        {
+            _eventService.RaiseBatchImportVariables(this, new BatchImportVariablesEventArgs(result));
+        }
+        
+        return result;
+    }
+
+    public async Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck)
+    {
+        return await _variableAppService.FindExistingVariablesAsync(variablesToCheck);
+    }
+
+    /// <summary>
     /// 异步批量删除变量。
     /// </summary>
     public async Task<bool> DeleteVariablesAsync(List<int> ids)

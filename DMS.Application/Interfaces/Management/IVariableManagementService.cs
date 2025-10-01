@@ -39,4 +39,14 @@ public interface IVariableManagementService
     /// 异步批量删除变量。
     /// </summary>
     Task<bool> DeleteVariablesAsync(List<int> ids);
+
+    /// <summary>
+    /// 异步批量导入变量。
+    /// </summary>
+    Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables);
+
+    /// <summary>
+    /// 查找已存在的变量。
+    /// </summary>
+    Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck);
 }

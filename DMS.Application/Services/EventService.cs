@@ -124,6 +124,21 @@ public class EventService : IEventService
         OnVariableActiveChanged?.Invoke(sender, e);
     }
 
+    /// <summary>
+    /// 批量导入变量事件
+    /// </summary>
+    public event EventHandler<BatchImportVariablesEventArgs> OnBatchImportVariables;
+
+    /// <summary>
+    /// 触发批量导入变量事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">批量导入变量事件参数</param>
+    public void RaiseBatchImportVariables(object sender, BatchImportVariablesEventArgs e)
+    {
+        OnBatchImportVariables?.Invoke(sender, e);
+    }
+
 
     /// <summary>
     /// 变量值改变事件

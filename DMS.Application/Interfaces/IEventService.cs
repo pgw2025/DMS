@@ -98,6 +98,18 @@ public interface IEventService
     void RaiseVariableActiveChanged(object sender,VariablesActiveChangedEventArgs e);
 
     /// <summary>
+    /// 批量导入变量事件
+    /// </summary>
+    event EventHandler<BatchImportVariablesEventArgs> OnBatchImportVariables;
+
+    /// <summary>
+    /// 触发批量导入变量事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">批量导入变量事件参数</param>
+    void RaiseBatchImportVariables(object sender, BatchImportVariablesEventArgs e);
+
+    /// <summary>
     /// 变量启停改变事件
     /// </summary>
     event EventHandler<VariablesActiveChangedEventArgs> OnVariableActiveChanged;

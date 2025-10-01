@@ -6,6 +6,7 @@ using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
 using System.Collections.ObjectModel;
+using DMS.Application.Services.Management;
 
 namespace DMS.WPF.Services;
 
@@ -30,6 +31,12 @@ public class VariableDataService : IVariableDataService
         _mapper = mapper;
         _dataStorageService = dataStorageService;
         _appDataCenterService = appDataCenterService;
+        
+        // 订阅批量导入变量事件
+        if (_appDataCenterService.VariableManagementService is VariableManagementService variableManagementService)
+        {
+            // 如果需要直接订阅事件，这将需要EventService实例
+        }
     }
 
     /// <summary>

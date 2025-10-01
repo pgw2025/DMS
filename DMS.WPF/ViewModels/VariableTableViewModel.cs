@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
+using DMS.Application.Interfaces.Management;
 using DMS.Core.Enums;
 using DMS.Core.Events;
 using DMS.Core.Models;
@@ -25,7 +26,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     private readonly IDialogService _dialogService;
 
-    private readonly IVariableAppService _variableAppService;
+    private readonly IVariableManagementService _variableManagementService;
     private readonly IEventService _eventService;
     private readonly IMqttAliasAppService _mqttAliasAppService;
     private readonly IMqttAppService _mqttAppService;
@@ -92,7 +93,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     private readonly INotificationService _notificationService;
 
-    public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableAppService variableAppService,
+    public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableManagementService variableManagementService,
                                   IEventService eventService,
                                   IMqttAliasAppService mqttAliasAppService, IMqttAppService mqttAppService,
                                   IWPFDataService wpfDataService, IDataStorageService dataStorageService,
@@ -100,7 +101,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         _mapper = mapper;
         _dialogService = dialogService;
-        _variableAppService = variableAppService;
+        _variableManagementService = variableManagementService;
         _eventService = eventService;
         _mqttAliasAppService = mqttAliasAppService;
         _mqttAppService = mqttAppService;
@@ -207,7 +208,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             editedVariable.UpdatedAt = DateTime.Now;
 
             // 更新数据库中的变量数据
-            var updateResult = await _variableAppService.UpdateVariableAsync(_mapper.Map<VariableDto>(editedVariable));
+            var updateResult = await _variableManagementService.UpdateVariableAsync(_mapper.Map<VariableDto>(editedVariable));
 
 
             if (updateResult > 0)
@@ -253,7 +254,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 variableDto.VariableTableId = CurrentVariableTable.Id;
             }
 
-            var existList = await _variableAppService.FindExistingVariablesAsync(improtVariableDtos);
+            var existList = await _variableManagementService.FindExistingVariablesAsync(improtVariableDtos);
             if (existList.Count > 0)
             {
                 // // 拼接要删除的变量名称，用于确认提示
@@ -268,7 +269,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             if (improtVariableDtos.Count != 0)
             {
-                var addVariableDtos = await _variableAppService.BatchImportVariablesAsync(improtVariableDtos);
+                var addVariableDtos = await _variableManagementService.BatchImportVariablesAsync(improtVariableDtos);
                 if (addVariableDtos is { Count: > 0 })
                 {
                     List<VariableItemViewModel> variableItemViewModels = _mapper.Map<List<VariableItemViewModel>>(addVariableDtos);
@@ -337,7 +338,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             }
 
             // 检查是否存在同名变量
-            var existList = await _variableAppService.FindExistingVariablesAsync(importedVariableDtos);
+            var existList = await _variableManagementService.FindExistingVariablesAsync(importedVariableDtos);
             if (existList.Count > 0)
             {
                 // 拼接要删除的变量名称，用于确认提示
@@ -353,7 +354,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 如果还有变量需要导入，则执行导入操作
             if (importedVariableDtos.Count != 0)
             {
-                var addVariableDtos = await _variableAppService.BatchImportVariablesAsync(importedVariableDtos);
+                var addVariableDtos = await _variableManagementService.BatchImportVariablesAsync(importedVariableDtos);
                 if (addVariableDtos is { Count: > 0 })
                 {
                     List<VariableItemViewModel> variableItemViewModels = _mapper.Map<List<VariableItemViewModel>>(addVariableDtos);
@@ -415,7 +416,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             // // 添加变量数据到数据库
             var addVariable
-                = await _variableAppService.CreateVariableAsync(_mapper.Map<VariableDto>(variableItemViewModel));
+                = await _variableManagementService.CreateVariableAsync(_mapper.Map<VariableDto>(variableItemViewModel));
             _mapper.Map(addVariable, variableItemViewModel);
             // // 更新当前页面显示的数据：将新变量添加到集合中
             _variableItemList.Add(variableItemViewModel);
@@ -462,7 +463,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 return; // 如果用户取消删除，则返回
 
             // 从数据库中删除变量数据
-            var result = await _variableAppService.DeleteVariablesAsync(variablesToDelete.Select(v => v.Id)
+            var result = await _variableManagementService.DeleteVariablesAsync(variablesToDelete.Select(v => v.Id)
                                                                             .ToList());
             if (result)
             {
@@ -522,7 +523,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
-            var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
+            var result = await _variableManagementService.UpdateVariablesAsync(variableDtos);
 
             if (result > 0)
             {
@@ -673,7 +674,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
-            var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
+            var result = await _variableManagementService.UpdateVariablesAsync(variableDtos);
 
             if (result > 0)
             {
@@ -737,7 +738,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
-            var updateResult = await _variableAppService.UpdateVariablesAsync(variableDtos);
+            var updateResult = await _variableManagementService.UpdateVariablesAsync(variableDtos);
 
 
             if (updateResult > 0)
@@ -792,7 +793,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             // 批量更新数据库中的变量数据
             var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
-            var updateResult = await _variableAppService.UpdateVariablesAsync(variableDtos);
+            var updateResult = await _variableManagementService.UpdateVariablesAsync(variableDtos);
 
             if (updateResult > 0)
             {
