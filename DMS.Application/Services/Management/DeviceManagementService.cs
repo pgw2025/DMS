@@ -14,16 +14,13 @@ public class DeviceManagementService : IDeviceManagementService
 {
     private readonly IDeviceAppService _deviceAppService;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IEventService _eventService;
 
-    /// <summary>
-    /// 当设备数据发生变化时触发
-    /// </summary>
-    public event EventHandler<DeviceChangedEventArgs> OnDeviceChanged;
-
-    public DeviceManagementService(IDeviceAppService deviceAppService,IAppDataStorageService appDataStorageService)
+    public DeviceManagementService(IDeviceAppService deviceAppService, IAppDataStorageService appDataStorageService, IEventService eventService)
     {
         _deviceAppService = deviceAppService;
         _appDataStorageService = appDataStorageService;
+        _eventService = eventService;
     }
 
     /// <summary>
@@ -113,7 +110,7 @@ public class DeviceManagementService : IDeviceManagementService
     {
         if (_appDataStorageService.Devices.TryAdd(deviceDto.Id, deviceDto))
         {
-            OnDeviceChanged?.Invoke(this,new DeviceChangedEventArgs(DataChangeType.Added, deviceDto));
+            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Added, deviceDto));
         }
     }
 
@@ -123,7 +120,7 @@ public class DeviceManagementService : IDeviceManagementService
     public void UpdateDeviceInMemory(DeviceDto deviceDto)
     {
         _appDataStorageService.Devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
-        OnDeviceChanged?.Invoke(this,new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
+        _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
     }
 
     /// <summary>
@@ -145,7 +142,7 @@ public class DeviceManagementService : IDeviceManagementService
 
             _appDataStorageService.Devices.TryRemove(deviceId, out _);
 
-            OnDeviceChanged?.Invoke(this,new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
+            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
         }
     }
 
