@@ -271,7 +271,15 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 var addVariableDtos = await _variableAppService.BatchImportVariablesAsync(improtVariableDtos);
                 if (addVariableDtos is { Count: > 0 })
                 {
-                    _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(addVariableDtos));
+                    List<VariableItemViewModel> variableItemViewModels = _mapper.Map<List<VariableItemViewModel>>(addVariableDtos);
+                    
+                    _variableItemList.AddRange(variableItemViewModels);
+                    //更新数据中心
+                    foreach (var variableItemViewModel in variableItemViewModels)
+                    {
+                        CurrentVariableTable.Variables.Add(variableItemViewModel);
+                    }
+                    
                     _notificationService.ShowSuccess($"从Excel导入变量成功，共导入变量：{improtVariableDtos.Count}个");
                 }
             }
@@ -348,7 +356,12 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 var addVariableDtos = await _variableAppService.BatchImportVariablesAsync(importedVariableDtos);
                 if (addVariableDtos is { Count: > 0 })
                 {
-                    _variableItemList.AddRange(_mapper.Map<List<VariableItemViewModel>>(addVariableDtos));
+                    List<VariableItemViewModel> variableItemViewModels = _mapper.Map<List<VariableItemViewModel>>(addVariableDtos);
+                    _variableItemList.AddRange(variableItemViewModels);
+                    foreach (var variableItemViewModel in variableItemViewModels)
+                    {
+                        CurrentVariableTable.Variables.Add(variableItemViewModel);
+                    }
                     _notificationService.ShowSuccess($"从OPC UA服务器导入变量成功，共导入变量：{importedVariableDtos.Count}个");
                 }
                 else

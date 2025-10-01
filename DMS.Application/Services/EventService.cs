@@ -83,7 +83,7 @@ public class EventService : IEventService
 
     #endregion
 
-    #region 变量事件
+    #region 变量表事件
     /// <summary>
     /// 变量表改变事件
     /// </summary>
