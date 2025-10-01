@@ -57,7 +57,7 @@ public class VariableTableDataService : IVariableTableDataService
             _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(resDto.Menu));
         }
 
-        _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(variableTableDto);
+        // 添加变量表到内存的操作现在在服务内部完成，无需额外调用
 
         // var device = _deviceDataService.Devices.FirstOrDefault(d => d.Id == variableTableDto.DeviceId);
         // if (device != null)
@@ -82,7 +82,7 @@ public class VariableTableDataService : IVariableTableDataService
         var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
         if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTableDto) > 0)
         {
-            _appDataCenterService.VariableTableManagementService.UpdateVariableTableInMemory(variableTableDto);
+            // 更新数据库后会自动更新内存，无需额外操作
 
             var menu = _dataStorageService.Menus.FirstOrDefault(m =>
                                                                     m.MenuType == MenuType.VariableTableMenu &&
@@ -119,7 +119,6 @@ public class VariableTableDataService : IVariableTableDataService
             _dataStorageService.Variables.Remove(variable.Id);
         }
 
-        _appDataCenterService.VariableTableManagementService.RemoveVariableTableFromMemory(variableTable.Id);
         // 删除变量表界面相关的菜单
 
         var variableTableMenu

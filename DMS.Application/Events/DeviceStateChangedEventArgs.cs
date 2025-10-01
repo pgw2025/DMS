@@ -1,6 +1,6 @@
 using DMS.Core.Enums;
 
-namespace DMS.Core.Events
+namespace DMS.Application.Events
 {
     /// <summary>
     /// 设备状态改变事件参数

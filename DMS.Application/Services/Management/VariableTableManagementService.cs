@@ -15,17 +15,20 @@ public class VariableTableManagementService : IVariableTableManagementService
 {
     private readonly IVariableTableAppService _variableTableAppService;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IEventService _eventService;
 
     /// <summary>
     /// 当变量表数据发生变化时触发
     /// </summary>
     public event EventHandler<VariableTableChangedEventArgs> OnVariableTableChanged;
 
-    public VariableTableManagementService(IVariableTableAppService variableTableAppService,IAppDataStorageService appDataStorageService 
-                                         )
+    public VariableTableManagementService(IVariableTableAppService variableTableAppService, 
+                                         IAppDataStorageService appDataStorageService,
+                                         IEventService eventService)
     {
         _variableTableAppService = variableTableAppService;
         _appDataStorageService = appDataStorageService;
+        _eventService = eventService;
     }
 
     /// <summary>
@@ -49,7 +52,42 @@ public class VariableTableManagementService : IVariableTableManagementService
     /// </summary>
     public async Task<CreateVariableTableWithMenuDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto dto)
     {
-        return await _variableTableAppService.CreateVariableTableAsync(dto);
+        var result = await _variableTableAppService.CreateVariableTableAsync(dto);
+        
+        // 创建成功后，将变量表添加到内存中
+        if (result?.VariableTable != null)
+        {
+            // 添加null检查
+            if (result.VariableTable == null)
+                return result;
+
+            DeviceDto deviceDto = null;
+            if (_appDataStorageService.Devices != null && 
+                _appDataStorageService.Devices.TryGetValue(result.VariableTable.DeviceId, out var device))
+            {
+                deviceDto = device;
+                // 确保VariableTables不为null
+                if (device.VariableTables == null)
+                    device.VariableTables = new List<VariableTableDto>();
+                    
+                device.VariableTables.Add(result.VariableTable);
+                
+                // 确保Device属性不为null
+                if (result.VariableTable != null)
+                    result.VariableTable.Device = device;
+            }
+
+            // 确保_variableTables和result.VariableTable不为null
+            if (_appDataStorageService.VariableTables.TryAdd(result.VariableTable.Id, result.VariableTable))
+            {
+                _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
+                                           DataChangeType.Added,
+                                           result.VariableTable,
+                                           deviceDto));
+            }
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -57,7 +95,25 @@ public class VariableTableManagementService : IVariableTableManagementService
     /// </summary>
     public async Task<int> UpdateVariableTableAsync(VariableTableDto variableTableDto)
     {
-        return await _variableTableAppService.UpdateVariableTableAsync(variableTableDto);
+        var result = await _variableTableAppService.UpdateVariableTableAsync(variableTableDto);
+        
+        // 更新成功后，更新内存中的变量表
+        if (result > 0 && variableTableDto != null)
+        {
+            DeviceDto deviceDto = null;
+            if (_appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
+            {
+                deviceDto = device;
+            }
+
+            _appDataStorageService.VariableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
+            _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
+                                             DataChangeType.Updated,
+                                             variableTableDto,
+                                             deviceDto));
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -65,82 +121,33 @@ public class VariableTableManagementService : IVariableTableManagementService
     /// </summary>
     public async Task<bool> DeleteVariableTableAsync(int id)
     {
-        return await _variableTableAppService.DeleteVariableTableAsync(id);
-    }
-
-    /// <summary>
-    /// 在内存中添加变量表
-    /// </summary>
-    public void AddVariableTableToMemory(VariableTableDto variableTableDto)
-    {
-        // 添加null检查
-        if (variableTableDto == null)
-            return;
-
-        DeviceDto deviceDto = null;
-        if (_appDataStorageService.Devices != null && 
-            _appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
+        var variableTable = await _variableTableAppService.GetVariableTableByIdAsync(id); // 获取变量表信息用于内存删除
+        var result = await _variableTableAppService.DeleteVariableTableAsync(id);
+        
+        // 删除成功后，从内存中移除变量表
+        if (result && variableTable != null)
         {
-            deviceDto = device;
-            // 确保VariableTables不为null
-            if (device.VariableTables == null)
-                device.VariableTables = new List<VariableTableDto>();
-                
-            device.VariableTables.Add(variableTableDto);
-            
-            // 确保Device属性不为null
-            if (variableTableDto != null)
-                variableTableDto.Device = device;
-        }
-
-        // 确保_variableTables和variableTableDto不为null
-            if (_appDataStorageService.VariableTables.TryAdd(variableTableDto.Id, variableTableDto))
+            if (_appDataStorageService.VariableTables.TryRemove(id, out var variableTableDto))
             {
-                OnVariableTableChanged?.Invoke(this, new VariableTableChangedEventArgs(
-                                           DataChangeType.Added,
-                                           variableTableDto,
-                                           deviceDto));
+                DeviceDto deviceDto = null;
+                if (variableTableDto != null && _appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
+                {
+                    deviceDto = device;
+                    if (device.VariableTables != null)
+                        device.VariableTables.Remove(variableTableDto);
+                }
+
+                _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
+                                                 DataChangeType.Deleted,
+                                                 variableTableDto,
+                                                 deviceDto));
             }
-    }
-
-    /// <summary>
-    /// 在内存中更新变量表
-    /// </summary>
-    public void UpdateVariableTableInMemory(VariableTableDto variableTableDto)
-    {
-        DeviceDto deviceDto = null;
-        if (_appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
-        {
-            deviceDto = device;
         }
-
-        _appDataStorageService.VariableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
-        OnVariableTableChanged?.Invoke(this,new VariableTableChangedEventArgs(
-                                         DataChangeType.Updated,
-                                         variableTableDto,
-                                         deviceDto));
+        
+        return result;
     }
 
-    /// <summary>
-    /// 在内存中删除变量表
-    /// </summary>
-    public void RemoveVariableTableFromMemory(int variableTableId)
-    {
-        if (_appDataStorageService.VariableTables.TryRemove(variableTableId, out var variableTableDto))
-        {
-            DeviceDto deviceDto = null;
-            if (variableTableDto != null && _appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var device))
-            {
-                deviceDto = device;
-                device.VariableTables.Remove(variableTableDto);
-            }
-
-            OnVariableTableChanged?.Invoke(this,new VariableTableChangedEventArgs(
-                                             DataChangeType.Deleted,
-                                             variableTableDto,
-                                             deviceDto));
-        }
-    }
+    
 
   
 }

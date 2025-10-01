@@ -72,6 +72,18 @@ public interface IEventService
     
 
     /// <summary>
+    /// 变量表改变事件
+    /// </summary>
+    event EventHandler<VariableTableChangedEventArgs> OnVariableTableChanged;
+
+    /// <summary>
+    /// 触发变量表改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">变量表改变事件参数</param>
+    void RaiseVariableTableChanged(object sender, VariableTableChangedEventArgs e);
+
+    /// <summary>
     /// 变量值改变事件
     /// </summary>
     event EventHandler<VariableChangedEventArgs> OnVariableChanged;

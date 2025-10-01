@@ -6,11 +6,6 @@ namespace DMS.Application.Interfaces.Management;
 public interface IVariableTableManagementService
 {
     /// <summary>
-    /// 当变量表数据发生变化时触发
-    /// </summary>
-    event EventHandler<VariableTableChangedEventArgs> OnVariableTableChanged;
-
-    /// <summary>
     /// 异步根据ID获取变量表DTO。
     /// </summary>
     Task<VariableTableDto> GetVariableTableByIdAsync(int id);
@@ -34,19 +29,4 @@ public interface IVariableTableManagementService
     /// 异步删除一个变量表。
     /// </summary>
     Task<bool> DeleteVariableTableAsync(int id);
-
-    /// <summary>
-    /// 在内存中添加变量表
-    /// </summary>
-    void AddVariableTableToMemory(VariableTableDto variableTableDto);
-
-    /// <summary>
-    /// 在内存中更新变量表
-    /// </summary>
-    void UpdateVariableTableInMemory(VariableTableDto variableTableDto);
-
-    /// <summary>
-    /// 在内存中删除变量表
-    /// </summary>
-    void RemoveVariableTableFromMemory(int variableTableId);
 }

@@ -79,8 +79,7 @@ public class VariableDataService : IVariableDataService
         var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
         if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTableDto) > 0)
         {
-            _appDataCenterService.VariableTableManagementService.UpdateVariableTableInMemory(variableTableDto);
-
+            // 更新数据库后会自动更新内存，无需额外操作
             return true;
         }
 
@@ -110,8 +109,6 @@ public class VariableDataService : IVariableDataService
         {
             _dataStorageService.Variables.Remove(variable.Id);
         }
-
-        _appDataCenterService.VariableTableManagementService.RemoveVariableTableFromMemory(variableTable.Id);
 
         // 删除变量表
         _dataStorageService.VariableTables.Remove(variableTable.Id);

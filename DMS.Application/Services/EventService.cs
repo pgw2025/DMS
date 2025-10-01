@@ -85,6 +85,21 @@ public class EventService : IEventService
 
     #region 变量事件
     /// <summary>
+    /// 变量表改变事件
+    /// </summary>
+    public event EventHandler<VariableTableChangedEventArgs> OnVariableTableChanged;
+
+    /// <summary>
+    /// 触发变量表改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">变量表改变事件参数</param>
+    public void RaiseVariableTableChanged(object sender, VariableTableChangedEventArgs e)
+    {
+        OnVariableTableChanged?.Invoke(sender, e);
+    }
+
+    /// <summary>
     /// 变量值改变事件
     /// </summary>
     public event EventHandler<VariableChangedEventArgs> OnVariableChanged;

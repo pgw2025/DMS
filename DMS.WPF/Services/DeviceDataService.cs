@@ -121,7 +121,7 @@ public class DeviceDataService : IDeviceDataService
         if (addDto.VariableTable != null)
         {
             await _variableDataService.AddVariableTableToView(addDto.VariableTable);
-            _appDataCenterService.VariableTableManagementService.AddVariableTableToMemory(addDto.VariableTable);
+            // 添加变量表到内存的操作现在在服务内部完成，无需额外调用
 
             if (addDto.VariableTable != null && addDto.VariableTableMenu != null)
             {
