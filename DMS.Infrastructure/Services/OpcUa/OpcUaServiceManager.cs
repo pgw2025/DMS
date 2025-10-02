@@ -48,6 +48,7 @@ namespace DMS.Infrastructure.Services.OpcUa
             _eventService.OnDeviceStateChanged += OnDeviceStateChanged;
             _eventService.OnDeviceChanged += OnDeviceChanged;
             _eventService.OnBatchImportVariables += OnBatchImportVariables;
+            _eventService.OnVariableChanged += OnVariableChanged;
         }
 
         private async void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
@@ -230,6 +231,22 @@ namespace DMS.Infrastructure.Services.OpcUa
             {
                 _logger.LogError(ex, "处理设备删除事件时发生错误: {DeviceId}", deviceId);
             }
+        }
+
+        /// <summary>
+        /// 获取需要订阅的变量列表
+        /// </summary>
+        /// <param name="context">设备上下文</param>
+        /// <returns>需要订阅的变量列表</returns>
+        private List<VariableDto> GetSubscribableVariables(DeviceContext context)
+        {
+            if (context?.Variables == null)
+                return new List<VariableDto>();
+
+            // 返回所有激活且OPC UA更新类型不是None的变量
+            return context.Variables.Values
+                .Where(v => v.IsActive )
+                .ToList();
         }
 
         /// <summary>
@@ -471,16 +488,25 @@ namespace DMS.Infrastructure.Services.OpcUa
         /// </summary>
         private async Task SetupSubscriptionsAsync(DeviceContext context, CancellationToken cancellationToken = default)
         {
-            if (!context.IsConnected || !context.Variables.Any())
+            if (!context.IsConnected)
                 return;
 
             try
             {
-                _logger.LogInformation("正在为设备 {DeviceName} 设置订阅，变量数: {VariableCount}",
-                                       context.Device.Name, context.Variables.Count);
+                // 获取需要订阅的变量
+                var subscribableVariables = GetSubscribableVariables(context);
+                
+                if (!subscribableVariables.Any())
+                {
+                    _logger.LogInformation("设备 {DeviceName} 没有需要订阅的变量", context.Device.Name);
+                    return;
+                }
+
+                _logger.LogInformation("正在为设备 {DeviceName} 设置订阅，需要订阅的变量数: {VariableCount}",
+                                       context.Device.Name, subscribableVariables.Count);
 
                 // 按PollingInterval对变量进行分组
-                var variablesByPollingInterval = context.Variables.Values
+                var variablesByPollingInterval = subscribableVariables
                                                         .GroupBy(v => v.PollingInterval)
                                                         .ToDictionary(g => g.Key, g => g.ToList());
 
@@ -493,7 +519,6 @@ namespace DMS.Infrastructure.Services.OpcUa
                     _logger.LogInformation(
                         "为设备 {DeviceName} 设置PollingInterval {PollingInterval} 的订阅，变量数: {VariableCount}",
                         context.Device.Name, pollingInterval, variables.Count);
-
 
                     var opcUaNodes = variables
                                      .Select(v => new OpcUaNode { NodeId = v.OpcUaNodeId })
@@ -512,29 +537,6 @@ namespace DMS.Infrastructure.Services.OpcUa
             }
         }
 
-        /// <summary>
-        /// 根据PollingInterval获取发布间隔（毫秒）
-        /// </summary>
-        private int GetPublishingIntervalFromPollLevel(int pollingInterval)
-        {
-            // 根据轮询间隔值映射到发布间隔
-            return pollingInterval switch
-                   {
-                       100 => 100, // HundredMilliseconds -> 100ms发布间隔
-                       500 => 500, // FiveHundredMilliseconds -> 500ms发布间隔
-                       1000 => 1000, // OneSecond -> 1000ms发布间隔
-                       5000 => 5000, // FiveSeconds -> 5000ms发布间隔
-                       10000 => 10000, // TenSeconds -> 10000ms发布间隔
-                       20000 => 20000, // TwentySeconds -> 20000ms发布间隔
-                       30000 => 30000, // ThirtySeconds -> 30000ms发布间隔
-                       60000 => 60000, // OneMinute -> 60000ms发布间隔
-                       300000 => 300000, // FiveMinutes -> 300000ms发布间隔
-                       600000 => 600000, // TenMinutes -> 600000ms发布间隔
-                       1800000 => 1800000, // ThirtyMinutes -> 1800000ms发布间隔
-                       3600000 => 3600000, // OneHour -> 3600000ms发布间隔
-                       _ => _options.SubscriptionPublishingIntervalMs // 默认值
-                   };
-        }
 
 
         /// <summary>
@@ -659,6 +661,80 @@ namespace DMS.Infrastructure.Services.OpcUa
 
                 _disposed = true;
                 _logger.LogInformation("OPC UA服务管理器资源已释放");
+            }
+        }
+
+        /// <summary>
+        /// 处理变量变更事件
+        /// </summary>
+        private void OnVariableChanged(object? sender, VariableChangedEventArgs e)
+        {
+            try
+            {
+                _logger.LogDebug("处理变量变更事件: 变量ID={VariableId}, 变更类型={ChangeType}, 变更属性={PropertyType}", 
+                    e.Variable.Id, e.ChangeType, e.PropertyType);
+
+                // 根据变更类型和属性类型进行相应处理
+                switch (e.ChangeType)
+                {
+                    case ActionChangeType.Updated:
+                        // 如果变量的OPC UA相关属性发生变化，需要重新设置订阅
+                        switch (e.PropertyType)
+                        {
+                            case VariablePropertyType.OpcUaNodeId:
+                            case VariablePropertyType.OpcUaUpdateType:
+                            case VariablePropertyType.PollingInterval:
+                                // 重新设置设备的订阅
+                                if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context))
+                                {
+                                    _ = Task.Run(async () =>
+                                    {
+                                        try
+                                        {
+                                            await SetupSubscriptionsAsync(context, CancellationToken.None);
+                                            _logger.LogInformation("已更新设备 {DeviceId} 的订阅，因为变量 {VariableId} 的OPC UA属性发生了变化", 
+                                                e.Variable.VariableTable.DeviceId, e.Variable.Id);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            _logger.LogError(ex, "更新设备 {DeviceId} 订阅时发生错误", e.Variable.VariableTable.DeviceId);
+                                        }
+                                    });
+                                }
+                                break;
+                                
+                            case VariablePropertyType.IsActive:
+                                // 变量激活状态变化，更新变量列表
+                                if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context2))
+                                {
+                                    if (e.Variable.IsActive)
+                                    {
+                                        // 添加变量到监控列表
+                                        context2.Variables.AddOrUpdate(e.Variable.OpcUaNodeId, e.Variable, (key, oldValue) => e.Variable);
+                                    }
+                                    else
+                                    {
+                                        // 从监控列表中移除变量
+                                        context2.Variables.Remove(e.Variable.OpcUaNodeId, out _);
+                                    }
+                                }
+                                break;
+                        }
+                        break;
+                        
+                    case ActionChangeType.Deleted:
+                        // 变量被删除时，从设备上下文的变量列表中移除
+                        if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context3))
+                        {
+                            context3.Variables.Remove(e.Variable.OpcUaNodeId, out _);
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "处理变量变更事件时发生错误: 变量ID={VariableId}, 变更类型={ChangeType}", 
+                    e.Variable.Id, e.ChangeType);
             }
         }
     }

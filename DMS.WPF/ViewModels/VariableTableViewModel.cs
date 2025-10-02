@@ -723,7 +723,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
             if (result > 0)
             {
-                _eventService.RaiseVariableActiveChanged(this,new VariablesActiveChangedEventArgs(validVariables.Select(v=>v.Id).ToList(),CurrentVariableTable.DeviceId,newIsActive.Value));
+                // _eventService.RaiseVariableActiveChanged(this,new VariablesActiveChangedEventArgs(validVariables.Select(v=>v.Id).ToList(),CurrentVariableTable.DeviceId,newIsActive.Value));
                 // 显示成功通知
                 _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的启用状态");
             }

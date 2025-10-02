@@ -47,6 +47,7 @@ namespace DMS.Infrastructure.Services.S7
 
             _eventService.OnVariableActiveChanged += OnVariableActiveChanged;
             _eventService.OnBatchImportVariables += OnBatchImportVariables;
+            _eventService.OnVariableChanged += OnVariableChanged;
         }
 
         private void OnVariableActiveChanged(object? sender, VariablesActiveChangedEventArgs e)
@@ -405,6 +406,71 @@ namespace DMS.Infrastructure.Services.S7
             catch (Exception ex)
             {
                 _logger.LogError(ex, "处理批量导入变量事件时发生错误");
+            }
+        }
+
+        /// <summary>
+        /// 处理变量变更事件
+        /// </summary>
+        private void OnVariableChanged(object? sender, VariableChangedEventArgs e)
+        {
+            try
+            {
+                _logger.LogDebug("处理变量变更事件: 变量ID={VariableId}, 变更类型={ChangeType}, 变更属性={PropertyType}", 
+                    e.Variable.Id, e.ChangeType, e.PropertyType);
+
+                // 根据变更类型和属性类型进行相应处理
+                switch (e.ChangeType)
+                {
+                    case ActionChangeType.Updated:
+                        // 如果变量的S7相关属性发生变化
+                        switch (e.PropertyType)
+                        {
+                            case VariablePropertyType.S7Address:
+                                // S7地址变化，需要更新设备上下文中的变量映射
+                                if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context))
+                                {
+                                    // 先移除旧地址的变量
+                                    context.Variables.Remove(e.Variable.S7Address, out _);
+                                    // 添加新地址的变量
+                                    context.Variables.AddOrUpdate(e.Variable.S7Address, e.Variable, (key, oldValue) => e.Variable);
+                                    _logger.LogInformation("已更新设备 {DeviceId} 中变量 {VariableId} 的S7地址映射", 
+                                        e.Variable.VariableTable.DeviceId, e.Variable.Id);
+                                }
+                                break;
+                                
+                            case VariablePropertyType.IsActive:
+                                // 变量激活状态变化，更新变量列表
+                                if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context2))
+                                {
+                                    if (e.Variable.IsActive)
+                                    {
+                                        // 添加变量到监控列表
+                                        context2.Variables.AddOrUpdate(e.Variable.S7Address, e.Variable, (key, oldValue) => e.Variable);
+                                    }
+                                    else
+                                    {
+                                        // 从监控列表中移除变量
+                                        context2.Variables.Remove(e.Variable.S7Address, out _);
+                                    }
+                                }
+                                break;
+                        }
+                        break;
+                        
+                    case ActionChangeType.Deleted:
+                        // 变量被删除时，从设备上下文的变量列表中移除
+                        if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context3))
+                        {
+                            context3.Variables.Remove(e.Variable.S7Address, out _);
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "处理变量变更事件时发生错误: 变量ID={VariableId}, 变更类型={ChangeType}", 
+                    e.Variable.Id, e.ChangeType);
             }
         }
     }
