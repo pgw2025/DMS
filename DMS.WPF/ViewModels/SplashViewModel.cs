@@ -8,6 +8,7 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using DMS.Application.Services;
+using DMS.Infrastructure.Configurations;
 using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Views;
@@ -26,18 +27,20 @@ public partial class SplashViewModel : ObservableObject
     private readonly IInitializeService _initializeService;
     private readonly IDataEventService _dataEventService;
     private readonly IAppDataCenterService _appDataCenterService;
+    private readonly AppSettings _appSettings;
 
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
     public SplashViewModel(ILogger<SplashViewModel> logger,IServiceProvider serviceProvider, IInitializeService initializeService,IDataEventService dataEventService,
-                           IAppDataCenterService appDataCenterService)
+                           IAppDataCenterService appDataCenterService,AppSettings appSettings)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
         _initializeService = initializeService;
         _dataEventService = dataEventService;
         this._appDataCenterService = appDataCenterService;
+        _appSettings = appSettings;
     }
 
     /// <summary>
@@ -52,6 +55,8 @@ public partial class SplashViewModel : ObservableObject
             _initializeService.InitializeTables();
             _initializeService.InitializeMenus();
             LoadingMessage = "正在加载系统配置...";
+            
+           
             await _appDataCenterService.DataLoaderService.LoadAllDataToMemoryAsync();
 
             // 可以在这里添加加载配置的逻辑

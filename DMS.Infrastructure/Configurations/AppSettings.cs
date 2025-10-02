@@ -1,3 +1,4 @@
+using AutoMapper;
 using DMS.Core.Models;
 using Newtonsoft.Json;
 
@@ -15,6 +16,10 @@ namespace DMS.Infrastructure.Configurations
 
     public class AppSettings
     {
+        private readonly IMapper _mapper;
+
+
+        
         public DatabaseSettings Database { get; set; } = new DatabaseSettings();
         public string Theme { get; set; } = "跟随系统";
         public bool EnableS7Service { get; set; } = true;
@@ -22,15 +27,18 @@ namespace DMS.Infrastructure.Configurations
         public bool EnableOpcUaService { get; set; } = true;
         public bool MinimizeToTrayOnClose { get; set; } = true;
         public List<MenuBean> Menus { get; set; } = new List<MenuBean>();
+        public int DefaultPollingInterval { get; set; } = 30000; // 默认轮询间隔30秒
 
         private static readonly string SettingsFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appSettings.json");
 
-        public static AppSettings Load()
+        public  AppSettings Load()
         {
             if (File.Exists(SettingsFilePath))
             {
                 string json = File.ReadAllText(SettingsFilePath);
-                return JsonConvert.DeserializeObject<AppSettings>(json);
+                AppSettings appSettings = JsonConvert.DeserializeObject<AppSettings>(json);
+                
+                return appSettings;
             }
             return new AppSettings();
         }

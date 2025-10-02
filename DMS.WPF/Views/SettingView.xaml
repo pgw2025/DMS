@@ -26,6 +26,11 @@
                                  IsClickEnabled="True">
                     <ui:ToggleSwitch IsOn="{Binding MinimizeToTrayOnClose, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:SettingsCard>
+                <ui:SettingsCard Header="默认轮询间隔"
+                                 Description="设置变量的默认轮询间隔时间（毫秒）">
+                    <TextBox Width="120"
+                             Text="{Binding DefaultPollingInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
             </ui:SettingsExpander.Items>
         </ui:SettingsExpander>
 

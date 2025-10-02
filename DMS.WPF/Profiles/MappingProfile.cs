@@ -28,7 +28,8 @@ namespace DMS.WPF.Profiles
             CreateMap<MqttServer, MqttServerItemViewModel>().ReverseMap();
             CreateMap<UserDto, UserItemViewModel>().ReverseMap();
             CreateMap<VariableHistoryDto, VariableHistoryItemViewModel>().ReverseMap();
-            CreateMap<VariableDto, VariableItemViewModel>().ReverseMap();
+            CreateMap<VariableDto, VariableItemViewModel>()
+                .ReverseMap();
             CreateMap<VariableMqttAliasDto, VariableMqttAliasItemViewModel>().ReverseMap();
             CreateMap<VariableTableDto, VariableTableItemViewModel>().ReverseMap();
             CreateMap<NlogDto, NlogItemViewModel>().ReverseMap();
