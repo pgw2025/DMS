@@ -1,55 +1,64 @@
-# PMSWPF
+# DMS - 工业设备数据管理与监控系统
 
-## OPC UA Service
+## 1. 项目简介
 
-This project includes an OPC UA service implementation that provides the following functionalities:
+DMS (Device Management System) 是一个基于 .NET 技术栈构建的、功能强大且高度可扩展的工业数据平台。它旨在解决工业4.0场景下多设备、多协议的数据采集、处理、存储和监控需求。
 
-### Features
-- Connect to OPC UA servers
-- Browse nodes in the OPC UA address space
-- Read and write values from/to OPC UA nodes
-- Add subscriptions for monitoring node changes
+项目采用现代化的软件架构和设计模式，确保了代码的高质量、可维护性和可扩展性，使其不仅是一个功能系统，也是一个优秀的.NET架构实践范例。
 
-### Usage
+## 2. 核心功能
 
-```csharp
-// Create an instance of the OPC UA service
-var opcUaService = new OpcUaService();
+- **多协议支持**: 内置对 `S7` 和 `OPC UA` 等主流工业协议的支持，可轻松连接和采集不同厂商的设备数据。
+- **实时数据监控**: 提供WPF桌面应用程序，用于实时展示和监控设备变量状态。
+- **动态UI生成**: 支持通过数据库配置动态生成导航菜单，实现灵活的界面布局。
+- **强大的数据处理链**: 项目的核心特色。所有采集到的数据都会流经一个由多个处理器组成的管道，进行一系列的链式处理。该处理链完全可配置，允许开发者通过增减处理器来定制业务逻辑。
+- **灵活的值转换**: 支持通过自定义公式（如 `x * 10 + 5`）对原始数据进行二次计算，生成用于UI展示的最终值。
+- **高效的数据存储**: 内置数据批处理机制，可将大量、高频的数据变更（如历史数据、实时值）缓存并批量写入数据库，显著降低数据库负载。
+- **灵活的触发器系统**: 支持创建基于多变量的复杂触发器，以响应特定的条件和事件。
 
-// Connect to an OPC UA server
-await opcUaService.CreateSession("opc.tcp://localhost:4840");
+## 3. 技术架构
 
-// Check connection status
-if (opcUaService.IsConnected())
-{
-    // Browse nodes
-    var rootNodeId = ObjectIds.RootFolder;
-    var references = opcUaService.BrowseNodes(rootNodeId);
-    
-    // Read a value
-    var value = opcUaService.ReadValue(someNodeId);
-    
-    // Write a value
-    opcUaService.WriteValue(someNodeId, newValue);
-    
-    // Add a subscription
-    var subscription = opcUaService.AddSubscription("MySubscription");
-}
+项目遵循清晰的 **整洁架构 (Clean Architecture)** 思想，将系统分为四个独立的层次，实现了高度的解耦和关注点分离。
 
-// Disconnect when done
-opcUaService.Disconnect();
-```
+- **`DMS.Core` (核心层)**: 定义了项目的领域模型、业务接口和最核心的业务规则，不依赖任何外部技术。
+- **`DMS.Application` (应用层)**: 包含了应用特有的业务逻辑，如数据处理链的编排、应用服务等。它依赖核心层，但与UI和基础设施层解耦。
+- **`DMS.Infrastructure` (基础设施层)**: 提供了所有与外部技术相关的实现，如数据库访问 (仓储模式)、设备通信 (S7/OPC UA服务)、日志记录等。
+- **`DMS.WPF` (表现层)**: 基于WPF和MVVM模式构建的桌面用户界面，负责与用户交互和数据展示。
 
-### Testing
+### 关键设计模式
 
-Unit tests for the OPC UA service are included in the `DMS.Infrastructure.UnitTests` project. Run them using your preferred test runner.
+- **MVVM (Model-View-ViewModel)**: 在WPF项目中用于UI与业务逻辑的解耦。
+- **仓储模式 (Repository Pattern)**: 将数据持久化逻辑与业务逻辑分离。
+- **责任链模式 (Chain of Responsibility)**: 在数据处理链中被广泛使用，每个处理器都是链上的一个节点，负责一项特定的任务。
+- **依赖注入 (Dependency Injection)**: 在整个项目中用于管理组件的生命周期和依赖关系。
 
-## Trigger System
+## 4. 技术栈
 
-The trigger system has been updated to support associating triggers with multiple variables instead of just one. This allows for more flexible trigger configurations where a single trigger can monitor multiple variables.
+- **.NET / C#**: 主要开发语言和平台。
+- **WPF**: 用于构建桌面用户界面。
+- **CommunityToolkit.Mvvm**: 用于实现MVVM模式。
+- **SqlSugar**: 一个高性能、轻量级的ORM框架，用于数据库操作。
+- **AutoMapper**: 用于在不同层之间自动映射对象模型。
+- **S7netplus / Opc.UaFx**: (推断) 用于与西门子S7和OPC UA设备通信的库。
 
-### Key Changes
-- Modified `TriggerDefinition` to use a list of variable IDs instead of a single variable ID
-- Added a new `TriggerVariables` table to maintain the many-to-many relationship between triggers and variables
-- Updated the UI to support selecting multiple variables when creating or editing triggers
-- Updated all related services and repositories to handle the new many-to-many relationship
+## 5. 数据处理链详解
+
+数据处理链是DMS系统的核心。当一个变量的值发生变化时，它会被包装成一个 `VariableContext` 对象，并依次流经以下处理器：
+
+1.  **`ValueConvertProcessor` (值转换处理器)**:
+    - 将从设备读取的原始值 (如 `byte[]`) 转换为 `NumericValue` (double类型)。
+    - 根据变量配置的 `ConversionFormula` (转换公式) 计算出最终用于UI的 `DisplayValue`。
+
+2.  **`UpdateDbVariableProcessor` (数据库更新处理器)**:
+    - 将变量的最新值暂存到队列。
+    - 通过批处理机制，在满足条件（数量或时间）时，将多个变量的最新值一次性更新到数据库。
+
+3.  **`HistoryProcessor` (历史记录处理器)**:
+    - 判断变量是否启用了历史记录。
+    - 通过批处理机制，将变量的历史变化记录批量存入数据库。
+
+4.  **`AlarmProcessor` (报警处理器)**:
+    - (推断) 检查变量值是否触发了报警规则。
+
+5.  **`MqttPublishProcessor` (MQTT发布处理器)**:
+    - (推断) 将变量变更发布到MQTT主题，用于与其他系统集成。
