@@ -488,7 +488,6 @@ namespace DMS.Infrastructure.Services.OpcUa
 
             try
             {
-
                 _logger.LogInformation("正在为设备 {DeviceName} 设置订阅，需要订阅的变量数: {VariableCount}",
                                        context.Device.Name, context.Variables.Count);
 
@@ -508,8 +507,8 @@ namespace DMS.Infrastructure.Services.OpcUa
                         context.Device.Name, pollingInterval, variables.Count);
 
                     var opcUaNodeIds = variables
-                                     .Select(v => v.OpcUaNodeId)
-                                     .ToList();
+                                       .Select(v => v.OpcUaNodeId)
+                                       .ToList();
 
                     context.OpcUaService.SubscribeToNode(opcUaNodeIds, HandleDataChanged,
                                                          pollingInterval, pollingInterval);
@@ -665,6 +664,11 @@ namespace DMS.Infrastructure.Services.OpcUa
                 _logger.LogDebug("处理变量变更事件: 变量ID={VariableId}, 变更类型={ChangeType}, 变更属性={PropertyType}",
                                  e.Variable.Id, e.ChangeType, e.PropertyType);
 
+                if (!_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context))
+                {
+                    return;
+                }
+
                 // 根据变更类型和属性类型进行相应处理
                 switch (e.ChangeType)
                 {
@@ -675,41 +679,39 @@ namespace DMS.Infrastructure.Services.OpcUa
                             case VariablePropertyType.OpcUaNodeId:
                             case VariablePropertyType.OpcUaUpdateType:
                             case VariablePropertyType.PollingInterval:
-                                if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context))
+                                if (context.Variables.TryGetValue(e.Variable.OpcUaNodeId, out var variableDto))
                                 {
-                                    if (context.Variables.TryGetValue(e.Variable.OpcUaNodeId,out var variableDto))
+                                    if (variableDto.IsActive)
                                     {
-                                        if (variableDto.IsActive)
-                                        {
-                                            context.OpcUaService.UnsubscribeFromNode(e.Variable.OpcUaNodeId);
-                                            context.OpcUaService.SubscribeToNode(e.Variable.OpcUaNodeId,HandleDataChanged,e.Variable.PollingInterval,e.Variable.PollingInterval);
-                                            _logger.LogInformation($"OpcUa变量节点：{e.Variable.OpcUaNodeId},的轮询时间修改为:{e.Variable.PollingInterval}");
-                                        }
-                                        
+                                        context.OpcUaService.UnsubscribeFromNode(e.Variable.OpcUaNodeId);
+                                        context.OpcUaService.SubscribeToNode(
+                                            e.Variable.OpcUaNodeId, HandleDataChanged, e.Variable.PollingInterval,
+                                            e.Variable.PollingInterval);
+                                        _logger.LogInformation(
+                                            $"OpcUa变量节点：{e.Variable.OpcUaNodeId},的轮询时间修改为:{e.Variable.PollingInterval}");
                                     }
-                                   
                                 }
+
                                 break;
 
                             case VariablePropertyType.IsActive:
                                 // 变量激活状态变化
-                                if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context2))
+                                if (e.Variable.IsActive)
                                 {
-                                    if (e.Variable.IsActive)
+                                    // 添加变量到监控列表并重新订阅
+                                    if (context.Variables.TryAdd(e.Variable.OpcUaNodeId, e.Variable))
                                     {
-                                        // 添加变量到监控列表并重新订阅
-                                        if (context2.Variables.TryAdd(e.Variable.OpcUaNodeId, e.Variable))
-                                        {
-                                            context2.OpcUaService.SubscribeToNode(e.Variable.OpcUaNodeId,HandleDataChanged,e.Variable.PollingInterval,e.Variable.PollingInterval);
-                                        }
+                                        context.OpcUaService.SubscribeToNode(
+                                            e.Variable.OpcUaNodeId, HandleDataChanged, e.Variable.PollingInterval,
+                                            e.Variable.PollingInterval);
                                     }
-                                    else
+                                }
+                                else
+                                {
+                                    // 从监控列表中移除变量并取消订阅
+                                    if (context.Variables.TryRemove(e.Variable.OpcUaNodeId, out _))
                                     {
-                                        // 从监控列表中移除变量并取消订阅
-                                        if (context2.Variables.TryRemove(e.Variable.OpcUaNodeId, out _))
-                                        {
-                                            context2.OpcUaService.UnsubscribeFromNode(e.Variable.OpcUaNodeId);
-                                        }
+                                        context.OpcUaService.UnsubscribeFromNode(e.Variable.OpcUaNodeId);
                                     }
                                 }
 
@@ -720,7 +722,12 @@ namespace DMS.Infrastructure.Services.OpcUa
 
                     case ActionChangeType.Deleted:
                         // 变量被删除时，取消订阅并从设备上下文的变量列表中移除
-                        // await UnsubscribeVariableAsync(e.Variable);
+                        // 从监控列表中移除变量并取消订阅
+                        if (context.Variables.TryRemove(e.Variable.OpcUaNodeId, out _))
+                        {
+                            context.OpcUaService.UnsubscribeFromNode(e.Variable.OpcUaNodeId);
+                        }
+
                         break;
                 }
             }

@@ -80,11 +80,9 @@ public partial class App : System.Windows.Application
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<ValueConvertProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateViewProcessor>());
-            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<CheckValueChangedProcessor>());
-            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<LoggingProcessor>());
-            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<MqttPublishProcessor>());
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<UpdateDbVariableProcessor>());
+            dataProcessingService.AddProcessor(Host.Services.GetRequiredService<HistoryProcessor>());
             // 添加报警处理器
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<DMS.Application.Services.Processors.AlarmProcessor>());
             // 添加触发器处理器
@@ -204,8 +202,6 @@ public partial class App : System.Windows.Application
                                       (DataProcessingService)provider.GetRequiredService<IDataProcessingService>());
         services.AddSingleton<ValueConvertProcessor>();
         services.AddSingleton<UpdateViewProcessor>();
-        services.AddSingleton<CheckValueChangedProcessor>();
-        services.AddSingleton<LoggingProcessor>();
         services.AddSingleton<UpdateDbVariableProcessor>();
         services.AddSingleton<HistoryProcessor>();
         services.AddSingleton<MqttPublishProcessor>();

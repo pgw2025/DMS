@@ -37,14 +37,6 @@ public class UpdateDbVariableProcessor : IVariableProcessor, IDisposable
 
     public async Task ProcessAsync(VariableContext context)
     {
-        // 检查新值是否有效，以及是否与旧值不同
-        if (context.NewValue == null || Equals(context.Data.DataValue, context.NewValue?.ToString()))
-        {
-            return; // 值未变或新值无效，跳过
-        }
-
-        // 用新值更新上下文中的数据，确保处理链的后续环节能看到最新值
-        context.Data.DataValue = context.NewValue?.ToString();
 
         _queue.Enqueue(context.Data);
         
