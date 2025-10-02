@@ -62,16 +62,21 @@ public class ValueConvertProcessor : IVariableProcessor
             // 使用 DataTable.Compute 来安全地计算表达式
             var result = new DataTable().Compute(expression, null);
 
-            // 将计算结果格式化后赋给 DisplayValue
-            if (result is double || result is decimal || result is float)
-            {
-                variable.DisplayValue = string.Format("{0:F2}", result); // 默认格式化为两位小数，可根据需要调整
-            }
-            else
-            {
-                variable.DisplayValue = result.ToString();
-            }
-        }
+                        // 将计算结果格式化后赋给 DisplayValue
+                        if (result is double || result is decimal || result is float)
+                        {
+                            variable.DisplayValue = string.Format("{0:F2}", result); // 默认格式化为两位小数，可根据需要调整
+                            variable.NumericValue = Convert.ToDouble(result); // 更新NumericValue为计算后的值
+                        }
+                        else
+                        {
+                            variable.DisplayValue = result.ToString();
+                            // 尝试将字符串结果解析回double，以更新NumericValue
+                            if (double.TryParse(result.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedResult))
+                            {
+                                variable.NumericValue = parsedResult;
+                            }
+                        }        }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"为变量 {variable.Name} (ID: {variable.Id}) 计算DisplayValue时出错。公式: '{variable.ConversionFormula}'");

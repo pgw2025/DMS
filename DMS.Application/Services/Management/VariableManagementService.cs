@@ -83,43 +83,7 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public async Task<int> UpdateVariableAsync(VariableDto variableDto)
     {
-        var result = await _variableAppService.UpdateVariableAsync(variableDto);
-        
-        // 更新成功后，更新内存中的变量
-        if (result > 0 && variableDto != null)
-        {
-            if (_appDataStorageService.Variables.TryGetValue(variableDto.Id, out var mVariableDto))
-            {
-                // 比较旧值和新值，确定哪个属性发生了变化
-                var changedProperties = GetChangedProperties(mVariableDto, variableDto);
-                
-                // 更新内存中的变量
-                UpdateVariableInMemory(mVariableDto, variableDto);
-
-                // 为每个发生变化的属性触发事件
-                foreach (var property in changedProperties)
-                {
-                    _eventService.RaiseVariableChanged(
-                        this, new VariableChangedEventArgs(ActionChangeType.Updated, variableDto, property));
-                }
-                
-                // 如果没有任何属性发生变化，至少触发一次更新事件
-                if (changedProperties.Count == 0)
-                {
-                    _eventService.RaiseVariableChanged(
-                        this, new VariableChangedEventArgs(ActionChangeType.Updated, variableDto, VariablePropertyType.All));
-                }
-            }
-            else
-            {
-                // 如果内存中不存在该变量，则直接添加
-                _appDataStorageService.Variables.TryAdd(variableDto.Id, variableDto);
-                _eventService.RaiseVariableChanged(
-                    this, new VariableChangedEventArgs(ActionChangeType.Added, variableDto, VariablePropertyType.All));
-            }
-        }
-        
-        return result;
+        return await UpdateVariablesAsync(new List<VariableDto>() { variableDto});
     }
 
     /// <summary>
@@ -140,7 +104,7 @@ public class VariableManagementService : IVariableManagementService
                     var changedProperties = GetChangedProperties(mVariableDto, variableDto);
                     
                     // 更新内存中的变量
-                    UpdateVariableInMemory(mVariableDto, variableDto);
+                    _mapper.Map(variableDto,mVariableDto);
 
                     // 为每个发生变化的属性触发事件
                     foreach (var property in changedProperties)
@@ -266,6 +230,8 @@ public class VariableManagementService : IVariableManagementService
             
         if (oldVariable.IsActive != newVariable.IsActive)
             changedProperties.Add(VariablePropertyType.IsActive);
+        if (oldVariable.IsHistoryEnabled != newVariable.IsHistoryEnabled)
+            changedProperties.Add(VariablePropertyType.IsHistoryEnabled);
             
         if (oldVariable.OpcUaNodeId != newVariable.OpcUaNodeId)
             changedProperties.Add(VariablePropertyType.OpcUaNodeId);
@@ -282,29 +248,6 @@ public class VariableManagementService : IVariableManagementService
         return changedProperties;
     }
 
-    /// <summary>
-    /// 更新内存中的变量
-    /// </summary>
-    /// <param name="oldVariable">内存中的变量</param>
-    /// <param name="newVariable">更新后的变量</param>
-    private void UpdateVariableInMemory(VariableDto oldVariable, VariableDto newVariable)
-    {
-        oldVariable.Name = newVariable.Name;
-        oldVariable.S7Address = newVariable.S7Address;
-        oldVariable.DataType = newVariable.DataType;
-        oldVariable.ConversionFormula = newVariable.ConversionFormula;
-        oldVariable.OpcUaUpdateType = newVariable.OpcUaUpdateType;
-        oldVariable.MqttAliases = newVariable.MqttAliases;
-        oldVariable.Description = newVariable.Description;
-        oldVariable.VariableTableId = newVariable.VariableTableId;
-        oldVariable.DataValue = newVariable.DataValue;
-        oldVariable.UpdatedAt = newVariable.UpdatedAt;
-        oldVariable.IsActive = newVariable.IsActive;
-        oldVariable.OpcUaNodeId = newVariable.OpcUaNodeId;
-        oldVariable.PollingInterval = newVariable.PollingInterval;
-        oldVariable.SignalType = newVariable.SignalType;
-        oldVariable.Protocol = newVariable.Protocol;
-    }
 
     /// <summary>
     /// 异步批量删除变量。

@@ -113,6 +113,7 @@ namespace DMS.Core.Enums
         /// <summary>
         /// 所有属性
         /// </summary>
-        All
+        All,
+        IsHistoryEnabled
     }
 }
