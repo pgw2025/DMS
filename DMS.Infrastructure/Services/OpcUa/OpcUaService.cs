@@ -274,17 +274,17 @@ namespace DMS.Infrastructure.Services.OpcUa
             }
         }
 
-        public void SubscribeToNode(OpcUaNode node, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500)
+        public void SubscribeToNode(string nodeId, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500)
         {
-            _logger?.LogDebug("正在订阅单个节点: {NodeId} ({DisplayName})，发布间隔: {PublishingInterval}ms，采样间隔: {SamplingInterval}ms", 
-                node.NodeId, node.DisplayName, publishingInterval, samplingInterval);
-            SubscribeToNode(new List<OpcUaNode> { node }, onDataChange, publishingInterval, samplingInterval);
+            _logger?.LogDebug("正在订阅单个节点: {NodeId}，发布间隔: {PublishingInterval}ms，采样间隔: {SamplingInterval}ms", 
+                nodeId, publishingInterval, samplingInterval);
+            SubscribeToNode(new List<string> { nodeId }, onDataChange, publishingInterval, samplingInterval);
         }
 
-        public void SubscribeToNode(List<OpcUaNode> nodes, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500)
+        public void SubscribeToNode(List<string> nodeIds, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500)
         {
             _logger?.LogDebug("正在订阅 {Count} 个节点，发布间隔: {PublishingInterval}ms，采样间隔: {SamplingInterval}ms", 
-                nodes?.Count ?? 0, publishingInterval, samplingInterval);
+                nodeIds?.Count ?? 0, publishingInterval, samplingInterval);
 
             // 检查会话是否已连接
             if (!IsConnected)
@@ -294,36 +294,64 @@ namespace DMS.Infrastructure.Services.OpcUa
             }
             
             // 检查节点列表是否有效
-            if (nodes == null || !nodes.Any())
+            if (nodeIds == null || !nodeIds.Any())
             {
-                _logger?.LogWarning("节点列表为null或为空，无法订阅");
+                _logger?.LogWarning("节点ID列表为null或为空，无法订阅");
                 return;
             }
             
             // 确保订阅对象存在
-            EnsureSubscriptionExists(publishingInterval);
+            // 如果还没有订阅对象，则基于会话的默认设置创建一个新的订阅
+            if (_subscription == null)
+            {
+                _subscription = new Subscription(_session.DefaultSubscription)
+                                {
+                                    // 设置服务器向客户端发送通知的速率（毫秒）
+                                    PublishingInterval = publishingInterval
+                                };
+                // 在会话中添加订阅
+                _session.AddSubscription(_subscription);
+                // 在服务器上创建订阅
+                _subscription.Create();
+            }
+            // 如果客户端请求的发布间隔与现有订阅不同，则修改订阅
+            else if (_subscription.PublishingInterval != publishingInterval)
+            {
+                _subscription.PublishingInterval = publishingInterval;
+            }
 
             // 创建一个用于存放待添加监视项的列表
             var itemsToAdd = new List<MonitoredItem>();
             
-            // 遍历所有请求订阅的节点
-            foreach (var node in nodes)
+            // 遍历所有请求订阅的节点ID
+            foreach (var nodeIdStr in nodeIds)
             {
-                // 如果节点已经存在于我们的跟踪列表中，则跳过，避免重复订阅
-                if (_subscribedNodes.ContainsKey(node.NodeId))
+                try
                 {
-                    _logger?.LogDebug("节点 {NodeId} ({DisplayName}) 已经被订阅，跳过重复订阅", node.NodeId, node.DisplayName);
-                    continue;
+                    var nodeId = new NodeId(nodeIdStr);
+                    // 如果节点已经存在于我们的跟踪列表中，则跳过，避免重复订阅
+                    if (_subscribedNodes.ContainsKey(nodeId))
+                    {
+                        _logger?.LogDebug("节点 {NodeId} 已经被订阅，跳过重复订阅", nodeIdStr);
+                        continue;
+                    }
+                    
+                    // 创建一个临时的OpcUaNode对象用于订阅
+                    var node = new OpcUaNode { NodeId = nodeId, DisplayName = nodeIdStr };
+
+                    // 为每个节点创建一个监视项
+                    var monitoredItem = CreateMonitoredItem(node, onDataChange, samplingInterval);
+                    
+                    // 将创建的监视项添加到待添加列表
+                    itemsToAdd.Add(monitoredItem);
+                    // 将节点添加到我们的跟踪字典中
+                    _subscribedNodes.TryAdd(node.NodeId, node);
+                    _logger?.LogDebug("节点 {NodeId} 已添加到订阅列表", nodeIdStr);
                 }
-                
-                // 为每个节点创建一个监视项
-                var monitoredItem = CreateMonitoredItem(node, onDataChange, samplingInterval);
-                
-                // 将创建的监视项添加到待添加列表
-                itemsToAdd.Add(monitoredItem);
-                // 将节点添加到我们的跟踪字典中
-                _subscribedNodes.TryAdd(node.NodeId, node);
-                _logger?.LogDebug("节点 {NodeId} ({DisplayName}) 已添加到订阅列表", node.NodeId, node.DisplayName);
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "创建节点 {NodeId} 的监视项时发生错误", nodeIdStr);
+                }
             }
 
             // 如果有新的监视项要添加
@@ -344,31 +372,6 @@ namespace DMS.Infrastructure.Services.OpcUa
             }
         }
 
-        /// <summary>
-        /// 确保订阅对象存在
-        /// </summary>
-        /// <param name="publishingInterval">发布间隔</param>
-        private void EnsureSubscriptionExists(int publishingInterval)
-        {
-            // 如果还没有订阅对象，则基于会话的默认设置创建一个新的订阅
-            if (_subscription == null)
-            {
-                _subscription = new Subscription(_session.DefaultSubscription)
-                {
-                    // 设置服务器向客户端发送通知的速率（毫秒）
-                    PublishingInterval = publishingInterval
-                };
-                // 在会话中添加订阅
-                _session.AddSubscription(_subscription);
-                // 在服务器上创建订阅
-                _subscription.Create();
-            }
-            // 如果客户端请求的发布间隔与现有订阅不同，则修改订阅
-            else if (_subscription.PublishingInterval != publishingInterval)
-            {
-                _subscription.PublishingInterval = publishingInterval;
-            }
-        }
 
         /// <summary>
         /// 创建监视项
@@ -414,67 +417,74 @@ namespace DMS.Infrastructure.Services.OpcUa
             return monitoredItem;
         }
 
-        public void UnsubscribeFromNode(OpcUaNode node)
-        {
-            _logger?.LogDebug("正在取消订阅节点: {NodeId} ({DisplayName})", node.NodeId, node.DisplayName);
-            UnsubscribeFromNode(new List<OpcUaNode> { node });
-        }
-
-        public void UnsubscribeFromNode(List<OpcUaNode> nodes)
-        {
-            _logger?.LogDebug("正在取消订阅 {Count} 个节点", nodes?.Count ?? 0);
-            
-            // 检查订阅对象和节点列表是否有效
-            if (_subscription == null)
-            {
-                _logger?.LogWarning("订阅对象为null，无法取消订阅");
-                return;
-            }
-            
-            if (nodes == null || !nodes.Any())
-            {
-                _logger?.LogWarning("节点列表为null或为空，无法取消订阅");
-                return;
-            }
-
-            var itemsToRemove = new List<MonitoredItem>();
-            // 遍历所有请求取消订阅的节点
-            foreach (var node in nodes)
-            {
-                // 在当前订阅中查找与节点ID匹配的监视项
-                var item = _subscription.MonitoredItems.FirstOrDefault(m => m.StartNodeId.Equals(node.NodeId));
-                if (item != null)
+                public void UnsubscribeFromNode(string nodeId)
                 {
-                    _logger?.LogDebug("找到节点 {NodeId} ({DisplayName}) 的监视项，准备移除", node.NodeId, node.DisplayName);
-                    // 如果找到，则添加到待移除列表
-                    itemsToRemove.Add(item);
-                    // 从我们的跟踪字典中移除该节点
-                    _subscribedNodes.Remove(node.NodeId);
+                    _logger?.LogDebug("正在取消订阅节点: {NodeId}", nodeId);
+                    UnsubscribeFromNode(new List<string> { nodeId });
                 }
-                else
+        
+                public void UnsubscribeFromNode(List<string> nodeIds)
                 {
-                    _logger?.LogDebug("节点 {NodeId} ({DisplayName}) 未在监视项中找到，可能已经取消订阅", node.NodeId, node.DisplayName);
+                    _logger?.LogDebug("正在取消订阅 {Count} 个节点", nodeIds?.Count ?? 0);
+                    
+                    // 检查订阅对象和节点列表是否有效
+                    if (_subscription == null)
+                    {
+                        _logger?.LogWarning("订阅对象为null，无法取消订阅");
+                        return;
+                    }
+                    
+                    if (nodeIds == null || !nodeIds.Any())
+                    {
+                        _logger?.LogWarning("节点ID列表为null或为空，无法取消订阅");
+                        return;
+                    }
+        
+                    var itemsToRemove = new List<MonitoredItem>();
+                    // 遍历所有请求取消订阅的节点ID
+                    foreach (var nodeIdStr in nodeIds)
+                    {
+                        try
+                        {
+                            var nodeId = new NodeId(nodeIdStr);
+                            // 在当前订阅中查找与节点ID匹配的监视项
+                            var item = _subscription.MonitoredItems.FirstOrDefault(m => m.StartNodeId.Equals(nodeId));
+                            if (item != null)
+                            {
+                                _logger?.LogDebug("找到节点 {NodeId} 的监视项，准备移除", nodeIdStr);
+                                // 如果找到，则添加到待移除列表
+                                itemsToRemove.Add(item);
+                                // 从我们的跟踪字典中移除该节点
+                                _subscribedNodes.Remove(nodeId);
+                            }
+                            else
+                            {
+                                _logger?.LogDebug("节点 {NodeId} 未在监视项中找到，可能已经取消订阅", nodeIdStr);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.LogError(ex, "解析节点ID '{NodeIdStr}' 时发生错误，无法取消订阅", nodeIdStr);
+                        }
+                    }
+        
+                    // 如果有需要移除的监视项
+                    if (itemsToRemove.Any())
+                    {
+                        _logger?.LogDebug("批量移除 {Count} 个监视项", itemsToRemove.Count);
+                        
+                        // 从订阅中批量移除监视项
+                        _subscription.RemoveItems(itemsToRemove);
+                        // 将更改应用到服务器
+                        _subscription.ApplyChanges();
+                        
+                        _logger?.LogInformation("已成功取消订阅 {Count} 个节点", itemsToRemove.Count);
+                    }
+                    else
+                    {
+                        _logger?.LogDebug("没有找到需要移除的监视项");
+                    }
                 }
-            }
-
-            // 如果有需要移除的监视项
-            if (itemsToRemove.Any())
-            {
-                _logger?.LogDebug("批量移除 {Count} 个监视项", itemsToRemove.Count);
-                
-                // 从订阅中批量移除监视项
-                _subscription.RemoveItems(itemsToRemove);
-                // 将更改应用到服务器
-                _subscription.ApplyChanges();
-                
-                _logger?.LogInformation("已成功取消订阅 {Count} 个节点", itemsToRemove.Count);
-            }
-            else
-            {
-                _logger?.LogDebug("没有找到需要移除的监视项");
-            }
-        }
-
         public List<OpcUaNode> GetSubscribedNodes()
         {
             var subscribedNodes = _subscribedNodes.Values.ToList();

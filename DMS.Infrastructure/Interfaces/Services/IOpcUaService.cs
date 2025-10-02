@@ -37,32 +37,32 @@ namespace DMS.Infrastructure.Interfaces.Services
         /// <summary>
         /// 订阅单个节点的数据变化
         /// </summary>
-        /// <param name="node">要订阅的节点</param>
+        /// <param name="nodeId">要订阅的节点ID</param>
         /// <param name="onDataChange">数据变化时的回调方法</param>
         /// <param name="publishingInterval">发布间隔（毫秒）</param>
         /// <param name="samplingInterval">采样间隔（毫秒）</param>
-        void SubscribeToNode(OpcUaNode node, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500);
+        void SubscribeToNode(string nodeId, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500);
 
         /// <summary>
         /// 订阅多个节点的数据变化
         /// </summary>
-        /// <param name="nodes">要订阅的节点列表</param>
+        /// <param name="nodeIds">要订阅的节点ID列表</param>
         /// <param name="onDataChange">数据变化时的回调方法</param>
         /// <param name="publishingInterval">发布间隔（毫秒）</param>
         /// <param name="samplingInterval">采样间隔（毫秒）</param>
-        void SubscribeToNode(List<OpcUaNode> nodes, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500);
+        void SubscribeToNode(List<string> nodeIds, Action<OpcUaNode> onDataChange, int publishingInterval = 1000, int samplingInterval = 500);
 
         /// <summary>
         /// 取消订阅单个节点
         /// </summary>
-        /// <param name="node">要取消订阅的节点</param>
-        void UnsubscribeFromNode(OpcUaNode node);
+        /// <param name="nodeId">要取消订阅的节点的ID</param>
+        void UnsubscribeFromNode(string nodeId);
 
         /// <summary>
         /// 取消订阅多个节点
         /// </summary>
-        /// <param name="nodes">要取消订阅的节点列表</param>
-        void UnsubscribeFromNode(List<OpcUaNode> nodes);
+        /// <param name="nodeIds">要取消订阅的节点ID列表</param>
+        void UnsubscribeFromNode(List<string> nodeIds);
 
         /// <summary>
         /// 获取当前已订阅的所有节点
