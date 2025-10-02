@@ -14,8 +14,6 @@ public class VariableTableDataService : IVariableTableDataService
     private readonly IDataStorageService _dataStorageService;
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IMenuDataService _menuDataService;
-    // Removed circular dependency by not injecting IDeviceDataService
-    // private readonly IDeviceDataService _deviceDataService;
 
 
 
@@ -40,11 +38,11 @@ public class VariableTableDataService : IVariableTableDataService
         }
     }
 
-    public async Task<bool> AddVariableTable(VariableTableDto variableTableDto,
+    public async Task<int> AddVariableTable(VariableTableDto variableTableDto,
                                              MenuBeanDto menuDto = null, bool isAddDb = false)
     {
         if (variableTableDto == null)
-            return false;
+            return 0;
 
         if (isAddDb && menuDto != null)
         {
@@ -53,22 +51,14 @@ public class VariableTableDataService : IVariableTableDataService
             createDto.DeviceId = variableTableDto.DeviceId;
             createDto.Menu = menuDto;
             var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
-            _mapper.Map(resDto.VariableTable, variableTableDto);
+            
             _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(resDto.Menu));
+            return resDto.VariableTable.Id;
         }
 
-        // 添加变量表到内存的操作现在在服务内部完成，无需额外调用
 
-        // var device = _deviceDataService.Devices.FirstOrDefault(d => d.Id == variableTableDto.DeviceId);
-        // if (device != null)
-        // {
-        //     var variableTableItemViewModel = _mapper.Map<VariableTableItemViewModel>(variableTableDto);
-        //     variableTableItemViewModel.Device = device;
-        //     device.VariableTables.Add(variableTableItemViewModel);
-        //     VariableTables.Add(variableTableItemViewModel);
-        // }
 
-        return true;
+        return 0;
     }
 
 

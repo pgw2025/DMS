@@ -28,11 +28,14 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     [ObservableProperty]
     private VariableTableItemViewModel _selectedVariableTable;
 
-    private readonly INotificationService _notificationService;
-    
-    
+    [ObservableProperty]
+    private bool _isBusy;
 
-    public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService,IDataStorageService dataStorageService ,INavigationService navigationService,
+    private readonly INotificationService _notificationService;
+
+
+    public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, IDataStorageService dataStorageService,
+                                 INavigationService navigationService,
                                  IWPFDataService wpfDataService, INotificationService notificationService)
     {
         _mapper = mapper;
@@ -46,6 +49,8 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     private async Task AddVariableTable()
     {
+        if (IsBusy) return;
+        IsBusy = true;
         try
         {
             VariableTableDialogViewModel variableTableDialogViewModel = new VariableTableDialogViewModel()
@@ -61,33 +66,47 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
             }
 
             variableTableItemViewModel.DeviceId = CurrentDevice.Id;
-             var tableMenu = new MenuBeanDto()
-                             {
-                                 Header = variableTableItemViewModel.Name,
-                                 Icon = SegoeFluentIcons.DataSense.Glyph,
-                                 TargetViewKey = "VariableTableView"
-                             };
+            var tableMenu = new MenuBeanDto()
+                            {
+                                Header = variableTableItemViewModel.Name,
+                                Icon = SegoeFluentIcons.DataSense.Glyph,
+                                TargetViewKey = "VariableTableView"
+                            };
+            int addVarTableId = await _wpfDataService.VariableTableDataService.AddVariableTable(
+                _mapper.Map<VariableTableDto>(variableTableItemViewModel),
+                tableMenu, true);
 
-             if (await _wpfDataService.VariableTableDataService.AddVariableTable(_mapper.Map<VariableTableDto>(variableTableItemViewModel),
-                                                    tableMenu, true))
-             {
-                 _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
-             }
-             else
-             {
-                 _notificationService.ShowError($"添加变量表失败：{variableTableItemViewModel.Name}！！");
-             }
+            if (addVarTableId > 0)
+            {
+                variableTableItemViewModel.Id = addVarTableId;
+                if (_dataStorageService.Devices.TryGetValue(variableTableItemViewModel.DeviceId, out var device))
+                {
+                    variableTableItemViewModel.Device = device;
+                }
 
+                _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
+                CurrentDevice.VariableTables.Add(variableTableItemViewModel);
+            }
+            else
+            {
+                _notificationService.ShowError($"添加变量表失败：{variableTableItemViewModel.Name}！！");
+            }
         }
         catch (Exception ex)
         {
             _notificationService.ShowError($"添加变量表时发生错误: {ex.Message}", ex);
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
     [RelayCommand]
     private async Task EditVariableTable()
     {
+        if (IsBusy) return;
+        IsBusy = true;
         try
         {
             if (SelectedVariableTable == null)
@@ -96,12 +115,14 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                 return;
             }
 
-            VariableTableDialogViewModel variableTableDialogViewModel = new VariableTableDialogViewModel(SelectedVariableTable)
-                                                                          {
-                                                                              PrimaryButText = "编辑变量表"
-                                                                          };
+            VariableTableDialogViewModel variableTableDialogViewModel
+                = new VariableTableDialogViewModel(SelectedVariableTable)
+                  {
+                      PrimaryButText = "编辑变量表"
+                  };
             // 1. 显示变量表对话框
-            VariableTableItemViewModel variableTable = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
+            VariableTableItemViewModel variableTable
+                = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
             // 如果用户取消或对话框未返回变量表，则直接返回
             if (variableTable == null)
             {
@@ -121,13 +142,19 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
         {
             _notificationService.ShowError($"编辑变量表的过程中发生错误：{e.Message}", e);
         }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
     private async Task DeleteVariableTable()
     {
+        if (IsBusy) return;
+        IsBusy = true;
         try
-        { 
+        {
             if (SelectedVariableTable == null)
             {
                 _notificationService.ShowError("你没有选择任何变量表，请选择变量表后再点击删除变量表");
@@ -135,11 +162,11 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
             }
 
             string message = $"确认要删除变量表名为:{SelectedVariableTable.Name} \n\n此操作将同时删除该变量表下的所有变量数据，且无法恢复！";
-            ConfirmDialogViewModel viewModel = new ConfirmDialogViewModel("删除变量表",message,"删除");
+            ConfirmDialogViewModel viewModel = new ConfirmDialogViewModel("删除变量表", message, "删除");
             if (await _dialogService.ShowDialogAsync(viewModel))
             {
                 var tableName = SelectedVariableTable.Name;
-                if (await _wpfDataService.VariableDataService.DeleteVariableTable(SelectedVariableTable,true))
+                if (await _wpfDataService.VariableDataService.DeleteVariableTable(SelectedVariableTable, true))
                 {
                     _notificationService.ShowSuccess($"变量表：{tableName},删除成功。");
                 }
@@ -153,13 +180,16 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
         {
             _notificationService.ShowError($"删除变量表的过程中发生错误：{e.Message}", e);
         }
+        finally
+        {
+            IsBusy = false;
+        }
     }
-
 
 
     public async Task OnNavigatedToAsync(MenuItemViewModel menu)
     {
-        if (_dataStorageService.Devices.TryGetValue(menu.TargetId,out var device))
+        if (_dataStorageService.Devices.TryGetValue(menu.TargetId, out var device))
         {
             CurrentDevice = device;
         }

@@ -9,7 +9,7 @@ public interface IVariableTableDataService
 
     void LoadAllVariableTables();
 
-    Task<bool> AddVariableTable(VariableTableDto variableTableDto,
+    Task<int> AddVariableTable(VariableTableDto variableTableDto,
                                 MenuBeanDto menuDto = null, bool isAddDb = false);
 
     Task<bool> UpdateVariableTable(VariableTableItemViewModel variableTable);
