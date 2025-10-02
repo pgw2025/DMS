@@ -11,6 +11,7 @@ using DMS.Core.Models;
 using DMS.Message;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
+using Microsoft.Extensions.Logging;
 
 namespace DMS.WPF.Services;
 
@@ -24,6 +25,7 @@ public class DataEventService : IDataEventService
     private readonly IEventService _eventService;
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IWPFDataService _wpfDataService;
+    private readonly ILogger<DataEventService> _logger;
 
     /// <summary>
     /// DataEventService类的构造函数。
@@ -32,33 +34,59 @@ public class DataEventService : IDataEventService
         IDataStorageService dataStorageService, 
         IEventService eventService,
         IAppDataCenterService appDataCenterService,
-        IWPFDataService wpfDataService)
+        IWPFDataService wpfDataService,
+        ILogger<DataEventService> logger)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
         _eventService = eventService;
         _appDataCenterService = appDataCenterService;
         _wpfDataService = wpfDataService;
+        _logger = logger;
+        
+        _logger?.LogInformation("正在初始化 DataEventService");
         
         // 监听变量值变更事件
         _eventService.OnVariableValueChanged += OnVariableValueChanged;
         _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
         // _appDataCenterService.OnLogChanged += _logDataService.OnNlogChanged;
+        
+        _logger?.LogInformation("DataEventService 初始化完成");
     }
     
     private  void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
     {
+        _logger?.LogDebug("接收到数据加载完成事件，成功: {IsSuccess}", e.IsSuccess);
+        
         if (e.IsSuccess)
         {
+            _logger?.LogInformation("开始加载所有数据项");
+            
             _wpfDataService.DeviceDataService.LoadAllDevices();
+            _logger?.LogDebug("设备数据加载完成");
+            
             _wpfDataService.VariableTableDataService.LoadAllVariableTables();
+            _logger?.LogDebug("变量表数据加载完成");
+            
             _wpfDataService.VariableDataService.LoadAllVariables();
+            _logger?.LogDebug("变量数据加载完成");
+            
             _wpfDataService.MenuDataService.LoadAllMenus();
+            _logger?.LogDebug("菜单数据加载完成");
+            
             _wpfDataService.MqttDataService.LoadMqttServers();
+            _logger?.LogDebug("MQTT服务器数据加载完成");
+            
             _wpfDataService.LogDataService.LoadAllLog();
+            _logger?.LogDebug("日志数据加载完成");
+            
+            _logger?.LogInformation("所有数据项加载完成");
         }
-        
+        else
+        {
+            _logger?.LogWarning("数据加载失败");
+        }
     }
 
     /// <summary>
@@ -66,16 +94,28 @@ public class DataEventService : IDataEventService
     /// </summary>
     private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
+        _logger?.LogDebug("接收到变量值变更事件，变量ID: {VariableId}, 新值: {NewValue}, 更新时间: {UpdateTime}", 
+            e.VariableId, e.NewValue, e.UpdateTime);
+        
         // 在UI线程上更新变量值
         App.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
             // 查找并更新对应的变量
-            
             if (_dataStorageService.Variables.TryGetValue(e.VariableId,out var variableToUpdate))
             {
+                _logger?.LogDebug("更新变量 {VariableId} ({VariableName}) 的值: {NewValue}", 
+                    e.VariableId, variableToUpdate.Name, e.NewValue);
+                    
                 variableToUpdate.DataValue = e.NewValue;
                 variableToUpdate.DisplayValue = e.NewValue;
                 variableToUpdate.UpdatedAt = e.UpdateTime;
+                
+                _logger?.LogDebug("变量 {VariableId} ({VariableName}) 的值已更新", 
+                    e.VariableId, variableToUpdate.Name);
+            }
+            else
+            {
+                _logger?.LogWarning("在变量存储中找不到ID为 {VariableId} 的变量，无法更新值", e.VariableId);
             }
         }));
     }
@@ -87,6 +127,11 @@ public class DataEventService : IDataEventService
     /// </summary>
     public async Task Receive(LoadMessage message)
     {
-       
+        _logger?.LogDebug("接收到LoadMessage消息，消息类型: {MessageType}", message.GetType().Name);
+        
+        // 这里可以添加加载消息处理的逻辑
+        // 目前是空实现，但已记录接收到消息的信息
+        
+        _logger?.LogDebug("LoadMessage消息处理完成");
     }
 }

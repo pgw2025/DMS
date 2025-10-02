@@ -47,6 +47,7 @@ namespace DMS.Infrastructure.Services.OpcUa
 
             _eventService.OnDeviceStateChanged += OnDeviceStateChanged;
             _eventService.OnDeviceChanged += OnDeviceChanged;
+            _eventService.OnBatchImportVariables += OnBatchImportVariables;
         }
 
         private async void OnDeviceStateChanged(object? sender, DeviceStateChangedEventArgs e)
@@ -228,6 +229,58 @@ namespace DMS.Infrastructure.Services.OpcUa
             catch (Exception ex)
             {
                 _logger.LogError(ex, "处理设备删除事件时发生错误: {DeviceId}", deviceId);
+            }
+        }
+
+        /// <summary>
+        /// 处理批量导入变量事件
+        /// </summary>
+        private async void OnBatchImportVariables(object? sender, BatchImportVariablesEventArgs e)
+        {
+            if (e?.Variables == null || !e.Variables.Any())
+            {
+                _logger.LogWarning("OnBatchImportVariables: 接收到空变量列表");
+                return;
+            }
+
+            try
+            {
+                _logger.LogInformation("处理批量导入变量事件，共 {Count} 个变量", e.Count);
+
+                // 更新相关设备的变量表
+                var deviceIds = e.Variables.Select(v => v.VariableTable.DeviceId).Distinct();
+                foreach (var deviceId in deviceIds)
+                {
+                    // 获取设备的变量表信息
+                    var variablesForDevice = e.Variables.Where(v => v.VariableTable.DeviceId == deviceId).ToList();
+                    if (variablesForDevice.Any())
+                    {
+                        // 更新设备上下文中的变量
+                        if (_deviceContexts.TryGetValue(deviceId, out var context))
+                        {
+                            // 将新导入的变量添加到设备上下文
+                            foreach (var variable in variablesForDevice)
+                            {
+                                if (!context.Variables.ContainsKey(variable.OpcUaNodeId))
+                                {
+                                    context.Variables.TryAdd(variable.OpcUaNodeId, variable);
+                                }
+                            }
+
+                            // 如果设备已连接，则设置订阅
+                            if (context.IsConnected)
+                            {
+                                await SetupSubscriptionsAsync(context, CancellationToken.None);
+                            }
+                        }
+                    }
+                }
+                
+                _logger.LogInformation("批量导入变量事件处理完成，更新了 {DeviceCount} 个设备的变量信息", deviceIds.Count());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "处理批量导入变量事件时发生错误");
             }
         }
 
@@ -490,24 +543,35 @@ namespace DMS.Infrastructure.Services.OpcUa
         private async void HandleDataChanged(OpcUaNode opcUaNode)
         {
             if (opcUaNode?.Value == null)
+            {
+                _logger.LogDebug("HandleDataChanged: 接收到空节点或空值，节点ID: {NodeId}", opcUaNode?.NodeId?.ToString() ?? "Unknown");
                 return;
+            }
 
             try
             {
+                _logger.LogDebug("HandleDataChanged: 节点 {NodeId} 的值发生变化: {Value}", opcUaNode.NodeId, opcUaNode.Value);
+
                 // 查找对应的变量
                 foreach (var context in _deviceContexts.Values)
                 {
                     if (context.Variables.TryGetValue(opcUaNode.NodeId.ToString(), out var variable))
                     {
+                        _logger.LogDebug("HandleDataChanged: 找到变量 {VariableName} (ID: {VariableId}) 与节点 {NodeId} 对应，设备: {DeviceName}", 
+                            variable.Name, variable.Id, opcUaNode.NodeId, context.Device.Name);
+
                         // 推送到数据处理队列
-                        await _dataProcessingService.EnqueueAsync(new VariableContext(variable,opcUaNode.Value));
+                        await _dataProcessingService.EnqueueAsync(new VariableContext(variable, opcUaNode.Value));
+                        
+                        _logger.LogDebug("HandleDataChanged: 变量 {VariableName} 的值已推送到数据处理队列", variable.Name);
                         break;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "处理数据变化时发生错误: {ErrorMessage}", ex.Message);
+                _logger.LogError(ex, "处理数据变化时发生错误 - 节点ID: {NodeId}, 值: {Value}, 错误信息: {ErrorMessage}", 
+                    opcUaNode?.NodeId?.ToString() ?? "Unknown", opcUaNode?.Value?.ToString() ?? "null", ex.Message);
             }
         }
 

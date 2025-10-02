@@ -46,6 +46,7 @@ namespace DMS.Infrastructure.Services.S7
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10
 
             _eventService.OnVariableActiveChanged += OnVariableActiveChanged;
+            _eventService.OnBatchImportVariables += OnBatchImportVariables;
         }
 
         private void OnVariableActiveChanged(object? sender, VariablesActiveChangedEventArgs e)
@@ -358,6 +359,52 @@ namespace DMS.Infrastructure.Services.S7
 
                 _disposed = true;
                 _logger.LogInformation("S7服务管理器资源已释放");
+            }
+        }
+
+        /// <summary>
+        /// 处理批量导入变量事件
+        /// </summary>
+        private void OnBatchImportVariables(object? sender, BatchImportVariablesEventArgs e)
+        {
+            if (e?.Variables == null || !e.Variables.Any())
+            {
+                _logger.LogWarning("OnBatchImportVariables: 接收到空变量列表");
+                return;
+            }
+
+            try
+            {
+                _logger.LogInformation("处理批量导入变量事件，共 {Count} 个变量", e.Count);
+
+                // 更新相关设备的变量表
+                var deviceIds = e.Variables.Select(v => v.VariableTable.DeviceId).Distinct();
+                foreach (var deviceId in deviceIds)
+                {
+                    // 获取设备的变量表信息
+                    var variablesForDevice = e.Variables.Where(v => v.VariableTable.DeviceId == deviceId).ToList();
+                    if (variablesForDevice.Any())
+                    {
+                        // 更新设备上下文中的变量
+                        if (_deviceContexts.TryGetValue(deviceId, out var context))
+                        {
+                            // 将新导入的变量添加到设备上下文
+                            foreach (var variable in variablesForDevice)
+                            {
+                                if (!context.Variables.ContainsKey(variable.S7Address))
+                                {
+                                    context.Variables.AddOrUpdate(variable.S7Address, variable, (key, oldValue) => variable);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                _logger.LogInformation("批量导入变量事件处理完成，更新了 {DeviceCount} 个设备的变量信息", deviceIds.Count());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "处理批量导入变量事件时发生错误");
             }
         }
     }

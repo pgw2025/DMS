@@ -359,8 +359,10 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 {
                     List<VariableItemViewModel> variableItemViewModels = _mapper.Map<List<VariableItemViewModel>>(addVariableDtos);
                     _variableItemList.AddRange(variableItemViewModels);
+                    
                     foreach (var variableItemViewModel in variableItemViewModels)
                     {
+                        _dataStorageService.Variables.TryAdd(variableItemViewModel.Id, variableItemViewModel);
                         CurrentVariableTable.Variables.Add(variableItemViewModel);
                     }
                     _notificationService.ShowSuccess($"从OPC UA服务器导入变量成功，共导入变量：{importedVariableDtos.Count}个");

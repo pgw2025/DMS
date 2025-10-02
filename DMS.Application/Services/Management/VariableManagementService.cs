@@ -159,6 +159,15 @@ public class VariableManagementService : IVariableManagementService
     public async Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables)
     {
         var result = await _variableAppService.BatchImportVariablesAsync(variables);
+        foreach (var variableDto in result)
+        {
+            if (_appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId ,out var variableTable))
+            {
+                variableDto.VariableTable = variableTable;
+            }
+            
+        }
+        
         
         // 批量导入成功后，触发批量导入事件
         if (result != null && result.Any())
