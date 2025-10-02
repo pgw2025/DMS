@@ -9,5 +9,6 @@ public class VariableHistory
     public int VariableId { get; set; }
     public Variable Variable { get; set; }
     public string Value { get; set; } // 以字符串形式存储，便于通用性
+    public double NumericValue { get; set; }
     public DateTime Timestamp { get; set; }
 }

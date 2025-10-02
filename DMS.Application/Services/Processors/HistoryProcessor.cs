@@ -42,6 +42,7 @@ public class HistoryProcessor : IVariableProcessor, IDisposable
         {
             VariableId = context.Data.Id,
             Value = context.Data.DisplayValue?.ToString() ?? string.Empty,
+            NumericValue = context.Data.NumericValue,
             Timestamp = DateTime.Now // 记录当前时间
         };
 

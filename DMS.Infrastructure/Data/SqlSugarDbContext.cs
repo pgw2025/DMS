@@ -5,25 +5,25 @@ namespace DMS.Infrastructure.Data;
 
 public class SqlSugarDbContext 
 {
-    private readonly SqlSugarClient _db;
+    private readonly AppSettings _settings;
 
     public SqlSugarDbContext(AppSettings settings)
     {
-        var connectionString = settings.ToConnectionString();
-        var dbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), settings.Database.DbType);
+        _settings = settings;
+    }
 
-        _db = new SqlSugarClient(new ConnectionConfig
+
+    public SqlSugarClient GetInstance()
+    {
+        var connectionString = _settings.ToConnectionString();
+        var dbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), _settings.Database.DbType);
+
+        return new SqlSugarClient(new ConnectionConfig
         {
             ConnectionString = connectionString,
             DbType = dbType,
             IsAutoCloseConnection = true,
             InitKeyType = InitKeyType.Attribute
         });
-    }
-
-
-    public SqlSugarClient GetInstance()
-    {
-        return _db;
     }
 }

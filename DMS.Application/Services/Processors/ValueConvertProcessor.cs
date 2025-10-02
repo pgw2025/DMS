@@ -3,6 +3,7 @@ using System.Globalization;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
+using DMS.Core.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace DMS.Application.Services.Processors;
@@ -19,20 +20,36 @@ public class ValueConvertProcessor : IVariableProcessor
     public Task ProcessAsync(VariableContext context)
     {
         var oldValue = context.Data.DataValue;
-
-        // 步骤 1: 将原始值转换为 DataValue 和 NumericValue
-        ConvertS7ValueToStringAndNumeric(context.Data, context.NewValue);
-
-        // 步骤 2: 根据公式计算 DisplayValue
-        CalculateDisplayValue(context.Data);
-
-        context.Data.UpdatedAt = DateTime.Now;
-
         // 如果值没有变化则中断处理链
-        if (context.Data.DataValue == oldValue)
+        if (context.Data.DataValue == context.NewValue)
         {
             context.IsHandled = true;
         }
+
+        // 步骤 1: 将原始值转换为 DataValue 和 NumericValue
+        context.Data.DataValue = context.NewValue;
+        if (context.Data.DataType == DataType.Bool)
+        {
+            context.Data.NumericValue=context.NewValue=="True"?1:0;
+            context.Data.DisplayValue = context.NewValue;
+        }
+        else
+        {
+            if (double.TryParse(context.Data.DataValue, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedFromStr))
+            {
+                context.Data.NumericValue = parsedFromStr;
+                
+            }
+            // 步骤 2: 根据公式计算 DisplayValue
+            CalculateDisplayValue(context.Data);
+        }
+        
+
+       
+
+        context.Data.UpdatedAt = DateTime.Now;
+
+        
         
         return Task.CompletedTask;
     }
@@ -89,76 +106,20 @@ public class ValueConvertProcessor : IVariableProcessor
     /// </summary>
     /// <param name="variable">关联的变量 DTO</param>
     /// <param name="value">从 S7 读取的原始对象值</param>
-    private void ConvertS7ValueToStringAndNumeric(VariableDto variable, object value)
+    private void ConvertS7ValueToStringAndNumeric(VariableDto variable, string value)
     {
         if (value == null)
             return;
 
         string directConversion = null;
         double numericValue = 0.0;
-
-        switch (value)
+        if (variable.DataType == DataType.Bool)
         {
-            case double d:
-                directConversion = d.ToString("G17", CultureInfo.InvariantCulture);
-                numericValue = d;
-                break;
-            case float f:
-                directConversion = f.ToString("G9", CultureInfo.InvariantCulture);
-                numericValue = f;
-                break;
-            case int i:
-                directConversion = i.ToString(CultureInfo.InvariantCulture);
-                numericValue = i;
-                break;
-            case uint ui:
-                directConversion = ui.ToString(CultureInfo.InvariantCulture);
-                numericValue = ui;
-                break;
-            case short s:
-                directConversion = s.ToString(CultureInfo.InvariantCulture);
-                numericValue = s;
-                break;
-            case ushort us:
-                directConversion = us.ToString(CultureInfo.InvariantCulture);
-                numericValue = us;
-                break;
-            case byte b:
-                directConversion = b.ToString(CultureInfo.InvariantCulture);
-                numericValue = b;
-                break;
-            case sbyte sb:
-                directConversion = sb.ToString(CultureInfo.InvariantCulture);
-                numericValue = sb;
-                break;
-            case long l:
-                directConversion = l.ToString(CultureInfo.InvariantCulture);
-                numericValue = l;
-                break;
-            case ulong ul:
-                directConversion = ul.ToString(CultureInfo.InvariantCulture);
-                numericValue = ul;
-                break;
-            case bool boolValue:
-                directConversion = boolValue.ToString().ToLowerInvariant();
-                numericValue = boolValue ? 1.0 : 0.0;
-                break;
-            case string str:
-                directConversion = str;
-                if (double.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedFromStr))
-                {
-                    numericValue = parsedFromStr;
-                }
-                break;
-            default:
-                _logger.LogWarning($"变量 {variable.Name} 读取到未预期的数据类型: {value.GetType().Name}, 值: {value}");
-                directConversion = value.ToString() ?? string.Empty;
-                if (double.TryParse(directConversion, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedFromObj))
-                {
-                    numericValue = parsedFromObj;
-                }
-                break;
+            numericValue=value.ToString()=="True"?1.0:0.0;
+            directConversion = value.ToString();
+            return;
         }
+        
 
         variable.DataValue = directConversion ?? value.ToString() ?? string.Empty;
         variable.NumericValue = numericValue;

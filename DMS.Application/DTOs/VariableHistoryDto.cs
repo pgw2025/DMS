@@ -11,5 +11,6 @@ public class VariableHistoryDto
     public int VariableId { get; set; }
     public string VariableName { get; set; }
     public string Value { get; set; }
+    public double NumericValue { get; set; }
     public DateTime Timestamp { get; set; }
 }

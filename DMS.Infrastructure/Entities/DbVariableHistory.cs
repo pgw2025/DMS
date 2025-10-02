@@ -9,5 +9,6 @@ public class DbVariableHistory
     public long Id { get; set; }
     public int VariableId { get; set; }
     public string Value { get; set; }
+    public double NumericValue { get; set; }
     public DateTime Timestamp { get; set; }
 }
