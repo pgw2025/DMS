@@ -11,7 +11,7 @@ namespace DMS.Application.Events
         /// <summary>
         /// 变更类型
         /// </summary>
-        public DataChangeType ChangeType { get; }
+        public ActionChangeType ChangeType { get; }
 
         /// <summary>
         /// 变量DTO
@@ -19,27 +19,21 @@ namespace DMS.Application.Events
         public VariableDto Variable { get; }
 
         /// <summary>
-        /// 关联的变量表DTO
+        /// 发生变化的属性类型
         /// </summary>
-        public VariableTableDto VariableTable { get; }
-
-        /// <summary>
-        /// 变更时间
-        /// </summary>
-        public DateTime ChangeTime { get; }
+        public VariablePropertyType PropertyType { get; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
         /// <param name="variable">变量DTO</param>
-        /// <param name="variableTable">关联的变量表DTO</param>
-        public VariableChangedEventArgs(DataChangeType changeType, VariableDto variable, VariableTableDto variableTable)
+        /// <param name="propertyType">发生变化的属性类型</param>
+        public VariableChangedEventArgs(ActionChangeType changeType, VariableDto variable, VariablePropertyType propertyType = VariablePropertyType.All)
         {
             ChangeType = changeType;
             Variable = variable;
-            VariableTable = variableTable;
-            ChangeTime = DateTime.Now;
+            PropertyType = propertyType;
         }
     }
 }
