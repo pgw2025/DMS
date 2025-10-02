@@ -1,0 +1,25 @@
+<ui:ContentDialog
+    x:Class="DMS.WPF.Views.Dialogs.InputDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance vm:InputDialogViewModel}"
+    Title="{Binding Title}"
+    PrimaryButtonText="{Binding PrimaryButtonText}"
+    CloseButtonText="{Binding CloseButtonText}"
+    PrimaryButtonCommand="{Binding ConfirmCommand}"
+    CloseButtonCommand="{Binding CancelCommand}">
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="{Binding Message}" Margin="0,0,0,10" TextWrapping="Wrap"/>
+            <hc:TextBox Text="{Binding InputText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        hc:InfoElement.Title="{Binding InputLabel}" 
+                        hc:InfoElement.Placeholder="{Binding InputPlaceholder}"/>
+        </StackPanel>
+    </Grid>
+</ui:ContentDialog>

@@ -11,6 +11,7 @@ using DMS.Core.Events;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
+using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
@@ -535,6 +536,48 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             else
             {
                 _notificationService.ShowError("更新轮询间隔失败");
+            }
+        }
+    }
+
+    [RelayCommand]
+    public async Task ModifyConversionFormula()
+    {
+        // 检查是否有变量被选中
+        if (SelectedVariables.Count == 0)
+        {
+            _notificationService.ShowInfo("请选择要修改转换公式的变量");
+            return;
+        }
+
+        // 获取选中的变量列表
+        var validVariables = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+
+        // --- 对话框调用 --- 
+        var viewModel = new InputDialogViewModel("修改数值转换公式", "请输入新的转换公式 (使用'x'代表变量值):", validVariables.First().ConversionFormula);
+        string newFormula = await _dialogService.ShowDialogAsync(viewModel);
+
+        if (newFormula != null) // 当用户输入了新公式并确认后
+        {
+            // 更新所有选定变量的转换公式
+            foreach (var variable in validVariables)
+            {
+                variable.ConversionFormula = newFormula;
+                variable.UpdatedAt = DateTime.Now;
+            }
+
+            // 批量更新数据库中的变量数据
+            var variableDtos = _mapper.Map<List<VariableDto>>(validVariables);
+            var result = await _variableManagementService.UpdateVariablesAsync(variableDtos);
+
+            if (result > 0)
+            {
+                // 显示成功通知
+                _notificationService.ShowSuccess($"已成功更新 {validVariables.Count} 个变量的转换公式");
+            }
+            else
+            {
+                _notificationService.ShowError("更新转换公式失败");
             }
         }
     }

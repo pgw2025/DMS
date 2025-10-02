@@ -187,6 +187,13 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem
+                        Command="{Binding ModifyConversionFormulaCommand}"
+                        Header="修改数值转换公式">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem
                         Command="{Binding ModifyOpcUaUpdateTypeCommand}"
                         CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                         Header="修改OPC UA更新方式"

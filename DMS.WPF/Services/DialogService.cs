@@ -25,7 +25,8 @@ namespace DMS.WPF.Services
             { typeof(AlarmSettingsDialogViewModel), typeof(AlarmSettingsDialog) },
             { typeof(EmailAccountDialogViewModel), typeof(EmailAccountDialog) },
             { typeof(EmailTemplateDialogViewModel), typeof(EmailTemplateDialog) },
-            { typeof(TriggerDialogViewModel), typeof(TriggerDialog) }
+            { typeof(TriggerDialogViewModel), typeof(TriggerDialog) },
+            { typeof(InputDialogViewModel), typeof(InputDialog) }
             // Add other mappings here
             // ... other dialogs
         };

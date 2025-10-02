@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
@@ -15,17 +16,20 @@ public class VariableManagementService : IVariableManagementService
 {
     private readonly IVariableAppService _variableAppService;
     private readonly IEventService _eventService;
+    private readonly IMapper _mapper;
     private readonly IAppDataStorageService _appDataStorageService;
     private readonly IDataProcessingService _dataProcessingService;
 
 
     public VariableManagementService(IVariableAppService variableAppService,
                                      IEventService eventService,
+                                     IMapper mapper,
                                      IAppDataStorageService appDataStorageService,
                                      IDataProcessingService dataProcessingService)
     {
         _variableAppService = variableAppService;
         _eventService = eventService;
+        _mapper = mapper;
         _appDataStorageService = appDataStorageService;
         _dataProcessingService = dataProcessingService;
     }
@@ -116,7 +120,12 @@ public class VariableManagementService : IVariableManagementService
                     variableTableDto = variableTable;
                 }
 
-                _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
+                if (_appDataStorageService.Variables.TryGetValue(variableDto.Id,out var mVariableDto))
+                {
+                    _mapper.Map(variableDto, mVariableDto);
+                }
+
+                // _appDataStorageService.Variables.AddOrUpdate(variableDto.Id, variableDto, (key, oldValue) => variableDto);
                 _eventService.RaiseVariableChanged(
                     this, new VariableChangedEventArgs(DataChangeType.Updated, variableDto, variableTableDto));
             }
