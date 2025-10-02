@@ -95,27 +95,21 @@ public class DataEventService : IDataEventService
     private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
         _logger?.LogDebug("接收到变量值变更事件，变量ID: {VariableId}, 新值: {NewValue}, 更新时间: {UpdateTime}", 
-            e.VariableId, e.NewValue, e.UpdateTime);
+            e.Variable.Id, e.Variable.DataValue, e.Variable.UpdatedAt);
         
         // 在UI线程上更新变量值
         App.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
             // 查找并更新对应的变量
-            if (_dataStorageService.Variables.TryGetValue(e.VariableId,out var variableToUpdate))
+            if (_dataStorageService.Variables.TryGetValue(e.Variable.Id,out var variableToUpdate))
             {
-                _logger?.LogDebug("更新变量 {VariableId} ({VariableName}) 的值: {NewValue}", 
-                    e.VariableId, variableToUpdate.Name, e.NewValue);
-                    
-                variableToUpdate.DataValue = e.NewValue;
-                variableToUpdate.DisplayValue = e.NewValue;
-                variableToUpdate.UpdatedAt = e.UpdateTime;
-                
-                _logger?.LogDebug("变量 {VariableId} ({VariableName}) 的值已更新", 
-                    e.VariableId, variableToUpdate.Name);
+                variableToUpdate.DataValue = e.Variable.DataValue;
+                variableToUpdate.DisplayValue = e.Variable.DisplayValue;
+                variableToUpdate.UpdatedAt = e.Variable.UpdatedAt;
             }
             else
             {
-                _logger?.LogWarning("在变量存储中找不到ID为 {VariableId} 的变量，无法更新值", e.VariableId);
+                _logger?.LogWarning("在变量存储中找不到ID为 {VariableId} 的变量，无法更新值", e.Variable.Id);
             }
         }));
     }

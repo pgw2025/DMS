@@ -3,6 +3,7 @@ using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Events;
@@ -107,7 +108,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
-        if (e.VariableId != CurrentVariable.Id)
+        if (e.Variable.Id != CurrentVariable.Id)
         {
             return;
         }
@@ -116,7 +117,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
                               {
                                   VariableId = CurrentVariable.Id,
                                   Timestamp = DateTime.Now,
-                                  Value = e.NewValue
+                                  Value = e.Variable.DataValue
                               };
         _variableHistoryList.Add(variableHistory);
         

@@ -30,36 +30,7 @@ public class EventService : IEventService
     public event EventHandler<DeviceChangedEventArgs> OnDeviceChanged;
 
 
-    /// <summary>
-    /// 触发设备状态改变事件
-    /// </summary>
-    /// <param name="sender">事件发送者</param>
-    /// <param name="e">设备状态改变事件参数</param>
-    public void RaiseDeviceActiveChanged(object sender, DeviceActiveChangedEventArgs e)
-    {
-        if (_appDataStorageService.Devices.TryGetValue(e.DeviceId, out var device))
-        {
-            if (device.IsActive != e.NewStatus)
-            {
-                device.IsActive = e.NewStatus;
-                // 转发到统一的设备状态事件
-                var unifiedEvent = new DeviceStateChangedEventArgs(e.DeviceId, e.DeviceName, e.NewStatus, Core.Enums.DeviceStateType.Active);
-                OnDeviceStateChanged?.Invoke(sender, unifiedEvent);
-            }
-        }
-    }
 
-    /// <summary>
-    /// 触发设备连接状态改变事件
-    /// </summary>
-    /// <param name="sender">事件发送者</param>
-    /// <param name="e">设备状态改变事件参数</param>
-    public void RaiseDeviceConnectChanged(object sender, DeviceConnectChangedEventArgs e)
-    {
-        // 转发到统一的设备状态事件
-        var unifiedEvent = new DeviceStateChangedEventArgs(e.DeviceId, e.DeviceName, e.NewStatus, Core.Enums.DeviceStateType.Connection);
-        OnDeviceStateChanged?.Invoke(sender, unifiedEvent);
-    }
 
     /// <summary>
     /// 触发设备状态改变事件（统一事件）

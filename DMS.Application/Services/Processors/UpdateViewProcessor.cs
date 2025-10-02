@@ -1,4 +1,5 @@
-﻿using DMS.Application.Interfaces;
+﻿using DMS.Application.Events;
+using DMS.Application.Interfaces;
 using DMS.Application.Models;
 using DMS.Core.Events;
 
@@ -17,13 +18,10 @@ public class UpdateViewProcessor: IVariableProcessor
     {
         // 触发变量值变更事件
         var eventArgs = new VariableValueChangedEventArgs(
-            context.Data.Id,
-            context.Data.Name,
-            context.Data.DataValue,
-            context.NewValue.ToString()??"",
-            DateTime.Now);
+            context.Data,
+            context.Data.DataValue);
 
-        _eventService.RaiseVariableValueChanged(this,eventArgs);
+        _eventService.RaiseVariableValueChanged(this, eventArgs);
         
     }
 }
