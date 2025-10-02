@@ -170,4 +170,20 @@ public class VariableRepository : BaseRepository<DbVariable>, IVariableRepositor
                                   .ToListAsync();
         return _mapper.Map<List<Variable>>(dbVariables);
     }
+
+    /// <summary>
+    /// 异步批量更新变量。
+    /// </summary>
+    /// <param name="variables">要更新的变量实体集合。</param>
+    /// <returns>受影响的行数。</returns>
+    public async Task<int> UpdateBatchAsync(IEnumerable<Variable> variables)
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        var dbVariables = _mapper.Map<List<DbVariable>>(variables);
+        var result = await _dbContext.GetInstance().Updateable(dbVariables).ExecuteCommandAsync();
+        stopwatch.Stop();
+        _logger.LogInformation($"Batch update {typeof(DbVariable)}, Count={dbVariables.Count}, 耗时：{stopwatch.ElapsedMilliseconds}ms");
+        return result;
+    }
 }

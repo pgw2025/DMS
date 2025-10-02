@@ -561,7 +561,7 @@ namespace DMS.Infrastructure.Services.OpcUa
                             variable.Name, variable.Id, opcUaNode.NodeId, context.Device.Name);
 
                         // 推送到数据处理队列
-                        await _dataProcessingService.EnqueueAsync(new VariableContext(variable, opcUaNode.Value));
+                        await _dataProcessingService.EnqueueAsync(new VariableContext(variable, opcUaNode.Value?.ToString()));
                         
                         _logger.LogDebug("HandleDataChanged: 变量 {VariableName} 的值已推送到数据处理队列", variable.Name);
                         break;

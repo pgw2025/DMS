@@ -7,10 +7,10 @@ namespace DMS.Application.Models
     {
         public VariableDto Data { get; set; }
         
-        public object NewValue { get; set; }
+        public string NewValue { get; set; }
         public bool IsHandled { get; set; }
 
-        public VariableContext(VariableDto data, object newValue=null)
+        public VariableContext(VariableDto data, string newValue="")
         {
             Data = data;
             IsHandled = false; // 默认未处理

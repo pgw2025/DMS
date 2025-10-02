@@ -7,9 +7,7 @@ namespace DMS.Application.Services.Processors;
 public class CheckValueChangedProcessor : IVariableProcessor
 {
 
-    public CheckValueChangedProcessor()
-    {
-    }
+
     public Task ProcessAsync(VariableContext context)
     {
         // Variable newVariable = context.Data;

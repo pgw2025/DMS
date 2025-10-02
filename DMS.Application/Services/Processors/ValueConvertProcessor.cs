@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+using System.Data;
+using System.Globalization;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
@@ -14,123 +15,147 @@ public class ValueConvertProcessor : IVariableProcessor
     {
         _logger = logger;
     }
-    public async Task ProcessAsync(VariableContext context)
+
+    public Task ProcessAsync(VariableContext context)
     {
         var oldValue = context.Data.DataValue;
+
+        // 步骤 1: 将原始值转换为 DataValue 和 NumericValue
         ConvertS7ValueToStringAndNumeric(context.Data, context.NewValue);
+
+        // 步骤 2: 根据公式计算 DisplayValue
+        CalculateDisplayValue(context.Data);
+
         context.Data.UpdatedAt = DateTime.Now;
-        // 如何值没有变化则中断处理
-        if (context.Data.DataValue==oldValue)
+
+        // 如果值没有变化则中断处理链
+        if (context.Data.DataValue == oldValue)
         {
             context.IsHandled = true;
         }
+        
+        return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// 根据转换公式计算用于UI显示的DisplayValue
+    /// </summary>
+    /// <param name="variable">需要处理的变量DTO</param>
+    private void CalculateDisplayValue(VariableDto variable)
+    {
+        // 默认情况下，显示值等于原始数据值
+        variable.DisplayValue = variable.DataValue;
+
+        // 如果没有转换公式，则直接返回
+        if (string.IsNullOrWhiteSpace(variable.ConversionFormula))
+        {
+            return;
+        }
+
+        try
+        {
+            // 将公式中的 'x' 替换为实际的数值
+            // 使用 InvariantCulture 确保小数点是 '.'
+            string expression = variable.ConversionFormula.ToLowerInvariant()
+                                        .Replace("x", variable.NumericValue.ToString(CultureInfo.InvariantCulture));
+
+            // 使用 DataTable.Compute 来安全地计算表达式
+            var result = new DataTable().Compute(expression, null);
+
+            // 将计算结果格式化后赋给 DisplayValue
+            if (result is double || result is decimal || result is float)
+            {
+                variable.DisplayValue = string.Format("{0:F2}", result); // 默认格式化为两位小数，可根据需要调整
+            }
+            else
+            {
+                variable.DisplayValue = result.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"为变量 {variable.Name} (ID: {variable.Id}) 计算DisplayValue时出错。公式: '{variable.ConversionFormula}'");
+            // 如果计算出错，DisplayValue 将保持为原始的 DataValue，保证程序健壮性
+        }
+    }
+
     /// <summary>
     /// 将从 S7 读取的对象值转换为字符串表示和数值表示
     /// </summary>
     /// <param name="variable">关联的变量 DTO</param>
     /// <param name="value">从 S7 读取的原始对象值</param>
-    /// <returns>(字符串表示, 数值表示)</returns>
     private void ConvertS7ValueToStringAndNumeric(VariableDto variable, object value)
     {
         if (value == null)
-            return ;
+            return;
 
-        // 首先根据 value 的实际运行时类型进行匹配和转换
         string directConversion = null;
         double numericValue = 0.0;
-        bool numericParsed = false;
 
         switch (value)
         {
             case double d:
                 directConversion = d.ToString("G17", CultureInfo.InvariantCulture);
                 numericValue = d;
-                numericParsed = true;
                 break;
             case float f:
                 directConversion = f.ToString("G9", CultureInfo.InvariantCulture);
                 numericValue = f;
-                numericParsed = true;
                 break;
             case int i:
                 directConversion = i.ToString(CultureInfo.InvariantCulture);
                 numericValue = i;
-                numericParsed = true;
                 break;
             case uint ui:
                 directConversion = ui.ToString(CultureInfo.InvariantCulture);
                 numericValue = ui;
-                numericParsed = true;
                 break;
             case short s:
                 directConversion = s.ToString(CultureInfo.InvariantCulture);
                 numericValue = s;
-                numericParsed = true;
                 break;
             case ushort us:
                 directConversion = us.ToString(CultureInfo.InvariantCulture);
                 numericValue = us;
-                numericParsed = true;
                 break;
             case byte b:
                 directConversion = b.ToString(CultureInfo.InvariantCulture);
                 numericValue = b;
-                numericParsed = true;
                 break;
             case sbyte sb:
                 directConversion = sb.ToString(CultureInfo.InvariantCulture);
                 numericValue = sb;
-                numericParsed = true;
                 break;
             case long l:
                 directConversion = l.ToString(CultureInfo.InvariantCulture);
                 numericValue = l;
-                numericParsed = true;
                 break;
             case ulong ul:
                 directConversion = ul.ToString(CultureInfo.InvariantCulture);
                 numericValue = ul;
-                numericParsed = true;
                 break;
             case bool boolValue:
                 directConversion = boolValue.ToString().ToLowerInvariant();
                 numericValue = boolValue ? 1.0 : 0.0;
-                numericParsed = true;
                 break;
             case string str:
                 directConversion = str;
-                // 尝试从字符串解析数值
                 if (double.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedFromStr))
                 {
                     numericValue = parsedFromStr;
-                    numericParsed = true;
                 }
                 break;
             default:
-                // 对于未预期的类型，记录日志
                 _logger.LogWarning($"变量 {variable.Name} 读取到未预期的数据类型: {value.GetType().Name}, 值: {value}");
                 directConversion = value.ToString() ?? string.Empty;
-                // 尝试从 ToString() 结果解析数值
                 if (double.TryParse(directConversion, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsedFromObj))
                 {
                     numericValue = parsedFromObj;
-                    numericParsed = true;
                 }
                 break;
         }
 
-        // 如果直接转换成功，直接返回
-
-        // 如果直接转换未能解析数值，并且变量有明确的 DataType，可以尝试更精细的解析
-        // (这部分逻辑在上面的 switch 中已经处理了大部分情况，这里作为后备)
-        // 在这个实现中，我们主要依赖于 value 的实际类型进行转换，因为这通常更可靠。
-        // 如果需要，可以根据 variable.DataType 添加额外的解析逻辑。
-
-        // 返回最终结果
         variable.DataValue = directConversion ?? value.ToString() ?? string.Empty;
         variable.NumericValue = numericValue;
     }
-    
-    
 }

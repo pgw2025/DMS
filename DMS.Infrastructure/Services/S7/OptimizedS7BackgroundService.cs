@@ -242,9 +242,8 @@ public class OptimizedS7BackgroundService : BackgroundService
             {
                 if (readResults.TryGetValue(variable.S7Address, out var value))
                 {
-
                     // 将更新后的数据推入处理队列。
-                    await _dataProcessingService.EnqueueAsync(new VariableContext(variable, value));
+                    await _dataProcessingService.EnqueueAsync(new VariableContext(variable, value?.ToString()));
                 }
                 // else
                 // {

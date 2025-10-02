@@ -25,5 +25,12 @@ namespace DMS.Core.Interfaces.Repositories
         /// <param name="opcUaNodeIds">OPC UA NodeId列表。</param>
         /// <returns>找到的变量实体列表。</returns>
         Task<List<Variable>> GetByOpcUaNodeIdsAsync(List<string> opcUaNodeIds);
+
+        /// <summary>
+        /// 异步批量更新变量。
+        /// </summary>
+        /// <param name="variables">要更新的变量实体集合。</param>
+        /// <returns>受影响的行数。</returns>
+        Task<int> UpdateBatchAsync(IEnumerable<Variable> variables);
     }
 }
