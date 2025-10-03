@@ -16,6 +16,8 @@ public class HistoryProcessor : IVariableProcessor, IDisposable
     private readonly Timer _timer;
     private readonly IRepositoryManager _repositoryManager;
     private readonly ILogger<HistoryProcessor> _logger;
+    private readonly ConcurrentDictionary<int, double> _lastWrittenValues = new(); // 安全字典，缓存最后写入的数值
+    
 
     public HistoryProcessor(IRepositoryManager repositoryManager, ILogger<HistoryProcessor> logger)
     {
@@ -37,6 +39,23 @@ public class HistoryProcessor : IVariableProcessor, IDisposable
             return;
         }
 
+        // 检查数值变化是否超过死区值
+        double currentValue = context.Data.NumericValue;
+        double historyDeadband = context.Data.HistoryDeadband;
+        int variableId = context.Data.Id;
+
+        // 获取上次写入的值，如果不存在则使用当前值（第一次写入）
+        if (_lastWrittenValues.TryGetValue(variableId, out double lastWrittenValue))
+        {
+            // 如果当前值与上次写入值的差值小于等于死区值，则跳过写入
+            if (Math.Abs(currentValue - lastWrittenValue) <= historyDeadband)
+            {
+                _logger.LogDebug("变量 {VariableName} (ID: {VariableId}) 数值变化未超过死区值 {Deadband}，跳过写入", 
+                    context.Data.Name, context.Data.Id, historyDeadband);
+                return;
+            }
+        }
+
         // 将 VariableDto 转换为 VariableHistory
         var historyData = new VariableHistory
         {
@@ -45,6 +64,9 @@ public class HistoryProcessor : IVariableProcessor, IDisposable
             NumericValue = context.Data.NumericValue,
             Timestamp = DateTime.Now // 记录当前时间
         };
+
+        // 更新缓存中的最后写入值
+        _lastWrittenValues[variableId] = currentValue;
 
         _queue.Enqueue(historyData);
         _logger.LogDebug("变量 {VariableName} (ID: {VariableId}) 历史数据已入队，队列数量: {QueueCount}", context.Data.Name, context.Data.Id, _queue.Count);
