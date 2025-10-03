@@ -12,6 +12,7 @@ using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ViewModels;
 
@@ -208,5 +209,23 @@ public partial class DeviceDetailViewModel : ViewModelBase
             this,
             new NavigationParameter(nameof(VariableTableViewModel), SelectedVariableTable.Id,
                                     NavigationType.VariableTable));
+    }
+
+    /// <summary>
+    /// 返回到设备列表页命令
+    /// </summary>
+    [RelayCommand]
+    private async Task NavigateToDevicesList()
+    {
+        try
+        {
+            // 导航到设备列表页面
+            var navigationService = App.Current.Services.GetRequiredService<INavigationService>();
+            await navigationService.NavigateToAsync(this, new NavigationParameter(nameof(DevicesViewModel), 0, NavigationType.Device));
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"导航到设备列表失败: {ex.Message}", ex);
+        }
     }
 }

@@ -9,7 +9,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mo="clr-namespace:DMS.Core.Models;assembly=DMS.Core"
     xmlns:taskbarNotification="http://www.hardcodet.net/taskbar"
-    xmlns:tb="http://hardcodet.net/taskbar"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
     Title="设备管理系统"
@@ -57,7 +56,7 @@
         </taskbarNotification:TaskbarIcon>
         <ui:NavigationView
             AlwaysShowHeader="True"
-            ExpandedModeThresholdWidth="500"
+            ExpandedModeThresholdWidth="200"
             IsBackButtonVisible="Collapsed"
             IsBackEnabled="False"
             IsSettingsVisible="False"

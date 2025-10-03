@@ -745,6 +745,24 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     }
 
     /// <summary>
+    /// 返回到设备详情页命令
+    /// </summary>
+    [RelayCommand]
+    private async Task NavigateToDeviceDetail()
+    {
+        try
+        {
+            // 导航到设备详情页面
+            var navigationService = App.Current.Services.GetRequiredService<INavigationService>();
+            await navigationService.NavigateToAsync(this, new NavigationParameter(nameof(DeviceDetailViewModel), CurrentVariableTable.DeviceId, NavigationType.Device));
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"导航到设备详情失败: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
     /// 修改选定变量的历史记录设置。
     /// </summary>
     [RelayCommand]

@@ -34,14 +34,7 @@
     </UserControl.Resources>
 
     <DockPanel>
-        <Border DockPanel.Dock="Top" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" 
-                Margin="20,10" Padding="15">
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="2" 
-                                  BlurRadius="5" 
-                                  Opacity="0.1" 
-                                  Color="#888888"/>
-            </Border.Effect>
+        <Border DockPanel.Dock="Top" Margin="20,10" Padding="15">
             
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -51,10 +44,17 @@
                 
                 <!-- 返回变量表按钮 -->
                 <Button Grid.Column="0" 
-                        Content="返回变量表" 
                         Command="{Binding NavigateToVariableTableCommand}"
-                        Style="{StaticResource ButtonPrimary}"
-                        Margin="0,0,10,0"/>
+                        Style="{StaticResource ButtonDefault}"
+                        ToolTip="返回变量表"
+                        Margin="0,0,10,0">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:FontIcon
+                                Icon="{x:Static ui:SegoeFluentIcons.ArrowLeft8}" />
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
                 
                 <!-- 操作菜单栏 -->
                 <ui:CommandBar Grid.Column="1" 

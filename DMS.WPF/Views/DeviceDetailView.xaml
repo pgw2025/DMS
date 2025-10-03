@@ -73,25 +73,49 @@
     </UserControl.Resources>
 
     <ikw:SimpleStackPanel Spacing="10">
-        <!-- Command Bar for Variable Tables -->
-        <ui:CommandBar Grid.Row="1" DefaultLabelPosition="Right" IsOpen="False" VerticalAlignment="Top">
-            <ui:AppBarButton Command="{Binding AddVariableTableCommand}" Label="添加变量表">
-                <ui:AppBarButton.Icon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
-                </ui:AppBarButton.Icon>
-            </ui:AppBarButton>
-            <ui:AppBarButton Command="{Binding EditVariableTableCommand}" Label="编辑变量表">
-                <ui:AppBarButton.Icon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
-                </ui:AppBarButton.Icon>
-            </ui:AppBarButton>
-            <ui:AppBarButton Command="{Binding DeleteVariableTableCommand}" Label="删除变量表">
-                <ui:AppBarButton.Icon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
-                </ui:AppBarButton.Icon>
-            </ui:AppBarButton>
-            <!-- Add more variable table-specific commands here if needed -->
-        </ui:CommandBar>
+        <Border Margin="10" Padding="5">
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 返回设备列表按钮 -->
+                <Button Grid.Column="0" 
+                        Command="{Binding NavigateToDevicesListCommand}"
+                        Style="{StaticResource ButtonDefault}"
+                        ToolTip="返回设备列表"
+                        Margin="0,0,10,0">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:FontIcon
+                                Icon="{x:Static ui:SegoeFluentIcons.ArrowLeft8}" />
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+                
+                <!-- Command Bar for Variable Tables -->
+                <ui:CommandBar Grid.Column="1" DefaultLabelPosition="Right" IsOpen="False" VerticalAlignment="Top">
+                    <ui:AppBarButton Command="{Binding AddVariableTableCommand}" Label="添加变量表">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding EditVariableTableCommand}" Label="编辑变量表">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding DeleteVariableTableCommand}" Label="删除变量表">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    <!-- Add more variable table-specific commands here if needed -->
+                </ui:CommandBar>
+            </Grid>
+        </Border>
         
             <!-- Device Details Section -->
             <StackPanel Grid.Row="0" Margin="10">

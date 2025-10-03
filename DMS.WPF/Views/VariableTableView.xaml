@@ -41,12 +41,32 @@
 
     <DockPanel>
 
-        <ikw:SimpleStackPanel Margin="10" DockPanel.Dock="Top">
-            <!--  操作菜单  -->
-            <controls:CommandBar
-                x:Name="PrimaryCommandBar"
-                DefaultLabelPosition="Right"
-                IsOpen="False">
+        <ikw:SimpleStackPanel DockPanel.Dock="Top" Margin="10" >
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 返回设备详情按钮 -->
+                <Button Grid.Column="0" 
+                        Command="{Binding NavigateToDeviceDetailCommand}"
+                        Style="{StaticResource ButtonDefault}"
+                        ToolTip="返回设备详情"
+                        Margin="0,0,10,0">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:FontIcon
+                                Icon="{x:Static ui:SegoeFluentIcons.ArrowLeft8}" />
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+                
+                <!--  操作菜单  -->
+                <controls:CommandBar Grid.Column="1"
+                    x:Name="PrimaryCommandBar"
+                    DefaultLabelPosition="Right"
+                    IsOpen="False">
                 <ui:AppBarButton Command="{Binding AddVariableCommand}" Label="添加变量">
                     <ui:AppBarButton.Icon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
@@ -98,7 +118,8 @@
                         Label="Settings" />
                 </ui:CommandBar.SecondaryCommands>
 
-            </controls:CommandBar>
+               </controls:CommandBar>
+           </Grid>
             <!--  变量表的名称描述等信息  -->
             <ikw:SimpleStackPanel
                 Margin="5"
@@ -127,9 +148,8 @@
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </ikw:SimpleStackPanel>
 
-
+            
         </ikw:SimpleStackPanel>
-
         <DataGrid
             x:Name="BasicGridView"
             Margin="10"
