@@ -108,21 +108,28 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
-        // if (e.Variable.Id != CurrentVariable.Id)
-        // {
-        //     return;
-        // }
-        //
-        // var variableHistory = new VariableHistoryDto()
-        //                       {
-        //                           VariableId = CurrentVariable.Id,
-        //                           Timestamp = DateTime.Now,
-        //                           Value = e.Variable.DataValue
-        //                       };
-        // _variableHistoryList.Add(variableHistory);
-        //
-        // // 更新图表数据
-        // UpdateChartData();
+        if (e.Variable.Id != CurrentVariable.Id)
+        {
+            return;
+        }
+
+        var variableHistory = new VariableHistoryDto()
+                              {
+                                  VariableId = CurrentVariable.Id,
+                                  Timestamp = DateTime.Now,
+                                  Value = e.Variable.DisplayValue
+                              };
+        _variableHistoryList.Add(variableHistory);
+
+        // 限制历史记录数量以防止内存溢出
+        if (HistoryLimit.HasValue && _variableHistoryList.Count > HistoryLimit.Value)
+        {
+            // 移除最旧的记录
+            _variableHistoryList.RemoveAt(0);
+        }
+
+        // 更新图表数据
+        UpdateChartData();
     }
 
     /// <summary>
@@ -241,31 +248,55 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             return;
         }
 
-        // 创建数值点集合
-        var values = new List<DateTimePoint>();
-        
-        foreach (var history in _variableHistoryList)
+        // 如果系列集合为空或没有有效的系列，则重新创建
+        if (LineSeriesCollection == null || LineSeriesCollection.Length == 0)
         {
-            // 尝试将值转换为double
-            if (double.TryParse(history.Value, out double value))
+            // 创建数值点集合
+            var values = new List<DateTimePoint>();
+            
+            foreach (var history in _variableHistoryList)
             {
-                values.Add(new DateTimePoint(history.Timestamp, value));
+                // 尝试将值转换为double
+                if (double.TryParse(history.Value, out double value))
+                {
+                    values.Add(new DateTimePoint(history.Timestamp, value));
+                }
             }
+
+            // 创建线性序列
+            var series = new LineSeries<DateTimePoint>
+            {
+                Name = CurrentVariable?.Name ?? "变量值",
+                Values = values,
+                Fill = null,
+                Stroke = new SolidColorPaint(new SKColor(41, 128, 185)) { StrokeThickness = 2 },
+                GeometrySize = 6, // 显示数据点，圆点大小为6
+                LineSmoothness = 0 // 使用直线连接点，也可以设为其他值实现曲线
+            };
+
+            // 更新序列集合
+            LineSeriesCollection = new ISeries[] { series };
         }
-
-        // 创建线性序列
-        var series = new LineSeries<DateTimePoint>
+        else
         {
-            Name = CurrentVariable?.Name ?? "变量值",
-            Values = values,
-            Fill = null,
-            Stroke = new SolidColorPaint(new SKColor(41, 128, 185)) { StrokeThickness = 2 },
-            GeometrySize = 6, // 显示数据点，圆点大小为6
-            LineSmoothness = 0 // 使用直线连接点，也可以设为其他值实现曲线
-        };
+            // 对于实时更新，保持原有完整的更新逻辑以确保数据一致性
+            // 创建数值点集合
+            var values = new List<DateTimePoint>();
+            
+            foreach (var history in _variableHistoryList)
+            {
+                // 尝试将值转换为double
+                if (double.TryParse(history.Value, out double value))
+                {
+                    values.Add(new DateTimePoint(history.Timestamp, value));
+                }
+            }
 
-        // 更新序列集合
-        LineSeriesCollection = new ISeries[] { series };
+            // 更新当前系列
+            var currentSeries = (LineSeries<DateTimePoint>)LineSeriesCollection[0];
+            currentSeries.Values = values;
+            currentSeries.Name = CurrentVariable?.Name ?? "变量值";
+        }
 
         // 更新坐标轴
         LineAxisX = new Axis[]
