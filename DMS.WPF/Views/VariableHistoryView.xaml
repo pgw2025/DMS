@@ -120,7 +120,7 @@
                     SelectionMode="Single"
                     Style="{StaticResource DataGridBaseStyle}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Binding="{Binding Value}" Header="值" />
+                        <DataGridTextColumn Binding="{Binding Value}" Header="{Binding DataContext.CurrentVariable.Name, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='值'}" />
                         <DataGridTextColumn
                             Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"
                             Header="时间戳"

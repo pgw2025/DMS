@@ -108,21 +108,21 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
-        if (e.Variable.Id != CurrentVariable.Id)
-        {
-            return;
-        }
-        
-        var variableHistory = new VariableHistoryDto()
-                              {
-                                  VariableId = CurrentVariable.Id,
-                                  Timestamp = DateTime.Now,
-                                  Value = e.Variable.DataValue
-                              };
-        _variableHistoryList.Add(variableHistory);
-        
-        // 更新图表数据
-        UpdateChartData();
+        // if (e.Variable.Id != CurrentVariable.Id)
+        // {
+        //     return;
+        // }
+        //
+        // var variableHistory = new VariableHistoryDto()
+        //                       {
+        //                           VariableId = CurrentVariable.Id,
+        //                           Timestamp = DateTime.Now,
+        //                           Value = e.Variable.DataValue
+        //                       };
+        // _variableHistoryList.Add(variableHistory);
+        //
+        // // 更新图表数据
+        // UpdateChartData();
     }
 
     /// <summary>
@@ -256,11 +256,12 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         // 创建线性序列
         var series = new LineSeries<DateTimePoint>
         {
-            Name = "变量值",
+            Name = CurrentVariable?.Name ?? "变量值",
             Values = values,
             Fill = null,
             Stroke = new SolidColorPaint(new SKColor(41, 128, 185)) { StrokeThickness = 2 },
-            GeometrySize = 0 // 不显示数据点，只显示线条
+            GeometrySize = 6, // 显示数据点，圆点大小为6
+            LineSmoothness = 0 // 使用直线连接点，也可以设为其他值实现曲线
         };
 
         // 更新序列集合
@@ -279,7 +280,8 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         {
             new Axis
             {
-                Name = "值"
+                Name = CurrentVariable?.Name ?? "值",
+                MinLimit = 0 // 设置Y轴从0开始
             }
         };
 
