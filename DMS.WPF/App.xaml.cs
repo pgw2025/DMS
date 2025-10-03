@@ -33,11 +33,14 @@ using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using DMS.WPF.Views;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Web;
+using SkiaSharp;
 using SqlSugar;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -67,9 +70,11 @@ public partial class App : System.Windows.Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        LiveCharts.Configure(config => config.HasGlobalSKTypeface(SKFontManager.Default.MatchCharacter('汉')));
         ShutdownMode = ShutdownMode.OnLastWindowClose;
         ThemeHelper.InitializeTheme();
         await Host.StartAsync();
+        
 
         try
         {
