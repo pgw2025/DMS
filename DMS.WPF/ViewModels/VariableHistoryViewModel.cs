@@ -30,10 +30,16 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     private readonly INotificationService _notificationService;
 
     /// <summary>
-    /// 历史记录条数限制
+    /// 加载历史记录条数限制
     /// </summary>
     [ObservableProperty]
-    private int? _historyLimit;
+    private int? _initHistoryLimit;
+    
+    /// <summary>
+    /// 显示历史记录条数限制
+    /// </summary>
+    [ObservableProperty]
+    private int? _viewHistoryLimit;
 
     /// <summary>
     /// 历史记录开始时间
@@ -60,11 +66,11 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     // 折线图相关属性
     public ISeries[] LineSeriesCollection { get; set; }
-    
-    [ObservableProperty] 
+
+    [ObservableProperty]
     private Axis[] _lineAxisX;
-    
-    [ObservableProperty] 
+
+    [ObservableProperty]
     private Axis[] _lineAxisY;
 
     private readonly ObservableList<VariableHistoryDto> _variableHistoryList;
@@ -77,7 +83,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     public VariableHistoryViewModel(IMapper mapper, IDialogService dialogService, IHistoryAppService historyAppService,
                                     IWPFDataService wpfDataService, IDataStorageService dataStorageService,
-                                    IEventService eventService, 
+                                    IEventService eventService,
                                     INotificationService notificationService)
     {
         _mapper = mapper;
@@ -94,10 +100,10 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _allVariableHistories = new List<VariableHistoryDto>();
 
         // 初始化默认值
-        _historyLimit = 50; // 默认限制1000条记录
+        _initHistoryLimit = 50; // 默认限制1000条记录
         _startTime = null;
         _endTime = null;
-        
+
         // 初始化图表属性
         LineAxisX = new Axis[] { new Axis() };
         LineAxisY = new Axis[] { new Axis() };
@@ -123,13 +129,13 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _variableHistoryList.Add(variableHistory);
 
         // 限制历史记录数量以防止内存溢出
-        if (HistoryLimit.HasValue && _variableHistoryList.Count > HistoryLimit.Value)
+        if (ViewHistoryLimit.HasValue && _variableHistoryList.Count > ViewHistoryLimit.Value)
         {
             // 移除最旧的记录
             _variableHistoryList.RemoveAt(0);
         }
 
-        // 更新图表数据
+        // 更新图表数据 - 使用更高效的方法处理实时更新
         UpdateChartData();
     }
 
@@ -147,7 +153,8 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             _variableHistoryList.Clear();
             var allHistories
                 = await _historyAppService.GetVariableHistoriesAsync(variableId, limit, startTime, endTime);
-            _allVariableHistories = allHistories.ToList();
+            _allVariableHistories = allHistories.OrderBy(v => v.Timestamp)
+                                                .ToList();
             _variableHistoryList.AddRange(_allVariableHistories);
 
             // 更新图表数据
@@ -167,7 +174,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         {
             CurrentVariable = variableItem;
             // 加载所有变量的历史记录
-            LoadAllVariableHistories(variableItem.Id, HistoryLimit, StartTime, EndTime);
+            LoadAllVariableHistories(variableItem.Id, InitHistoryLimit, StartTime, EndTime);
         }
     }
 
@@ -179,7 +186,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     {
         if (CurrentVariable != null)
         {
-            LoadAllVariableHistories(CurrentVariable.Id, HistoryLimit, StartTime, EndTime);
+            LoadAllVariableHistories(CurrentVariable.Id, InitHistoryLimit, StartTime, EndTime);
         }
     }
 
@@ -240,6 +247,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     private Axis[] _lineAxisXInstance;
     private Axis[] _lineAxisYInstance;
 
+
     /// <summary>
     /// 更新图表数据
     /// </summary>
@@ -258,7 +266,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         {
             // 创建数值点集合
             var values = new List<DateTimePoint>();
-            
+
             foreach (var history in _variableHistoryList)
             {
                 values.Add(new DateTimePoint(history.Timestamp, history.NumericValue));
@@ -266,36 +274,37 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
             // 创建线性序列
             var series = new LineSeries<DateTimePoint>
-            {
-                Name = CurrentVariable?.Name ?? "变量值",
-                Values = values,
-                Fill = null,
-                Stroke = new SolidColorPaint(new SKColor(41, 128, 185)) { StrokeThickness = 2 },
-                GeometrySize = 6, // 显示数据点，圆点大小为6
-                LineSmoothness = 0 // 使用直线连接点，也可以设为其他值实现曲线
-            };
+                         {
+                             Name = CurrentVariable?.Name ?? "变量值",
+                             Values = values,
+                             Fill = null,
+                             Stroke = new SolidColorPaint(new SKColor(41, 128, 185)) { StrokeThickness = 2 },
+                             GeometrySize = 6, // 显示数据点，圆点大小为6
+                             LineSmoothness = 5 // 使用直线连接点，也可以设为其他值实现曲线
+                         };
 
             // 更新序列集合
             LineSeriesCollection = new ISeries[] { series };
-            
+
             // 初始化坐标轴并保存实例引用
             _lineAxisXInstance = new Axis[]
-            {
-                new Axis
-                {
-                    Labeler = value => new DateTime((long)value).ToString("MM-dd HH:mm:ss")
-                }
-            };
+                                 {
+                                     new Axis
+                                     {
+                                         Labeler = value => new DateTime((long)value).ToString("MM-dd HH:mm:ss"),
+                                         // 不设置固定范围，让图表根据数据自动调整
+                                     }
+                                 };
 
             _lineAxisYInstance = new Axis[]
-            {
-                new Axis
-                {
-                    Name = CurrentVariable?.Name ?? "值",
-                    // MinLimit = 0 // 设置Y轴从0开始
-                }
-            };
-            
+                                 {
+                                     new Axis
+                                     {
+                                         Name = CurrentVariable?.Name ?? "值",
+                                         MinLimit = 0 // 设置Y轴从0开始
+                                     }
+                                 };
+
             // 设置属性值
             LineAxisX = _lineAxisXInstance;
             LineAxisY = _lineAxisYInstance;
@@ -310,20 +319,20 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             // 对于实时更新，保持原有完整的更新逻辑以确保数据一致性
             // 创建数值点集合
             var values = new List<DateTimePoint>();
-            
+
             foreach (var history in _variableHistoryList)
             {
                 // 尝试将值转换为double
-                    values.Add(new DateTimePoint(history.Timestamp, history.NumericValue));
+                values.Add(new DateTimePoint(history.Timestamp, history.NumericValue));
             }
 
             // 更新当前系列
             var currentSeries = (LineSeries<DateTimePoint>)LineSeriesCollection[0];
             currentSeries.Values = values;
             currentSeries.Name = CurrentVariable?.Name ?? "变量值";
-            
+
             // 通知系列更改，但保留当前轴的缩放状态（不需要更新轴）
-            OnPropertyChanged(nameof(LineSeriesCollection));
+            // OnPropertyChanged(nameof(LineSeriesCollection));
         }
     }
 }
