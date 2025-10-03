@@ -91,7 +91,7 @@
                                                  Glyph="&#xE8F4;" />
                                     <TextBlock FontSize="12"
                                                Foreground="#888888"
-                                               Text="{Binding ConnectionStatus}" />
+                                               Text="{Binding IsRunning, Converter={StaticResource BoolToStringConverter}, ConverterParameter='已连接;未连接'}" />
                                 </StackPanel>
                             </StackPanel>
 
@@ -99,15 +99,16 @@
                             <StackPanel Grid.Column="1"
                                         VerticalAlignment="Top"
                                         Orientation="Horizontal">
-                                <Border Width="16"
-                                        Height="16"
+                                <Border 
                                         Margin="0,0,10,0"
                                         Background="{Binding IsRunning, Converter={StaticResource BoolToColorConverter}, ConverterParameter='Green;Red'}"
                                         CornerRadius="8">
-                                    <Border.ToolTip>
-                                        <TextBlock
-                                            Text="{Binding IsRunning, Converter={StaticResource BoolToStringConverter}, ConverterParameter='已连接;未连接'}" />
-                                    </Border.ToolTip>
+                                    <TextBlock
+                                        Margin="10 5"
+                                        FontSize="14"
+                                        Foreground="White"
+                                        FontWeight="Bold"
+                                        Text="{Binding IsRunning, Converter={StaticResource BoolToStringConverter}, ConverterParameter='已连接;未连接'}" />
                                 </Border>
 
                                 <ToggleButton x:Name="ExpandToggleButton"
@@ -218,13 +219,17 @@
                                                                 Height="26"
                                                                 Margin="8,0,0,0"
                                                                 Padding="0"
-                                                                Content="&#xE76C;"
-                                                                FontFamily="Segoe MDL2 Assets"
-                                                                FontSize="14"
                                                                 Style="{StaticResource DefaultButtonStyle}"
                                                                 Command="{Binding DataContext.EditVariableTableCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                 CommandParameter="{Binding}"
-                                                                ToolTip="编辑变量表" />
+                                                                ToolTip="编辑变量表">
+                                                            <Button.Content>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <ui:FontIcon
+                                                                        Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                                                                </StackPanel>
+                                                            </Button.Content>
+                                                        </Button>
 
                                                         <Button Width="26"
                                                                 Height="26"
@@ -250,7 +255,7 @@
                                            FontSize="13"
                                            Foreground="#AAAAAA"
                                            Text="暂无变量表"
-                                           Visibility="{Binding VariableTables.Count, Converter={StaticResource CountToVisibilityConverter}}" />
+                                           Visibility="{Binding VariableTables, Converter={StaticResource CountToVisibilityConverter}}" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
