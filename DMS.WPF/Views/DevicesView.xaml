@@ -162,6 +162,8 @@
                                                 FontFamily="Segoe MDL2 Assets"
                                                 FontSize="14"
                                                 Style="{StaticResource DefaultButtonStyle}"
+                                                Command="{Binding DataContext.AddVariableTableCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
                                                 ToolTip="添加变量表" />
                                     </Grid>
                                 </Border>
@@ -220,6 +222,8 @@
                                                                 FontFamily="Segoe MDL2 Assets"
                                                                 FontSize="14"
                                                                 Style="{StaticResource DefaultButtonStyle}"
+                                                                Command="{Binding DataContext.EditVariableTableCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
                                                                 ToolTip="编辑变量表" />
 
                                                         <Button Width="26"
@@ -230,6 +234,8 @@
                                                                 FontFamily="Segoe MDL2 Assets"
                                                                 FontSize="14"
                                                                 Style="{StaticResource DefaultButtonStyle}"
+                                                                Command="{Binding DataContext.DeleteVariableTableCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
                                                                 ToolTip="删除变量表" />
                                                     </StackPanel>
                                                 </Grid>
