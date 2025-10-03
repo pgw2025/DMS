@@ -119,54 +119,54 @@ public class InitializeRepository : IInitializeRepository
                                new DbMenu
                                {
                                    Id = 1, Header = "主页", Icon = "\uE80F", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "HomeView", DisplayOrder = 1
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "HomeViewModel", DisplayOrder = 1
                                },
                                new DbMenu
                                {
                                    Id = 2, Header = "设备", Icon = "\uE975", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "DevicesView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "DevicesViewModel",
                                    DisplayOrder = 2
                                },
                                new DbMenu
                                {
                                    Id = 3, Header = "数据转换", Icon = "\uF1CB", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "DataTransformView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "DataTransformViewModel",
                                    DisplayOrder = 3
                                },
                                new DbMenu
                                {
                                    Id = 4, Header = "Mqtt服务器", Icon = "\uE753", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "MqttsView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "MqttsViewModel",
                                    DisplayOrder = 4
                                },
                                new DbMenu
                                {
                                    Id = 5, Header = "触发器", Icon = "\uE7BA", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "TriggersView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "TriggersViewModel",
                                    DisplayOrder = 5
                                },
                                new DbMenu
                                {
                                    Id = 6, Header = "日志历史", Icon = "\uE7BA", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "LogHistoryView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "LogHistoryViewModel",
                                    DisplayOrder = 6
                                },
                                new DbMenu
                                {
                                    Id = 7, Header = "邮件管理", Icon = "\uE715", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "EmailManagementView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "EmailManagementViewModel",
                                    DisplayOrder = 7
                                },
                                new DbMenu
                                {
                                    Id = 8, Header = "变量历史", Icon = "\uE81C", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "VariableHistoryView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "VariableHistoryViewModel",
                                    DisplayOrder = 8
                                },
                                new DbMenu
                                {
                                    Id = 9, Header = "设置", Icon = "\uE713", ParentId = 0,
-                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingView",
+                                   MenuType = MenuType.MainMenu, TargetViewKey = "SettingViewModel",
                                    DisplayOrder = 9
                                },
                                new DbMenu

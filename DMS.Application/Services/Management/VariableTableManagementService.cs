@@ -82,8 +82,7 @@ public class VariableTableManagementService : IVariableTableManagementService
             {
                 _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
                                            DataChangeType.Added,
-                                           result.VariableTable,
-                                           deviceDto));
+                                           result.VariableTable));
             }
         }
         
@@ -109,8 +108,7 @@ public class VariableTableManagementService : IVariableTableManagementService
             _appDataStorageService.VariableTables.AddOrUpdate(variableTableDto.Id, variableTableDto, (key, oldValue) => variableTableDto);
             _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
                                              DataChangeType.Updated,
-                                             variableTableDto,
-                                             deviceDto));
+                                             variableTableDto));
         }
         
         return result;
@@ -139,8 +137,7 @@ public class VariableTableManagementService : IVariableTableManagementService
 
                 _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
                                                  DataChangeType.Deleted,
-                                                 variableTableDto,
-                                                 deviceDto));
+                                                 variableTableDto));
             }
         }
         

@@ -53,6 +53,10 @@ public class DeviceManagementService : IDeviceManagementService
             {
                 _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Added, result.Device));
             }
+            if (_appDataStorageService.VariableTables.TryAdd(result.VariableTable.Id, result.VariableTable))
+            {
+                _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(DataChangeType.Added, result.VariableTable));
+            }
         }
         
         return result;

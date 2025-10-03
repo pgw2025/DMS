@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Text;
 using DMS.Application.DTOs;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
@@ -251,38 +252,37 @@ namespace DMS.Infrastructure.Services.OpcUa
             {
                 _logger.LogInformation("处理批量导入变量事件，共 {Count} 个变量", e.Count);
 
-                // 更新相关设备的变量表
                 var deviceIds = e.Variables.Select(v => v.VariableTable.DeviceId)
-                                 .Distinct();
-                foreach (var deviceId in deviceIds)
-                {
-                    // 获取设备的变量表信息
-                    var variablesForDevice = e.Variables.Where(v => v.VariableTable.DeviceId == deviceId)
-                                              .ToList();
-                    if (variablesForDevice.Any())
-                    {
-                        // 更新设备上下文中的变量
-                        if (_deviceContexts.TryGetValue(deviceId, out var context))
-                        {
-                            // 将新导入的变量添加到设备上下文
-                            foreach (var variable in variablesForDevice)
-                            {
-                                if (!context.Variables.ContainsKey(variable.OpcUaNodeId))
-                                {
-                                    context.Variables.TryAdd(variable.OpcUaNodeId, variable);
-                                }
-                            }
+                                 .Distinct().ToList();
 
-                            // 如果设备已连接，则设置订阅
-                            if (context.IsConnected)
+                foreach (var deviceId in deviceIds){
+                        // 获取设备的变量表信息
+                        var variablesForDevice = e.Variables.Where(v => v.VariableTable.DeviceId == deviceId)
+                                                  .ToList();
+                        if (variablesForDevice.Any())
+                        {
+                            // 更新设备上下文中的变量
+                            if (_deviceContexts.TryGetValue(deviceId, out var context))
                             {
-                                await SetupSubscriptionsAsync(context, CancellationToken.None);
+                                // 将新导入的变量添加到设备上下文
+                                foreach (var variable in variablesForDevice)
+                                {
+                                    if (!context.Variables.ContainsKey(variable.OpcUaNodeId))
+                                    {
+                                        context.Variables.TryAdd(variable.OpcUaNodeId, variable);
+                                    }
+                                }
+
+                                // 如果设备已连接，则设置订阅
+                                if (context.IsConnected)
+                                {
+                                    await SetupSubscriptionsAsync(context, CancellationToken.None);
+                                }
                             }
                         }
                     }
-                }
 
-                _logger.LogInformation("批量导入变量事件处理完成，更新了 {DeviceCount} 个设备的变量信息", deviceIds.Count());
+                    _logger.LogInformation("批量导入变量事件处理完成，更新了 {DeviceCount} 个设备的变量信息", deviceIds.Count());
             }
             catch (Exception ex)
             {
