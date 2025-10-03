@@ -282,10 +282,10 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 if (_dataStorageService.Devices.TryGetValue(variableTableItemViewModel.DeviceId, out var deviceModel))
                 {
                     variableTableItemViewModel.Device = deviceModel;
+                    deviceModel.VariableTables.Add(variableTableItemViewModel);
+                    _dataStorageService.VariableTables.Add(variableTableItemViewModel.Id, variableTableItemViewModel);
                 }
-
                 _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
-                device.VariableTables.Add(variableTableItemViewModel);
             }
             else
             {
@@ -362,8 +362,14 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                 if (await _wpfDataService.VariableDataService.DeleteVariableTable(variableTable, true))
                 {
                     // Remove from parent device's collection
-                    if (variableTable.Device != null && variableTable.Device.VariableTables.Contains(variableTable))
+                    if (variableTable.Device != null)
                     {
+                        if (_dataStorageService.Devices.TryGetValue(variableTable.DeviceId ,out var device))
+                        {
+                            device.VariableTables.Remove(variableTable);
+                        }
+                        _dataStorageService.VariableTables.Remove(variableTable.Id);
+                        
                         variableTable.Device.VariableTables.Remove(variableTable);
                     }
                     _notificationService.ShowSuccess($"变量表：{tableName},删除成功。");

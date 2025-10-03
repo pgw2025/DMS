@@ -81,13 +81,10 @@ public partial class DeviceDetailViewModel : ViewModelBase
             if (addVarTableId > 0)
             {
                 variableTableItemViewModel.Id = addVarTableId;
-                if (_dataStorageService.Devices.TryGetValue(variableTableItemViewModel.DeviceId, out var device))
-                {
-                    variableTableItemViewModel.Device = device;
-                }
-
-                _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
+                variableTableItemViewModel.Device = CurrentDevice;
                 CurrentDevice.VariableTables.Add(variableTableItemViewModel);
+                _dataStorageService.VariableTables.Add(variableTableItemViewModel.Id, variableTableItemViewModel);
+                _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
             }
             else
             {
@@ -170,6 +167,15 @@ public partial class DeviceDetailViewModel : ViewModelBase
                 var tableName = SelectedVariableTable.Name;
                 if (await _wpfDataService.VariableDataService.DeleteVariableTable(SelectedVariableTable, true))
                 {
+                    if (SelectedVariableTable.Device != null)
+                    {
+                        if (_dataStorageService.Devices.TryGetValue(SelectedVariableTable.DeviceId ,out var device))
+                        {
+                            device.VariableTables.Remove(SelectedVariableTable);
+                        }
+                        _dataStorageService.VariableTables.Remove(SelectedVariableTable.Id);
+                        SelectedVariableTable.Device.VariableTables.Remove(SelectedVariableTable);
+                    }
                     _notificationService.ShowSuccess($"变量表：{tableName},删除成功。");
                 }
                 else
@@ -189,7 +195,6 @@ public partial class DeviceDetailViewModel : ViewModelBase
     }
 
 
-    
     public override async Task OnNavigatedToAsync(NavigationParameter parameter)
     {
         if (_dataStorageService.Devices.TryGetValue(parameter.TargetId, out var device))
@@ -221,7 +226,8 @@ public partial class DeviceDetailViewModel : ViewModelBase
         {
             // 导航到设备列表页面
             var navigationService = App.Current.Services.GetRequiredService<INavigationService>();
-            await navigationService.NavigateToAsync(this, new NavigationParameter(nameof(DevicesViewModel), 0, NavigationType.Device));
+            await navigationService.NavigateToAsync(
+                this, new NavigationParameter(nameof(DevicesViewModel), 0, NavigationType.Device));
         }
         catch (Exception ex)
         {
