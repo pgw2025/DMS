@@ -4,6 +4,8 @@ using DMS.WPF.ViewModels;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using DMS.Core.Enums;
+using DMS.Core.Models;
+using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.Views;
@@ -60,7 +62,24 @@ public partial class MainView : Window
         var menu = args.SelectedItem as MenuItemViewModel;
         if (menu != null)
         {
-           await _viewModel.MenuSelectionChanged(menu);
+
+            NavigationType navigationType = NavigationType.None;
+            switch (menu.MenuType)
+            {
+                case MenuType.DeviceMenu:
+                    navigationType=NavigationType.Device;
+                    break;
+                case MenuType.VariableTableMenu:
+                    navigationType=NavigationType.VariableTable;
+                    break;
+                case MenuType.MqttMenu:
+                    navigationType=NavigationType.Mqtt;
+                    break;
+                
+            }
+            
+          var navigationService=  App.Current.Services.GetRequiredService<INavigationService>();
+          navigationService.NavigateToAsync(this,new NavigationParameter(menu.TargetViewKey,menu.TargetId,navigationType));
         }
        
     }

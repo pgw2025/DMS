@@ -6,6 +6,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
@@ -122,7 +123,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                         {
                                             Header = dto.VariableTable.Name,
                                             Icon = SegoeFluentIcons.DataSense.Glyph,
-                                            TargetViewKey = "VariableTableView"
+                                            TargetViewKey = nameof(VariableTableViewModel)
                                         };
             }
 
@@ -241,16 +242,9 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     {
         if (SelectedDevice == null) return;
 
-        var menu = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu &&
-                                                                 m.TargetId == SelectedDevice.Id);
-        if (menu == null) return;
-
-        _navigationService.NavigateToAsync(menu);
+        _navigationService.NavigateToAsync(this,new NavigationParameter(nameof(DeviceDetailViewModel),SelectedDevice.Id,NavigationType.Device));
     }
 
-    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
-    {
-    }
 
     [RelayCommand]
     private async Task AddVariableTable(DeviceItemViewModel device)
@@ -276,7 +270,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                             {
                                 Header = variableTableItemViewModel.Name,
                                 Icon = SegoeFluentIcons.DataSense.Glyph,
-                                TargetViewKey = "VariableTableView"
+                                TargetViewKey = nameof(VariableTableViewModel)
                             };
             int addVarTableId = await _wpfDataService.VariableTableDataService.AddVariableTable(
                 _mapper.Map<VariableTableDto>(variableTableItemViewModel),

@@ -1,7 +1,10 @@
+using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Items;
+using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DMS.WPF.Services;
 
@@ -22,49 +25,34 @@ public class NavigationService : INavigationService
         _notificationService = notificationService;
     }
 
-    /// <summary>
-    /// 导航到指定键的视图，并传递参数。
-    /// </summary>
-    public async Task NavigateToAsync(MenuItemViewModel menu)
-    {
-        if (string.IsNullOrEmpty(menu.TargetViewKey))
-        {
-            return;
-        }
-
-        var mainViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
-        var viewModel = GetViewModelByKey(menu.TargetViewKey);
-        if (viewModel == null)
-        {
-            _notificationService.ShowError($"切换界面失败，没有找到界面：{menu.TargetViewKey}");
-            return;
-        }
-
-
-        if (viewModel is INavigatable navigatableViewModel)
-        {
-            await navigatableViewModel.OnNavigatedToAsync(menu);
-        }
-
-        mainViewModel.CurrentViewModel = viewModel;
-    }
     
     /// <summary>
     /// 导航到指定键的视图，并传递参数。
     /// </summary>
-    public async Task NavigateToAsync(string viewKey, object parameter = null)
+    public async Task NavigateToAsync(object sender,NavigationParameter parameter)
     {
-        var mainViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
-        var viewModel = GetViewModelByKey(viewKey);
+        if (parameter == null || string.IsNullOrWhiteSpace(parameter.TargetViewKey) )return;
+        
+        
+        var viewModel = GetViewModelByKey(parameter.TargetViewKey);
         if (viewModel == null)
         {
-            _notificationService.ShowError($"切换界面失败，没有找到界面：{viewKey}");
+            _notificationService.ShowError($"切换界面失败，没有找到界面：{parameter.TargetViewKey}");
             return;
         }
+        
+        if (sender is INavigatable fromViewModel)
+        {
+            await fromViewModel.OnNavigatedFromAsync(parameter);
+        }
 
-      
-
+        var mainViewModel = App.Current.Services.GetRequiredService<MainViewModel>();
         mainViewModel.CurrentViewModel = viewModel;
+        
+        if (viewModel is INavigatable toViewModel)
+        {
+            await toViewModel.OnNavigatedToAsync(parameter);
+        }
     }
 
 
@@ -74,29 +62,29 @@ public class NavigationService : INavigationService
         {
             switch (key)
             {
-                case "HomeView":
+                case nameof(HomeViewModel):
                     return App.Current.Services.GetRequiredService<HomeViewModel>();
-                case "DevicesView":
+                case nameof(DevicesViewModel):
                     return App.Current.Services.GetRequiredService<DevicesViewModel>();
-                case "DeviceDetailView":
+                case nameof(DeviceDetailViewModel):
                     return App.Current.Services.GetRequiredService<DeviceDetailViewModel>();
-                case "DataTransformView":
+                case nameof(DataTransformViewModel):
                     return App.Current.Services.GetRequiredService<DataTransformViewModel>();
-                case "VariableTableView":
+                case nameof(VariableTableViewModel):
                     return App.Current.Services.GetRequiredService<VariableTableViewModel>();
-                case "VariableHistoryView":
+                case nameof(VariableHistoryViewModel):
                     return App.Current.Services.GetRequiredService<VariableHistoryViewModel>();
-                case "LogHistoryView":
+                case nameof(LogHistoryViewModel):
                     return App.Current.Services.GetRequiredService<LogHistoryViewModel>();
-                case "MqttsView":
+                case nameof(MqttsViewModel):
                     return App.Current.Services.GetRequiredService<MqttsViewModel>();
-                case "MqttServerDetailView":
+                case nameof(MqttServerDetailViewModel):
                     return App.Current.Services.GetRequiredService<MqttServerDetailViewModel>();
-                case "SettingView":
+                case nameof(SettingViewModel):
                     return App.Current.Services.GetRequiredService<SettingViewModel>();
-                case "EmailManagementView":
+                case nameof(EmailManagementViewModel):
                     return App.Current.Services.GetRequiredService<EmailManagementViewModel>();
-                case "TriggersView":
+                case nameof(TriggersViewModel):
                     return App.Current.Services.GetRequiredService<TriggersViewModel>();
                 default:
                     return null;

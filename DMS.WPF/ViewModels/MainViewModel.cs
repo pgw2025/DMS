@@ -57,10 +57,6 @@ public partial class MainViewModel : ViewModelBase
 
         CurrentViewModel = new HomeViewModel();
         CurrentViewModel.OnLoaded();
-        // 发送消息加载数据
-        MessageHelper.SendLoadMessage(LoadTypes.All);
-        // 当菜单加载成功后，在前台显示菜单
-        // _dataServices.OnMenuTreeListChanged += (menus) => { Menus = new ObservableCollection<MenuBean>(menus); };
     }
 
     /// <summary>
@@ -84,86 +80,6 @@ public partial class MainViewModel : ViewModelBase
         // Application.Current.Shutdown();
     }
 
-    /// <summary>
-    /// 添加变量表。
-    /// </summary>
-    /// <param name="menu">当前菜单项，用于获取父级设备信息。</param>
-    private async Task AddVariableTable(MenuBean menu)
-    {
-        // var db = DbContext.GetInstance();
-        // try
-        // {
-        //     // 1. 检查父级设备信息
-        //     if (menu.Parent?.Data is not Device device)
-        //     {
-        //         _logger.LogWarning("尝试添加变量表时，Parent 或 Parent.Data 为空，或 Parent.Data 不是 Device 类型。");
-        //         NotificationHelper.ShowError("操作失败：无法获取有效的设备信息。");
-        //         return;
-        //     }
-        //
-        //
-        //     // 2. 显示添加变量表对话框
-        //     var varTable = await _dialogService.ShowAddVarTableDialog();
-        //     if (varTable == null)
-        //     {
-        //         // 用户取消或未选择
-        //         return;
-        //     }
-        //
-        //     // 3. 设置变量表属性
-        //     varTable.IsActive = true;
-        //     varTable.DeviceId = device.Id;
-        //     varTable.ProtocolType = device.ProtocolType;
-        //
-        //     // 4. 添加变量表到数据库
-        //     // 假设 _varTableRepository.AddAsync 返回一个布尔值表示成功，或者一个表示 ID 的整数
-        //     // 这里为了演示，我们假设它返回新添加的ID，如果失败则返回0
-        //     await db.BeginTranAsync();
-        //     var addVarTable = await _varTableRepository.AddAsync(varTable, db);
-        //
-        //     // 5. 添加变量表菜单
-        //     MenuBean newMenu = new MenuBean
-        //                        {
-        //                            Icon = SegoeFluentIcons.Tablet.Glyph,
-        //                            Name = varTable.Name,
-        //                            DataId = addVarTable.Id, // 使用实际添加的ID
-        //                            Type = MenuType.VariableTableMenu,
-        //                            ParentId = menu.Parent.Id
-        //                        };
-        //
-        //     var addMenuRes = await _menuRepository.AddAsync(newMenu, db);
-        //     if (addMenuRes > 0)
-        //     {
-        //         await db.CommitTranAsync();
-        //         // 变量表和菜单都添加成功
-        //         MessageHelper.SendLoadMessage(LoadTypes.Menu);
-        //         MessageHelper.SendLoadMessage(LoadTypes.Devices);
-        //         NotificationHelper.ShowSuccess($"变量表:{varTable.Name},添加成功");
-        //         _logger.LogInformation($"变量表:{varTable.Name},添加成功");
-        //     }
-        //     else
-        //     {
-        //         await db.RollbackTranAsync();
-        //         // 变量表菜单添加失败 (此时变量表可能已添加成功，需要根据业务决定是否回滚)
-        //         NotificationHelper.ShowError($"变量表:{varTable.Name},添加菜单失败");
-        //         _logger.LogError($"变量表:{varTable.Name},添加菜单失败");
-        //         // 考虑：如果菜单添加失败，是否需要删除之前添加的变量表？
-        //         // 例如：await _varTableRepository.DeleteAsync(addVarTableId);
-        //     }
-        // }
-        // catch (Exception e)
-        // {
-        //     await db.RollbackTranAsync();
-        //     NotificationHelper.ShowError($"添加变量表时出现了错误:{e.Message}", e);
-        // }
-    }
 
-    /// <summary>
-    /// 处理菜单选择变化的逻辑。
-    /// </summary>
-    /// <param name="menu">被选中的菜单项。</param>
-    public async Task MenuSelectionChanged(MenuItemViewModel menu)
-    {
-        _navigationService.NavigateToAsync(menu);
-    }
+
 }

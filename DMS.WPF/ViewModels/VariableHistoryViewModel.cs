@@ -6,7 +6,9 @@ using DMS.Application.DTOs;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
+using DMS.Core.Enums;
 using DMS.Core.Events;
+using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
 using LiveChartsCore;
@@ -28,6 +30,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     private readonly IDataStorageService _dataStorageService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
+    private readonly INavigationService _navigationService;
 
     /// <summary>
     /// 加载历史记录条数限制
@@ -83,8 +86,8 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     public VariableHistoryViewModel(IMapper mapper, IDialogService dialogService, IHistoryAppService historyAppService,
                                     IWPFDataService wpfDataService, IDataStorageService dataStorageService,
-                                    IEventService eventService,
-                                    INotificationService notificationService)
+                                    IEventService eventService, INotificationService notificationService,
+                                    INavigationService navigationService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
@@ -93,6 +96,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         _dataStorageService = dataStorageService;
         _eventService = eventService;
         _notificationService = notificationService;
+        _navigationService = navigationService;
 
         _variableHistoryList = new ObservableList<VariableHistoryDto>();
         _variableHistorySynchronizedView = _variableHistoryList.CreateView(v => v);
@@ -168,9 +172,9 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     }
 
 
-    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
+    public override async Task OnNavigatedToAsync(NavigationParameter parameter)
     {
-        if (_dataStorageService.Variables.TryGetValue(menu.TargetId, out VariableItemViewModel variableItem))
+        if (_dataStorageService.Variables.TryGetValue(parameter.TargetId, out VariableItemViewModel variableItem))
         {
             CurrentVariable = variableItem;
             // 加载所有变量的历史记录
@@ -187,6 +191,23 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         if (CurrentVariable != null)
         {
             LoadAllVariableHistories(CurrentVariable.Id, InitHistoryLimit, StartTime, EndTime);
+        }
+    }
+
+    /// <summary>
+    /// 返回变量表命令
+    /// </summary>
+    [RelayCommand]
+    private async Task NavigateToVariableTable()
+    {
+        try
+        {
+            // 导航到变量表页面
+            await _navigationService.NavigateToAsync(this,new NavigationParameter(nameof(VariableTableViewModel),CurrentVariable.VariableTableId,NavigationType.VariableTable));
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"导航到变量表失败: {ex.Message}", ex);
         }
     }
 

@@ -6,6 +6,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
@@ -177,12 +178,13 @@ public partial class MqttsViewModel : ViewModelBase
         }
 
         // 导航到MQTT服务器详情页
-        var menu = new MenuItemViewModel
-        {
-            TargetViewKey = "MqttServerDetailView",
-            TargetId = SelectedMqtt.Id
-        };
-        
-        await _navigationService.NavigateToAsync(menu);
+        // var menu = new MenuItemViewModel
+        // {
+        //     TargetViewKey = "MqttServerDetailView",
+        //     TargetId = SelectedMqtt.Id
+        // };
+
+        await _navigationService.NavigateToAsync(
+            this, new NavigationParameter(nameof(MqttServerDetailViewModel), SelectedMqtt.Id, NavigationType.Mqtt));
     }
 }

@@ -5,6 +5,7 @@ using Dm;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.WPF.Services;
 using DMS.Services;
 using DMS.WPF.Interfaces;
@@ -14,7 +15,7 @@ using iNKORE.UI.WPF.Modern.Common.IconKeys;
 
 namespace DMS.WPF.ViewModels;
 
-public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
+public partial class DeviceDetailViewModel : ViewModelBase
 {
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
@@ -70,7 +71,7 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
                             {
                                 Header = variableTableItemViewModel.Name,
                                 Icon = SegoeFluentIcons.DataSense.Glyph,
-                                TargetViewKey = "VariableTableView"
+                                TargetViewKey = nameof(VariableTableViewModel)
                             };
             int addVarTableId = await _wpfDataService.VariableTableDataService.AddVariableTable(
                 _mapper.Map<VariableTableDto>(variableTableItemViewModel),
@@ -187,9 +188,10 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     }
 
 
-    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
+    
+    public override async Task OnNavigatedToAsync(NavigationParameter parameter)
     {
-        if (_dataStorageService.Devices.TryGetValue(menu.TargetId, out var device))
+        if (_dataStorageService.Devices.TryGetValue(parameter.TargetId, out var device))
         {
             CurrentDevice = device;
         }
@@ -199,9 +201,12 @@ public partial class DeviceDetailViewModel : ViewModelBase, INavigatable
     public void NavigateToVariableTable()
     {
         if (SelectedVariableTable == null) return;
-        var menu = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu &&
-                                                                 m.TargetId == SelectedVariableTable.Id);
-        if (menu == null) return;
-        _navigationService.NavigateToAsync(menu);
+        // var menu = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu &&
+        //                                                          m.TargetId == SelectedVariableTable.Id);
+        // if (menu == null) return;
+        _navigationService.NavigateToAsync(
+            this,
+            new NavigationParameter(nameof(VariableTableViewModel), SelectedVariableTable.Id,
+                                    NavigationType.VariableTable));
     }
 }

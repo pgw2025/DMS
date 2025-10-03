@@ -739,11 +739,9 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         // 导航到历史记录视图
         var navigationService = App.Current.Services.GetRequiredService<INavigationService>();
-        MenuItemViewModel viewModel = new MenuItemViewModel();
-        viewModel.TargetViewKey = "VariableHistoryView";
-        viewModel.MenuType = MenuType.VariableMenu;
-        viewModel.TargetId = SelectedVariable.Id;
-        navigationService.NavigateToAsync(viewModel);
+        navigationService.NavigateToAsync(
+            this,
+            new NavigationParameter(nameof(VariableHistoryViewModel), SelectedVariable.Id, NavigationType.Variable));
     }
 
     /// <summary>
@@ -875,9 +873,9 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         // }
     }
 
-    public async Task OnNavigatedToAsync(MenuItemViewModel menu)
+    public override async Task OnNavigatedToAsync(NavigationParameter parameter)
     {
-        if (_dataStorageService.VariableTables.TryGetValue(menu.TargetId, out var varTable))
+        if (_dataStorageService.VariableTables.TryGetValue(parameter.TargetId, out var varTable))
         {
             CurrentVariableTable = varTable;
             // 根据变量表的协议类型设置对应的布尔属性

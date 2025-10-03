@@ -1,8 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DMS.Core.Models;
+using DMS.WPF.Interfaces;
+using DMS.WPF.ViewModels.Items;
 
 namespace DMS.WPF.ViewModels;
 
-public abstract class ViewModelBase : ObservableObject
+public abstract class ViewModelBase : ObservableObject,INavigatable
 {
     public virtual void OnLoaded()
     {
@@ -20,5 +23,13 @@ public abstract class ViewModelBase : ObservableObject
     }
 
 
+    public virtual async Task OnNavigatedToAsync(NavigationParameter parameter)
+    {
+        
+    }
 
+    public virtual async Task OnNavigatedFromAsync(NavigationParameter parameter)
+    {
+        
+    }
 }
