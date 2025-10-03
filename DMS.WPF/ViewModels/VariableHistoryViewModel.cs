@@ -117,7 +117,8 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
                               {
                                   VariableId = CurrentVariable.Id,
                                   Timestamp = DateTime.Now,
-                                  Value = e.Variable.DisplayValue
+                                  Value = e.Variable.DisplayValue,
+                                  NumericValue = e.Variable.NumericValue
                               };
         _variableHistoryList.Add(variableHistory);
 
@@ -235,6 +236,10 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
         }
     }
 
+    // 添加字段来保存轴实例，以保持缩放状态
+    private Axis[] _lineAxisXInstance;
+    private Axis[] _lineAxisYInstance;
+
     /// <summary>
     /// 更新图表数据
     /// </summary>
@@ -256,11 +261,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             
             foreach (var history in _variableHistoryList)
             {
-                // 尝试将值转换为double
-                if (double.TryParse(history.Value, out double value))
-                {
-                    values.Add(new DateTimePoint(history.Timestamp, value));
-                }
+                values.Add(new DateTimePoint(history.Timestamp, history.NumericValue));
             }
 
             // 创建线性序列
@@ -276,6 +277,33 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
             // 更新序列集合
             LineSeriesCollection = new ISeries[] { series };
+            
+            // 初始化坐标轴并保存实例引用
+            _lineAxisXInstance = new Axis[]
+            {
+                new Axis
+                {
+                    Labeler = value => new DateTime((long)value).ToString("MM-dd HH:mm:ss")
+                }
+            };
+
+            _lineAxisYInstance = new Axis[]
+            {
+                new Axis
+                {
+                    Name = CurrentVariable?.Name ?? "值",
+                    // MinLimit = 0 // 设置Y轴从0开始
+                }
+            };
+            
+            // 设置属性值
+            LineAxisX = _lineAxisXInstance;
+            LineAxisY = _lineAxisYInstance;
+
+            // 通知属性更改
+            OnPropertyChanged(nameof(LineSeriesCollection));
+            OnPropertyChanged(nameof(LineAxisX));
+            OnPropertyChanged(nameof(LineAxisY));
         }
         else
         {
@@ -286,39 +314,16 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
             foreach (var history in _variableHistoryList)
             {
                 // 尝试将值转换为double
-                if (double.TryParse(history.Value, out double value))
-                {
-                    values.Add(new DateTimePoint(history.Timestamp, value));
-                }
+                    values.Add(new DateTimePoint(history.Timestamp, history.NumericValue));
             }
 
             // 更新当前系列
             var currentSeries = (LineSeries<DateTimePoint>)LineSeriesCollection[0];
             currentSeries.Values = values;
             currentSeries.Name = CurrentVariable?.Name ?? "变量值";
+            
+            // 通知系列更改，但保留当前轴的缩放状态（不需要更新轴）
+            OnPropertyChanged(nameof(LineSeriesCollection));
         }
-
-        // 更新坐标轴
-        LineAxisX = new Axis[]
-        {
-            new Axis
-            {
-                Labeler = value => new DateTime((long)value).ToString("MM-dd HH:mm:ss")
-            }
-        };
-
-        LineAxisY = new Axis[]
-        {
-            new Axis
-            {
-                Name = CurrentVariable?.Name ?? "值",
-                MinLimit = 0 // 设置Y轴从0开始
-            }
-        };
-
-        // 通知属性更改
-        OnPropertyChanged(nameof(LineSeriesCollection));
-        OnPropertyChanged(nameof(LineAxisX));
-        OnPropertyChanged(nameof(LineAxisY));
     }
 }
