@@ -3,7 +3,7 @@ using DMS.Application.DTOs;
 using DMS.Core.Enums;
 using System;
 using System.Collections.Generic;
-using DMS.Infrastructure.Configurations;
+using DMS.Application.Configurations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ViewModels.Items;

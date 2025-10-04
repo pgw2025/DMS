@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using AutoMapper.Internal;
+using DMS.Application.Configurations;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Application.Services;
@@ -11,7 +12,6 @@ using DMS.Core.Interfaces.Repositories;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
-using DMS.Infrastructure.Configurations;
 
 
 namespace DMS.Infrastructure.UnitTests.Services;
@@ -37,11 +37,7 @@ public class BaseServiceTest
         });
 
         // 2. 配置数据库上下文 (在测试中通常使用单例)
-        services.AddSingleton<SqlSugarDbContext>(_ =>
-        {
-            var appSettings = new AppSettings { Database = { Database = "dms_test" } };
-            return new SqlSugarDbContext(appSettings);
-        });
+        services.AddSingleton<SqlSugarDbContext>();
 
         // --- 注册服务和仓储 ---
         // 使用 Transient 或 Scoped 取决于服务的生命周期需求，对于测试，Transient 通常更安全。

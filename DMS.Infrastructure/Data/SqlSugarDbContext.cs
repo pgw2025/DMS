@@ -1,4 +1,4 @@
-using DMS.Infrastructure.Configurations;
+using DMS.Application.Configurations;
 using SqlSugar;
 
 namespace DMS.Infrastructure.Data;
@@ -16,7 +16,7 @@ public class SqlSugarDbContext
     public SqlSugarClient GetInstance()
     {
         var connectionString = _settings.ToConnectionString();
-        var dbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), _settings.Database.DbType);
+        var dbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), _settings.Db.DbType);
 
         return new SqlSugarClient(new ConnectionConfig
         {

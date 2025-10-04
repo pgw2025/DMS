@@ -34,6 +34,9 @@
             <!-- System Accent Color as Brush -->
             <SolidColorBrush x:Key="SystemAccentColorBrush" Color="{DynamicResource SystemAccentColor}" />
             
+            <!-- Material Design Icons Font -->
+            <FontFamily x:Key="MdFontIcons">/Assets/Fonts/materialdesignicons-webfont.ttf#Material Design Icons</FontFamily>
+            
             <!-- Enum Values for ComboBoxes -->
             <ObjectDataProvider x:Key="ConditionTypeEnum" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
                 <ObjectDataProvider.MethodParameters>

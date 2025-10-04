@@ -1,5 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
-using DMS.Infrastructure.Configurations;
+using DMS.Application.Configurations;
 using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 
@@ -39,12 +39,12 @@ public partial class SettingViewModel : ViewModelBase
 
     public string SelectedDbType
     {
-        get => _settings.Database.DbType;
+        get => _settings.Db.DbType;
         set
         {
-            if (_settings.Database.DbType != value)
+            if (_settings.Db.DbType != value)
             {
-                _settings.Database.DbType = value;
+                _settings.Db.DbType = value;
                 OnPropertyChanged();
                 _settings.Save();
             }
@@ -53,12 +53,12 @@ public partial class SettingViewModel : ViewModelBase
 
     public string Server
     {
-        get => _settings.Database.Server;
+        get => _settings.Db.Server;
         set
         {
-            if (_settings.Database.Server != value)
+            if (_settings.Db.Server != value)
             {
-                _settings.Database.Server = value;
+                _settings.Db.Server = value;
                 OnPropertyChanged();
                 _settings.Save();
             }
@@ -67,12 +67,12 @@ public partial class SettingViewModel : ViewModelBase
 
     public int Port
     {
-        get => _settings.Database.Port;
+        get => _settings.Db.Port;
         set
         {
-            if (_settings.Database.Port != value)
+            if (_settings.Db.Port != value)
             {
-                _settings.Database.Port = value;
+                _settings.Db.Port = value;
                 OnPropertyChanged();
                 _settings.Save();
             }
@@ -81,12 +81,12 @@ public partial class SettingViewModel : ViewModelBase
 
     public string UserId
     {
-        get => _settings.Database.UserId;
+        get => _settings.Db.UserId;
         set
         {
-            if (_settings.Database.UserId != value)
+            if (_settings.Db.UserId != value)
             {
-                _settings.Database.UserId = value;
+                _settings.Db.UserId = value;
                 OnPropertyChanged();
                 _settings.Save();
             }
@@ -95,26 +95,26 @@ public partial class SettingViewModel : ViewModelBase
     
     public string Password
     {
-        get => _settings.Database.Password;
+        get => _settings.Db.Password;
         set
         {
-            if (_settings.Database.Password != value)
+            if (_settings.Db.Password != value)
             {
-                _settings.Database.Password = value;
+                _settings.Db.Password = value;
                 OnPropertyChanged();
                 _settings.Save();
             }
         }
     }
     
-    public string Database
+    public string DbName
     {
-        get => _settings.Database.Database;
+        get => _settings.Db.DbName;
         set
         {
-            if (_settings.Database.Database != value)
+            if (_settings.Db.DbName != value)
             {
-                _settings.Database.Database = value;
+                _settings.Db.DbName = value;
                 OnPropertyChanged();
                 _settings.Save();
             }
@@ -157,7 +157,7 @@ public partial class SettingViewModel : ViewModelBase
             // 使用当前配置测试数据库连接
             using var db = new SqlSugar.SqlSugarScope(new SqlSugar.ConnectionConfig()
             {
-                DbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), _settings.Database.DbType),
+                DbType = (SqlSugar.DbType)Enum.Parse(typeof(SqlSugar.DbType), _settings.Db.DbType),
                 ConnectionString = _settings.ToConnectionString(),
                 IsAutoCloseConnection = true
             });

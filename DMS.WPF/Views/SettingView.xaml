@@ -1,161 +1,95 @@
-<UserControl x:Class="DMS.WPF.Views.SettingView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             mc:Ignorable="d"
-             d:DesignHeight="450"
-             d:DesignWidth="800">
+<UserControl
+    x:Class="DMS.WPF.Views.SettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
     <StackPanel>
-        <ui:SettingsExpander Header="通用设置"
-                             Description="通用程序行为设置">
+
+        <ui:SettingsExpander Description="通用程序行为设置" Header="通用设置">
             <ui:SettingsExpander.HeaderIcon>
                 <ui:FontIcon Glyph="&#xE713;" />
             </ui:SettingsExpander.HeaderIcon>
             <ui:SettingsExpander.Items>
-                <ui:SettingsCard Header="主题切换"
-                                 Description="切换应用程序的主题">
-                    <ComboBox Width="120"
-                              ItemsSource="{Binding Themes}"
-                              SelectedItem="{Binding SelectedTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:SettingsCard Description="切换应用程序的主题" Header="主题切换">
+                    <ComboBox
+                        Width="120"
+                        ItemsSource="{Binding Themes}"
+                        SelectedItem="{Binding SelectedTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:SettingsCard>
-                <ui:SettingsCard Header="点击关闭按钮时最小化到通知栏"
-                                 Description="开启后，点击主窗口的关闭按钮会将程序最小化到系统通知栏，而不是直接退出。"
-                                 IsClickEnabled="True">
+                <ui:SettingsCard
+                    Description="开启后，点击主窗口的关闭按钮会将程序最小化到系统通知栏，而不是直接退出。"
+                    Header="点击关闭按钮时最小化到通知栏"
+                    IsClickEnabled="True">
                     <ui:ToggleSwitch IsOn="{Binding MinimizeToTrayOnClose, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:SettingsCard>
-                <ui:SettingsCard Header="默认轮询间隔"
-                                 Description="设置变量的默认轮询间隔时间（毫秒）">
-                    <TextBox Width="120"
-                             Text="{Binding DefaultPollingInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:SettingsCard Description="设置变量的默认轮询间隔时间（毫秒）" Header="默认轮询间隔">
+                    <TextBox Width="120" Text="{Binding DefaultPollingInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:SettingsCard>
             </ui:SettingsExpander.Items>
         </ui:SettingsExpander>
 
-        <ui:SettingsExpander x:Name="dbSettingCard"
-                             Header="设置数据库"
-                             Description="设置要连接的数据库，数据全部在数据库中存放">
+
+
+        <ui:SettingsExpander Description="设置要连接的数据库，数据全部在数据库中存放" Header="设置数据库">
             <ui:SettingsExpander.HeaderIcon>
-                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DataSense}"
-                             VerticalAlignment="Center"
-                             Margin="0,0,8,0"
-                             FontSize="14" />
+                <ui:FontIcon
+                    FontFamily="{StaticResource MdFontIcons}"
+                    FontSize="18"
+                    Glyph="&#xF01BC;" />
             </ui:SettingsExpander.HeaderIcon>
-            
-            <Button Content="测试连接"
-                    Command="{Binding TestConnectionCommand}"
-                    Style="{StaticResource AccentButtonStyle}"
-                    Margin="0,10,0,0"
-                    HorizontalAlignment="Left" />
-            
-            <ui:SettingsExpander.Items>
-                <ui:SettingsCard HorizontalAlignment="Left"
-                                 Width="{Binding ElementName=dbSettingCard ,Path=Width}">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                          Spacing="10">
-                        <TextBlock Text="数据库类型:"
-                                   FontSize="14"
-                                   VerticalAlignment="Center"
-                                   Margin="30,0,10,0" />
-                        <ComboBox Grid.Column="1"
-                                  MinWidth="200"
-                                  ItemsSource="{Binding AvailableDbTypes}"
-                                  SelectedItem="{Binding SelectedDbType}" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
-
-
-                <ui:SettingsCard HorizontalAlignment="Left"
-                                 Width="{Binding ElementName=dbSettingCard ,Path=Width}">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                          Spacing="10">
-                        <TextBlock Text="服务器地址:"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,0" />
-                        <TextBox Grid.Column="1"
-                                 Text="{Binding Server, UpdateSourceTrigger=PropertyChanged}" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
-                 <ui:SettingsCard HorizontalAlignment="Left"
-                                 Width="{Binding ElementName=dbSettingCard ,Path=Width}">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                          Spacing="10">
-                        <TextBlock Text="服务器端口:"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,0" />
-                        <TextBox Grid.Column="1"
-                                 Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
-                
-                
-                <ui:SettingsCard HorizontalAlignment="Left"
-                                 Width="{Binding ElementName=dbSettingCard ,Path=Width}">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                          Spacing="10">
-                        <TextBlock Text="用户名:"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,0" />
-                        <TextBox Grid.Column="1"
-                                 Text="{Binding UserId, UpdateSourceTrigger=PropertyChanged}" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
-                
-                <ui:SettingsCard HorizontalAlignment="Left"
-                                 Width="{Binding ElementName=dbSettingCard ,Path=Width}">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                          Spacing="10">
-                        <TextBlock Text="密码:"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,0" />
-                        <TextBox Grid.Column="1"
-                                 Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
-                
-                <ui:SettingsCard HorizontalAlignment="Left"
-                                 Width="{Binding ElementName=dbSettingCard ,Path=Width}">
-                    <ikw:SimpleStackPanel Orientation="Horizontal"
-                                          Spacing="10">
-                        <TextBlock Text="数据库名称:"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,0" />
-                        <TextBox Grid.Column="1"
-                                 Text="{Binding Database, UpdateSourceTrigger=PropertyChanged}" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
-               
-
-            </ui:SettingsExpander.Items>
-
-        </ui:SettingsExpander>
-
-       
-
-        <ui:SettingsExpander Header="SettingsExpander"
-                             Description="The SettingsExpander has the same properties as a SettingsCard">
-            <ui:SettingsExpander.HeaderIcon>
-                <ui:FontIcon Glyph="&#xE91B;" />
-            </ui:SettingsExpander.HeaderIcon>
-
-            <Button Content="Content"
-                    Style="{StaticResource AccentButtonStyle}" />
+            <Button
+                Margin="0,10,0,0"
+                HorizontalAlignment="Left"
+                Command="{Binding TestConnectionCommand}"
+                Content="测试连接"
+                Style="{StaticResource AccentButtonStyle}" />
 
             <ui:SettingsExpander.Items>
-                <ui:SettingsCard Header="A basic SettingsCard within an SettingsExpander">
-                    <Button Content="Button" />
+                <ui:SettingsCard Description="使用的数据库类型，如Mysql,SqlServer等" Header="数据库类型">
+                    <ComboBox
+                        MinWidth="200"
+                        ItemsSource="{Binding AvailableDbTypes}"
+                        SelectedItem="{Binding SelectedDbType}" />
                 </ui:SettingsCard>
-                <ui:SettingsCard Description="SettingsCard within an Expander can be made clickable too!"
-                                 Header="This item can be clicked"
-                                 IsClickEnabled="True" />
-                <ui:SettingsCard ContentAlignment="Left">
-                    <CheckBox
-                        Content="Here the ContentAlignment is set to Left. This is great for e.g. CheckBoxes or RadioButtons" />
+
+                <ui:SettingsCard Description="数据库所在电脑的地址" Header="服务器地址">
+                    <TextBox MinWidth="200" Text="{Binding Server, UpdateSourceTrigger=PropertyChanged}" />
                 </ui:SettingsCard>
+
+                <ui:SettingsCard Description="数据库服务器端口号" Header="服务器端口">
+                    <TextBox MinWidth="200" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+
+
+                <ui:SettingsCard Description="数据库登录用户名" Header="用户名">
+                    <TextBox MinWidth="200" Text="{Binding UserId, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Description="数据库登录密码" Header="密码">
+                    <TextBox MinWidth="200" Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Description="要连接的数据库名称" Header="数据库名称">
+                    <TextBox MinWidth="200" Text="{Binding DbName, UpdateSourceTrigger=PropertyChanged}" />
+                </ui:SettingsCard>
+
+
             </ui:SettingsExpander.Items>
+
         </ui:SettingsExpander>
+
+        <ui:SettingsExpander>
+            <ui:SettingsExpander.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ScreenTime}" />
+            </ui:SettingsExpander.HeaderIcon>
+        </ui:SettingsExpander>
+
 
     </StackPanel>
 </UserControl>

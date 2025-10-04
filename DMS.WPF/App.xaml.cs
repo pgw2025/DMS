@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using AutoMapper;
 using AutoMapper.Internal;
+using DMS.Application.Configurations;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces.Management;
@@ -15,7 +16,6 @@ using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Interfaces.Repositories.Triggers;
 using DMS.Core.Interfaces.Services;
 using DMS.Infrastructure.Configuration;
-using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Interfaces;
 using DMS.Infrastructure.Interfaces.Services;
@@ -174,6 +174,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ILoggerFactory, NLogLoggerFactory>();
         services.AddSingleton<GrowlNotificationService>();
         services.AddSingleton<INotificationService, NotificationService>();
+        
 
         // 注册核心服务
         services.AddAutoMapper(cfg =>
@@ -218,11 +219,7 @@ public partial class App : System.Windows.Application
 
         // 注册Core中的仓库
         services.AddSingleton<AppSettings>();
-        services.AddSingleton<SqlSugarDbContext>(_ =>
-        {
-            var appSettings = new AppSettings { Database = { Database = "dms_test" } };
-            return new SqlSugarDbContext(appSettings);
-        });
+        services.AddSingleton<SqlSugarDbContext>();
 
 
 

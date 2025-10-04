@@ -1,7 +1,6 @@
 using DMS.Core.Enums;
 using DMS.Core.Interfaces.Repositories;
 using DMS.Core.Models;
-using DMS.Infrastructure.Configurations;
 using DMS.Infrastructure.Data;
 using DMS.Infrastructure.Entities;
 using Microsoft.Extensions.Logging;

@@ -26,4 +26,8 @@
     <ProjectReference Include="..\DMS.Core\DMS.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Configurations\" />
+  </ItemGroup>
+
 </Project>

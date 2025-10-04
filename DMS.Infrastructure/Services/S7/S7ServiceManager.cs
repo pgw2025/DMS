@@ -426,18 +426,6 @@ namespace DMS.Infrastructure.Services.S7
                         // 如果变量的S7相关属性发生变化
                         switch (e.PropertyType)
                         {
-                            case VariablePropertyType.S7Address:
-                                // S7地址变化，需要更新设备上下文中的变量映射
-                                if (_deviceContexts.TryGetValue(e.Variable.VariableTable.DeviceId, out var context))
-                                {
-                                    // 先移除旧地址的变量
-                                    context.Variables.Remove(e.Variable.S7Address, out _);
-                                    // 添加新地址的变量
-                                    context.Variables.AddOrUpdate(e.Variable.S7Address, e.Variable, (key, oldValue) => e.Variable);
-                                    _logger.LogInformation("已更新设备 {DeviceId} 中变量 {VariableId} 的S7地址映射", 
-                                        e.Variable.VariableTable.DeviceId, e.Variable.Id);
-                                }
-                                break;
                                 
                             case VariablePropertyType.IsActive:
                                 // 变量激活状态变化，更新变量列表

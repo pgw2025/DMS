@@ -7,8 +7,8 @@ using DMS.WPF.Services;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using DMS.Application.Configurations;
 using DMS.Application.Services;
-using DMS.Infrastructure.Configurations;
 using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Views;
@@ -32,8 +32,9 @@ public partial class SplashViewModel : ObservableObject
     [ObservableProperty]
     private string _loadingMessage = "正在加载...";
 
-    public SplashViewModel(ILogger<SplashViewModel> logger,IServiceProvider serviceProvider, IInitializeService initializeService,IDataEventService dataEventService,
-                           IAppDataCenterService appDataCenterService,AppSettings appSettings)
+    public SplashViewModel(ILogger<SplashViewModel> logger, IServiceProvider serviceProvider,
+                           IInitializeService initializeService, IDataEventService dataEventService,
+                           IAppDataCenterService appDataCenterService, AppSettings appSettings)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
@@ -50,13 +51,18 @@ public partial class SplashViewModel : ObservableObject
     {
         try
         {
+            LoadingMessage = "正在加载系统配置...";
+            if (_appSettings.Load() == null)
+            {
+                //程序第一次启动
+            }
+
             _logger.LogInformation("正在初始化数据库...");
             LoadingMessage = "正在初始化数据库...";
             _initializeService.InitializeTables();
             _initializeService.InitializeMenus();
-            LoadingMessage = "正在加载系统配置...";
-            
-           
+
+
             await _appDataCenterService.DataLoaderService.LoadAllDataToMemoryAsync();
 
             // 可以在这里添加加载配置的逻辑
@@ -80,7 +86,7 @@ public partial class SplashViewModel : ObservableObject
         {
             // 处理初始化过程中的异常
             LoadingMessage = $"初始化失败: {ex.Message}";
-            _logger.LogError(ex,$"初始化失败: {ex}");
+            _logger.LogError(ex, $"初始化失败: {ex}");
             // 在此可以记录日志或显示错误对话框
             return false;
         }
