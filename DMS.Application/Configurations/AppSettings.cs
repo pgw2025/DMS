@@ -2,7 +2,7 @@ using AutoMapper;
 using DMS.Core.Models;
 using Newtonsoft.Json;
 
-namespace DMS.Infrastructure.Configurations
+namespace DMS.Application.Configurations
 {
     public class DatabaseSettings
     {
