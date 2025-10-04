@@ -28,19 +28,4 @@ public interface IMqttManagementService
     /// 异步删除一个MQTT服务器。
     /// </summary>
     Task DeleteMqttServerAsync(int id);
-
-    /// <summary>
-    /// 在内存中添加MQTT服务器
-    /// </summary>
-    void AddMqttServerToMemory(MqttServerDto mqttServerDto);
-
-    /// <summary>
-    /// 在内存中更新MQTT服务器
-    /// </summary>
-    void UpdateMqttServerInMemory(MqttServerDto mqttServerDto);
-
-    /// <summary>
-    /// 在内存中删除MQTT服务器
-    /// </summary>
-    void RemoveMqttServerFromMemory(int mqttServerId);
 }

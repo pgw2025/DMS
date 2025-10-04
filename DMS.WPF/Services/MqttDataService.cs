@@ -41,7 +41,11 @@ public class MqttDataService : IMqttDataService
         try
         {
             // 加载MQTT服务器数据
-            _dataStorageService.MqttServers = _mapper.Map<ObservableCollection<MqttServerItemViewModel>>(_appDataStorageService.MqttServers.Values);
+            foreach (var mqttServerDto in _appDataStorageService.MqttServers.Values)
+            {
+                _dataStorageService.MqttServers.TryAdd(mqttServerDto.Id,_mapper.Map<MqttServerItemViewModel>(mqttServerDto));
+            }
+
         }
         catch (Exception ex)
         {
@@ -61,7 +65,7 @@ public class MqttDataService : IMqttDataService
         dto.Id = id;
         
         var mqttServerItem = _mapper.Map<MqttServerItemViewModel>(dto);
-        _dataStorageService.MqttServers.Add(mqttServerItem);
+        _dataStorageService.MqttServers.Add(mqttServerItem.Id,mqttServerItem);
         
         return mqttServerItem;
     }
@@ -82,7 +86,7 @@ public class MqttDataService : IMqttDataService
     public async Task<bool> DeleteMqttServer(MqttServerItemViewModel mqttServer)
     {
         await _mqttAppService.DeleteMqttServerAsync(mqttServer.Id);
-        _dataStorageService.MqttServers.Remove(mqttServer);
+        _dataStorageService.MqttServers.Remove(mqttServer.Id);
         return true;
     }
 }

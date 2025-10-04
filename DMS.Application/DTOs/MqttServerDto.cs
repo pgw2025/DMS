@@ -12,6 +12,7 @@ public class MqttServerDto
     public string ServerName { get; set; }
     public string ServerUrl { get; set; }
     public int Port { get; set; }
+    public bool IsConnect { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }
     public bool IsActive { get; set; }

@@ -28,7 +28,7 @@ public class DataStorageService : IDataStorageService
     /// <summary>
     /// MQTT服务器列表。
     /// </summary>
-    public ObservableCollection<MqttServerItemViewModel> MqttServers { get; set; }
+    public ObservableDictionary<int, MqttServerItemViewModel> MqttServers { get; set; }
 
     /// <summary>
     /// 菜单列表。
@@ -55,7 +55,7 @@ public class DataStorageService : IDataStorageService
         Devices=new ObservableDictionary<int,DeviceItemViewModel>();
         VariableTables = new ObservableDictionary<int,VariableTableItemViewModel>();
         Variables=new ObservableDictionary<int,VariableItemViewModel>();
-        MqttServers=new ObservableCollection<MqttServerItemViewModel>();
+        MqttServers=new ObservableDictionary<int, MqttServerItemViewModel>();
         Menus=new ObservableCollection<MenuItemViewModel>();
         MenuTrees=new ObservableCollection<MenuItemViewModel>();
         Nlogs=new ObservableCollection<NlogItemViewModel>();

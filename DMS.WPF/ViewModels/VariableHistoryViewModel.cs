@@ -118,6 +118,11 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     private void OnVariableValueChanged(object? sender, VariableValueChangedEventArgs e)
     {
+        if (CurrentVariable is null)
+        {
+            return;
+        }
+
         if (e.Variable.Id != CurrentVariable.Id)
         {
             return;

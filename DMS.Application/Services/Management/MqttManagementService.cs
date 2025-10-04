@@ -14,16 +14,13 @@ public class MqttManagementService : IMqttManagementService
 {
     private readonly IMqttAppService _mqttAppService;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IEventService _eventService;
 
-    /// <summary>
-    /// 当MQTT服务器数据发生变化时触发
-    /// </summary>
-    public event EventHandler<MqttServerChangedEventArgs> MqttServerChanged;
-
-    public MqttManagementService(IMqttAppService mqttAppService,IAppDataStorageService appDataStorageService)
+    public MqttManagementService(IMqttAppService mqttAppService, IAppDataStorageService appDataStorageService, IEventService eventService)
     {
         _mqttAppService = mqttAppService;
         _appDataStorageService = appDataStorageService;
+        _eventService = eventService;
     }
 
     /// <summary>
@@ -47,7 +44,19 @@ public class MqttManagementService : IMqttManagementService
     /// </summary>
     public async Task<int> CreateMqttServerAsync(MqttServerDto mqttServerDto)
     {
-        return await _mqttAppService.CreateMqttServerAsync(mqttServerDto);
+        var result = await _mqttAppService.CreateMqttServerAsync(mqttServerDto);
+        
+        // 创建成功后，将MQTT服务器添加到内存中
+        if (result > 0)
+        {
+            mqttServerDto.Id = result; // 假设返回的ID是新创建的
+            if (_appDataStorageService.MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto))
+            {
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Added, mqttServerDto));
+            }
+        }
+        
+        return result;
     }
 
     /// <summary>
@@ -56,6 +65,10 @@ public class MqttManagementService : IMqttManagementService
     public async Task UpdateMqttServerAsync(MqttServerDto mqttServerDto)
     {
         await _mqttAppService.UpdateMqttServerAsync(mqttServerDto);
+        
+        // 更新成功后，更新内存中的MQTT服务器
+        _appDataStorageService.MqttServers.AddOrUpdate(mqttServerDto.Id, mqttServerDto, (key, oldValue) => mqttServerDto);
+        _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, mqttServerDto));
     }
 
     /// <summary>
@@ -63,45 +76,18 @@ public class MqttManagementService : IMqttManagementService
     /// </summary>
     public async Task DeleteMqttServerAsync(int id)
     {
-        await _mqttAppService.DeleteMqttServerAsync(id);
-    }
-
-    /// <summary>
-    /// 在内存中添加MQTT服务器
-    /// </summary>
-    public void AddMqttServerToMemory(MqttServerDto mqttServerDto)
-    {
-        if (_appDataStorageService.MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto))
+        var mqttServer = await _mqttAppService.GetMqttServerByIdAsync(id); // 获取MQTT服务器信息用于内存删除
+        var result = await _mqttAppService.DeleteMqttServerAsync(id);
+        
+        // 删除成功后，从内存中移除MQTT服务器
+        if (result>0)
         {
-            OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Added, mqttServerDto));
+            if (_appDataStorageService.MqttServers.TryRemove(id, out var mqttServerDto))
+            {
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Deleted, mqttServerDto));
+            }
         }
     }
 
-    /// <summary>
-    /// 在内存中更新MQTT服务器
-    /// </summary>
-    public void UpdateMqttServerInMemory(MqttServerDto mqttServerDto)
-    {
-        _appDataStorageService.MqttServers.AddOrUpdate(mqttServerDto.Id, mqttServerDto, (key, oldValue) => mqttServerDto);
-        OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Updated, mqttServerDto));
-    }
 
-    /// <summary>
-    /// 在内存中删除MQTT服务器
-    /// </summary>
-    public void RemoveMqttServerFromMemory(int mqttServerId)
-    {
-        if (_appDataStorageService.MqttServers.TryRemove(mqttServerId, out var mqttServerDto))
-        {
-            OnMqttServerChanged(new MqttServerChangedEventArgs(DataChangeType.Deleted, mqttServerDto));
-        }
-    }
-
-    /// <summary>
-    /// 触发MQTT服务器变更事件
-    /// </summary>
-    protected virtual void OnMqttServerChanged(MqttServerChangedEventArgs e)
-    {
-        MqttServerChanged?.Invoke(this, e);
-    }
 }

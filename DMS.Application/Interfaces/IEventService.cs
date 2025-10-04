@@ -67,6 +67,18 @@ public interface IEventService
     /// <param name="e">MQTT连接状态改变事件参数</param>
     void RaiseMqttConnectionChanged(object sender, MqttConnectionChangedEventArgs e);
 
+    /// <summary>
+    /// MQTT服务器改变事件
+    /// </summary>
+    event EventHandler<MqttServerChangedEventArgs> OnMqttServerChanged;
+
+    /// <summary>
+    /// 触发MQTT服务器改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">MQTT服务器改变事件参数</param>
+    void RaiseMqttServerChanged(object sender, MqttServerChangedEventArgs e);
+
     #endregion
 
     

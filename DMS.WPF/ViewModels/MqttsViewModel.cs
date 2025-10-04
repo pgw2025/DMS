@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,6 +11,8 @@ using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.Logging;
+using ObservableCollections;
+using System.Collections.ObjectModel;
 
 namespace DMS.WPF.ViewModels;
 
@@ -29,10 +30,11 @@ public partial class MqttsViewModel : ViewModelBase
     private readonly INotificationService _notificationService;
 
     /// <summary>
-    /// MQTT服务器列表。
+    /// 设备列表。
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<MqttServerItemViewModel> _mqtts;
+    private INotifyCollectionChangedSynchronizedViewList<MqttServerItemViewModel> _mqttServeise;
+    
 
     /// <summary>
     /// 当前选中的MQTT服务器。
@@ -61,8 +63,8 @@ public partial class MqttsViewModel : ViewModelBase
         _mapper = mapper;
         _navigationService = navigationService;
         _notificationService = notificationService;
-        
-        Mqtts = _dataStorageService.MqttServers;
+
+        _mqttServeise = _dataStorageService.MqttServers.ToNotifyCollectionChanged(x=>x.Value);
     }
 
     /// <summary>

@@ -12,6 +12,8 @@ public class MqttServer
     public string Username { get; set; } // 用户名
     public string Password { get; set; } // 密码
     public bool IsActive { get; set; } // 是否启用
+    public bool IsConnect { get; set; } // 是否启用
+
 
     /// <summary>
     /// MQTT订阅主题。

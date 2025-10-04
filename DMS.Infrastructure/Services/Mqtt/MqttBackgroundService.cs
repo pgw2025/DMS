@@ -189,7 +189,7 @@ namespace DMS.Infrastructure.Services.Mqtt
 
                 foreach (var mqttServerDto in mqttServerDtos)
                 {
-                    // 将 MqttServerDto 转换为 MqttServer
+                    // 将 MqttServerDto 转换为 MqttServerConfig
                     var mqttServer = new MqttServer
                     {
                         Id = mqttServerDto.Id,

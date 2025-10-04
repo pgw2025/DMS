@@ -1,4 +1,5 @@
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces.Database;
 
@@ -27,8 +28,10 @@ public interface IMqttAppService
     /// </summary>
     Task UpdateMqttServerAsync(MqttServerDto mqttServerDto);
 
+   
+
     /// <summary>
-    /// 异步删除一个MQTT服务器。
+    /// 异步根据ID删除一个MQTT服务器。
     /// </summary>
-    Task DeleteMqttServerAsync(int id);
+    Task<int> DeleteMqttServerAsync(int id);
 }

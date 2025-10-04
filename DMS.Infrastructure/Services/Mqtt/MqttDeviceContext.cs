@@ -12,17 +12,13 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// <summary>
         /// MQTT服务器配置
         /// </summary>
-        public MqttServer MqttServer { get; set; }
+        public MqttServer MqttServerConfig { get; set; }
 
         /// <summary>
         /// MQTT服务实例
         /// </summary>
         public IMqttService MqttService { get; set; }
 
-        /// <summary>
-        /// 连接状态
-        /// </summary>
-        public bool IsConnected { get; set; }
 
         /// <summary>
         /// 重连尝试次数

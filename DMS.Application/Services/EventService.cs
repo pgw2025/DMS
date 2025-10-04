@@ -145,5 +145,20 @@ public class EventService : IEventService
         MqttConnectionChanged?.Invoke(sender, e);
     }
 
+    /// <summary>
+    /// MQTT服务器改变事件
+    /// </summary>
+    public event EventHandler<MqttServerChangedEventArgs> OnMqttServerChanged;
+
+    /// <summary>
+    /// 触发MQTT服务器改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">MQTT服务器改变事件参数</param>
+    public void RaiseMqttServerChanged(object sender, MqttServerChangedEventArgs e)
+    {
+        OnMqttServerChanged?.Invoke(sender, e);
+    }
+     
     #endregion
 }

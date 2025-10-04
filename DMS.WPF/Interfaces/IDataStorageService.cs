@@ -25,7 +25,7 @@ public interface IDataStorageService
     /// <summary>
     /// MQTT服务器列表。
     /// </summary>
-    ObservableCollection<MqttServerItemViewModel> MqttServers { get; set; }
+    ObservableDictionary<int, MqttServerItemViewModel> MqttServers { get; set; }
 
     /// <summary>
     /// 菜单列表。

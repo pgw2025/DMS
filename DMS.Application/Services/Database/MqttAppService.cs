@@ -98,24 +98,23 @@ public class MqttAppService : IMqttAppService
         }
     }
 
+
     /// <summary>
-    /// 异步删除一个MQTT服务器（事务性操作）。
+    /// 异步根据ID删除一个MQTT服务器（事务性操作）。
     /// </summary>
     /// <param name="id">要删除MQTT服务器的ID。</param>
-    /// <returns>表示异步操作的任务。</returns>
+    /// <returns>如果删除成功则为 true，否则为 false。</returns>
     /// <exception cref="ApplicationException">如果删除MQTT服务器时发生错误。</exception>
-    public async Task DeleteMqttServerAsync(int id)
+    public async Task<int> DeleteMqttServerAsync(int id)
     {
         try
         {
-            await _repoManager.BeginTranAsync();
-            await _repoManager.MqttServers.DeleteByIdAsync(id);
-            await _repoManager.CommitAsync();
+            return await _repoManager.MqttServers.DeleteByIdAsync(id);
         }
         catch (Exception ex)
         {
             await _repoManager.RollbackAsync();
-            throw new ApplicationException("删除MQTT服务器时发生错误，操作已回滚。", ex);
+            throw new ApplicationException($"删除MQTT服务器时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
         }
     }
 }

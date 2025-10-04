@@ -48,13 +48,74 @@ public class DataEventService : IDataEventService
         
         // 监听变量值变更事件
         _eventService.OnVariableValueChanged += OnVariableValueChanged;
+        _eventService.OnMqttServerChanged += OnMqttServerChanged;
         _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
         // _appDataCenterService.OnLogChanged += _logDataService.OnNlogChanged;
         
         _logger?.LogInformation("DataEventService 初始化完成");
     }
-    
+
+    private void OnMqttServerChanged(object? sender, MqttServerChangedEventArgs e)
+    {
+        _logger?.LogDebug("接收到Mqtt服务器状态发生了改变，服务器名称：{mqttName}属性: {mqttProperty}",
+            e.MqttServer.ServerName, e.PropertyType);
+
+        // 在UI线程上更新变量值
+        App.Current.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            //// 查找并更新对应的变量
+            if (_dataStorageService.MqttServers.TryGetValue(e.MqttServer.Id, out var mqttServerItem))
+            {
+                if (e.ChangeType == ActionChangeType.Updated)
+                {
+                    switch (e.PropertyType)
+                    {
+                        case MqttServerPropertyType.ServerName:
+                            break;
+                        case MqttServerPropertyType.ServerUrl:
+                            break;
+                        case MqttServerPropertyType.Port:
+                            break;
+                        case MqttServerPropertyType.IsConnect:
+                            mqttServerItem.IsConnect=e.MqttServer.IsConnect;
+                            break;
+                        case MqttServerPropertyType.Username:
+                            break;
+                        case MqttServerPropertyType.Password:
+                            break;
+                        case MqttServerPropertyType.IsActive:
+                            break;
+                        case MqttServerPropertyType.SubscribeTopic:
+                            break;
+                        case MqttServerPropertyType.PublishTopic:
+                            break;
+                        case MqttServerPropertyType.ClientId:
+                            break;
+                        case MqttServerPropertyType.MessageFormat:
+                            break;
+                        case MqttServerPropertyType.MessageHeader:
+                            break;
+                        case MqttServerPropertyType.MessageContent:
+                            break;
+                        case MqttServerPropertyType.MessageFooter:
+                            break;
+                        case MqttServerPropertyType.All:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+            }
+            else
+            {
+                _logger?.LogWarning("在Mqtt服务器队列中找不到ID为 {MqttServer} 的变量，无法更新值", e.MqttServer.Id);
+            }
+        }));
+
+    }
+
     private  void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
     {
         _logger?.LogDebug("接收到数据加载完成事件，成功: {IsSuccess}", e.IsSuccess);

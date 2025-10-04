@@ -1,28 +1,28 @@
-<ui:ContentDialog x:Class="DMS.WPF.Views.Dialogs.MqttDialog"
-                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                  xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-                  xmlns:hc="https://handyorg.github.io/handycontrol"
-                  xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-                  xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
-                  xmlns:ex="clr-namespace:DMS.Extensions"
-                  xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
-                  xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
-                  Title="{Binding Title}"
-                  CloseButtonText="取消"
-                  DefaultButton="Primary"
-                  PrimaryButtonText="{Binding PrimaryButText}"
-                  PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
-                  CloseButtonCommand="{Binding CancelButtonCommand}"
-                  d:DataContext="{d:DesignInstance vmd:MqttDialogViewModel}"
-                  mc:Ignorable="d">
+<ui:ContentDialog
+    x:Class="DMS.WPF.Views.Dialogs.MqttDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:DMS.Core.Enums;assembly=DMS.Core"
+    xmlns:ex="clr-namespace:DMS.Extensions"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
+    xmlns:vmd="clr-namespace:DMS.WPF.ViewModels.Dialogs"
+    Title="{Binding Title}"
+    d:DataContext="{d:DesignInstance vmd:MqttDialogViewModel}"
+    CloseButtonCommand="{Binding CancelButtonCommand}"
+    CloseButtonText="取消"
+    DefaultButton="Primary"
+    PrimaryButtonCommand="{Binding PrimaryButtonCommand}"
+    PrimaryButtonText="{Binding PrimaryButText}"
+    mc:Ignorable="d">
     <ui:ContentDialog.Resources>
-        <ex:EnumBindingSource x:Key="mqttPlatform"
-                              EnumType="{x:Type enums:MqttPlatform}" />
+        <ex:EnumBindingSource x:Key="mqttPlatform" EnumType="{x:Type enums:MqttPlatform}" />
         <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
-        
+
         <Style x:Key="LabelStyle" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Right" />
@@ -31,7 +31,7 @@
     </ui:ContentDialog.Resources>
 
     <StackPanel Margin="16">
-        <!-- 基本信息 -->
+        <!--  基本信息  -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -49,7 +49,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Row 0 -->
+            <!--  Row 0  -->
             <hc:TextBox
                 Grid.Row="0"
                 Grid.Column="0"
@@ -76,7 +76,7 @@
                 hc:InfoElement.Title="端口:"
                 Text="{Binding MqttServer.Port, UpdateSourceTrigger=PropertyChanged}" />
 
-            <!-- Row 2 -->
+            <!--  Row 2  -->
             <hc:TextBox
                 Grid.Row="2"
                 Grid.Column="0"
@@ -91,7 +91,7 @@
                 hc:InfoElement.Title="密码:"
                 Text="{Binding MqttServer.Password, UpdateSourceTrigger=PropertyChanged}" />
 
-            <!-- Row 3 -->
+            <!--  Row 3  -->
             <hc:TextBox
                 Grid.Row="3"
                 Grid.Column="0"
@@ -105,44 +105,44 @@
                 Margin="0,15,0,0"
                 hc:InfoElement.Title="订阅主题:"
                 Text="{Binding MqttServer.SubscribeTopic, UpdateSourceTrigger=PropertyChanged}" />
-            
-            
-            <!-- Row 5 -->
+
+
+            <!--  Row 5  -->
             <hc:TextBox
                 Grid.Row="4"
                 Grid.Column="0"
                 Grid.ColumnSpan="3"
                 Margin="0,15,0,0"
-                hc:InfoElement.Title="消息头:"
-                Text="{Binding MqttServer.MessageHeader, UpdateSourceTrigger=PropertyChanged}"
-                TextWrapping="Wrap"
+                VerticalContentAlignment="Top"
+                hc:InfoElement.Title="消息头:可以使用{timestamp}表示时间戳"
                 AcceptsReturn="True"
-                VerticalContentAlignment="Top" />
-            
+                Text="{Binding MqttServer.MessageHeader, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap" />
+
             <hc:TextBox
                 Grid.Row="5"
                 Grid.Column="0"
                 Grid.ColumnSpan="3"
                 Margin="0,15,0,0"
-                hc:InfoElement.Title="消息内容:"
-                Text="{Binding MqttServer.MessageContent, UpdateSourceTrigger=PropertyChanged}"
-                TextWrapping="Wrap"
+                VerticalContentAlignment="Top"
+                hc:InfoElement.Title="消息内容:可以使用,{name}表示变量名，{value}表示变量值"
                 AcceptsReturn="True"
-                VerticalContentAlignment="Top" />
-            
-            <!-- Row 6 -->
+                Text="{Binding MqttServer.MessageContent, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap" />
+
+            <!--  Row 6  -->
             <hc:TextBox
                 Grid.Row="6"
                 Grid.Column="0"
                 Grid.ColumnSpan="3"
                 Margin="0,15,0,0"
+                VerticalContentAlignment="Top"
                 hc:InfoElement.Title="消息尾:"
-                Text="{Binding MqttServer.MessageFooter, UpdateSourceTrigger=PropertyChanged}"
-                TextWrapping="Wrap"
                 AcceptsReturn="True"
-                VerticalContentAlignment="Top" />
-            
-            <!-- Row 4 -->
+                Text="{Binding MqttServer.MessageFooter, UpdateSourceTrigger=PropertyChanged}"
+                TextWrapping="Wrap" />
+
+            <!--  Row 4  -->
             <CheckBox
                 Grid.Row="7"
                 Grid.Column="0"

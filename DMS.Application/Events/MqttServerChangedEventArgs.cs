@@ -11,28 +11,30 @@ namespace DMS.Application.Events
         /// <summary>
         /// 变更类型
         /// </summary>
-        public DataChangeType ChangeType { get; }
+        public ActionChangeType ChangeType { get; }
 
         /// <summary>
         /// MQTT服务器DTO
         /// </summary>
         public MqttServerDto MqttServer { get; }
-
+        
         /// <summary>
-        /// 变更时间
+        /// 发生变化的属性类型
         /// </summary>
-        public DateTime ChangeTime { get; }
+        public MqttServerPropertyType PropertyType { get; }
+        
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
         /// <param name="mqttServer">MQTT服务器DTO</param>
-        public MqttServerChangedEventArgs(DataChangeType changeType, MqttServerDto mqttServer)
+        /// <param name="propertyType">发生变化的属性类型</param>
+        public MqttServerChangedEventArgs(ActionChangeType changeType, MqttServerDto mqttServer, MqttServerPropertyType propertyType = MqttServerPropertyType.All)
         {
             ChangeType = changeType;
             MqttServer = mqttServer;
-            ChangeTime = DateTime.Now;
+            PropertyType = propertyType;
         }
     }
 }

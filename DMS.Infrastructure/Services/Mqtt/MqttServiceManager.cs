@@ -1,7 +1,11 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
+using AutoMapper;
+using DMS.Application.DTOs;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
+using DMS.Core.Enums;
 using DMS.Core.Interfaces.Services;
 using DMS.Core.Models;
 using DMS.Infrastructure.Interfaces.Services;
@@ -18,6 +22,8 @@ namespace DMS.Infrastructure.Services.Mqtt
         private readonly IDataProcessingService _dataProcessingService;
         private readonly IAppDataCenterService _appDataCenterService;
         private readonly IMqttServiceFactory _mqttServiceFactory;
+        private readonly IEventService _eventService;
+        private readonly IMapper _mapper;
         private readonly ConcurrentDictionary<int, MqttDeviceContext> _mqttContexts;
         private readonly SemaphoreSlim _semaphore;
         private bool _disposed = false;
@@ -26,12 +32,16 @@ namespace DMS.Infrastructure.Services.Mqtt
             ILogger<MqttServiceManager> logger,
             IDataProcessingService dataProcessingService,
             IAppDataCenterService appDataCenterService,
-            IMqttServiceFactory mqttServiceFactory)
+            IMqttServiceFactory mqttServiceFactory,
+            IEventService eventService,
+            IMapper mapper)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
             _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _mqttServiceFactory = mqttServiceFactory ?? throw new ArgumentNullException(nameof(mqttServiceFactory));
+            _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _mqttContexts = new ConcurrentDictionary<int, MqttDeviceContext>();
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10
         }
@@ -56,13 +66,17 @@ namespace DMS.Infrastructure.Services.Mqtt
 
             var context = new MqttDeviceContext
             {
-                MqttServer = mqttServer,
+                MqttServerConfig = mqttServer,
                 MqttService = _mqttServiceFactory.CreateService(),
-                IsConnected = false
             };
 
             _mqttContexts.AddOrUpdate(mqttServer.Id, context, (key, oldValue) => context);
             _logger.LogInformation("已添加MQTT服务器 {MqttServerId} 到监控列表", mqttServer.Id);
+
+            // 使用AutoMapper触发MQTT服务器改变事件
+            var mqttServerDto = _mapper.Map<MqttServerDto>(mqttServer);
+
+            _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(Core.Enums.ActionChangeType.Added, mqttServerDto));
         }
 
         /// <summary>
@@ -74,6 +88,11 @@ namespace DMS.Infrastructure.Services.Mqtt
             {
                 await DisconnectMqttServerAsync(mqttServerId, cancellationToken);
                 _logger.LogInformation("已移除MQTT服务器 {MqttServerId} 的监控", mqttServerId);
+
+                // 使用AutoMapper触发MQTT服务器删除事件
+                var mqttServerDto = _mapper.Map<MqttServerDto>(context.MqttServerConfig);
+
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(Core.Enums.ActionChangeType.Deleted, mqttServerDto));
             }
         }
 
@@ -98,7 +117,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// </summary>
         public bool IsMqttServerConnected(int mqttServerId)
         {
-            return _mqttContexts.TryGetValue(mqttServerId, out var context) && context.IsConnected;
+            return _mqttContexts.TryGetValue(mqttServerId, out var context) && context.MqttService.IsConnected;
         }
 
         /// <summary>
@@ -136,7 +155,7 @@ namespace DMS.Infrastructure.Services.Mqtt
             try
             {
                 _logger.LogInformation("正在连接MQTT服务器 {ServerName} ({ServerUrl}:{Port})",
-                    context.MqttServer.ServerName, context.MqttServer.ServerUrl, context.MqttServer.Port);
+                    context.MqttServerConfig.ServerName, context.MqttServerConfig.ServerUrl, context.MqttServerConfig.Port);
 
                 var stopwatch = Stopwatch.StartNew();
 
@@ -145,40 +164,44 @@ namespace DMS.Infrastructure.Services.Mqtt
                 using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutToken.Token);
 
                 await context.MqttService.ConnectAsync(
-                    context.MqttServer.ServerUrl,
-                    context.MqttServer.Port,
-                    context.MqttServer.ClientId,
-                    context.MqttServer.Username,
-                    context.MqttServer.Password);
+                    context.MqttServerConfig.ServerUrl,
+                    context.MqttServerConfig.Port,
+                    context.MqttServerConfig.ClientId,
+                    context.MqttServerConfig.Username,
+                    context.MqttServerConfig.Password);
 
                 stopwatch.Stop();
                 _logger.LogInformation("MQTT服务器 {ServerName} 连接耗时 {ElapsedMs} ms",
-                    context.MqttServer.ServerName, stopwatch.ElapsedMilliseconds);
-
+                    context.MqttServerConfig.ServerName, stopwatch.ElapsedMilliseconds);
                 if (context.MqttService.IsConnected)
                 {
-                    context.IsConnected = true;
                     context.ReconnectAttempts = 0; // 重置重连次数
-                    
+                    context.MqttServerConfig.IsConnect=true;
                     // 订阅主题
-                    if (!string.IsNullOrEmpty(context.MqttServer.SubscribeTopic))
+                    if (!string.IsNullOrEmpty(context.MqttServerConfig.SubscribeTopic))
                     {
-                        await context.MqttService.SubscribeAsync(context.MqttServer.SubscribeTopic);
+                        await context.MqttService.SubscribeAsync(context.MqttServerConfig.SubscribeTopic);
                     }
-                    
-                    _logger.LogInformation("MQTT服务器 {ServerName} 连接成功", context.MqttServer.ServerName);
+
+                    _logger.LogInformation("MQTT服务器 {ServerName} 连接成功", context.MqttServerConfig.ServerName);
+
+                    //
                 }
                 else
                 {
-                    _logger.LogWarning("MQTT服务器 {ServerName} 连接失败", context.MqttServer.ServerName);
+                    context.MqttServerConfig.IsConnect = false;
+                    _logger.LogWarning("MQTT服务器 {ServerName} 连接失败", context.MqttServerConfig.ServerName);
                 }
+                //触发MQTT连接状态改变事件
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, _mapper.Map<MqttServerDto>(context.MqttServerConfig), MqttServerPropertyType.IsConnect));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "连接MQTT服务器 {ServerName} 时发生错误: {ErrorMessage}",
-                    context.MqttServer.ServerName, ex.Message);
-                context.IsConnected = false;
+                    context.MqttServerConfig.ServerName, ex.Message);
                 context.ReconnectAttempts++;
+                context.MqttServerConfig.IsConnect = false;
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, _mapper.Map<MqttServerDto>(context.MqttServerConfig), MqttServerPropertyType.IsConnect));
             }
             finally
             {
@@ -196,15 +219,18 @@ namespace DMS.Infrastructure.Services.Mqtt
 
             try
             {
-                _logger.LogInformation("正在断开MQTT服务器 {ServerName} 的连接", context.MqttServer.ServerName);
+                _logger.LogInformation("正在断开MQTT服务器 {ServerName} 的连接", context.MqttServerConfig.ServerName);
                 await context.MqttService.DisconnectAsync();
-                context.IsConnected = false;
-                _logger.LogInformation("MQTT服务器 {ServerName} 连接已断开", context.MqttServer.ServerName);
+                _logger.LogInformation("MQTT服务器 {ServerName} 连接已断开", context.MqttServerConfig.ServerName);
+
+                // 如果连接状态从连接变为断开，触发事件
+                context.MqttServerConfig.IsConnect = false;
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, _mapper.Map<MqttServerDto>(context.MqttServerConfig), MqttServerPropertyType.IsConnect));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "断开MQTT服务器 {ServerName} 连接时发生错误: {ErrorMessage}",
-                    context.MqttServer.ServerName, ex.Message);
+                    context.MqttServerConfig.ServerName, ex.Message);
             }
         }
 
@@ -225,26 +251,26 @@ namespace DMS.Infrastructure.Services.Mqtt
                 return;
             }
 
-            if (!context.IsConnected)
+            if (!context.MqttService.IsConnected)
             {
-                _logger.LogWarning("MQTT服务器 {ServerName} 未连接，跳过发布", context.MqttServer.ServerName);
+                _logger.LogWarning("MQTT服务器 {ServerName} 未连接，跳过发布", context.MqttServerConfig.ServerName);
                 return;
             }
 
             try
             {
-                var topic = context.MqttServer.PublishTopic;
+                var topic = context.MqttServerConfig.PublishTopic;
 
                 var sendMsg = BuildSendMessage(variableMqtt);
 
                 await context.MqttService.PublishAsync(topic, sendMsg);
                 _logger.LogDebug("成功向MQTT服务器 {ServerName} 发布变量 {VariableName} 的数据：{sendMsg}",
-                    context.MqttServer.ServerName, variableMqtt.Variable.Name,sendMsg);
+                    context.MqttServerConfig.ServerName, variableMqtt.Variable.Name, sendMsg);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "向MQTT服务器 {ServerName} 发布变量 {VariableName} 数据时发生错误: {ErrorMessage}",
-                    context.MqttServer.ServerName, variableMqtt.Variable.Name, ex.Message);
+                    context.MqttServerConfig.ServerName, variableMqtt.Variable.Name, ex.Message);
             }
         }
 
@@ -253,8 +279,8 @@ namespace DMS.Infrastructure.Services.Mqtt
             StringBuilder sb = new StringBuilder();
             var now = DateTime.Now;
             var timestamp = ((DateTimeOffset)now).ToUnixTimeMilliseconds();
-            sb.Append(variableMqtt.MqttServer.MessageHeader.Replace("{timestamp}",timestamp.ToString()));
-            sb.Append(variableMqtt.MqttServer.MessageContent.Replace("{name}",variableMqtt.Alias).Replace("{value}",variableMqtt.Variable.DataValue));
+            sb.Append(variableMqtt.MqttServer.MessageHeader.Replace("{timestamp}", timestamp.ToString()));
+            sb.Append(variableMqtt.MqttServer.MessageContent.Replace("{name}", variableMqtt.Alias).Replace("{value}", variableMqtt.Variable.DataValue));
             sb.Append(variableMqtt.MqttServer.MessageFooter);
 
             return sb.ToString();
@@ -283,10 +309,10 @@ namespace DMS.Infrastructure.Services.Mqtt
                     continue;
                 }
 
-                if (!context.IsConnected)
+                if (!context.MqttService.IsConnected)
                 {
-                    _logger.LogWarning("MQTT服务器 {ServerName} 未连接，跳过 {Count} 条消息", 
-                        context.MqttServer.ServerName, group.Count());
+                    _logger.LogWarning("MQTT服务器 {ServerName} 未连接，跳过 {Count} 条消息",
+                        context.MqttServerConfig.ServerName, group.Count());
                     continue;
                 }
 
@@ -294,19 +320,19 @@ namespace DMS.Infrastructure.Services.Mqtt
                 {
                     foreach (var variableMqtt in group)
                     {
-                        var topic = context.MqttServer.PublishTopic;
+                        var topic = context.MqttServerConfig.PublishTopic;
                         var payload = variableMqtt.Variable?.DataValue?.ToString() ?? string.Empty;
 
                         await context.MqttService.PublishAsync(topic, payload);
                     }
-                    
+
                     _logger.LogInformation("成功向MQTT服务器 {ServerName} 发布 {Count} 条变量数据",
-                        context.MqttServer.ServerName, group.Count());
+                        context.MqttServerConfig.ServerName, group.Count());
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "向MQTT服务器 {ServerName} 批量发布变量数据时发生错误: {ErrorMessage}",
-                        context.MqttServer.ServerName, ex.Message);
+                        context.MqttServerConfig.ServerName, ex.Message);
                 }
             }
         }
@@ -320,7 +346,7 @@ namespace DMS.Infrastructure.Services.Mqtt
             {
                 _disposed = true;
                 _semaphore?.Dispose();
-                
+
                 // 断开所有MQTT连接
                 foreach (var context in _mqttContexts.Values)
                 {
@@ -331,10 +357,10 @@ namespace DMS.Infrastructure.Services.Mqtt
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "断开MQTT服务器 {ServerName} 连接时发生错误",
-                            context.MqttServer?.ServerName ?? "Unknown");
+                            context.MqttServerConfig?.ServerName ?? "Unknown");
                     }
                 }
-                
+
                 _logger.LogInformation("MQTT服务管理器已释放资源");
             }
         }
