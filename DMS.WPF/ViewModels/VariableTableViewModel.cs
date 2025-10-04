@@ -11,7 +11,6 @@ using DMS.Core.Events;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ViewModels.Items;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
@@ -328,6 +327,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             {
                 return; // 用户取消或没有选择任何变量
             }
+
+
 
             // 将导入的变量转换为DTO并设置必要的属性
             var importedVariableDtos = _mapper.Map<List<VariableDto>>(importedVariables);

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Core.Enums;
 using DMS.Infrastructure.Interfaces.Services;
 using DMS.Infrastructure.Models;
+using DMS.WPF.Factories;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Items;
@@ -79,17 +80,18 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// OPC UA服务接口实例
     /// </summary>
     private readonly IOpcUaService _opcUaService;
-    
+    private readonly IVariableItemViewModelFactory _variableItemViewModelFactory;
+
     /// <summary>
     /// 对象映射器实例
     /// </summary>
     private readonly IMapper _mapper;
-    
+
     /// <summary>
     /// 取消令牌源，用于取消长时间运行的操作
     /// </summary>
     private readonly CancellationTokenSource _cancellationTokenSource;
-    
+
     /// <summary>
     /// 通知服务实例
     /// </summary>
@@ -102,9 +104,11 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// <param name="opcUaService">OPC UA服务接口实例</param>
     /// <param name="mapper">对象映射器实例</param>
     /// <param name="notificationService">通知服务实例</param>
-    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService, IMapper mapper, INotificationService notificationService)
+    public ImportOpcUaDialogViewModel(IOpcUaService opcUaService, IVariableItemViewModelFactory variableItemViewModelFactory,
+        IMapper mapper, INotificationService notificationService)
     {
         _opcUaService = opcUaService;
+        _variableItemViewModelFactory = variableItemViewModelFactory;
         _mapper = mapper;
         _notificationService = notificationService;
         // 初始化根节点
@@ -319,7 +323,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
             // 异步浏览节点获取子节点列表
             var children = await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(node));
-            
+
             // 再次检查是否有取消请求
             _cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
@@ -332,15 +336,15 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
                 // 判断节点类型是否为变量
                 if (child.NodeClass == NodeClass.Variable)
                 {
+                    var variableItem = _variableItemViewModelFactory.CreateNewVariableItemViewModel();
+                    variableItem.Name = child.DisplayName;
+                    variableItem.OpcUaNodeId = child.NodeId.ToString();
+                    variableItem.Protocol = ProtocolType.OpcUa;
+                    variableItem.DataType = child.DataType;
+
+
                     // 创建并添加变量项到变量列表
-                    OpcUaNodeVariables.Add(new VariableItemViewModel
-                    {
-                        Name = child.DisplayName,           // 变量名称
-                        OpcUaNodeId = child.NodeId.ToString(), // OPC UA节点ID
-                        Protocol = ProtocolType.OpcUa,       // 协议类型
-                        DataType = child.DataType,    // C#数据类型
-                        IsActive = true                      // 默认激活状态
-                    });
+                    OpcUaNodeVariables.Add(variableItem);
                 }
                 // 如果是递归模式且节点不是变量，则递归浏览子节点
                 else if (isRecursive)

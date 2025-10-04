@@ -122,9 +122,6 @@ public partial class VariableItemViewModel : ObservableObject
     
     public VariableItemViewModel()
     {
-        // 使用默认值，实际的默认值应该从外部传入或通过其他方式设置
-        // 保持构造函数轻量级，不加载配置文件
-        _pollingInterval = App.Current.Services.GetRequiredService<AppSettings>().DefaultPollingInterval; // 默认值，可通过外部设置覆盖
     }
     
 

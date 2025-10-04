@@ -52,10 +52,7 @@ public partial class SplashViewModel : ObservableObject
         try
         {
             LoadingMessage = "正在加载系统配置...";
-            if (_appSettings.Load() == null)
-            {
-                //程序第一次启动
-            }
+            _appSettings.Load();
 
             _logger.LogInformation("正在初始化数据库...");
             LoadingMessage = "正在初始化数据库...";

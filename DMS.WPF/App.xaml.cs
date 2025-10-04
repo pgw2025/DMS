@@ -25,6 +25,7 @@ using DMS.Infrastructure.Services.Mqtt;
 using DMS.Infrastructure.Services.OpcUa;
 using DMS.Infrastructure.Services.S7;
 using DMS.WPF.Converters;
+using DMS.WPF.Factories;
 using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Logging;
@@ -346,6 +347,9 @@ public partial class App : System.Windows.Application
         services.AddTransient<EmailAccountDialogViewModel>();
         services.AddTransient<EmailTemplateDialogViewModel>();
         services.AddTransient<TriggerDialogViewModel>(); // 注册 TriggerEditorViewModel
+        
+        // 注册工厂
+        services.AddTransient<IVariableItemViewModelFactory, VariableItemViewModelFactory>();
 
         // 注册View视图
         services.AddSingleton<SplashWindow>();

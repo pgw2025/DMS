@@ -135,19 +135,63 @@ public partial class SettingViewModel : ViewModelBase
         }
     }
     
-    public int DefaultPollingInterval
+    public int VariablePollingInterval
     {
-        get => _settings.DefaultPollingInterval;
+        get => _settings.VariableImportTemplate.PollingInterval;
         set
         {
-            if (_settings.DefaultPollingInterval != value)
+            if (_settings.VariableImportTemplate.PollingInterval != value)
             {
-                _settings.DefaultPollingInterval = value;
+                _settings.VariableImportTemplate.PollingInterval = value;
                 OnPropertyChanged();
                 _settings.Save();
             }
         }
     }
+    
+    public bool VariableIsActive
+    {
+        get => _settings.VariableImportTemplate.IsActive;
+        set
+        {
+            if (_settings.VariableImportTemplate.IsActive != value)
+            {
+                _settings.VariableImportTemplate.IsActive = value;
+                OnPropertyChanged();
+                _settings.Save();
+            }
+        }
+    }
+    
+    public bool VariableIsHistoryEnabled
+    {
+        get => _settings.VariableImportTemplate.IsHistoryEnabled;
+        set
+        {
+            if (_settings.VariableImportTemplate.IsHistoryEnabled != value)
+            {
+                _settings.VariableImportTemplate.IsHistoryEnabled = value;
+                OnPropertyChanged();
+                _settings.Save();
+            }
+        }
+    }
+    
+    public double VariableHistoryDeadband
+    {
+        get => _settings.VariableImportTemplate.HistoryDeadband;
+        set
+        {
+            if (_settings.VariableImportTemplate.HistoryDeadband != value)
+            {
+                _settings.VariableImportTemplate.HistoryDeadband = value;
+                OnPropertyChanged();
+                _settings.Save();
+            }
+        }
+    }
+
+
 
     [RelayCommand]
     private async Task TestConnection()

@@ -84,10 +84,25 @@
 
         </ui:SettingsExpander>
 
-        <ui:SettingsExpander>
+        <ui:SettingsExpander Description="设置变量默认导入的状态" Header="变量导入设置">
             <ui:SettingsExpander.HeaderIcon>
-                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ScreenTime}" />
+                <ui:FontIcon FontFamily="{StaticResource MdFontIcons}" Glyph="&#xF02FA;" />
             </ui:SettingsExpander.HeaderIcon>
+
+            <ui:SettingsExpander.Items>
+                <ui:SettingsCard Description="默认变量读取的间隔时间" Header="轮询时间">
+                    <TextBox MinWidth="200" Text="{Binding VariablePollingInterval}" />
+                </ui:SettingsCard>
+                <ui:SettingsCard Description="默认变量是否启用" Header="是否启用">
+                    <CheckBox MinWidth="200" IsChecked="{Binding VariableIsActive}" />
+                </ui:SettingsCard>
+                <ui:SettingsCard Description="默认变量是否开启历史记录" Header="是否保存">
+                    <CheckBox MinWidth="200" IsChecked="{Binding VariableIsHistoryEnabled}" />
+                </ui:SettingsCard>
+                <ui:SettingsCard Description="默认变量历史记录变化返回，正负超过设定的范围才保存" Header="保存范围">
+                    <TextBox MinWidth="200" Text="{Binding VariableHistoryDeadband}" />
+                </ui:SettingsCard>
+            </ui:SettingsExpander.Items>
         </ui:SettingsExpander>
 
 

@@ -41,85 +41,86 @@
 
     <DockPanel>
 
-        <ikw:SimpleStackPanel DockPanel.Dock="Top" Margin="10" >
-            <Grid >
+        <ikw:SimpleStackPanel Margin="10" DockPanel.Dock="Top">
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                
-                <!-- 返回设备详情按钮 -->
-                <Button Grid.Column="0" 
-                        Command="{Binding NavigateToDeviceDetailCommand}"
-                        Style="{StaticResource ButtonDefault}"
-                        ToolTip="返回设备详情"
-                        Margin="0,0,10,0">
+
+                <!--  返回设备详情按钮  -->
+                <Button
+                    Grid.Column="0"
+                    Margin="0,0,10,0"
+                    Command="{Binding NavigateToDeviceDetailCommand}"
+                    Style="{StaticResource ButtonDefault}"
+                    ToolTip="返回设备详情">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal">
-                            <ui:FontIcon
-                                Icon="{x:Static ui:SegoeFluentIcons.ArrowLeft8}" />
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ArrowLeft8}" />
                         </StackPanel>
                     </Button.Content>
                 </Button>
-                
+
                 <!--  操作菜单  -->
-                <controls:CommandBar Grid.Column="1"
+                <controls:CommandBar
                     x:Name="PrimaryCommandBar"
+                    Grid.Column="1"
                     DefaultLabelPosition="Right"
                     IsOpen="False">
-                <ui:AppBarButton Command="{Binding AddVariableCommand}" Label="添加变量">
-                    <ui:AppBarButton.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
-                    </ui:AppBarButton.Icon>
-                </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding AddVariableCommand}" Label="添加变量">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
 
-                <ui:AppBarButton Command="{Binding UpdateVariableCommand}" Label="编辑变量">
-                    <ui:AppBarButton.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
-                    </ui:AppBarButton.Icon>
-                </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding UpdateVariableCommand}" Label="编辑变量">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
 
-                <ui:AppBarButton Command="{Binding DeleteVariableCommand}" Label="删除变量">
-                    <ui:AppBarButton.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
-                    </ui:AppBarButton.Icon>
-                </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding DeleteVariableCommand}" Label="删除变量">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
 
-                <ui:AppBarButton
-                    Command="{Binding ImprotFromTiaVarTableCommand}"
-                    Label="从TIA变量表导入"
-                    Visibility="{Binding IsS7ProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <ui:AppBarButton.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
-                    </ui:AppBarButton.Icon>
-
-                </ui:AppBarButton>
-
-                <ui:AppBarButton
-                    Command="{Binding ImportFromOpcUaServerCommand}"
-                    Label="从OPC UA服务器导入"
-                    Visibility="{Binding IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <ui:AppBarButton.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
-                    </ui:AppBarButton.Icon>
-
-                </ui:AppBarButton>
-
-
-                <ui:AppBarButton x:Name="ShareButton" Label="Share">
-                    <ui:AppBarButton.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Share}" />
-                    </ui:AppBarButton.Icon>
-                </ui:AppBarButton>
-                <ui:CommandBar.SecondaryCommands>
                     <ui:AppBarButton
-                        x:Name="SettingsButton"
-                        Icon="Setting"
-                        Label="Settings" />
-                </ui:CommandBar.SecondaryCommands>
+                        Command="{Binding ImprotFromTiaVarTableCommand}"
+                        Label="从TIA变量表导入"
+                        Visibility="{Binding IsS7ProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
+                        </ui:AppBarButton.Icon>
 
-               </controls:CommandBar>
-           </Grid>
+                    </ui:AppBarButton>
+
+                    <ui:AppBarButton
+                        Command="{Binding ImportFromOpcUaServerCommand}"
+                        Label="从OPC UA服务器导入"
+                        Visibility="{Binding IsOpcUaProtocolSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Import}" />
+                        </ui:AppBarButton.Icon>
+
+                    </ui:AppBarButton>
+
+
+                    <ui:AppBarButton x:Name="ShareButton" Label="Share">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Share}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    <ui:CommandBar.SecondaryCommands>
+                        <ui:AppBarButton
+                            x:Name="SettingsButton"
+                            Icon="Setting"
+                            Label="Settings" />
+                    </ui:CommandBar.SecondaryCommands>
+
+                </controls:CommandBar>
+            </Grid>
             <!--  变量表的名称描述等信息  -->
             <ikw:SimpleStackPanel
                 Margin="5"
@@ -148,7 +149,7 @@
                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
             </ikw:SimpleStackPanel>
 
-            
+
         </ikw:SimpleStackPanel>
         <DataGrid
             x:Name="BasicGridView"
@@ -206,9 +207,7 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem
-                        Command="{Binding ModifyConversionFormulaCommand}"
-                        Header="修改数值转换公式">
+                    <MenuItem Command="{Binding ModifyConversionFormulaCommand}" Header="修改数值转换公式">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
@@ -235,7 +234,7 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    
+
                     <MenuItem
                         Command="{Binding ChangeHistorySettingsCommand}"
                         CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
@@ -244,18 +243,14 @@
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    
-                    <MenuItem
-                        Command="{Binding ChangeAlarmSettingsCommand}"
-                        Header="修改报警设置">
+
+                    <MenuItem Command="{Binding ChangeAlarmSettingsCommand}" Header="修改报警设置">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </MenuItem.Icon>
                     </MenuItem>
-                    
-                    <MenuItem
-                        Command="{Binding ToHistoryCommand}"
-                        Header="查看历史记录">
+
+                    <MenuItem Command="{Binding ToHistoryCommand}" Header="查看历史记录">
                         <MenuItem.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
                         </MenuItem.Icon>
@@ -319,7 +314,7 @@
                     </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
                 <DataGridCheckBoxColumn Binding="{Binding IsActive}" Header="启用" />
-                
+
                 <DataGridTemplateColumn Header="轮询间隔(毫秒)" SortMemberPath="PollingInterval">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -346,13 +341,13 @@
                     Header="更新时间"
                     IsReadOnly="True" />
                 <DataGridTextColumn Binding="{Binding ConversionFormula}" Header="转换规则" />
-                
+
                 <DataGridCheckBoxColumn Binding="{Binding IsHistoryEnabled}" Header="保存" />
                 <DataGridTextColumn Binding="{Binding HistoryDeadband}" Header="保存范围" />
                 <DataGridCheckBoxColumn Binding="{Binding IsAlarmEnabled}" Header="报警" />
                 <DataGridTextColumn Binding="{Binding AlarmMinValue}" Header="报警最小值" />
                 <DataGridTextColumn Binding="{Binding AlarmMaxValue}" Header="报警最大值" />
-                </DataGrid.Columns>
+            </DataGrid.Columns>
         </DataGrid>
     </DockPanel>
 
