@@ -45,7 +45,7 @@ namespace DMS.Infrastructure.Services.Mqtt
             {
                 Start();
             }
-            
+
         }
 
         /// <summary>
@@ -137,11 +137,11 @@ namespace DMS.Infrastructure.Services.Mqtt
 
             try
             {
-                while (!stoppingToken.IsCancellationRequested )
+                while (!stoppingToken.IsCancellationRequested)
                 {
                     await _reloadSemaphore.WaitAsync(stoppingToken);
 
-                    if (stoppingToken.IsCancellationRequested ) break;
+                    if (stoppingToken.IsCancellationRequested) break;
 
                     // 加载MQTT配置
                     if (!LoadMqttConfigurations())
@@ -155,7 +155,7 @@ namespace DMS.Infrastructure.Services.Mqtt
                     _logger.LogInformation("MQTT后台服务已启动");
 
                     // 保持运行状态
-                    while (!stoppingToken.IsCancellationRequested  && _reloadSemaphore.CurrentCount == 0)
+                    while (!stoppingToken.IsCancellationRequested && _reloadSemaphore.CurrentCount == 0)
                     {
                         await Task.Delay(1000, stoppingToken);
                     }
@@ -186,9 +186,7 @@ namespace DMS.Infrastructure.Services.Mqtt
                 _mqttServers.Clear();
 
                 // 从数据服务中心获取所有激活的MQTT服务器
-                var mqttServerDtos = _appDataStorageService.MqttServers.Values
-                                                           .Where(m => m.IsActive)
-                                                           .ToList();
+                var mqttServerDtos = _appDataStorageService.MqttServers.Values.ToList();
 
                 foreach (var mqttServerDto in mqttServerDtos)
                 {
@@ -252,12 +250,12 @@ namespace DMS.Infrastructure.Services.Mqtt
         public override void Dispose()
         {
             _logger.LogInformation("正在释放MQTT后台服务资源...");
-            
+
             _eventService.OnLoadDataCompleted -= OnLoadDataCompleted;
             _reloadSemaphore?.Dispose();
-            
+
             base.Dispose();
-            
+
             _logger.LogInformation("MQTT后台服务资源已释放");
         }
     }

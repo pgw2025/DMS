@@ -105,12 +105,6 @@ public class MqttManagementService : IMqttManagementService
                             this, new MqttServerChangedEventArgs(ActionChangeType.Updated, mMqttServerDto, property));
                     }
                     
-                    // 如果没有任何属性发生变化，至少触发一次更新事件
-                    if (changedProperties.Count == 0)
-                    {
-                        _eventService.RaiseMqttServerChanged(
-                            this, new MqttServerChangedEventArgs(ActionChangeType.Updated, mMqttServerDto, MqttServerPropertyType.All));
-                    }
                 }
                 else
                 {

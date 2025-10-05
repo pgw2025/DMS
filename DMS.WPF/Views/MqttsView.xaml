@@ -45,11 +45,13 @@
 
                     <!--  Row 0: Header with Name and ToggleSwitch  -->
                     <DockPanel Grid.Row="0" Margin="0,0,0,10">
-                        <ui:ToggleSwitch
+                        <ToggleButton
                             DockPanel.Dock="Right"
-                            IsOn="{Binding IsActive}"
-                            OffContent="停止"
-                            OnContent="启动" />
+                            Command="{Binding DataContext.ToggleIsActiveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding }"
+                            IsChecked="{Binding IsActive}"
+                            Style="{StaticResource ToggleButtonSwitch}" />
+
                         <TextBlock
                             VerticalAlignment="Center"
                             FontSize="20"

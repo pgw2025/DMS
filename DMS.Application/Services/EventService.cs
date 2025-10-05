@@ -86,15 +86,6 @@ public class EventService : IEventService
 
 
     /// <summary>
-    /// 变量启停改变事件
-    /// </summary>
-    public event EventHandler<VariablesActiveChangedEventArgs> OnVariableActiveChanged;
-    public void RaiseVariableActiveChanged(object sender, VariablesActiveChangedEventArgs e)
-    {
-        OnVariableActiveChanged?.Invoke(sender, e);
-    }
-
-    /// <summary>
     /// 批量导入变量事件
     /// </summary>
     public event EventHandler<BatchImportVariablesEventArgs> OnBatchImportVariables;
@@ -128,22 +119,6 @@ public class EventService : IEventService
     #endregion
 
     #region MQTT事件
-
-    /// <summary>
-    /// MQTT连接状态改变事件
-    /// </summary>
-    public event EventHandler<MqttConnectionChangedEventArgs> MqttConnectionChanged;
-
-    /// <summary>
-    /// 触发MQTT连接状态改变事件
-    /// </summary>
-    /// <param name="sender">事件发送者</param>
-    /// <param name="e">MQTT连接状态改变事件参数</param>
-    public void RaiseMqttConnectionChanged(object sender, MqttConnectionChangedEventArgs e)
-    {
-        MqttConnectionChanged?.Invoke(sender, e);
-    }
-
     /// <summary>
     /// MQTT服务器改变事件
     /// </summary>

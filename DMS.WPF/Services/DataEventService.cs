@@ -82,7 +82,6 @@ public class DataEventService : IDataEventService
                             break;
                         case MqttServerPropertyType.IsConnect:
                             mqttServerItem.IsConnect=e.MqttServer.IsConnect;
-                            _notificationService.ShowSuccess($"MQTT服务器：{mqttServerItem.ServerName},连接发生了变化,状态：{e.MqttServer.IsConnect}");
                             break;
                         case MqttServerPropertyType.Username:
                             break;

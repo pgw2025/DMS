@@ -50,11 +50,6 @@ namespace DMS.Infrastructure.Services.Mqtt
         }
 
         /// <summary>
-        /// 标志是否正在处理事件，用于防止递归调用
-        /// </summary>
-        private readonly ConcurrentDictionary<int, bool> _isProcessingUpdate = new();
-
-        /// <summary>
         /// 初始化服务管理器
         /// </summary>
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
@@ -81,10 +76,6 @@ namespace DMS.Infrastructure.Services.Mqtt
             _mqttContexts.AddOrUpdate(mqttServer.Id, context, (key, oldValue) => context);
             _logger.LogInformation("已添加MQTT服务器 {MqttServerId} 到监控列表", mqttServer.Id);
 
-            // 使用AutoMapper触发MQTT服务器改变事件
-            var mqttServerDto = _mapper.Map<MqttServerDto>(mqttServer);
-
-            _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(Core.Enums.ActionChangeType.Added, mqttServerDto));
         }
 
         /// <summary>
@@ -97,10 +88,6 @@ namespace DMS.Infrastructure.Services.Mqtt
                 await DisconnectMqttServerAsync(mqttServerId, cancellationToken);
                 _logger.LogInformation("已移除MQTT服务器 {MqttServerId} 的监控", mqttServerId);
 
-                // 使用AutoMapper触发MQTT服务器删除事件
-                var mqttServerDto = _mapper.Map<MqttServerDto>(context.MqttServerConfig);
-
-                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(Core.Enums.ActionChangeType.Deleted, mqttServerDto));
             }
         }
 
@@ -352,14 +339,6 @@ namespace DMS.Infrastructure.Services.Mqtt
         {
             try
             {
-                // 防止同一服务器的递归更新
-                if (_isProcessingUpdate.ContainsKey(e.MqttServer.Id) && _isProcessingUpdate[e.MqttServer.Id])
-                {
-                    _logger.LogDebug("正在处理服务器 {MqttServerId} 的更新，跳过重复事件", e.MqttServer.Id);
-                    return;
-                }
-                
-                _isProcessingUpdate[e.MqttServer.Id] = true;
                 
                 _logger.LogDebug("处理MQTT服务器变更事件: 服务器ID={MqttServerId}, 变更类型={ChangeType}, 变更属性={PropertyType}",
                     e.MqttServer.Id, e.ChangeType, e.PropertyType);
@@ -381,10 +360,6 @@ namespace DMS.Infrastructure.Services.Mqtt
             {
                 _logger.LogError(ex, "处理MQTT服务器变更事件时发生错误: 服务器ID={MqttServerId}, 变更类型={ChangeType}",
                     e.MqttServer.Id, e.ChangeType);
-            }
-            finally
-            {
-                _isProcessingUpdate.TryRemove(e.MqttServer.Id, out _);
             }
         }
 
@@ -474,10 +449,6 @@ namespace DMS.Infrastructure.Services.Mqtt
                             await ReconnectMqttServerAsync(mqttServer.Id, CancellationToken.None);
                             break;
                         case MqttServerPropertyType.IsActive:
-                            // 检查当前激活状态和新激活状态是否一致
-                            if (context.MqttServerConfig.IsActive != mqttServer.IsActive)
-                            {
-                                context.MqttServerConfig.IsActive = mqttServer.IsActive;
                                 
                                 if (mqttServer.IsActive)
                                 {
@@ -489,7 +460,6 @@ namespace DMS.Infrastructure.Services.Mqtt
                                     // 激活状态变为false，断开服务器连接
                                     await DisconnectMqttServerAsync(mqttServer.Id, CancellationToken.None);
                                 }
-                            }
                             break;
                         case MqttServerPropertyType.SubscribeTopic:
                             context.MqttServerConfig.SubscribeTopic = mqttServer.SubscribeTopic;
@@ -556,9 +526,6 @@ namespace DMS.Infrastructure.Services.Mqtt
                             context.MqttServerConfig?.ServerName ?? "Unknown");
                     }
                 }
-                
-                // 清理处理更新状态的字典
-                _isProcessingUpdate.Clear();
 
                 _logger.LogInformation("MQTT服务管理器已释放资源");
             }

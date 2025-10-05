@@ -45,33 +45,32 @@ namespace DMS.Infrastructure.Services.S7
             _deviceContexts = new ConcurrentDictionary<int, S7DeviceContext>();
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10
 
-            _eventService.OnVariableActiveChanged += OnVariableActiveChanged;
             _eventService.OnBatchImportVariables += OnBatchImportVariables;
             _eventService.OnVariableChanged += OnVariableChanged;
         }
 
-        private void OnVariableActiveChanged(object? sender, VariablesActiveChangedEventArgs e)
-        {
-            if (_deviceContexts.TryGetValue(e.DeviceId, out var s7DeviceContext))
-            {
+        //private void OnVariableActiveChanged(object? sender, VariablesActiveChangedEventArgs e)
+        //{
+        //    if (_deviceContexts.TryGetValue(e.DeviceId, out var s7DeviceContext))
+        //    {
                 
-                var variables = _appDataStorageService.Variables.Values.Where(v => e.VariableIds.Contains(v.Id))
-                                                      .ToList();
-                foreach (var variable in variables)
-                {
-                    if (e.NewStatus)
-                    {
-                        // 变量启用，从轮询列表中添加变量
-                        s7DeviceContext.Variables.AddOrUpdate(variable.S7Address,variable, (key, oldValue) => variable);
-                    }
-                    else
-                    {
-                        // 变量停用，从轮询列表中移除变量
-                        s7DeviceContext.Variables.Remove(variable.S7Address, out _);
-                    }
-                }
-            }
-        }
+        //        var variables = _appDataStorageService.Variables.Values.Where(v => e.VariableIds.Contains(v.Id))
+        //                                              .ToList();
+        //        foreach (var variable in variables)
+        //        {
+        //            if (e.NewStatus)
+        //            {
+        //                // 变量启用，从轮询列表中添加变量
+        //                s7DeviceContext.Variables.AddOrUpdate(variable.S7Address,variable, (key, oldValue) => variable);
+        //            }
+        //            else
+        //            {
+        //                // 变量停用，从轮询列表中移除变量
+        //                s7DeviceContext.Variables.Remove(variable.S7Address, out _);
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// 初始化服务管理器

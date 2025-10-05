@@ -64,10 +64,34 @@ public partial class MqttsViewModel : ViewModelBase
         _navigationService = navigationService;
         _notificationService = notificationService;
 
-        // Set static services for MqttServerItemViewModel
-        MqttServerItemViewModel.SetServices(_wpfDataService, _notificationService);
         
         _mqttServeise = _dataStorageService.MqttServers.ToNotifyCollectionChanged(x=>x.Value);
+    }
+
+    [RelayCommand]
+    public async Task ToggleIsActive(MqttServerItemViewModel mqttServerItem)
+    {
+        try
+        {
+            if (mqttServerItem == null)
+            {
+                _notificationService.ShowError("没有选择任何MQTT服务器，请选择后再点击切换激活状态");
+                return;
+            }
+
+
+            // 更新到数据存储
+            await _wpfDataService.MqttDataService.UpdateMqttServer(mqttServerItem);
+
+            // 显示操作结果
+            var statusText = mqttServerItem.IsActive ? "已启用" : "已停用";
+            _notificationService.ShowSuccess($"MQTT服务器 {mqttServerItem.ServerName} 已{statusText}");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "切换MQTT服务器激活状态时发生错误");
+            _notificationService.ShowError($"切换MQTT服务器激活状态时发生错误：{e.Message}", e);
+        }
     }
 
     /// <summary>

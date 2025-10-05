@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
+using DMS.Application.Interfaces.Management;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
 
@@ -16,8 +17,8 @@ public class MqttDataService : IMqttDataService
 {
     private readonly IMapper _mapper;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IMqttManagementService _mqttManagementService;
     private readonly IDataStorageService _dataStorageService;
-    private readonly IMqttAppService _mqttAppService;
 
 
     /// <summary>
@@ -25,12 +26,12 @@ public class MqttDataService : IMqttDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="mqttAppService">MQTT应用服务实例。</param>
-    public MqttDataService(IMapper mapper, IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService, IMqttAppService mqttAppService)
+    public MqttDataService(IMapper mapper, IAppDataStorageService appDataStorageService,IMqttManagementService mqttManagementService, IDataStorageService dataStorageService)
     {
         _mapper = mapper;
         _appDataStorageService = appDataStorageService;
+        _mqttManagementService = mqttManagementService;
         _dataStorageService = dataStorageService;
-        _mqttAppService = mqttAppService;
     }
 
     /// <summary>
@@ -60,11 +61,8 @@ public class MqttDataService : IMqttDataService
     /// </summary>
     public async Task<MqttServerItemViewModel> AddMqttServer(MqttServerItemViewModel mqttServer)
     {
-        var dto = _mapper.Map<MqttServerDto>(mqttServer);
-        var id = await _mqttAppService.CreateMqttServerAsync(dto);
-        dto.Id = id;
-        
-        var mqttServerItem = _mapper.Map<MqttServerItemViewModel>(dto);
+        var mqttServerDto = await _mqttManagementService.CreateMqttServerAsync(_mapper.Map<MqttServerDto>(mqttServer));
+        var mqttServerItem = _mapper.Map<MqttServerItemViewModel>(mqttServerDto);
         _dataStorageService.MqttServers.Add(mqttServerItem.Id,mqttServerItem);
         
         return mqttServerItem;
@@ -76,7 +74,7 @@ public class MqttDataService : IMqttDataService
     public async Task<bool> UpdateMqttServer(MqttServerItemViewModel mqttServer)
     {
         var dto = _mapper.Map<MqttServerDto>(mqttServer);
-        await _mqttAppService.UpdateMqttServerAsync(dto);
+        await _mqttManagementService.UpdateMqttServerAsync(dto);
         return true;
     }
 
@@ -85,7 +83,7 @@ public class MqttDataService : IMqttDataService
     /// </summary>
     public async Task<bool> DeleteMqttServer(MqttServerItemViewModel mqttServer)
     {
-        await _mqttAppService.DeleteMqttServerAsync(mqttServer.Id);
+        await _mqttManagementService.DeleteMqttServerAsync(mqttServer.Id);
         _dataStorageService.MqttServers.Remove(mqttServer.Id);
         return true;
     }
