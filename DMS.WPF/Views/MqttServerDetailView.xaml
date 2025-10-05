@@ -38,14 +38,8 @@
                                DefaultLabelPosition="Right" 
                                IsOpen="False"
                                HorizontalAlignment="Right">
-                    <!-- 重新加载 -->
-                    <ui:AppBarButton Command="{Binding ReloadCommand}" Label="重新加载">
-                        <ui:AppBarButton.Icon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
-                        </ui:AppBarButton.Icon>
-                    </ui:AppBarButton>
                     
-                    <ui:AppBarButton x:Name="EditButton" Label="编辑">
+                    <ui:AppBarButton x:Name="EditButton" Label="编辑" Command="{Binding EditMqttCommand}">
                         <ui:AppBarButton.Icon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
                         </ui:AppBarButton.Icon>
@@ -272,18 +266,24 @@
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" Text="关联变量" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
                         <DataGrid Grid.Row="1" x:Name="AssociatedVariablesDataGrid"
-                                         ItemsSource="{Binding AssociatedVariables}"
+                                         ItemsSource="{Binding CurrentMqtt.VariableAliases}"
                                          AutoGenerateColumns="False"
                                          CanUserAddRows="False"
                                          CanUserDeleteRows="False"
                                          IsReadOnly="True"
                                          SelectionMode="Extended">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="修改发送名称" Command="{Binding ModifyAliasCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=SelectedItems[0]}"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
                             <DataGrid.Columns>
+                                <DataGridTextColumn Header="设备名称" Binding="{Binding Variable.VariableTable.Device.Name}"/>
+                                <DataGridTextColumn Header="变量表名称" Binding="{Binding Variable.VariableTable.Name}"/>
                                 <DataGridTextColumn Header="变量名称" Binding="{Binding Variable.Name}"/>
-                                <DataGridTextColumn Header="MQTT发送名称" Binding="{Binding MqttAlias}"/>
+                                <DataGridTextColumn Header="MQTT发送名称" Binding="{Binding Alias}"/>
                                 <DataGridTextColumn Header="地址" Binding="{Binding Variable.S7Address}"/>
-                                <DataGridTextColumn Header="数据类型" Binding="{Binding Variable.SignalType}"/>
-                                <DataGridTextColumn Header="当前值" Binding="{Binding Variable.DataValue}"/>
+                                <DataGridTextColumn Header="数据类型" Binding="{Binding Variable.DataType}"/>
                                 <DataGridTextColumn Header="显示值" Binding="{Binding Variable.DisplayValue}"/>
                                 <DataGridTextColumn Header="更新时间" Binding="{Binding Variable.UpdatedAt, StringFormat='yyyy-MM-dd HH:mm:ss'}"/>
                             </DataGrid.Columns>

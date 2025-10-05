@@ -43,7 +43,7 @@ public class MqttPublishProcessor : IVariableProcessor
             
             // 发布变量数据到MQTT服务器
            var variableMqttAlias = _mapper.Map<VariableMqttAlias>(variableMqttAliasDto);
-           variableMqttAlias.Variable.DataValue=variable.DataValue;
+           variableMqttAlias.Variable.DisplayValue=variable.DisplayValue;
             await _mqttServiceManager.PublishVariableDataAsync(variableMqttAlias);
         }
     }

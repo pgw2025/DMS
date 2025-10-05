@@ -275,7 +275,7 @@ namespace DMS.Infrastructure.Services.Mqtt
             var now = DateTime.Now;
             var timestamp = ((DateTimeOffset)now).ToUnixTimeMilliseconds();
             sb.Append(variableMqtt.MqttServer.MessageHeader.Replace("{timestamp}", timestamp.ToString()));
-            sb.Append(variableMqtt.MqttServer.MessageContent.Replace("{name}", variableMqtt.Alias).Replace("{value}", variableMqtt.Variable.DataValue));
+            sb.Append(variableMqtt.MqttServer.MessageContent.Replace("{name}", variableMqtt.Alias).Replace("{value}", variableMqtt.Variable.DisplayValue));
             sb.Append(variableMqtt.MqttServer.MessageFooter);
 
             return sb.ToString();

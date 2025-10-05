@@ -184,7 +184,20 @@ public partial class MqttsViewModel : ViewModelBase
             
             // 更新UI
             _mapper.Map(mqtt, SelectedMqtt);
-            
+
+            // 更新当前视图模型的数据
+            mqtt.ServerName = SelectedMqtt.ServerName;
+            mqtt.ServerUrl = SelectedMqtt.ServerUrl;
+            mqtt.Port = SelectedMqtt.Port;
+            mqtt.ClientId = SelectedMqtt.ClientId;
+            mqtt.Username = SelectedMqtt.Username;
+            mqtt.Password = SelectedMqtt.Password;
+            mqtt.PublishTopic = SelectedMqtt.PublishTopic;
+            mqtt.SubscribeTopic = SelectedMqtt.SubscribeTopic;
+            mqtt.MessageHeader = SelectedMqtt.MessageHeader;
+            mqtt.MessageContent = SelectedMqtt.MessageContent;
+            mqtt.MessageFooter = SelectedMqtt.MessageFooter;
+
             _notificationService.ShowSuccess($"编辑MQTT服务器成功：{mqtt.ServerName}");
         }
         catch (Exception e)
