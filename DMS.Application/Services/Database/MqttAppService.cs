@@ -117,4 +117,60 @@ public class MqttAppService : IMqttAppService
             throw new ApplicationException($"删除MQTT服务器时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
         }
     }
+
+    /// <summary>
+    /// 异步批量更新MQTT服务器（事务性操作）。
+    /// </summary>
+    /// <param name="mqttServerDtos">要更新的MQTT服务器数据传输对象列表。</param>
+    /// <returns>成功更新的MQTT服务器数量。</returns>
+    /// <exception cref="ApplicationException">如果批量更新MQTT服务器时发生错误。</exception>
+    public async Task<int> UpdateMqttServersAsync(List<MqttServerDto> mqttServerDtos)
+    {
+        try
+        {
+            await _repoManager.BeginTranAsync();
+            var count = 0;
+            foreach (var mqttServerDto in mqttServerDtos)
+            {
+                var mqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServerDto.Id);
+                if (mqttServer != null)
+                {
+                    _mapper.Map(mqttServerDto, mqttServer);
+                    await _repoManager.MqttServers.UpdateAsync(mqttServer);
+                    count++;
+                }
+            }
+            await _repoManager.CommitAsync();
+            return count;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException("批量更新MQTT服务器时发生错误，操作已回滚。", ex);
+        }
+    }
+
+    /// <summary>
+    /// 异步批量删除MQTT服务器（事务性操作）。
+    /// </summary>
+    /// <param name="ids">要删除的MQTT服务器ID列表。</param>
+    /// <returns>如果删除成功则为 true，否则为 false。</returns>
+    /// <exception cref="ApplicationException">如果批量删除MQTT服务器时发生错误。</exception>
+    public async Task<bool> DeleteMqttServersAsync(List<int> ids)
+    {
+        try
+        {
+            if (ids == null || !ids.Any()) return true;
+
+            await _repoManager.BeginTranAsync();
+            var result = await _repoManager.MqttServers.DeleteByIdsAsync(ids);
+            await _repoManager.CommitAsync();
+            return result > 0;
+        }
+        catch (Exception ex)
+        {
+            await _repoManager.RollbackAsync();
+            throw new ApplicationException($"批量删除MQTT服务器时发生错误，操作已回滚,错误信息:{ex.Message}", ex);
+        }
+    }
 }

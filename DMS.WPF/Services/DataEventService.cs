@@ -23,6 +23,7 @@ public class DataEventService : IDataEventService
     private readonly IMapper _mapper;
     private readonly IDataStorageService _dataStorageService;
     private readonly IEventService _eventService;
+    private readonly INotificationService _notificationService;
     private readonly IAppDataCenterService _appDataCenterService;
     private readonly IWPFDataService _wpfDataService;
     private readonly ILogger<DataEventService> _logger;
@@ -33,6 +34,7 @@ public class DataEventService : IDataEventService
     public DataEventService(IMapper mapper,
         IDataStorageService dataStorageService, 
         IEventService eventService,
+        INotificationService notificationService,
         IAppDataCenterService appDataCenterService,
         IWPFDataService wpfDataService,
         ILogger<DataEventService> logger)
@@ -40,6 +42,7 @@ public class DataEventService : IDataEventService
         _mapper = mapper;
         _dataStorageService = dataStorageService;
         _eventService = eventService;
+        _notificationService = notificationService;
         _appDataCenterService = appDataCenterService;
         _wpfDataService = wpfDataService;
         _logger = logger;
@@ -79,6 +82,7 @@ public class DataEventService : IDataEventService
                             break;
                         case MqttServerPropertyType.IsConnect:
                             mqttServerItem.IsConnect=e.MqttServer.IsConnect;
+                            _notificationService.ShowSuccess($"MQTT服务器：{mqttServerItem.ServerName},连接发生了变化,状态：{e.MqttServer.IsConnect}");
                             break;
                         case MqttServerPropertyType.Username:
                             break;

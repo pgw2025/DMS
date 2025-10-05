@@ -28,10 +28,18 @@ public interface IMqttAppService
     /// </summary>
     Task UpdateMqttServerAsync(MqttServerDto mqttServerDto);
 
-   
+    /// <summary>
+    /// 异步批量更新MQTT服务器。
+    /// </summary>
+    Task<int> UpdateMqttServersAsync(List<MqttServerDto> mqttServerDtos);
 
     /// <summary>
     /// 异步根据ID删除一个MQTT服务器。
     /// </summary>
     Task<int> DeleteMqttServerAsync(int id);
+
+    /// <summary>
+    /// 异步批量删除MQTT服务器。
+    /// </summary>
+    Task<bool> DeleteMqttServersAsync(List<int> ids);
 }

@@ -17,15 +17,25 @@ public interface IMqttManagementService
     /// <summary>
     /// 异步创建一个新的MQTT服务器。
     /// </summary>
-    Task<int> CreateMqttServerAsync(MqttServerDto mqttServerDto);
+    Task<MqttServerDto> CreateMqttServerAsync(MqttServerDto mqttServerDto);
 
     /// <summary>
     /// 异步更新一个已存在的MQTT服务器。
     /// </summary>
-    Task UpdateMqttServerAsync(MqttServerDto mqttServerDto);
+    Task<int> UpdateMqttServerAsync(MqttServerDto mqttServerDto);
+
+    /// <summary>
+    /// 异步批量更新MQTT服务器。
+    /// </summary>
+    Task<int> UpdateMqttServersAsync(List<MqttServerDto> mqttServerDtos);
 
     /// <summary>
     /// 异步删除一个MQTT服务器。
     /// </summary>
-    Task DeleteMqttServerAsync(int id);
+    Task<bool> DeleteMqttServerAsync(int id);
+
+    /// <summary>
+    /// 异步批量删除MQTT服务器。
+    /// </summary>
+    Task<bool> DeleteMqttServersAsync(List<int> ids);
 }
