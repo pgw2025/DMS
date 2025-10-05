@@ -3,110 +3,294 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <valueConverts:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
     </UserControl.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- MQTT Server Details -->
-        <StackPanel Grid.Row="0" Margin="10">
-            <TextBlock Text="MQTT 服务器详情" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
-            <Grid Margin="0,0,0,10">
+    
+    <DockPanel>
+        <!-- 顶部导航栏 -->
+        <Border DockPanel.Dock="Top" Margin="20,10" Padding="15">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="名称:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CurrentMqtt.ServerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
-
-                <TextBlock Grid.Row="0" Grid.Column="2" Text="主机:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding CurrentMqtt.ServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="端口:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMqtt.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
-
-                <TextBlock Grid.Row="1" Grid.Column="2" Text="客户端ID:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding CurrentMqtt.ClientId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="用户名:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMqtt.Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
-
-                <TextBlock Grid.Row="2" Grid.Column="2" Text="密码:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding CurrentMqtt.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="发布主题:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding CurrentMqtt.PublishTopic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
-
-                <TextBlock Grid.Row="3" Grid.Column="2" Text="订阅主题:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding CurrentMqtt.SubscribeTopic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="平台:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <!-- <ComboBox Grid.Row="4" Grid.Column="1" SelectedValue="{Binding CurrentMqtt.MqttPlatform, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" -->
-                <!--           Margin="0,0,10,0" -->
-                <!--           ItemsSource="{Binding Source={extensions:EnumBindingSourceExtension {x:Type enums:MqttPlatform}}}" -->
-                <!--           DisplayMemberPath="Description" -->
-                <!--           SelectedValuePath="Value"/> -->
                 
-                <TextBlock Grid.Row="5" Grid.Column="0" Text="消息头:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding CurrentMqtt.MessageHeader, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
+                <!-- 返回MQTT列表按钮 -->
+                <Button Grid.Column="0" 
+                        Command="{Binding NavigateToMqttsCommand}"
+                        Style="{StaticResource ButtonDefault}"
+                        ToolTip="返回MQTT服务器列表"
+                        Margin="0,0,10,0">
+                    <Button.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ArrowLeft8}" />
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
                 
-                <TextBlock Grid.Row="5" Grid.Column="2" Text="消息内容:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="5" Grid.Column="3" Text="{Binding CurrentMqtt.MessageContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="消息尾:" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding CurrentMqtt.MessageFooter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0"/>
+                <!-- 操作菜单栏 -->
+                <ui:CommandBar Grid.Column="1" 
+                               DefaultLabelPosition="Right" 
+                               IsOpen="False"
+                               HorizontalAlignment="Right">
+                    <!-- 重新加载 -->
+                    <ui:AppBarButton Command="{Binding ReloadCommand}" Label="重新加载">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    
+                    <ui:AppBarButton x:Name="EditButton" Label="编辑">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    
+                    <ui:AppBarButton x:Name="ShareButton" Label="分享">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Share}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    
+                    <ui:CommandBar.SecondaryCommands>
+                        <ui:AppBarButton
+                            x:Name="SettingsButton"
+                            Icon="Setting"
+                            Label="设置" />
+                    </ui:CommandBar.SecondaryCommands>
+                </ui:CommandBar>
             </Grid>
-            <Button Content="保存更改" Command="{Binding SaveChangesCommand}" HorizontalAlignment="Right" Margin="0,10,0,0"/>
-        </StackPanel>
+        </Border>
 
-        <!-- Associated Variables -->
-        <Grid Grid.Row="1" Margin="10,0,10,10">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="关联变量" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
-            <DataGrid Grid.Row="1" x:Name="AssociatedVariablesDataGrid"
-                             ItemsSource="{Binding AssociatedVariables}"
-                             AutoGenerateColumns="False"
-                             CanUserAddRows="False"
-                             CanUserDeleteRows="False"
-                             IsReadOnly="True"
-                             SelectionMode="Extended">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="变量名称" Binding="{Binding Variable.Name}"/>
-                    <DataGridTextColumn Header="MQTT发送名称" Binding="{Binding MqttAlias}"/>
-                    <DataGridTextColumn Header="地址" Binding="{Binding Variable.S7Address}"/>
-                    <DataGridTextColumn Header="数据类型" Binding="{Binding Variable.SignalType}"/>
-                    <DataGridTextColumn Header="当前值" Binding="{Binding Variable.DataValue}"/>
-                    <DataGridTextColumn Header="显示值" Binding="{Binding Variable.DisplayValue}"/>
-                    <DataGridTextColumn Header="更新时间" Binding="{Binding Variable.UpdatedAt, StringFormat='yyyy-MM-dd HH:mm:ss'}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
+        <!-- 主内容区域 -->
+        <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
+                <!-- MQTT Server Details -->
+                <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,10" Padding="15">
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.1" Color="#888888"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <ui:FontIcon FontFamily="{StaticResource MdFontIcons}"
+                                             Glyph="&#xF048B;"
+                                             FontSize="24" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,10,0"
+                                             Foreground="#2196F3"/>
+                                <TextBlock Text="MQTT 服务器详情" 
+                                           Style="{StaticResource SubtitleTextBlockStyle}" 
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <Grid Margin="0,8,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-        <!-- Actions for Associated Variables -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
-            <Button Content="添加变量" Command="{Binding AddVariablesCommand}" Margin="0,0,10,0"/>
-            <Button Content="移除选中变量" Command="{Binding RemoveVariablesCommand}" CommandParameter="{Binding ElementName=AssociatedVariablesDataGrid, Path=SelectedItems}"/>
-        </StackPanel>
-    </Grid>
+                            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Tag}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="名称:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentMqtt.ServerName}" 
+                                       Margin="0,0,10,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.World}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="主机:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding CurrentMqtt.ServerUrl}" 
+                                       Margin="0,0,0,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ConnectApp}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="端口:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentMqtt.Port}" 
+                                       Margin="0,0,10,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ContactInfo}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="客户端ID:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding CurrentMqtt.ClientId}" 
+                                       Margin="0,0,0,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="用户名:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CurrentMqtt.Username}" 
+                                       Margin="0,0,10,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Lock}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="密码:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding CurrentMqtt.Password}" 
+                                       Margin="0,0,0,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon FontFamily="{StaticResource MdFontIcons}"
+                                             Glyph="&#xF06A7;" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="发布主题:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CurrentMqtt.PublishTopic}" 
+                                       Margin="0,0,10,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon FontFamily="{StaticResource MdFontIcons}"
+                                             Glyph="&#xF009E;" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="订阅主题:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding CurrentMqtt.SubscribeTopic}" 
+                                       Margin="0,0,0,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+
+                            <StackPanel Grid.Row="4" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="平台:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <!-- <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CurrentMqtt.MqttPlatform, Converter={StaticResource EnumDescriptionConverter}}" Margin="0,0,10,12" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#333333"/> -->
+                            
+                            <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Mail}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="消息头:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CurrentMqtt.MessageHeader}" 
+                                       Margin="0,0,10,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+                            
+                            <StackPanel Grid.Row="5" Grid.Column="2" Orientation="Horizontal" Margin="0,0,5,12">
+                                <ui:FontIcon  Icon="{x:Static ui:SegoeFluentIcons.Mail}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="消息内容:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="5" Grid.Column="3" Text="{Binding CurrentMqtt.MessageContent}" 
+                                       Margin="0,0,0,12" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+                            
+                            <StackPanel Grid.Row="6" Grid.Column="0" Orientation="Horizontal" Margin="0,0,5,0">
+                                <ui:FontIcon  Icon="{x:Static ui:SegoeFluentIcons.Mail}" 
+                                             FontSize="16" 
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,5,0"
+                                             Foreground="#666666"/>
+                                <TextBlock Text="消息尾:" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding CurrentMqtt.MessageFooter}" 
+                                       Margin="0,0,10,0" VerticalAlignment="Center" 
+                                       FontWeight="SemiBold" Foreground="#333333"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Associated Variables -->
+                <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,10" Padding="15">
+                    <Border.Effect>
+                        <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.1" Color="#888888"/>
+                    </Border.Effect>
+                    
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="关联变量" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
+                        <DataGrid Grid.Row="1" x:Name="AssociatedVariablesDataGrid"
+                                         ItemsSource="{Binding AssociatedVariables}"
+                                         AutoGenerateColumns="False"
+                                         CanUserAddRows="False"
+                                         CanUserDeleteRows="False"
+                                         IsReadOnly="True"
+                                         SelectionMode="Extended">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="变量名称" Binding="{Binding Variable.Name}"/>
+                                <DataGridTextColumn Header="MQTT发送名称" Binding="{Binding MqttAlias}"/>
+                                <DataGridTextColumn Header="地址" Binding="{Binding Variable.S7Address}"/>
+                                <DataGridTextColumn Header="数据类型" Binding="{Binding Variable.SignalType}"/>
+                                <DataGridTextColumn Header="当前值" Binding="{Binding Variable.DataValue}"/>
+                                <DataGridTextColumn Header="显示值" Binding="{Binding Variable.DisplayValue}"/>
+                                <DataGridTextColumn Header="更新时间" Binding="{Binding Variable.UpdatedAt, StringFormat='yyyy-MM-dd HH:mm:ss'}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
 </UserControl>
