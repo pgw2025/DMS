@@ -1,4 +1,3 @@
-using System;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Events;
@@ -74,7 +73,7 @@ public class EventService : IEventService
     /// 变量值改变事件
     /// </summary>
     public event EventHandler<VariableChangedEventArgs> OnVariableChanged;
-    
+
     /// <summary>
     /// 触发变量值改变事件
     /// </summary>
@@ -85,7 +84,7 @@ public class EventService : IEventService
         OnVariableChanged?.Invoke(sender, e);
     }
 
-    
+
     /// <summary>
     /// 变量启停改变事件
     /// </summary>
@@ -159,7 +158,7 @@ public class EventService : IEventService
     {
         OnMqttServerChanged?.Invoke(sender, e);
     }
-     
+
     #endregion
 
     #region 数据加载事件

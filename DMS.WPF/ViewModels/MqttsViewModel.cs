@@ -64,6 +64,9 @@ public partial class MqttsViewModel : ViewModelBase
         _navigationService = navigationService;
         _notificationService = notificationService;
 
+        // Set static services for MqttServerItemViewModel
+        MqttServerItemViewModel.SetServices(_wpfDataService, _notificationService);
+        
         _mqttServeise = _dataStorageService.MqttServers.ToNotifyCollectionChanged(x=>x.Value);
     }
 
