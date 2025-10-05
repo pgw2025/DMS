@@ -44,8 +44,5 @@ public interface IDataLoaderService
     /// </summary>
     Task LoadAllNlogsAsync(int count);
 
-    /// <summary>
-    /// 当数据加载完成时触发
-    /// </summary>
-    event EventHandler<DataLoadCompletedEventArgs> OnLoadDataCompleted;
+
 }

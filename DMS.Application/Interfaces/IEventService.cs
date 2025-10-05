@@ -125,4 +125,16 @@ public interface IEventService
     /// 变量启停改变事件
     /// </summary>
     event EventHandler<VariablesActiveChangedEventArgs> OnVariableActiveChanged;
+    
+    /// <summary>
+    /// 数据加载完成事件
+    /// </summary>
+    event EventHandler<DataLoadCompletedEventArgs> OnLoadDataCompleted;
+
+    /// <summary>
+    /// 触发数据加载完成事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">数据加载完成事件参数</param>
+    void RaiseLoadDataCompleted(object sender, DataLoadCompletedEventArgs e);
 }

@@ -16,6 +16,7 @@ namespace DMS.Infrastructure.Services.Mqtt
     {
         private readonly ILogger<MqttBackgroundService> _logger;
         private readonly IMqttServiceManager _mqttServiceManager;
+        private readonly IEventService _eventService;
         private readonly IAppDataStorageService _appDataStorageService;
         private readonly IAppDataCenterService _appDataCenterService;
         private readonly ConcurrentDictionary<int, MqttServer> _mqttServers;
@@ -24,16 +25,18 @@ namespace DMS.Infrastructure.Services.Mqtt
         public MqttBackgroundService(
             ILogger<MqttBackgroundService> logger,
             IMqttServiceManager mqttServiceManager,
+            IEventService eventService,
             IAppDataStorageService appDataStorageService,
             IAppDataCenterService appDataCenterService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mqttServiceManager = mqttServiceManager ?? throw new ArgumentNullException(nameof(mqttServiceManager));
+            _eventService = eventService;
             _appDataStorageService = appDataStorageService;
             _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _mqttServers = new ConcurrentDictionary<int, MqttServer>();
 
-            _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
+            _eventService.OnLoadDataCompleted += OnLoadDataCompleted;
         }
 
         private void OnLoadDataCompleted(object? sender, DataLoadCompletedEventArgs e)
@@ -250,7 +253,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         {
             _logger.LogInformation("正在释放MQTT后台服务资源...");
             
-            _appDataCenterService.DataLoaderService.OnLoadDataCompleted -= OnLoadDataCompleted;
+            _eventService.OnLoadDataCompleted -= OnLoadDataCompleted;
             _reloadSemaphore?.Dispose();
             
             base.Dispose();

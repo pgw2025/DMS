@@ -49,7 +49,7 @@ public class DataEventService : IDataEventService
         // 监听变量值变更事件
         _eventService.OnVariableValueChanged += OnVariableValueChanged;
         _eventService.OnMqttServerChanged += OnMqttServerChanged;
-        _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
+        _eventService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
         // _appDataCenterService.OnLogChanged += _logDataService.OnNlogChanged;
         

@@ -161,4 +161,23 @@ public class EventService : IEventService
     }
      
     #endregion
+
+    #region 数据加载事件
+
+    /// <summary>
+    /// 数据加载完成事件
+    /// </summary>
+    public event EventHandler<DataLoadCompletedEventArgs> OnLoadDataCompleted;
+
+    /// <summary>
+    /// 触发数据加载完成事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">数据加载完成事件参数</param>
+    public void RaiseLoadDataCompleted(object sender, DataLoadCompletedEventArgs e)
+    {
+        OnLoadDataCompleted?.Invoke(sender, e);
+    }
+
+    #endregion
 }

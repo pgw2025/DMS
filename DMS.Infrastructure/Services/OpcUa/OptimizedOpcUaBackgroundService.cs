@@ -23,6 +23,7 @@ namespace DMS.Infrastructure.Services.OpcUa
         public OptimizedOpcUaBackgroundService(
             IAppDataCenterService appDataCenterService,
             IAppDataStorageService appDataStorageService,
+            IEventService eventService,
             IOpcUaServiceManager opcUaServiceManager,
             ILogger<OptimizedOpcUaBackgroundService> logger)
         {
@@ -30,8 +31,8 @@ namespace DMS.Infrastructure.Services.OpcUa
             _appDataStorageService = appDataStorageService;
             _opcUaServiceManager = opcUaServiceManager ?? throw new ArgumentNullException(nameof(opcUaServiceManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
+            _eventService = eventService;
+            _eventService.OnLoadDataCompleted += OnLoadDataCompleted;
         }
 
 
@@ -146,7 +147,7 @@ namespace DMS.Infrastructure.Services.OpcUa
         {
             _logger.LogInformation("正在释放OPC UA后台服务资源...");
             
-            _appDataCenterService.DataLoaderService.OnLoadDataCompleted -= OnLoadDataCompleted;
+            _eventService.OnLoadDataCompleted -= OnLoadDataCompleted;
             _reloadSemaphore?.Dispose();
             
             base.Dispose();

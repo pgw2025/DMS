@@ -51,7 +51,7 @@ public class OptimizedS7BackgroundService : BackgroundService
         _s7ServiceManager = s7ServiceManager;
         _logger = logger;
 
-        _appDataCenterService.DataLoaderService.OnLoadDataCompleted += OnLoadDataCompleted;
+        _eventService.OnLoadDataCompleted += OnLoadDataCompleted;
         
     }
     
