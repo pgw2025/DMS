@@ -11,18 +11,20 @@ namespace DMS.Application.Services.Management;
 /// </summary>
 public class MenuManagementService : IMenuManagementService
 {
-    private readonly IMenuService _menuService;
+    private readonly IMenuAppService _menuService;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IEventService _eventService;
 
     /// <summary>
     /// 当菜单数据发生变化时触发
     /// </summary>
     public event EventHandler<MenuChangedEventArgs> MenuChanged;
 
-    public MenuManagementService(IMenuService menuService,IAppDataStorageService appDataStorageService)
+    public MenuManagementService(IMenuAppService menuService, IAppDataStorageService appDataStorageService, IEventService eventService)
     {
         _menuService = menuService;
         _appDataStorageService = appDataStorageService;
+        _eventService = eventService;
     }
 
     /// <summary>
@@ -46,74 +48,71 @@ public class MenuManagementService : IMenuManagementService
     /// </summary>
     public async Task<int> CreateMenuAsync(MenuBeanDto menuDto)
     {
-        return await _menuService.CreateMenuAsync(menuDto);
+        var result = await _menuService.CreateMenuAsync(menuDto);
+        
+        // 创建成功后，将菜单添加到内存中
+        if (result > 0)
+        {
+            menuDto.Id = result; // 假设返回的ID是新创建的
+            if (_appDataStorageService.Menus.TryAdd(menuDto.Id, menuDto))
+            {
+                MenuBeanDto parentMenu = null;
+                if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parent))
+                {
+                    parentMenu = parent;
+                    parent.Children.Add(menuDto);
+                }
+
+                _eventService.RaiseMenuChanged(this, new MenuChangedEventArgs(DataChangeType.Added, menuDto));
+            }
+        }
+        
+        return result;
     }
 
     /// <summary>
     /// 异步更新一个已存在的菜单。
     /// </summary>
-    public async Task UpdateMenuAsync(MenuBeanDto menuDto)
+    public async Task<int> UpdateMenuAsync(MenuBeanDto menuDto)
     {
-        await _menuService.UpdateMenuAsync(menuDto);
+        var result = await _menuService.UpdateMenuAsync(menuDto);
+        
+        // 更新成功后，更新内存中的菜单
+        if (result > 0 && menuDto != null)
+        {
+            _appDataStorageService.Menus.AddOrUpdate(menuDto.Id, menuDto, (key, oldValue) => menuDto);
+            
+
+            _eventService.RaiseMenuChanged(this, new MenuChangedEventArgs(DataChangeType.Updated, menuDto));
+        }
+
+        return result;
     }
 
     /// <summary>
     /// 异步删除一个菜单。
     /// </summary>
-    public async Task DeleteMenuAsync(int id)
+    public async Task<bool> DeleteMenuAsync(int id)
     {
-        await _menuService.DeleteMenuAsync(id);
-    }
-
-    /// <summary>
-    /// 在内存中添加菜单
-    /// </summary>
-    public void AddMenuToMemory(MenuBeanDto menuDto)
-    {
-        if (_appDataStorageService.Menus.TryAdd(menuDto.Id, menuDto))
+        var menu = await _menuService.GetMenuByIdAsync(id); // 获取菜单信息用于内存删除
+        var result = await _menuService.DeleteMenuAsync(id);
+        
+        // 删除成功后，从内存中移除菜单
+        if (result && menu != null)
         {
-            MenuBeanDto parentMenu = null;
-            if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parent))
+            if (_appDataStorageService.Menus.TryRemove(id, out var menuDto))
             {
-                parentMenu = parent;
-                parent.Children.Add(menuDto);
+                // 从父菜单中移除子菜单
+                if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parentMenu))
+                {
+                    parentMenu.Children.Remove(menuDto);
+                }
+                
+                _eventService.RaiseMenuChanged(this, new MenuChangedEventArgs(DataChangeType.Deleted, menuDto));
             }
-
-            OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Added, menuDto, parentMenu));
-        }
-    }
-
-    /// <summary>
-    /// 在内存中更新菜单
-    /// </summary>
-    public void UpdateMenuInMemory(MenuBeanDto menuDto)
-    {
-        _appDataStorageService.Menus.AddOrUpdate(menuDto.Id, menuDto, (key, oldValue) => menuDto);
-
-        MenuBeanDto parentMenu = null;
-        if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parent))
-        {
-            parentMenu = parent;
         }
 
-        OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Updated, menuDto, parentMenu));
-    }
-
-    /// <summary>
-    /// 在内存中删除菜单
-    /// </summary>
-    public void RemoveMenuFromMemory(int menuId)
-    {
-        if (_appDataStorageService.Menus.TryRemove(menuId, out var menuDto))
-        {
-            MenuBeanDto parentMenu = null;
-            if (menuDto.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuDto.ParentId, out var parent))
-            {
-                parentMenu = parent;
-            }
-
-            OnMenuChanged(new MenuChangedEventArgs(DataChangeType.Deleted, menuDto, parentMenu));
-        }
+        return result;
     }
 
     /// <summary>
@@ -159,6 +158,6 @@ public class MenuManagementService : IMenuManagementService
     /// </summary>
     protected virtual void OnMenuChanged(MenuChangedEventArgs e)
     {
-        MenuChanged?.Invoke(this, e);
+        _eventService.RaiseMenuChanged(this, e);
     }
 }

@@ -1,8 +1,12 @@
-using System.Collections.ObjectModel;
 using AutoMapper;
+using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Application.Interfaces.Management;
+using DMS.Application.Services.Management;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Items;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace DMS.WPF.Services;
 
@@ -14,6 +18,7 @@ public class MenuDataService : IMenuDataService
     private readonly IMapper _mapper;
     private readonly IDataStorageService _dataStorageService;
     private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IMenuManagementService _menuManagementService;
 
 
 
@@ -22,11 +27,12 @@ public class MenuDataService : IMenuDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appDataStorageService">数据服务中心实例。</param>
-    public MenuDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataStorageService appDataStorageService)
+    public MenuDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataStorageService appDataStorageService,IMenuManagementService menuManagementService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
         _appDataStorageService = appDataStorageService;
+        _menuManagementService = menuManagementService;
     }
 
     public void LoadAllMenus()
@@ -65,18 +71,23 @@ public class MenuDataService : IMenuDataService
     /// <summary>
     /// 添加菜单项。
     /// </summary>
-    public void AddMenuItem(MenuItemViewModel menuItemViewModel)
+    public async Task AddMenuItem(MenuItemViewModel menuItemViewModel)
     {
-        if (menuItemViewModel == null)
-        {
-            return;
-        }
+        if (menuItemViewModel is null) return;
 
         var deviceMenu = _dataStorageService.Menus.FirstOrDefault(m => m.Id == menuItemViewModel.ParentId);
-        if (deviceMenu != null)
+        if (deviceMenu is not null)
         {
-            deviceMenu.Children.Add(menuItemViewModel);
-            _dataStorageService.Menus.Add(menuItemViewModel);
+
+        var menuId= await _menuManagementService.CreateMenuAsync(_mapper.Map<MenuBeanDto>(menuItemViewModel));
+            if (menuId>0)
+            {
+                menuItemViewModel.Id = menuId;
+                deviceMenu.Children.Add(menuItemViewModel);
+                _dataStorageService.Menus.Add(menuItemViewModel);
+                BuildMenuTrees();
+            }
+            
         }
     }
 
@@ -84,17 +95,16 @@ public class MenuDataService : IMenuDataService
     /// <summary>
     /// 删除菜单项。
     /// </summary>
-    public void DeleteMenuItem(MenuItemViewModel? menuItemViewModel)
+    public async Task DeleteMenuItem(MenuItemViewModel? menuItemViewModel)
     {
-        if (menuItemViewModel == null)
-        {
-            return;
-        }
+        if (menuItemViewModel is null) return;
 
+       await _menuManagementService.DeleteMenuAsync(menuItemViewModel.Id);
+        
         // 从扁平菜单列表中移除
         _dataStorageService.Menus.Remove(menuItemViewModel);
 
-        // 从树形结构中移除
+        //// 从树形结构中移除
         if (menuItemViewModel.ParentId.HasValue && menuItemViewModel.ParentId.Value != 0)
         {
             // 如果有父菜单，从父菜单的Children中移除
@@ -106,5 +116,7 @@ public class MenuDataService : IMenuDataService
             // 如果是根菜单，从MenuTrees中移除
             _dataStorageService.MenuTrees.Remove(menuItemViewModel);
         }
+
+        //BuildMenuTrees();
     }
 }

@@ -22,27 +22,12 @@ public interface IMenuManagementService
     /// <summary>
     /// 异步更新一个已存在的菜单。
     /// </summary>
-    Task UpdateMenuAsync(MenuBeanDto menuDto);
+    Task<int> UpdateMenuAsync(MenuBeanDto menuDto);
 
     /// <summary>
     /// 异步删除一个菜单。
     /// </summary>
-    Task DeleteMenuAsync(int id);
-
-    /// <summary>
-    /// 在内存中添加菜单
-    /// </summary>
-    void AddMenuToMemory(MenuBeanDto menuDto);
-
-    /// <summary>
-    /// 在内存中更新菜单
-    /// </summary>
-    void UpdateMenuInMemory(MenuBeanDto menuDto);
-
-    /// <summary>
-    /// 在内存中删除菜单
-    /// </summary>
-    void RemoveMenuFromMemory(int menuId);
+    Task<bool> DeleteMenuAsync(int id);
 
     /// <summary>
     /// 获取根菜单列表
@@ -60,4 +45,9 @@ public interface IMenuManagementService
     /// 构建菜单树结构
     /// </summary>
     void BuildMenuTree();
+
+    /// <summary>
+    /// 当菜单数据发生变化时触发
+    /// </summary>
+    event EventHandler<DMS.Application.Events.MenuChangedEventArgs> MenuChanged;
 }

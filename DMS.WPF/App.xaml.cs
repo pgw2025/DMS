@@ -254,7 +254,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IVariableAppService, VariableAppService>();
         services.AddSingleton<IHistoryAppService, HistoryAppService>();
         services.AddSingleton<IVariableTableAppService, VariableTableAppService>();
-        services.AddSingleton<IMenuService, MenuService>();
+        services.AddSingleton<IMenuAppService, MenuAppService>();
         services.AddSingleton<IAppDataCenterService, AppDataCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();

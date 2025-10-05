@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
@@ -213,7 +214,13 @@
             ItemTemplate="{StaticResource MqttItemTemplate}"
             ItemsSource="{Binding MqttServeise}"
             SelectedItem="{Binding SelectedMqtt}"
-            SelectionMode="Single" />
+            SelectionMode="Single">
+            <hc:Interaction.Triggers>
+                <hc:EventTrigger EventName="MouseDoubleClick">
+                    <hc:InvokeCommandAction Command="{Binding NavigateToMqttDetailCommand}" />
+                </hc:EventTrigger>
+            </hc:Interaction.Triggers>
+        </ui:GridView>
     </StackPanel>
 
 </UserControl>

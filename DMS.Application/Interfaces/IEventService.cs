@@ -120,4 +120,20 @@ public interface IEventService
     /// <param name="sender">事件发送者</param>
     /// <param name="e">数据加载完成事件参数</param>
     void RaiseLoadDataCompleted(object sender, DataLoadCompletedEventArgs e);
+
+    #region 菜单事件
+
+    /// <summary>
+    /// 菜单改变事件
+    /// </summary>
+    event EventHandler<MenuChangedEventArgs> OnMenuChanged;
+
+    /// <summary>
+    /// 触发菜单改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">菜单改变事件参数</param>
+    void RaiseMenuChanged(object sender, MenuChangedEventArgs e);
+
+    #endregion
 }

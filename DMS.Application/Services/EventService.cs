@@ -154,4 +154,23 @@ public class EventService : IEventService
     }
 
     #endregion
+
+    #region 菜单事件
+
+    /// <summary>
+    /// 菜单改变事件
+    /// </summary>
+    public event EventHandler<MenuChangedEventArgs> OnMenuChanged;
+
+    /// <summary>
+    /// 触发菜单改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">菜单改变事件参数</param>
+    public void RaiseMenuChanged(object sender, MenuChangedEventArgs e)
+    {
+        OnMenuChanged?.Invoke(sender, e);
+    }
+
+    #endregion
 }

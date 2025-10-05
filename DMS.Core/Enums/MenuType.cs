@@ -6,5 +6,6 @@ public enum MenuType
     DeviceMenu,
     VariableTableMenu,
     VariableMenu,
-    MqttMenu
+    MqttMenu,
+    MqttServerMenu
 }

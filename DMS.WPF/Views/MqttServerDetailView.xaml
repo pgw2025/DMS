@@ -3,11 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:viewmodels="clr-namespace:DMS.WPF.ViewModels"
-             xmlns:models="clr-namespace:DMS.Core.Models;assembly=DMS.Core"
-             xmlns:iNKORE="clr-namespace:iNKORE.UI.WPF.Modern.Controls;assembly=iNKORE.UI.WPF.Modern"
-             xmlns:extensions="clr-namespace:DMS.Extensions"
-             xmlns:enums="clr-namespace:DMS.Core.Enums"
              xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">

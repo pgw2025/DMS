@@ -38,4 +38,5 @@ public interface IMqttManagementService
     /// 异步批量删除MQTT服务器。
     /// </summary>
     Task<bool> DeleteMqttServersAsync(List<int> ids);
+
 }

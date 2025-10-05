@@ -2,15 +2,16 @@ using AutoMapper;
 using DMS.Core.Interfaces;
 using DMS.Core.Models;
 using DMS.Application.DTOs;
+using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces;
 
-namespace DMS.Application.Services;
+namespace DMS.Application.Services.Database;
 
 /// <summary>
 /// 菜单应用服务，负责处理菜单相关的业务逻辑。
-/// 实现 <see cref="IMenuService"/> 接口。
+/// 实现 <see cref="IMenuAppService"/> 接口。
 /// </summary>
-public class MenuService : IMenuService
+public class MenuAppService : IMenuAppService
 {
     private readonly IRepositoryManager _repoManager;
     private readonly IMapper _mapper;
@@ -20,7 +21,7 @@ public class MenuService : IMenuService
     /// </summary>
     /// <param name="repoManager">仓储管理器实例。</param>
     /// <param name="mapper">AutoMapper 实例。</param>
-    public MenuService(IRepositoryManager repoManager, IMapper mapper)
+    public MenuAppService(IRepositoryManager repoManager, IMapper mapper)
     {
         _repoManager = repoManager;
         _mapper = mapper;
@@ -74,9 +75,9 @@ public class MenuService : IMenuService
     /// 异步更新一个已存在的菜单（事务性操作）。
     /// </summary>
     /// <param name="menuDto">要更新的菜单数据传输对象。</param>
-    /// <returns>表示异步操作的任务。</returns>
+    /// <returns>受影响的行数。</returns>
     /// <exception cref="ApplicationException">如果找不到菜单或更新菜单时发生错误。</exception>
-    public async Task UpdateMenuAsync(MenuBeanDto menuDto)
+    public async Task<int> UpdateMenuAsync(MenuBeanDto menuDto)
     {
         try
         {
@@ -87,8 +88,9 @@ public class MenuService : IMenuService
                 throw new ApplicationException($"Menu with ID {menuDto.Id} not found.");
             }
             _mapper.Map(menuDto, menu);
-            await _repoManager.Menus.UpdateAsync(menu);
+            int res = await _repoManager.Menus.UpdateAsync(menu);
             await _repoManager.CommitAsync();
+            return res;
         }
         catch (Exception ex)
         {
@@ -101,15 +103,21 @@ public class MenuService : IMenuService
     /// 异步删除一个菜单（事务性操作）。
     /// </summary>
     /// <param name="id">要删除菜单的ID。</param>
-    /// <returns>表示异步操作的任务。</returns>
-    /// <exception cref="ApplicationException">如果删除菜单时发生错误。</exception>
-    public async Task DeleteMenuAsync(int id)
+    /// <returns>如果删除成功则为 true，否则为 false。</returns>
+    /// <exception cref="InvalidOperationException">如果删除菜单失败。</exception>
+    /// <exception cref="ApplicationException">如果删除菜单时发生其他错误。</exception>
+    public async Task<bool> DeleteMenuAsync(int id)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            await _repoManager.Menus.DeleteByIdAsync(id);
+            var delRes = await _repoManager.Menus.DeleteByIdAsync(id);
+            if (delRes == 0)
+            {
+                throw new InvalidOperationException($"删除菜单失败：菜单ID:{id}，请检查菜单Id是否存在");
+            }
             await _repoManager.CommitAsync();
+            return true;
         }
         catch (Exception ex)
         {

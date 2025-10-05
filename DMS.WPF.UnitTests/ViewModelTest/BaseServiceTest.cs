@@ -3,9 +3,7 @@
 using AutoMapper;
 using AutoMapper.Internal;
 using DMS.Application.Configurations;
-using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
-using DMS.Application.Services;
 using DMS.Application.Services.Database;
 using DMS.Core.Interfaces;
 using DMS.Core.Interfaces.Repositories;
@@ -53,7 +51,7 @@ public class BaseServiceTest
         services.AddTransient<IDeviceAppService, DeviceAppService>();
         services.AddTransient<IVariableTableAppService, VariableTableAppService>();
         services.AddTransient<IVariableAppService, VariableAppService>();
-        services.AddTransient<IMenuService, MenuService>();
+        services.AddTransient<IMenuAppService, MenuAppService>();
         services.AddTransient<INavigationService, NavigationService>();
         services.AddTransient<DevicesViewModel>();
         // services.AddTransient<DataServices>();

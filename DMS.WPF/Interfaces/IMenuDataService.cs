@@ -9,20 +9,16 @@ namespace DMS.WPF.Interfaces;
 public interface IMenuDataService
 {
 
-    /// <summary>
-    /// 构建菜单树。
-    /// </summary>
-    void BuildMenuTrees();
 
     /// <summary>
     /// 添加菜单项。
     /// </summary>
-    void AddMenuItem(MenuItemViewModel menuItemViewModel);
+    Task AddMenuItem(MenuItemViewModel menuItemViewModel);
 
     /// <summary>
     /// 删除菜单项。
     /// </summary>
-    void DeleteMenuItem(MenuItemViewModel? menuItemViewModel);
+    Task DeleteMenuItem(MenuItemViewModel? menuItemViewModel);
 
     void LoadAllMenus();
 

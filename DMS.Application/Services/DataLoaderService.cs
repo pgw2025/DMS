@@ -24,7 +24,7 @@ public class DataLoaderService : IDataLoaderService
     private readonly IDeviceAppService _deviceAppService;
     private readonly IVariableTableAppService _variableTableAppService;
     private readonly IVariableAppService _variableAppService;
-    private readonly IMenuService _menuService;
+    private readonly IMenuAppService _menuService;
     private readonly IMqttAppService _mqttAppService;
     private readonly INlogAppService _nlogAppService;
     private readonly ITriggerManagementService _triggerManagementService; // 添加触发器管理服务
@@ -40,7 +40,7 @@ public class DataLoaderService : IDataLoaderService
         IDeviceAppService deviceAppService,
         IVariableTableAppService variableTableAppService,
         IVariableAppService variableAppService,
-        IMenuService menuService,
+        IMenuAppService menuService,
         IMqttAppService mqttAppService,
         INlogAppService nlogAppService,
         ITriggerManagementService triggerManagementService, // 添加触发器管理服务参数

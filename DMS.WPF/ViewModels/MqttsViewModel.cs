@@ -206,12 +206,6 @@ public partial class MqttsViewModel : ViewModelBase
             return;
         }
 
-        // 导航到MQTT服务器详情页
-        // var menu = new MenuItemViewModel
-        // {
-        //     TargetViewKey = "MqttServerDetailView",
-        //     TargetId = SelectedMqtt.Id
-        // };
 
         await _navigationService.NavigateToAsync(
             this, new NavigationParameter(nameof(MqttServerDetailViewModel), SelectedMqtt.Id, NavigationType.Mqtt));

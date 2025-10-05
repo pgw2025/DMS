@@ -112,7 +112,6 @@ public class DeviceDataService : IDeviceDataService
         if (addDto.DeviceMenu != null)
         {
             _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
-            _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.DeviceMenu);
             
         }
 
@@ -126,15 +125,11 @@ public class DeviceDataService : IDeviceDataService
             if (addDto.VariableTable != null && addDto.VariableTableMenu != null)
             {
                 _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
-                _appDataCenterService.MenuManagementService.AddMenuToMemory(addDto.VariableTableMenu);
             }
 
 
         }
 
-
-        // 添加null检查
-        _menuDataService.BuildMenuTrees();
         
 
         return addDto;

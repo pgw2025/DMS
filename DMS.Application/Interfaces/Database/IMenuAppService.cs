@@ -5,7 +5,7 @@ namespace DMS.Application.Interfaces;
 /// <summary>
 /// 定义菜单管理相关的应用服务操作。
 /// </summary>
-public interface IMenuService
+public interface IMenuAppService
 {
     /// <summary>
     /// 异步根据ID获取菜单DTO。
@@ -25,11 +25,11 @@ public interface IMenuService
     /// <summary>
     /// 异步更新一个已存在的菜单。
     /// </summary>
-    Task UpdateMenuAsync(MenuBeanDto menuDto);
+    Task<int> UpdateMenuAsync(MenuBeanDto menuDto);
 
     /// <summary>
     /// 异步删除一个菜单。
     /// </summary>
-    Task DeleteMenuAsync(int id);
+    Task<bool> DeleteMenuAsync(int id);
 
 }
