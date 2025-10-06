@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Core.Models;
 
 namespace DMS.Application.Services;
 
@@ -40,7 +41,7 @@ public class AppDataStorageService : IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有MQTT变量别名的数据
     /// </summary>
-    public ConcurrentDictionary<int, VariableMqttAliasDto> VariableMqttAliases { get; } = new();
+    public ConcurrentDictionary<int, VariableMqttAlias> VariableMqttAliases { get; } = new();
     
         
     

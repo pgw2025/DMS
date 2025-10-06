@@ -31,11 +31,6 @@ public class MappingProfile : Profile
         CreateMap<MqttServer, MqttServerDto>().ReverseMap();
         CreateMap<MqttServerDto, MqttServerDto>().ReverseMap();
 
-        // VariableMqttAlias 映射
-        CreateMap<VariableMqttAlias, VariableMqttAliasDto>()
-            .ForMember(dest => dest.MqttServerName, opt => opt.MapFrom(src => src.MqttServer.ServerName))
-            .ReverseMap();
-
         // VariableHistory 映射
         CreateMap<VariableHistory, VariableHistoryDto>()
             .ForMember(dest => dest.VariableName, opt => opt.MapFrom(src => src.Variable.Name))

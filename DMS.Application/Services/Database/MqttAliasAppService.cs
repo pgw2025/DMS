@@ -1,8 +1,11 @@
 using AutoMapper;
-using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Interfaces;
+using DMS.Core.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DMS.Application.Services.Database;
 
@@ -26,11 +29,11 @@ public class MqttAliasAppService : IMqttAliasAppService
     /// <summary>
     /// 异步获取指定变量的所有MQTT别名关联。
     /// </summary>
-    public async Task<List<VariableMqttAliasDto>> GetAliasesForVariableAsync(int variableId)
+    public async Task<List<VariableMqttAlias>> GetAliasesForVariableAsync(int variableId)
     {
         // 从仓储获取别名，并确保加载了关联的MqttServer信息
         var aliases = await _repoManager.VariableMqttAliases.GetAliasesForVariableAsync(variableId);
-        return _mapper.Map<List<VariableMqttAliasDto>>(aliases);
+        return aliases.ToList();
     }
 
     /// <summary>

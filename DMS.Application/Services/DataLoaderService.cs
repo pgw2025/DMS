@@ -105,27 +105,23 @@ public class DataLoaderService : IDataLoaderService
 
     private async Task LoadAllVariableMqttAliases()
     {
-       
-        var variableMqttAliases = await _repositoryManager.VariableMqttAliases.GetAllAsync();
-       var variableMqttAliasDtos = _mapper.Map<IEnumerable<VariableMqttAliasDto>>(variableMqttAliases);
-       foreach (var variableMqttAliasDto in variableMqttAliasDtos)
-       {
-           _appDataStorageService.VariableMqttAliases.TryAdd(variableMqttAliasDto.Id, variableMqttAliasDto);
-           if (_appDataStorageService.Variables.TryGetValue(variableMqttAliasDto.VariableId, out var variable))
-           {
-               variableMqttAliasDto.Variable = _mapper.Map<Variable>(variable);
-               variable.MqttAliases?.Add(variableMqttAliasDto);
-           }
 
-           if (_appDataStorageService.MqttServers.TryGetValue(variableMqttAliasDto.MqttServerId, out var mqttServer))
-           {
-               variableMqttAliasDto.MqttServer = _mapper.Map<MqttServer>(mqttServer);
-               variableMqttAliasDto.MqttServerName = variableMqttAliasDto.MqttServer.ServerName;
-               mqttServer.VariableAliases?.Add(variableMqttAliasDto);
-           }
-           
-           
-       }
+        var variableMqttAliases = await _repositoryManager.VariableMqttAliases.GetAllAsync();
+        foreach (var variableMqttAlias in variableMqttAliases)
+        {
+            _appDataStorageService.VariableMqttAliases.TryAdd(variableMqttAlias.Id, variableMqttAlias);
+            if (_appDataStorageService.Variables.TryGetValue(variableMqttAlias.VariableId, out var variable))
+            {
+                variableMqttAlias.Variable = _mapper.Map<Variable>(variable);
+                variable.MqttAliases?.Add(variableMqttAlias);
+            }
+
+            if (_appDataStorageService.MqttServers.TryGetValue(variableMqttAlias.MqttServerId, out var mqttServer))
+            {
+                variableMqttAlias.MqttServer = _mapper.Map<MqttServer>(mqttServer);
+                mqttServer.VariableAliases?.Add(variableMqttAlias);
+            }
+        }
     }
 
     /// <summary>

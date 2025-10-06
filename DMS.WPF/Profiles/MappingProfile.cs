@@ -17,7 +17,6 @@ namespace DMS.WPF.Profiles
             CreateMap<OpcUaNode, OpcUaNodeItemViewModel>()
                 .ReverseMap();
             CreateMap<VariableItemViewModel, VariableItemViewModel>();
-            CreateMap<VariableMqttAliasDto, VariableMqttAliasItemViewModel>().ReverseMap();
             CreateMap<VariableMqttAlias, VariableMqttAliasItemViewModel>().ReverseMap();
                 
 
@@ -32,7 +31,6 @@ namespace DMS.WPF.Profiles
             CreateMap<VariableHistoryDto, VariableHistoryItemViewModel>().ReverseMap();
             CreateMap<VariableDto, VariableItemViewModel>()
                 .ReverseMap();
-            CreateMap<VariableMqttAliasDto, VariableMqttAliasItemViewModel>().ReverseMap();
             CreateMap<VariableTableDto, VariableTableItemViewModel>().ReverseMap();
             CreateMap<NlogDto, NlogItemViewModel>().ReverseMap();
         }

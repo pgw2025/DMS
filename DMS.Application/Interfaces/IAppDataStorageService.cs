@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces;
 
@@ -43,7 +44,7 @@ public interface IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有MQTT变量别名的数据
     /// </summary>
-    ConcurrentDictionary<int, VariableMqttAliasDto> VariableMqttAliases { get; }
+    ConcurrentDictionary<int, VariableMqttAlias> VariableMqttAliases { get; }
     
     /// <summary>
     /// 安全字典，用于存储所有触发器定义数据
