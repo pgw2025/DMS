@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.Application.DTOs;
+
 using DMS.Application.Interfaces;
 using DMS.WPF.ItemViewModel;
 using System;
@@ -36,27 +36,27 @@ namespace DMS.WPF.ViewModels.Dialogs
         {
             try
             {
-                var mqttServerDtos = await _mqttAppService.GetAllMqttServersAsync();
+                var mqttServers = await _mqttAppService.GetAllMqttServersAsync();
                 MqttServers.Clear();
 
-                foreach (var dto in mqttServerDtos)
+                foreach (var mqttServer in mqttServers)
                 {
                     MqttServers.Add(new MqttServerItem
                     {
-                        Id = dto.Id,
-                        ServerName = dto.ServerName,
-                        ServerUrl = dto.ServerUrl,
-                        Port = dto.Port,
-                        Username = dto.Username,
-                        Password = dto.Password,
-                        IsActive = dto.IsActive,
-                        SubscribeTopic = dto.SubscribeTopic,
-                        PublishTopic = dto.PublishTopic,
-                        ClientId = dto.ClientId,
-                        CreatedAt = dto.CreatedAt,
-                        ConnectedAt = dto.ConnectedAt,
-                        ConnectionDuration = dto.ConnectionDuration,
-                        MessageFormat = dto.MessageFormat
+                        Id = mqttServer.Id,
+                        ServerName = mqttServer.ServerName,
+                        ServerUrl = mqttServer.ServerUrl,
+                        Port = mqttServer.Port,
+                        Username = mqttServer.Username,
+                        Password = mqttServer.Password,
+                        IsActive = mqttServer.IsActive,
+                        SubscribeTopic = mqttServer.SubscribeTopic,
+                        PublishTopic = mqttServer.PublishTopic,
+                        ClientId = mqttServer.ClientId,
+                        CreatedAt = mqttServer.CreatedAt,
+                        ConnectedAt = mqttServer.ConnectedAt,
+                        ConnectionDuration = mqttServer.ConnectionDuration,
+                        MessageFormat = mqttServer.MessageFormat
                     });
                 }
             }

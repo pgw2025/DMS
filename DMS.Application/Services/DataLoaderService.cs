@@ -118,7 +118,7 @@ public class DataLoaderService : IDataLoaderService
 
             if (_appDataStorageService.MqttServers.TryGetValue(variableMqttAlias.MqttServerId, out var mqttServer))
             {
-                variableMqttAlias.MqttServer = _mapper.Map<MqttServer>(mqttServer);
+                variableMqttAlias.MqttServer = mqttServer;
                 mqttServer.VariableAliases?.Add(variableMqttAlias);
             }
         }
@@ -209,11 +209,11 @@ public class DataLoaderService : IDataLoaderService
     public async Task LoadAllMqttServersAsync()
     {
         _appDataStorageService.MqttServers.Clear();
-        var  mqttServerDtos =await _mqttAppService.GetAllMqttServersAsync();
+        var  mqttServers =await _mqttAppService.GetAllMqttServersAsync();
         // 加载MQTT服务器数据到内存
-        foreach (var mqttServerDto in mqttServerDtos)
+        foreach (var mqttServer in mqttServers)
         {
-            _appDataStorageService.MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto);
+            _appDataStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
         }
     }
 

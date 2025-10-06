@@ -1,11 +1,11 @@
 using System.Collections.Concurrent;
-using AutoMapper;
-using DMS.Application.DTOs;
+
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces.Management;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Services.Management;
 
@@ -17,83 +17,91 @@ public class MqttManagementService : IMqttManagementService
     private readonly IMqttAppService _mqttAppService;
     private readonly IAppDataStorageService _appDataStorageService;
     private readonly IEventService _eventService;
-    private readonly IMapper _mapper;
-    private readonly IDataProcessingService _dataProcessingService;
-    private readonly IMenuManagementService _menuManagementService;
 
     public MqttManagementService(IMqttAppService mqttAppService, 
                                 IAppDataStorageService appDataStorageService, 
-                                IEventService eventService,
-                                IMapper mapper,
-                                IDataProcessingService dataProcessingService,
-                                IMenuManagementService menuManagementService)
+                                IEventService eventService)
     {
         _mqttAppService = mqttAppService;
         _appDataStorageService = appDataStorageService;
         _eventService = eventService;
-        _mapper = mapper;
-        _dataProcessingService = dataProcessingService;
-        _menuManagementService = menuManagementService;
     }
 
     /// <summary>
     /// 异步根据ID获取MQTT服务器DTO。
     /// </summary>
-    public async Task<MqttServerDto> GetMqttServerByIdAsync(int id)
+    public async Task<MqttServer> GetMqttServerByIdAsync(int id)
     {
-        return await _mqttAppService.GetMqttServerByIdAsync(id);
+        if (_appDataStorageService.MqttServers.TryGetValue(id,out var mqttServer))
+        {
+            return mqttServer;
+        }
+        return null;
     }
 
     /// <summary>
     /// 异步获取所有MQTT服务器DTO列表。
     /// </summary>
-    public async Task<List<MqttServerDto>> GetAllMqttServersAsync()
+    public async Task<List<MqttServer>> GetAllMqttServersAsync()
     {
-        return await _mqttAppService.GetAllMqttServersAsync();
+        return _appDataStorageService.MqttServers.Values.ToList();
     }
 
     /// <summary>
     /// 异步更新一个已存在的MQTT服务器。
     /// </summary>
-    public async Task<int> UpdateMqttServerAsync(MqttServerDto mqttServerDto)
+    public async Task<int> UpdateMqttServerAsync(MqttServer mqttServer)
     {
-        return await UpdateMqttServersAsync(new List<MqttServerDto>() { mqttServerDto });
+        return await UpdateMqttServersAsync(new List<MqttServer>() { mqttServer });
     }
 
     /// <summary>
     /// 异步批量更新MQTT服务器。
     /// </summary>
-    public async Task<int> UpdateMqttServersAsync(List<MqttServerDto> mqttServerDtos)
+    public async Task<int> UpdateMqttServersAsync(List<MqttServer> mqttServers)
     {
-        var result = await _mqttAppService.UpdateMqttServersAsync(mqttServerDtos);
+        var result = await _mqttAppService.UpdateMqttServersAsync(mqttServers);
         
         // 批量更新成功后，更新内存中的MQTT服务器
-        if (result > 0 && mqttServerDtos != null)
+        if (result > 0 && mqttServers != null)
         {
-            foreach (var mqttServerDto in mqttServerDtos)
+            foreach (var mqttServer in mqttServers)
             {
-                if (_appDataStorageService.MqttServers.TryGetValue(mqttServerDto.Id, out var mMqttServerDto))
+                if (_appDataStorageService.MqttServers.TryGetValue(mqttServer.Id, out var mMqttServer))
                 {
                     // 比较旧值和新值，确定哪个属性发生了变化
-                    var changedProperties = GetChangedProperties(mMqttServerDto, mqttServerDto);
+                    var changedProperties = GetChangedProperties(mMqttServer, mqttServer);
                     
                     // 更新内存中的MQTT服务器
-                    _mapper.Map(mqttServerDto, mMqttServerDto);
+                    mMqttServer.ServerName = mqttServer.ServerName;
+                    mMqttServer.ServerUrl = mqttServer.ServerUrl;
+                    mMqttServer.Port = mqttServer.Port;
+                    mMqttServer.Username = mqttServer.Username;
+                    mMqttServer.Password = mqttServer.Password;
+                    mMqttServer.IsActive = mqttServer.IsActive;
+                    mMqttServer.IsConnect = mqttServer.IsConnect;
+                    mMqttServer.SubscribeTopic = mqttServer.SubscribeTopic;
+                    mMqttServer.PublishTopic = mqttServer.PublishTopic;
+                    mMqttServer.ClientId = mqttServer.ClientId;
+                    mMqttServer.MessageFormat = mqttServer.MessageFormat;
+                    mMqttServer.MessageHeader = mqttServer.MessageHeader;
+                    mMqttServer.MessageContent = mqttServer.MessageContent;
+                    mMqttServer.MessageFooter = mqttServer.MessageFooter;
 
                     // 为每个发生变化的属性触发事件
                     foreach (var property in changedProperties)
                     {
                         _eventService.RaiseMqttServerChanged(
-                            this, new MqttServerChangedEventArgs(ActionChangeType.Updated, mMqttServerDto, property));
+                            this, new MqttServerChangedEventArgs(ActionChangeType.Updated, mMqttServer, property));
                     }
                     
                 }
                 else
                 {
                     // 如果内存中不存在该MQTT服务器，则直接添加
-                    _appDataStorageService.MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto);
+                    _appDataStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
                     _eventService.RaiseMqttServerChanged(
-                        this, new MqttServerChangedEventArgs(ActionChangeType.Added, mqttServerDto, MqttServerPropertyType.All));
+                        this, new MqttServerChangedEventArgs(ActionChangeType.Added, mqttServer, MqttServerPropertyType.All));
                 }
             }
         }
@@ -112,10 +120,10 @@ public class MqttManagementService : IMqttManagementService
         // 删除成功后，从内存中移除MQTT服务器
         if (result && mqttServer != null)
         {
-            if (_appDataStorageService.MqttServers.TryRemove(id, out var mqttServerDto))
+            if (_appDataStorageService.MqttServers.TryRemove(id, out var mqttServerFromCache))
             {
                 _eventService.RaiseMqttServerChanged(
-                    this, new MqttServerChangedEventArgs(ActionChangeType.Deleted, mqttServerDto));
+                    this, new MqttServerChangedEventArgs(ActionChangeType.Deleted, mqttServerFromCache));
             }
         }
         
@@ -134,10 +142,10 @@ public class MqttManagementService : IMqttManagementService
         {
             foreach (var id in ids)
             {
-                if (_appDataStorageService.MqttServers.TryRemove(id, out var mqttServerDto))
+                if (_appDataStorageService.MqttServers.TryRemove(id, out var mqttServer))
                 {
                     _eventService.RaiseMqttServerChanged(
-                        this, new MqttServerChangedEventArgs(ActionChangeType.Deleted, mqttServerDto));
+                        this, new MqttServerChangedEventArgs(ActionChangeType.Deleted, mqttServer));
                 }
             }
         }
@@ -148,27 +156,27 @@ public class MqttManagementService : IMqttManagementService
     /// <summary>
     /// 异步创建MQTT服务器及其菜单项。
     /// </summary>
-    public async Task<MqttServerDto> CreateMqttServerAsync(MqttServerDto mqttServerDto)
+    public async Task<MqttServer> CreateMqttServerAsync(MqttServer mqttServer)
     {
         // 首先创建MQTT服务器
-        var mqttServerId = await _mqttAppService.CreateMqttServerAsync(mqttServerDto);
+        var mqttServerId = await _mqttAppService.CreateMqttServerAsync(mqttServer);
         
         if (mqttServerId > 0)
         {
-            mqttServerDto.Id = mqttServerId;
+            mqttServer.Id = mqttServerId;
             
             
             // 将MQTT服务器添加到内存中
-            if (_appDataStorageService.MqttServers.TryAdd(mqttServerDto.Id, mqttServerDto))
+            if (_appDataStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer))
             {
                 _eventService.RaiseMqttServerChanged(
-                    this, new MqttServerChangedEventArgs(ActionChangeType.Added, mqttServerDto));
+                    this, new MqttServerChangedEventArgs(ActionChangeType.Added, mqttServer));
             }
             
             
         }
 
-        return mqttServerDto; // 返回null表示创建失败
+        return mqttServer; // 返回null表示创建失败
     }
 
     /// <summary>
@@ -177,7 +185,7 @@ public class MqttManagementService : IMqttManagementService
     /// <param name="oldMqttServer">旧MQTT服务器值</param>
     /// <param name="newMqttServer">新MQTT服务器值</param>
     /// <returns>发生变化的属性列表</returns>
-    private List<MqttServerPropertyType> GetChangedProperties(MqttServerDto oldMqttServer, MqttServerDto newMqttServer)
+    private List<MqttServerPropertyType> GetChangedProperties(MqttServer oldMqttServer, MqttServer newMqttServer)
     {
         var changedProperties = new List<MqttServerPropertyType>();
 

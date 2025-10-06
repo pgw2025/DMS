@@ -186,34 +186,15 @@ namespace DMS.Infrastructure.Services.Mqtt
                 _mqttServers.Clear();
 
                 // 从数据服务中心获取所有激活的MQTT服务器
-                var mqttServerDtos = _appDataStorageService.MqttServers.Values.ToList();
+                var mqttServers = _appDataStorageService.MqttServers.Values.ToList();
 
-                foreach (var mqttServerDto in mqttServerDtos)
+                foreach (var mqttServer in mqttServers)
                 {
-                    // 将 MqttServerDto 转换为 MqttServerConfig
-                    var mqttServer = new MqttServer
-                    {
-                        Id = mqttServerDto.Id,
-                        ServerName = mqttServerDto.ServerName,
-                        ServerUrl = mqttServerDto.ServerUrl,
-                        Port = mqttServerDto.Port,
-                        Username = mqttServerDto.Username,
-                        Password = mqttServerDto.Password,
-                        IsActive = mqttServerDto.IsActive,
-                        SubscribeTopic = mqttServerDto.SubscribeTopic,
-                        PublishTopic = mqttServerDto.PublishTopic,
-                        ClientId = mqttServerDto.ClientId,
-                        CreatedAt = mqttServerDto.CreatedAt,
-                        ConnectedAt = mqttServerDto.ConnectedAt,
-                        ConnectionDuration = mqttServerDto.ConnectionDuration,
-                        MessageFormat = mqttServerDto.MessageFormat
-                    };
-
                     _mqttServers.TryAdd(mqttServer.Id, mqttServer);
                     _mqttServiceManager.AddMqttServer(mqttServer);
                 }
 
-                _logger.LogInformation($"成功加载 {mqttServerDtos.Count} 个MQTT配置");
+                _logger.LogInformation($"成功加载 {mqttServers.Count} 个MQTT配置");
                 return true;
             }
             catch (Exception ex)

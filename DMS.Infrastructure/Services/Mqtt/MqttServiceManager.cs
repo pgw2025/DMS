@@ -1,8 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
-using AutoMapper;
-using DMS.Application.DTOs;
+
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
@@ -23,7 +22,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         private readonly IAppDataCenterService _appDataCenterService;
         private readonly IMqttServiceFactory _mqttServiceFactory;
         private readonly IEventService _eventService;
-        private readonly IMapper _mapper;
+
         private readonly ConcurrentDictionary<int, MqttDeviceContext> _mqttContexts;
         private readonly SemaphoreSlim _semaphore;
         private bool _disposed = false;
@@ -33,15 +32,13 @@ namespace DMS.Infrastructure.Services.Mqtt
             IDataProcessingService dataProcessingService,
             IAppDataCenterService appDataCenterService,
             IMqttServiceFactory mqttServiceFactory,
-            IEventService eventService,
-            IMapper mapper)
+            IEventService eventService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProcessingService = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
             _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
             _mqttServiceFactory = mqttServiceFactory ?? throw new ArgumentNullException(nameof(mqttServiceFactory));
             _eventService = eventService ?? throw new ArgumentNullException(nameof(eventService));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _mqttContexts = new ConcurrentDictionary<int, MqttDeviceContext>();
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10
 
@@ -187,8 +184,7 @@ namespace DMS.Infrastructure.Services.Mqtt
                     context.MqttServerConfig.IsConnect = false;
                     _logger.LogWarning("MQTT服务器 {ServerName} 连接失败", context.MqttServerConfig.ServerName);
                 }
-                //触发MQTT连接状态改变事件
-                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, _mapper.Map<MqttServerDto>(context.MqttServerConfig), MqttServerPropertyType.IsConnect));
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, context.MqttServerConfig, MqttServerPropertyType.IsConnect));
             }
             catch (Exception ex)
             {
@@ -196,7 +192,7 @@ namespace DMS.Infrastructure.Services.Mqtt
                     context.MqttServerConfig.ServerName, ex.Message);
                 context.ReconnectAttempts++;
                 context.MqttServerConfig.IsConnect = false;
-                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, _mapper.Map<MqttServerDto>(context.MqttServerConfig), MqttServerPropertyType.IsConnect));
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, context.MqttServerConfig, MqttServerPropertyType.IsConnect));
             }
             finally
             {
@@ -220,7 +216,7 @@ namespace DMS.Infrastructure.Services.Mqtt
 
                 // 如果连接状态从连接变为断开，触发事件
                 context.MqttServerConfig.IsConnect = false;
-                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, _mapper.Map<MqttServerDto>(context.MqttServerConfig), MqttServerPropertyType.IsConnect));
+                _eventService.RaiseMqttServerChanged(this, new MqttServerChangedEventArgs(ActionChangeType.Updated, context.MqttServerConfig, MqttServerPropertyType.IsConnect));
             }
             catch (Exception ex)
             {
@@ -366,7 +362,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// <summary>
         /// 处理MQTT服务器添加事件
         /// </summary>
-        private void HandleMqttServerAdded(MqttServerDto mqttServer)
+        private void HandleMqttServerAdded(MqttServer mqttServer)
         {
             if (mqttServer == null)
             {
@@ -379,11 +375,8 @@ namespace DMS.Infrastructure.Services.Mqtt
                 _logger.LogInformation("处理MQTT服务器添加事件: {MqttServerId} ({MqttServerName})",
                     mqttServer.Id, mqttServer.ServerName);
 
-                // 将DTO转换为MqttServer实体
-                var mqttServerEntity = _mapper.Map<MqttServer>(mqttServer);
-
                 // 添加服务器到监控列表
-                AddMqttServer(mqttServerEntity);
+                AddMqttServer(mqttServer);
 
                 // 如果服务器是激活状态，则尝试连接
                 if (mqttServer.IsActive)
@@ -413,7 +406,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// <summary>
         /// 处理MQTT服务器更新事件
         /// </summary>
-        private async Task HandleMqttServerUpdated(MqttServerDto mqttServer, MqttServerPropertyType propertyType)
+        private async Task HandleMqttServerUpdated(MqttServer mqttServer, MqttServerPropertyType propertyType)
         {
             if (mqttServer == null)
             {

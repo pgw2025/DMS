@@ -34,7 +34,7 @@ public interface IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有MQTT服务器数据
     /// </summary>
-    ConcurrentDictionary<int, MqttServerDto> MqttServers { get; }
+    ConcurrentDictionary<int, MqttServer> MqttServers { get; }
 
     /// <summary>
     /// 安全字典，用于存储所有日志数据

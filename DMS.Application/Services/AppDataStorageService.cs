@@ -35,7 +35,7 @@ public class AppDataStorageService : IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有MQTT服务器数据
     /// </summary>
-    public ConcurrentDictionary<int, MqttServerDto> MqttServers { get; } = new();
+    public ConcurrentDictionary<int, MqttServer> MqttServers { get; } = new();
     
     
     /// <summary>

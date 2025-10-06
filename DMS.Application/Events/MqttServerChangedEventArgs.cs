@@ -1,5 +1,5 @@
-using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Events
 {
@@ -14,9 +14,9 @@ namespace DMS.Application.Events
         public ActionChangeType ChangeType { get; }
 
         /// <summary>
-        /// MQTT服务器DTO
+        /// MQTT服务器
         /// </summary>
-        public MqttServerDto MqttServer { get; }
+        public MqttServer MqttServer { get; }
         
         /// <summary>
         /// 发生变化的属性类型
@@ -28,9 +28,9 @@ namespace DMS.Application.Events
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
-        /// <param name="mqttServer">MQTT服务器DTO</param>
+        /// <param name="mqttServer">MQTT服务器</param>
         /// <param name="propertyType">发生变化的属性类型</param>
-        public MqttServerChangedEventArgs(ActionChangeType changeType, MqttServerDto mqttServer, MqttServerPropertyType propertyType = MqttServerPropertyType.All)
+        public MqttServerChangedEventArgs(ActionChangeType changeType, MqttServer mqttServer, MqttServerPropertyType propertyType = MqttServerPropertyType.All)
         {
             ChangeType = changeType;
             MqttServer = mqttServer;

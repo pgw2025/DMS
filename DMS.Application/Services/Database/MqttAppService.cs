@@ -1,6 +1,3 @@
-using AutoMapper;
-using DMS.Application.DTOs;
-using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Interfaces;
 using DMS.Core.Models;
@@ -14,52 +11,47 @@ namespace DMS.Application.Services.Database;
 public class MqttAppService : IMqttAppService
 {
     private readonly IRepositoryManager _repoManager;
-    private readonly IMapper _mapper;
 
     /// <summary>
-    /// 构造函数，通过依赖注入获取仓储管理器和AutoMapper实例。
+    /// 构造函数，通过依赖注入获取仓储管理器实例。
     /// </summary>
     /// <param name="repoManager">仓储管理器实例。</param>
-    /// <param name="mapper">AutoMapper 实例。</param>
-    public MqttAppService(IRepositoryManager repoManager, IMapper mapper)
+    public MqttAppService(IRepositoryManager repoManager)
     {
         _repoManager = repoManager;
-        _mapper = mapper;
     }
 
     /// <summary>
-    /// 异步根据ID获取MQTT服务器数据传输对象。
+    /// 异步根据ID获取MQTT服务器。
     /// </summary>
     /// <param name="id">MQTT服务器ID。</param>
-    /// <returns>MQTT服务器数据传输对象。</returns>
-    public async Task<MqttServerDto> GetMqttServerByIdAsync(int id)
+    /// <returns>MQTT服务器。</returns>
+    public async Task<MqttServer> GetMqttServerByIdAsync(int id)
     {
-        var mqttServer = await _repoManager.MqttServers.GetByIdAsync(id);
-        return _mapper.Map<MqttServerDto>(mqttServer);
+        return await _repoManager.MqttServers.GetByIdAsync(id);
     }
 
     /// <summary>
-    /// 异步获取所有MQTT服务器数据传输对象列表。
+    /// 异步获取所有MQTT服务器列表。
     /// </summary>
-    /// <returns>MQTT服务器数据传输对象列表。</returns>
-    public async Task<List<MqttServerDto>> GetAllMqttServersAsync()
+    /// <returns>MQTT服务器列表。</returns>
+    public async Task<List<MqttServer>> GetAllMqttServersAsync()
     {
         var mqttServers = await _repoManager.MqttServers.GetAllAsync();
-        return _mapper.Map<List<MqttServerDto>>(mqttServers);
+        return mqttServers.ToList();
     }
 
     /// <summary>
     /// 异步创建一个新MQTT服务器（事务性操作）。
     /// </summary>
-    /// <param name="mqttServerDto">要创建的MQTT服务器数据传输对象。</param>
+    /// <param name="mqttServer">要创建的MQTT服务器。</param>
     /// <returns>新创建MQTT服务器的ID。</returns>
     /// <exception cref="ApplicationException">如果创建MQTT服务器时发生错误。</exception>
-    public async Task<int> CreateMqttServerAsync(MqttServerDto mqttServerDto)
+    public async Task<int> CreateMqttServerAsync(MqttServer mqttServer)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            var mqttServer = _mapper.Map<MqttServer>(mqttServerDto);
             await _repoManager.MqttServers.AddAsync(mqttServer);
             await _repoManager.CommitAsync();
             return mqttServer.Id;
@@ -74,21 +66,36 @@ public class MqttAppService : IMqttAppService
     /// <summary>
     /// 异步更新一个已存在的MQTT服务器（事务性操作）。
     /// </summary>
-    /// <param name="mqttServerDto">要更新的MQTT服务器数据传输对象。</param>
+    /// <param name="mqttServer">要更新的MQTT服务器。</param>
     /// <returns>表示异步操作的任务。</returns>
     /// <exception cref="ApplicationException">如果找不到MQTT服务器或更新MQTT服务器时发生错误。</exception>
-    public async Task UpdateMqttServerAsync(MqttServerDto mqttServerDto)
+    public async Task UpdateMqttServerAsync(MqttServer mqttServer)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            var mqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServerDto.Id);
-            if (mqttServer == null)
+            var existingMqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServer.Id);
+            if (existingMqttServer == null)
             {
-                throw new ApplicationException($"MQTT Server with ID {mqttServerDto.Id} not found.");
+                throw new ApplicationException($"MQTT Server with ID {mqttServer.Id} not found.");
             }
-            _mapper.Map(mqttServerDto, mqttServer);
-            await _repoManager.MqttServers.UpdateAsync(mqttServer);
+
+            existingMqttServer.ServerName = mqttServer.ServerName;
+            existingMqttServer.ServerUrl = mqttServer.ServerUrl;
+            existingMqttServer.Port = mqttServer.Port;
+            existingMqttServer.Username = mqttServer.Username;
+            existingMqttServer.Password = mqttServer.Password;
+            existingMqttServer.IsActive = mqttServer.IsActive;
+            existingMqttServer.IsConnect = mqttServer.IsConnect;
+            existingMqttServer.SubscribeTopic = mqttServer.SubscribeTopic;
+            existingMqttServer.PublishTopic = mqttServer.PublishTopic;
+            existingMqttServer.ClientId = mqttServer.ClientId;
+            existingMqttServer.MessageFormat = mqttServer.MessageFormat;
+            existingMqttServer.MessageHeader = mqttServer.MessageHeader;
+            existingMqttServer.MessageContent = mqttServer.MessageContent;
+            existingMqttServer.MessageFooter = mqttServer.MessageFooter;
+
+            await _repoManager.MqttServers.UpdateAsync(existingMqttServer);
             await _repoManager.CommitAsync();
         }
         catch (Exception ex)
@@ -121,22 +128,36 @@ public class MqttAppService : IMqttAppService
     /// <summary>
     /// 异步批量更新MQTT服务器（事务性操作）。
     /// </summary>
-    /// <param name="mqttServerDtos">要更新的MQTT服务器数据传输对象列表。</param>
+    /// <param name="mqttServers">要更新的MQTT服务器列表。</param>
     /// <returns>成功更新的MQTT服务器数量。</returns>
     /// <exception cref="ApplicationException">如果批量更新MQTT服务器时发生错误。</exception>
-    public async Task<int> UpdateMqttServersAsync(List<MqttServerDto> mqttServerDtos)
+    public async Task<int> UpdateMqttServersAsync(List<MqttServer> mqttServers)
     {
         try
         {
             await _repoManager.BeginTranAsync();
             var count = 0;
-            foreach (var mqttServerDto in mqttServerDtos)
+            foreach (var mqttServer in mqttServers)
             {
-                var mqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServerDto.Id);
-                if (mqttServer != null)
+                var existingMqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServer.Id);
+                if (existingMqttServer != null)
                 {
-                    _mapper.Map(mqttServerDto, mqttServer);
-                    await _repoManager.MqttServers.UpdateAsync(mqttServer);
+                    existingMqttServer.ServerName = mqttServer.ServerName;
+                    existingMqttServer.ServerUrl = mqttServer.ServerUrl;
+                    existingMqttServer.Port = mqttServer.Port;
+                    existingMqttServer.Username = mqttServer.Username;
+                    existingMqttServer.Password = mqttServer.Password;
+                    existingMqttServer.IsActive = mqttServer.IsActive;
+                    existingMqttServer.IsConnect = mqttServer.IsConnect;
+                    existingMqttServer.SubscribeTopic = mqttServer.SubscribeTopic;
+                    existingMqttServer.PublishTopic = mqttServer.PublishTopic;
+                    existingMqttServer.ClientId = mqttServer.ClientId;
+                    existingMqttServer.MessageFormat = mqttServer.MessageFormat;
+                    existingMqttServer.MessageHeader = mqttServer.MessageHeader;
+                    existingMqttServer.MessageContent = mqttServer.MessageContent;
+                    existingMqttServer.MessageFooter = mqttServer.MessageFooter;
+
+                    await _repoManager.MqttServers.UpdateAsync(existingMqttServer);
                     count++;
                 }
             }

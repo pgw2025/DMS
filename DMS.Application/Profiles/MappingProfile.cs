@@ -27,9 +27,7 @@ public class MappingProfile : Profile
         CreateMap<VariableDto, VariableDto>()
             .ReverseMap();
            
-        // MqttServer 映射
-        CreateMap<MqttServer, MqttServerDto>().ReverseMap();
-        CreateMap<MqttServerDto, MqttServerDto>().ReverseMap();
+
 
         // VariableHistory 映射
         CreateMap<VariableHistory, VariableHistoryDto>()

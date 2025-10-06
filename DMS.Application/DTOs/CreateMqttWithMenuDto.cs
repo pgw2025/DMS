@@ -1,4 +1,4 @@
-using DMS.Application.DTOs;
+using DMS.Core.Models;
 
 namespace DMS.Application.DTOs
 {
@@ -10,7 +10,7 @@ namespace DMS.Application.DTOs
         /// <summary>
         /// MQTT服务器信息
         /// </summary>
-        public MqttServerDto MqttServer { get; set; }
+        public MqttServer MqttServer { get; set; }
         
         /// <summary>
         /// 菜单项信息

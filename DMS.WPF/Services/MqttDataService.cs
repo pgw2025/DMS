@@ -1,11 +1,13 @@
 using AutoMapper;
-using DMS.Application.DTOs;
+
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Management;
 using DMS.Core.Enums;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ItemViewModel;
+using DMS.Core.Models;
+using DMS.Application.DTOs;
 
 namespace DMS.WPF.Services;
 
@@ -45,9 +47,9 @@ public class MqttDataService : IMqttDataService
         try
         {
             // 加载MQTT服务器数据
-            foreach (var mqttServerDto in _appDataStorageService.MqttServers.Values)
+            foreach (var mqttServer in _appDataStorageService.MqttServers.Values)
             {
-                _dataStorageService.MqttServers.TryAdd(mqttServerDto.Id, _mapper.Map<MqttServerItem>(mqttServerDto));
+                _dataStorageService.MqttServers.TryAdd(mqttServer.Id, _mapper.Map<MqttServerItem>(mqttServer));
             }
 
         }
@@ -65,9 +67,9 @@ public class MqttDataService : IMqttDataService
     public async Task<MqttServerItem> AddMqttServer(MqttServerItem mqttServer)
     {
 
-        var addMqttServerDto = await _mqttManagementService.CreateMqttServerAsync(_mapper.Map<MqttServerDto>(mqttServer));
+        var addMqttServer = await _mqttManagementService.CreateMqttServerAsync(_mapper.Map<MqttServer>(mqttServer));
 
-        MqttServerItem mqttServerItem = _mapper.Map<MqttServerItem>(addMqttServerDto);
+        MqttServerItem mqttServerItem = _mapper.Map<MqttServerItem>(addMqttServer);
 
         _dataStorageService.MqttServers.Add(mqttServerItem.Id, mqttServerItem);
 
@@ -96,8 +98,8 @@ public class MqttDataService : IMqttDataService
     /// </summary>
     public async Task<bool> UpdateMqttServer(MqttServerItem mqttServer)
     {
-        var dto = _mapper.Map<MqttServerDto>(mqttServer);
-        var result = await _mqttManagementService.UpdateMqttServerAsync(dto);
+        var mqttServerModel = _mapper.Map<DMS.Core.Models.MqttServer>(mqttServer);
+        var result = await _mqttManagementService.UpdateMqttServerAsync(mqttServerModel);
 
         if (result > 0)
         {

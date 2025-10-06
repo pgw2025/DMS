@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Configurations\**" />
+    <EmbeddedResource Remove="Configurations\**" />
+    <None Remove="Configurations\**" />
+  </ItemGroup>
+
+  <ItemGroup>
 	  <PackageReference Include="MailKit" Version="4.7.1.1" />
 	  <PackageReference Include="MQTTnet" Version="3.0.16" />
 	  <PackageReference Include="SqlSugarCore" Version="5.1.4.197" />
@@ -24,10 +30,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DMS.Application\DMS.Application.csproj" />
     <ProjectReference Include="..\DMS.Core\DMS.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Configurations\" />
   </ItemGroup>
 
 </Project>

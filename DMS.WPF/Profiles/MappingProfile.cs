@@ -24,8 +24,7 @@ namespace DMS.WPF.Profiles
             CreateMap<MenuBeanDto, MenuItem>()
                 .ReverseMap();
                 
-            CreateMap<MqttServerDto, MqttServerItem>().ReverseMap();
-            CreateMap<MqttServerItem, MqttServerItem>().ReverseMap();
+
 
             CreateMap<MqttServer, MqttServerItem>().ReverseMap();
             CreateMap<UserDto, UserItem>().ReverseMap();
