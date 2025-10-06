@@ -51,7 +51,7 @@ public class BaseServiceTest
         services.AddTransient<IDeviceAppService, DeviceAppService>();
         services.AddTransient<IVariableTableAppService, VariableTableAppService>();
         services.AddTransient<IVariableAppService, VariableAppService>();
-        services.AddTransient<IMenuAppService, MenuAppService>();
+        // services.AddTransient<IMenuAppService, MenuAppService>();
         services.AddTransient<INavigationService, NavigationService>();
         services.AddTransient<DevicesViewModel>();
         // services.AddTransient<DataServices>();

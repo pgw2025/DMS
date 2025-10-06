@@ -227,18 +227,18 @@ namespace DMS.WPF.ViewModels
                     variableAlias.Alias = newAlias;
 
                     // 保存更改到数据服务
-                    var result = await _wpfDataService.UpdateMqttServer(CurrentMqtt);
-                    
-                    if (result)
-                    {
-                        _notificationService.ShowSuccess($"变量 '{variableAlias.Variable.Name}' 的发送名称已更新为 '{newAlias}'");
-                    }
-                    else
-                    {
-                        _notificationService.ShowError("更新发送名称失败。");
-                        // 如果更新失败，恢复原来的值
-                        variableAlias.Alias = oldAlias;
-                    }
+                    // var result = await _wpfDataService.UpdateMqttServer(CurrentMqtt);
+                    //
+                    // if (result)
+                    // {
+                    //     _notificationService.ShowSuccess($"变量 '{variableAlias.Variable.Name}' 的发送名称已更新为 '{newAlias}'");
+                    // }
+                    // else
+                    // {
+                    //     _notificationService.ShowError("更新发送名称失败。");
+                    //     // 如果更新失败，恢复原来的值
+                    //     variableAlias.Alias = oldAlias;
+                    // }
                 }
             }
             catch (Exception e)
