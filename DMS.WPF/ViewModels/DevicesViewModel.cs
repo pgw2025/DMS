@@ -10,7 +10,7 @@ using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using ObservableCollections;
 
@@ -33,14 +33,14 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 设备列表。
     /// </summary>
     [ObservableProperty]
-    private INotifyCollectionChangedSynchronizedViewList<DeviceItemViewModel> _devices;
+    private INotifyCollectionChangedSynchronizedViewList<DeviceItem> _devices;
 
 
     /// <summary>
     /// 当前选中的设备。
     /// </summary>
     [ObservableProperty]
-    private DeviceItemViewModel _selectedDevice;
+    private DeviceItem _selectedDevice;
 
     private readonly INotificationService _notificationService;
 
@@ -79,7 +79,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
         try
         {
             // 1. 显示添加设备对话框
-            DeviceItemViewModel device = await _dialogService.ShowDialogAsync(new DeviceDialogViewModel()
+            DeviceItem device = await _dialogService.ShowDialogAsync(new DeviceDialogViewModel()
                                                                               {
                                                                                   Title = "添加设备",
                                                                                   PrimaryButText = "添加设备"
@@ -165,7 +165,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 删除设备命令。
     /// </summary>
     [RelayCommand]
-    private async Task DeleteDevice(DeviceItemViewModel parmDeviceItem)
+    private async Task DeleteDevice(DeviceItem parmDeviceItem)
     {
         try
         {
@@ -199,7 +199,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// 编辑设备命令。
     /// </summary>
     [RelayCommand]
-    private async Task EditDevice(DeviceItemViewModel parmDeviceItem)
+    private async Task EditDevice(DeviceItem parmDeviceItem)
     {
         try
         {
@@ -219,7 +219,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                                               PrimaryButText = "编辑设备"
                                                           };
             // 1. 显示设备对话框
-            DeviceItemViewModel device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
+            DeviceItem device = await _dialogService.ShowDialogAsync(deviceDialogViewModel);
             // 如果用户取消或对话框未返回设备，则直接返回
             if (device == null)
             {
@@ -247,7 +247,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
 
     [RelayCommand]
-    private async Task AddVariableTable(DeviceItemViewModel device)
+    private async Task AddVariableTable(DeviceItem device)
     {
         if (device == null) return;
 
@@ -258,38 +258,38 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                                                             PrimaryButText = "添加变量表"
                                                                         };
             // 显示添加变量表对话框
-            var variableTableItemViewModel = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
+            var VariableTableItem = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
             // 如果用户取消或对话框未返回变量表，则直接返回
-            if (variableTableItemViewModel == null)
+            if (VariableTableItem == null)
             {
                 return;
             }
 
-            variableTableItemViewModel.DeviceId = device.Id;
+            VariableTableItem.DeviceId = device.Id;
             var tableMenu = new MenuBeanDto()
                             {
-                                Header = variableTableItemViewModel.Name,
+                                Header = VariableTableItem.Name,
                                 Icon = SegoeFluentIcons.DataSense.Glyph,
                                 TargetViewKey = nameof(VariableTableViewModel)
                             };
             int addVarTableId = await _wpfDataService.VariableTableDataService.AddVariableTable(
-                _mapper.Map<VariableTableDto>(variableTableItemViewModel),
+                _mapper.Map<VariableTableDto>(VariableTableItem),
                 tableMenu, true);
 
             if (addVarTableId > 0)
             {
-                variableTableItemViewModel.Id = addVarTableId;
-                if (_dataStorageService.Devices.TryGetValue(variableTableItemViewModel.DeviceId, out var deviceModel))
+                VariableTableItem.Id = addVarTableId;
+                if (_dataStorageService.Devices.TryGetValue(VariableTableItem.DeviceId, out var deviceModel))
                 {
-                    variableTableItemViewModel.Device = deviceModel;
-                    deviceModel.VariableTables.Add(variableTableItemViewModel);
-                    _dataStorageService.VariableTables.Add(variableTableItemViewModel.Id, variableTableItemViewModel);
+                    VariableTableItem.Device = deviceModel;
+                    deviceModel.VariableTables.Add(VariableTableItem);
+                    _dataStorageService.VariableTables.Add(VariableTableItem.Id, VariableTableItem);
                 }
-                _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
+                _notificationService.ShowSuccess($"添加变量表成功：{VariableTableItem.Name}");
             }
             else
             {
-                _notificationService.ShowError($"添加变量表失败：{variableTableItemViewModel.Name}！！");
+                _notificationService.ShowError($"添加变量表失败：{VariableTableItem.Name}！！");
             }
         }
         catch (Exception ex)
@@ -299,7 +299,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     }
 
     [RelayCommand]
-    private async Task EditVariableTable(VariableTableItemViewModel variableTable)
+    private async Task EditVariableTable(VariableTableItem variableTable)
     {
         if (variableTable == null)
         {
@@ -315,7 +315,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                       PrimaryButText = "编辑变量表"
                   };
             // 显示变量表对话框
-            VariableTableItemViewModel updatedVariableTable
+            VariableTableItem updatedVariableTable
                 = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
             // 如果用户取消或对话框未返回变量表，则直接返回
             if (updatedVariableTable == null)
@@ -344,7 +344,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     }
 
     [RelayCommand]
-    private async Task DeleteVariableTable(VariableTableItemViewModel variableTable)
+    private async Task DeleteVariableTable(VariableTableItem variableTable)
     {
         if (variableTable == null)
         {
@@ -388,7 +388,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
     private void OnDeviceIsActiveChanged(object? sender, bool isActive)
     {
-        if (sender is DeviceItemViewModel deviceItemViewModel)
+        if (sender is DeviceItem DeviceItem)
         {
         }
     }

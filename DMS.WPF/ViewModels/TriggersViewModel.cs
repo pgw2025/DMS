@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
 
@@ -21,10 +21,10 @@ namespace DMS.WPF.ViewModels
         private readonly INotificationService _notificationService;
 
         [ObservableProperty]
-        private ObservableDictionary<int, TriggerItemViewModel> _triggers ;
+        private ObservableDictionary<int, TriggerItem> _triggers ;
 
         [ObservableProperty]
-        private TriggerItemViewModel? _selectedTrigger;
+        private TriggerItem? _selectedTrigger;
 
         public TriggersViewModel(
             ITriggerDataService triggerDataService,
@@ -49,7 +49,7 @@ namespace DMS.WPF.ViewModels
         [RelayCommand]
         private async Task AddTriggerAsync()
         {
-            var newTrigger = new TriggerItemViewModel()
+            var newTrigger = new TriggerItem()
                 {
                     IsActive = true,
                     Condition = Core.Models.Triggers.ConditionType.GreaterThan,

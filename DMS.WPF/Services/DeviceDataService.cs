@@ -8,7 +8,7 @@ using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Events;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Services;
 
@@ -60,7 +60,7 @@ public class DeviceDataService : IDeviceDataService
             _uiDispatcher.Invoke(() =>
             {
 
-                if (_dataStorageService.Devices.TryGetValue(e.DeviceId, out DeviceItemViewModel device))
+                if (_dataStorageService.Devices.TryGetValue(e.DeviceId, out DeviceItem device))
                 {
 
                     device.IsRunning = e.StateValue;
@@ -84,7 +84,7 @@ public class DeviceDataService : IDeviceDataService
     {
         foreach (var deviceDto in _appDataStorageService.Devices.Values)
         {
-            _dataStorageService.Devices.Add(deviceDto.Id, _mapper.Map<DeviceItemViewModel>(deviceDto));
+            _dataStorageService.Devices.Add(deviceDto.Id, _mapper.Map<DeviceItem>(deviceDto));
         }
     }
 
@@ -106,12 +106,12 @@ public class DeviceDataService : IDeviceDataService
         }
 
         //给界面添加设备
-        _dataStorageService.Devices.Add(addDto.Device.Id, _mapper.Map<DeviceItemViewModel>(addDto.Device));
+        _dataStorageService.Devices.Add(addDto.Device.Id, _mapper.Map<DeviceItem>(addDto.Device));
 
         // 给界面添加设备菜单
         if (addDto.DeviceMenu != null)
         {
-            _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.DeviceMenu));
+            _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.DeviceMenu));
             
         }
 
@@ -124,7 +124,7 @@ public class DeviceDataService : IDeviceDataService
 
             if (addDto.VariableTable != null && addDto.VariableTableMenu != null)
             {
-                _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(addDto.VariableTableMenu));
+                _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.VariableTableMenu));
             }
 
 
@@ -138,7 +138,7 @@ public class DeviceDataService : IDeviceDataService
     /// <summary>
     /// 删除设备。
     /// </summary>
-    public async Task<bool> DeleteDevice(DeviceItemViewModel device)
+    public async Task<bool> DeleteDevice(DeviceItem device)
     {
         
         //从数据库和内存中删除设备相关数据
@@ -169,7 +169,7 @@ public class DeviceDataService : IDeviceDataService
     /// <summary>
     /// 更新设备。
     /// </summary>
-    public async Task<bool> UpdateDevice(DeviceItemViewModel device)
+    public async Task<bool> UpdateDevice(DeviceItem device)
     {
         if (!_appDataStorageService.Devices.TryGetValue(device.Id, out var deviceDto))
         {

@@ -1,23 +1,23 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using System.Threading.Tasks;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class DeviceDialogViewModel : DialogViewModelBase<DeviceItemViewModel>
+public partial class DeviceDialogViewModel : DialogViewModelBase<DeviceItem>
 {
     [ObservableProperty]
     private bool _isAddMode;
     
     [ObservableProperty]
-    private DeviceItemViewModel _device;
+    private DeviceItem _device;
 
-    public DeviceDialogViewModel(DeviceItemViewModel device=null)
+    public DeviceDialogViewModel(DeviceItem device=null)
     {
         if (device==null)
         {
-            _device = new DeviceItemViewModel();
+            _device = new DeviceItem();
             IsAddMode=true;
         }
         else

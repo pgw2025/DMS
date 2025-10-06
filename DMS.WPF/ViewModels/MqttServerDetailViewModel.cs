@@ -6,7 +6,7 @@ using DMS.Application.Interfaces.Management;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
@@ -31,7 +31,7 @@ namespace DMS.WPF.ViewModels
         /// 当前正在编辑的MQTT服务器对象。
         /// </summary>
         [ObservableProperty]
-        private MqttServerItemViewModel _currentMqtt;
+        private MqttServerItem _currentMqtt;
 
         /// <summary>
         /// 与当前MQTT服务器关联的变量数据集合。

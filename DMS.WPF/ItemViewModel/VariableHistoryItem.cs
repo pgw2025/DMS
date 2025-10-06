@@ -2,9 +2,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using System;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
-public partial class VariableHistoryItemViewModel : ObservableObject
+public partial class VariableHistoryItem : ObservableObject
 {
     public long Id { get; set; }
 

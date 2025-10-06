@@ -9,7 +9,7 @@ using DMS.Infrastructure.Models;
 using DMS.WPF.Factories;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using Opc.Ua;
 using Opc.Ua.Client;
 
@@ -19,7 +19,7 @@ namespace DMS.WPF.ViewModels.Dialogs;
 /// OPC UA导入对话框的视图模型
 /// 负责处理OPC UA服务器连接、节点浏览和变量导入等功能
 /// </summary>
-public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<VariableItemViewModel>>, IDisposable
+public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<VariableItem>>, IDisposable
 {
     /// <summary>
     /// OPC UA服务器端点URL
@@ -31,13 +31,13 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// OPC UA根节点
     /// </summary>
     [ObservableProperty]
-    private OpcUaNodeItemViewModel _rootOpcUaNode;
+    private OpcUaNodeItem _rootOpcUaNode;
 
     /// <summary>
     /// 当前选中节点下的所有变量集合
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<VariableItemViewModel> _opcUaNodeVariables = new();
+    private ObservableCollection<VariableItem> _opcUaNodeVariables = new();
 
     /// <summary>
     /// 用户选择的变量列表
@@ -74,7 +74,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(FindCurrentNodeVariablesCommand))] // 当选中节点改变时通知查找变量命令更新可执行状态
-    private OpcUaNodeItemViewModel _selectedNode;
+    private OpcUaNodeItem _selectedNode;
 
     /// <summary>
     /// OPC UA服务接口实例
@@ -112,7 +112,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
         _mapper = mapper;
         _notificationService = notificationService;
         // 初始化根节点
-        RootOpcUaNode = new OpcUaNodeItemViewModel() { DisplayName = "根节点", NodeId = Objects.ObjectsFolder, IsExpanded = true };
+        RootOpcUaNode = new OpcUaNodeItem() { DisplayName = "根节点", NodeId = Objects.ObjectsFolder, IsExpanded = true };
         // 初始化取消令牌源
         _cancellationTokenSource = new CancellationTokenSource();
     }
@@ -148,7 +148,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
 
                 // 浏览根节点并加载其子节点
                 var children = await _opcUaService.BrowseNode(_mapper.Map<OpcUaNode>(RootOpcUaNode));
-                RootOpcUaNode.Children = _mapper.Map<ObservableCollection<OpcUaNodeItemViewModel>>(children);
+                RootOpcUaNode.Children = _mapper.Map<ObservableCollection<OpcUaNodeItem>>(children);
             }
         }
         // 处理特定异常类型提供更友好的用户提示
@@ -188,7 +188,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
             // 断开与OPC UA服务器的连接
             await _opcUaService.DisconnectAsync();
             // 关闭对话框并返回用户选择的变量列表
-            Close(SelectedVariables.Cast<VariableItemViewModel>().ToList());
+            Close(SelectedVariables.Cast<VariableItem>().ToList());
         }
         catch (Exception ex)
         {
@@ -277,7 +277,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// 根据指定节点加载其下的所有变量
     /// </summary>
     /// <param name="node">要加载变量的OPC UA节点</param>
-    public async Task LoadNodeVariables(OpcUaNodeItemViewModel node)
+    public async Task LoadNodeVariables(OpcUaNodeItem node)
     {
         try
         {
@@ -311,7 +311,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
     /// </summary>
     /// <param name="node">要浏览的节点</param>
     /// <param name="isRecursive">是否递归浏览子节点</param>
-    private async Task BrowseNodeVariablesAsync(OpcUaNodeItemViewModel node, bool isRecursive = false)
+    private async Task BrowseNodeVariablesAsync(OpcUaNodeItem node, bool isRecursive = false)
     {
         // 参数有效性检查
         if (node == null) return;
@@ -331,7 +331,7 @@ public partial class ImportOpcUaDialogViewModel : DialogViewModelBase<List<Varia
             foreach (var child in children)
             {
                 // 映射子节点为视图模型对象
-                var nodeItem = _mapper.Map<OpcUaNodeItemViewModel>(child);
+                var nodeItem = _mapper.Map<OpcUaNodeItem>(child);
 
                 // 判断节点类型是否为变量
                 if (child.NodeClass == NodeClass.Variable)

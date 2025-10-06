@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using DMS.Application.Events;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 

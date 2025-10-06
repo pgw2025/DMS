@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,11 +19,11 @@ namespace DMS.WPF.ViewModels.Dialogs
         private ObservableCollection<MqttAliasItem> _variableMqttAliases = new();
 
         [ObservableProperty]
-        private MqttServerItemViewModel _selectedMqttServer;
+        private MqttServerItem _selectedMqttServer;
 
         public MqttAliasBatchEditDialogViewModel(
-            List<VariableItemViewModel> variables, 
-            MqttServerItemViewModel mqttServer)
+            List<VariableItem> variables, 
+            MqttServerItem mqttServer)
         {
             _selectedMqttServer = mqttServer;
             InitializeVariableMqttAliases(variables);
@@ -32,7 +32,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         /// <summary>
         /// 初始化变量MQTT别名列表
         /// </summary>
-        private void InitializeVariableMqttAliases(List<VariableItemViewModel> variables)
+        private void InitializeVariableMqttAliases(List<VariableItem> variables)
         {
             VariableMqttAliases.Clear();
 
@@ -58,7 +58,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         /// <summary>
         /// 生成默认别名
         /// </summary>
-        private string GenerateDefaultAlias(VariableItemViewModel variable)
+        private string GenerateDefaultAlias(VariableItem variable)
         {
             // 可以根据需要自定义默认别名生成逻辑
             return $"{variable.Name}";

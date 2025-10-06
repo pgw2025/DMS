@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
+using DMS.WPF.ItemViewModel;
 using ObservableCollections;
 
 namespace DMS.WPF.Services;
@@ -12,54 +13,54 @@ public class DataStorageService : IDataStorageService
     /// <summary>
     /// 设备列表。
     /// </summary>
-    public ObservableDictionary<int,DeviceItemViewModel> Devices { get; set; }
+    public ObservableDictionary<int,DeviceItem> Devices { get; set; }
 
     /// <summary>
     /// 设备列表。
     /// </summary>
-    public new ObservableDictionary<int,VariableTableItemViewModel> VariableTables { get; set; }
+    public new ObservableDictionary<int,VariableTableItem> VariableTables { get; set; }
 
     /// <summary>
     /// 变量数据列表。
     /// </summary>
-    public ObservableDictionary<int,VariableItemViewModel> Variables { get; set; }
+    public ObservableDictionary<int,VariableItem> Variables { get; set; }
 
 
     /// <summary>
     /// MQTT服务器列表。
     /// </summary>
-    public ObservableDictionary<int, MqttServerItemViewModel> MqttServers { get; set; }
+    public ObservableDictionary<int, MqttServerItem> MqttServers { get; set; }
 
     /// <summary>
     /// 菜单列表。
     /// </summary>
-    public ObservableCollection<MenuItemViewModel> Menus { get; set; }
+    public ObservableCollection<MenuItem> Menus { get; set; }
 
     /// <summary>
     /// 菜单树列表。
     /// </summary>
-    public ObservableCollection<MenuItemViewModel> MenuTrees { get; set; }
+    public ObservableCollection<MenuItem> MenuTrees { get; set; }
     
     /// <summary>
     /// 日志列表。
     /// </summary>
-    public ObservableCollection<NlogItemViewModel> Nlogs { get; set; }
+    public ObservableCollection<NlogItem> Nlogs { get; set; }
 
     /// <summary>
     /// 触发器列表。
     /// </summary>
-    public ObservableDictionary<int, TriggerItemViewModel> Triggers { get; set; }
+    public ObservableDictionary<int, TriggerItem> Triggers { get; set; }
 
     public DataStorageService()
     {
-        Devices=new ObservableDictionary<int,DeviceItemViewModel>();
-        VariableTables = new ObservableDictionary<int,VariableTableItemViewModel>();
-        Variables=new ObservableDictionary<int,VariableItemViewModel>();
-        MqttServers=new ObservableDictionary<int, MqttServerItemViewModel>();
-        Menus=new ObservableCollection<MenuItemViewModel>();
-        MenuTrees=new ObservableCollection<MenuItemViewModel>();
-        Nlogs=new ObservableCollection<NlogItemViewModel>();
-        Triggers = new ObservableDictionary<int, TriggerItemViewModel>();
+        Devices=new ObservableDictionary<int,DeviceItem>();
+        VariableTables = new ObservableDictionary<int,VariableTableItem>();
+        Variables=new ObservableDictionary<int,VariableItem>();
+        MqttServers=new ObservableDictionary<int, MqttServerItem>();
+        Menus=new ObservableCollection<MenuItem>();
+        MenuTrees=new ObservableCollection<MenuItem>();
+        Nlogs=new ObservableCollection<NlogItem>();
+        Triggers = new ObservableDictionary<int, TriggerItem>();
         
     }
 

@@ -6,7 +6,7 @@ using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Services;
 
@@ -36,7 +36,7 @@ public class LogDataService : ILogDataService
     public void LoadAllLog()
     {
         // 加载日志数据
-        _dataStorageService.Nlogs = _mapper.Map<ObservableCollection<NlogItemViewModel>>(_appDataStorageService.Nlogs.Values);
+        _dataStorageService.Nlogs = _mapper.Map<ObservableCollection<NlogItem>>(_appDataStorageService.Nlogs.Values);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class LogDataService : ILogDataService
             switch (e.ChangeType)
             {
                 case DataChangeType.Added:
-                    _dataStorageService.Nlogs.Add(_mapper.Map<NlogItemViewModel>(e.Nlog));
+                    _dataStorageService.Nlogs.Add(_mapper.Map<NlogItem>(e.Nlog));
                     break;
                 case DataChangeType.Updated:
                     var existingLog = _dataStorageService.Nlogs.FirstOrDefault(l => l.Id == e.Nlog.Id);

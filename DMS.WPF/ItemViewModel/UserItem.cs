@@ -1,9 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
-public partial class UserItemViewModel : ObservableObject
+public partial class UserItem : ObservableObject
 {
     public int Id { get; set; }
 

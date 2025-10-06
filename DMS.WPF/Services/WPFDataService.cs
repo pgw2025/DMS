@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using AutoMapper;
 using DMS.Application.Interfaces;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Services;
 

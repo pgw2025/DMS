@@ -5,7 +5,6 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
 using ObservableCollections;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +18,7 @@ using DMS.Application.Events;
 using DMS.WPF.Services;
 using DMS.Application.Interfaces.Database;
 using DMS.Core.Enums;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.ViewModels;
 
@@ -33,7 +33,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     private readonly IAppDataCenterService _appDataCenterService;
 
     [ObservableProperty]
-    private NlogItemViewModel _selectedLog;
+    private NlogItem _selectedLog;
 
     [ObservableProperty]
     private IList _selectedLogs = new ArrayList();
@@ -44,9 +44,9 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     [ObservableProperty]
     private string _selectedLogLevel;
 
-    private readonly ObservableList<NlogItemViewModel> _logItemList;
-    private readonly ISynchronizedView<NlogItemViewModel, NlogItemViewModel> _synchronizedView;
-    public NotifyCollectionChangedSynchronizedViewList<NlogItemViewModel> LogItemListView { get; }
+    private readonly ObservableList<NlogItem> _logItemList;
+    private readonly ISynchronizedView<NlogItem, NlogItem> _synchronizedView;
+    public NotifyCollectionChangedSynchronizedViewList<NlogItem> LogItemListView { get; }
 
     public ObservableCollection<string> LogLevels { get; } = new ObservableCollection<string> { "Trace", "Debug", "Info", "Warn", "Error", "Fatal" };
 
@@ -61,7 +61,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
         _wpfDataService = wpfDataService;
         _appDataCenterService = appDataCenterService;
 
-        _logItemList = new ObservableList<NlogItemViewModel>(_dataStorageService.Nlogs);
+        _logItemList = new ObservableList<NlogItem>(_dataStorageService.Nlogs);
         
         _synchronizedView = _logItemList.CreateView(v => v);
         LogItemListView = _synchronizedView.ToNotifyCollectionChanged();
@@ -81,7 +81,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
             switch (e.ChangeType)
             {
                 case DataChangeType.Added:
-                    var newLogItem = new NlogItemViewModel(new Nlog
+                    var newLogItem = new NlogItem(new Nlog
                     {
                         Id = e.Nlog.Id,
                         LogTime = e.Nlog.LogTime,
@@ -103,7 +103,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
                     var existingLog = _logItemList.FirstOrDefault(l => l.Id == e.Nlog.Id);
                     if (existingLog != null)
                     {
-                        existingLog = new NlogItemViewModel(new Nlog
+                        existingLog = new NlogItem(new Nlog
                         {
                             Id = e.Nlog.Id,
                             LogTime = e.Nlog.LogTime,
@@ -132,7 +132,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
         }));
     }
 
-    private bool FilterLogs(NlogItemViewModel item)
+    private bool FilterLogs(NlogItem item)
     {
         // 搜索文本过滤
         var searchTextLower = SearchText?.ToLower() ?? string.Empty;
@@ -231,7 +231,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
                     CallerLineNumber = logDto.CallerLineNumber,
                     CallerMember = logDto.CallerMember
                 };
-                return new NlogItemViewModel(nlog);
+                return new NlogItem(nlog);
             }).ToList();
             
             _logItemList.Clear();

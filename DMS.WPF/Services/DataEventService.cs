@@ -10,7 +10,7 @@ using DMS.Core.Events;
 using DMS.Core.Models;
 using DMS.Message;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using Microsoft.Extensions.Logging;
 
 namespace DMS.WPF.Services;

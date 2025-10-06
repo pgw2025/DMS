@@ -4,7 +4,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Events;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using Opc.Ua;
 
 namespace DMS.WPF.Services;
@@ -51,14 +51,14 @@ public class TriggerDataService : ITriggerDataService
     {
         foreach (var triggerDto in _appDataStorageService.Triggers.Values)
         {
-            _dataStorageService.Triggers.Add(triggerDto.Id, _mapper.Map<TriggerItemViewModel>(triggerDto));
+            _dataStorageService.Triggers.Add(triggerDto.Id, _mapper.Map<TriggerItem>(triggerDto));
         }
     }
 
     /// <summary>
     /// 添加触发器。
     /// </summary>
-    public async Task<TriggerItemViewModel> AddTrigger(TriggerItemViewModel dto)
+    public async Task<TriggerItem> AddTrigger(TriggerItem dto)
     {
         // 添加null检查
         if (dto == null)
@@ -75,7 +75,7 @@ public class TriggerDataService : ITriggerDataService
         }
 
         // 给界面添加触发器
-        var addItem = _mapper.Map<TriggerItemViewModel>(addDto);
+        var addItem = _mapper.Map<TriggerItem>(addDto);
         _dataStorageService.Triggers.Add(addDto.Id, addItem);
 
         return addItem;
@@ -84,7 +84,7 @@ public class TriggerDataService : ITriggerDataService
     /// <summary>
     /// 删除触发器。
     /// </summary>
-    public async Task<bool> DeleteTrigger(TriggerItemViewModel trigger)
+    public async Task<bool> DeleteTrigger(TriggerItem trigger)
     {
         // 从数据库删除触发器数据
         if (!await _appDataCenterService.TriggerManagementService.DeleteTriggerAsync(trigger.Id))
@@ -101,7 +101,7 @@ public class TriggerDataService : ITriggerDataService
     /// <summary>
     /// 更新触发器。
     /// </summary>
-    public async Task<bool> UpdateTrigger(TriggerItemViewModel trigger)
+    public async Task<bool> UpdateTrigger(TriggerItem trigger)
     {
         if (!_appDataStorageService.Triggers.TryGetValue(trigger.Id, out var triggerDto))
         {

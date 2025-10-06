@@ -1,19 +1,19 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class VariableTableDialogViewModel:DialogViewModelBase<VariableTableItemViewModel>
+public partial class VariableTableDialogViewModel:DialogViewModelBase<VariableTableItem>
 {
     [ObservableProperty] 
-    private VariableTableItemViewModel _variableTable;
+    private VariableTableItem _variableTable;
 
-    public VariableTableDialogViewModel(VariableTableItemViewModel variableTable=null)
+    public VariableTableDialogViewModel(VariableTableItem variableTable=null)
     {
         if (variableTable==null)
         {
-            VariableTable = new VariableTableItemViewModel();
+            VariableTable = new VariableTableItem();
         }
         else
         {

@@ -5,7 +5,7 @@ using DMS.Application.Interfaces.Management;
 using DMS.Core.Enums;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Services;
 
@@ -47,7 +47,7 @@ public class MqttDataService : IMqttDataService
             // 加载MQTT服务器数据
             foreach (var mqttServerDto in _appDataStorageService.MqttServers.Values)
             {
-                _dataStorageService.MqttServers.TryAdd(mqttServerDto.Id, _mapper.Map<MqttServerItemViewModel>(mqttServerDto));
+                _dataStorageService.MqttServers.TryAdd(mqttServerDto.Id, _mapper.Map<MqttServerItem>(mqttServerDto));
             }
 
         }
@@ -62,12 +62,12 @@ public class MqttDataService : IMqttDataService
     /// <summary>
     /// 添加MQTT服务器。
     /// </summary>
-    public async Task<MqttServerItemViewModel> AddMqttServer(MqttServerItemViewModel mqttServer)
+    public async Task<MqttServerItem> AddMqttServer(MqttServerItem mqttServer)
     {
 
         var addMqttServerDto = await _mqttManagementService.CreateMqttServerAsync(_mapper.Map<MqttServerDto>(mqttServer));
 
-        MqttServerItemViewModel mqttServerItem = _mapper.Map<MqttServerItemViewModel>(addMqttServerDto);
+        MqttServerItem mqttServerItem = _mapper.Map<MqttServerItem>(addMqttServerDto);
 
         _dataStorageService.MqttServers.Add(mqttServerItem.Id, mqttServerItem);
 
@@ -85,7 +85,7 @@ public class MqttDataService : IMqttDataService
                 MenuType = MenuType.MqttServerMenu,
                 TargetViewKey = nameof(MqttServerDetailViewModel),
             };
-            await _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(mqttServerMenu));
+            await _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(mqttServerMenu));
         }
 
         return mqttServerItem;
@@ -94,7 +94,7 @@ public class MqttDataService : IMqttDataService
     /// <summary>
     /// 更新MQTT服务器。
     /// </summary>
-    public async Task<bool> UpdateMqttServer(MqttServerItemViewModel mqttServer)
+    public async Task<bool> UpdateMqttServer(MqttServerItem mqttServer)
     {
         var dto = _mapper.Map<MqttServerDto>(mqttServer);
         var result = await _mqttManagementService.UpdateMqttServerAsync(dto);
@@ -120,7 +120,7 @@ public class MqttDataService : IMqttDataService
     /// <summary>
     /// 删除MQTT服务器。
     /// </summary>
-    public async Task<bool> DeleteMqttServer(MqttServerItemViewModel mqttServer)
+    public async Task<bool> DeleteMqttServer(MqttServerItem mqttServer)
     {
         // 从数据库和内存中删除MQTT服务器
         var result = await _mqttManagementService.DeleteMqttServerAsync(mqttServer.Id);

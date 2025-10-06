@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -13,15 +13,15 @@ namespace DMS.WPF.ViewModels.Dialogs
     /// <summary>
     /// MQTT服务器选择对话框的视图模型
     /// </summary>
-    public partial class MqttSelectionDialogViewModel : DialogViewModelBase<MqttServerItemViewModel>
+    public partial class MqttSelectionDialogViewModel : DialogViewModelBase<MqttServerItem>
     {
         private readonly IMqttAppService _mqttAppService;
 
         [ObservableProperty]
-        private ObservableCollection<MqttServerItemViewModel> _mqttServers = new();
+        private ObservableCollection<MqttServerItem> _mqttServers = new();
 
         [ObservableProperty]
-        private MqttServerItemViewModel _selectedMqttServer;
+        private MqttServerItem _selectedMqttServer;
 
         public MqttSelectionDialogViewModel(IMqttAppService mqttAppService)
         {
@@ -41,7 +41,7 @@ namespace DMS.WPF.ViewModels.Dialogs
 
                 foreach (var dto in mqttServerDtos)
                 {
-                    MqttServers.Add(new MqttServerItemViewModel
+                    MqttServers.Add(new MqttServerItem
                     {
                         Id = dto.Id,
                         ServerName = dto.ServerName,

@@ -7,14 +7,14 @@ using DMS.Application.Interfaces.Database;
 using DMS.Core.Enums;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemViewModel>
+public partial class VariableDialogViewModel : DialogViewModelBase<VariableItem>
 {
     [ObservableProperty]
-    private VariableItemViewModel _variable;
+    private VariableItem _variable;
 
     [ObservableProperty]
     private string _errorMessage = string.Empty;
@@ -33,7 +33,7 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
     public VariableDialogViewModel(IWPFDataService wpfDataService,IDataStorageService dataStorageService, IVariableAppService variableAppService, IMapper mapper)
     {
 
-        Variable = new VariableItemViewModel();
+        Variable = new VariableItem();
 
         _wpfDataService = wpfDataService;
         _dataStorageService = dataStorageService;
@@ -84,7 +84,7 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItemV
         }
         //检查变量是否存在
         var existVariables = _dataStorageService.Variables.Where(v => v.Value.Name == Variable.Name || (v.Value.Protocol == ProtocolType.S7 && v.Value.S7Address == Variable.S7Address) || (v.Value.Protocol == ProtocolType.OpcUa && v.Value.OpcUaNodeId == Variable.OpcUaNodeId)).Select(v=>v.Value).ToList();
-        VariableItemViewModel existVariable = null;
+        VariableItem existVariable = null;
         if (IsAddModel)
         {
             existVariable = existVariables.FirstOrDefault();

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using DMS.Core.Enums;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Views;
 
@@ -48,7 +48,7 @@ public partial class MainView : Window
     /// <param name="args"></param>
     private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var menu = args.SelectedItem as MenuItemViewModel;
+        var menu = args.SelectedItem as MenuItem;
         if (menu != null)
         {
 

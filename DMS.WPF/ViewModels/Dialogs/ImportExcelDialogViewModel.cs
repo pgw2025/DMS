@@ -8,7 +8,7 @@ using DMS.Core.Interfaces.Services;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
@@ -25,7 +25,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
     private List<Variable> _variables = new();
     
     [ObservableProperty]
-    private ObservableCollection<VariableItemViewModel> _variableItemViewModels ;
+    private ObservableCollection<VariableItem> _variableItemViewModels ;
 
     [ObservableProperty]
     private IList _selectedVariables = new ArrayList();
@@ -48,7 +48,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
         try
         {
            Variables = _excelService.ImprotFromTiaVariableTable(value);
-           VariableItemViewModels=new ObservableCollection<VariableItemViewModel>(_mapper.Map<List<VariableItemViewModel>>(Variables));
+           VariableItemViewModels=new ObservableCollection<VariableItem>(_mapper.Map<List<VariableItem>>(Variables));
         }
         catch (System.Exception ex)
         {
@@ -65,7 +65,7 @@ public partial class ImportExcelDialogViewModel : DialogViewModelBase<List<Varia
     [RelayCommand]
     private void ImportSelected()
     {
-        var selected = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+        var selected = SelectedVariables.Cast<VariableItem>().ToList();
         Close(_mapper.Map<List<Variable>>(selected));
     }
 

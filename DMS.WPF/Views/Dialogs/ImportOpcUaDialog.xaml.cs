@@ -3,7 +3,7 @@ using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using iNKORE.UI.WPF.Modern.Controls;
 using System.Threading.Tasks;
 using System.Windows;
@@ -63,7 +63,7 @@ public partial class ImportOpcUaDialog : ContentDialog
     //事件
     public async void SelectedItemChanged(object selectedObj)
     {
-        if (selectedObj is OpcUaNodeItemViewModel selectedNode)
+        if (selectedObj is OpcUaNodeItem selectedNode)
         {
 
             if (this.DataContext is ImportOpcUaDialogViewModel viewModel)

@@ -1,4 +1,4 @@
-// 文件: DMS.WPF/ViewModels/Items/DeviceItemViewModel.cs
+// 文件: DMS.WPF/ViewModels/Items/DeviceItem.cs
 
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,13 +8,13 @@ using DMS.Core.Enums;
 using DMS.Core.Events;
 using DMS.WPF.Interfaces;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
 /// <summary>
 /// 代表设备列表中的单个设备项的ViewModel。
 /// 实现了INotifyPropertyChanged，其任何属性变化都会自动通知UI。
 /// </summary>
-public partial class DeviceItemViewModel : ObservableObject
+public partial class DeviceItem : ObservableObject
 {
     // 用于访问事件服务的静态属性
     public static IEventService EventService { get; set; }
@@ -97,7 +97,7 @@ public partial class DeviceItemViewModel : ObservableObject
         }
     }
 
-    public ObservableCollection<VariableTableItemViewModel> VariableTables { get; set; } = new();
+    public ObservableCollection<VariableTableItem> VariableTables { get; set; } = new();
     
     [ObservableProperty]
     private bool _isConnected;

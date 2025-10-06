@@ -1,7 +1,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using DMS.WPF.Helper;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using iNKORE.UI.WPF.Modern.Controls;
 
 namespace DMS.WPF.Views.Dialogs
@@ -36,7 +36,7 @@ namespace DMS.WPF.Views.Dialogs
         /// </summary>
         private void VariableListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (VariableListBox.SelectedItem is VariableItemViewModel selectedVariable)
+            if (VariableListBox.SelectedItem is VariableItem selectedVariable)
             {
                 var viewModel = DataContext as ViewModels.Dialogs.TriggerDialogViewModel;
                 viewModel?.AddVariable(selectedVariable);
@@ -48,7 +48,7 @@ namespace DMS.WPF.Views.Dialogs
         /// </summary>
         private void RemoveVariableButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (sender is System.Windows.Controls.Button button && button.Tag is VariableItemViewModel variable)
+            if (sender is System.Windows.Controls.Button button && button.Tag is VariableItem variable)
             {
                 var viewModel = DataContext as ViewModels.Dialogs.TriggerDialogViewModel;
                 viewModel?.RemoveVariable(variable);

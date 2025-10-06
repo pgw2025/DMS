@@ -4,7 +4,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using System.Collections.ObjectModel;
 using DMS.Application.Services.Management;
 
@@ -64,7 +64,7 @@ public class VariableDataService : IVariableDataService
 
         if (_dataStorageService.Devices.TryGetValue(tableDto.DeviceId, out var device))
         {
-            var variableTableItem = _mapper.Map<VariableTableItemViewModel>(tableDto);
+            var variableTableItem = _mapper.Map<VariableTableItem>(tableDto);
             device.VariableTables.Add(variableTableItem);
             _dataStorageService.VariableTables.TryAdd(variableTableItem.Id,variableTableItem);
         }
@@ -76,7 +76,7 @@ public class VariableDataService : IVariableDataService
     /// <summary>
     /// 更新变量表。
     /// </summary>
-    public async Task<bool> UpdateVariableTable(VariableTableItemViewModel variableTable)
+    public async Task<bool> UpdateVariableTable(VariableTableItem variableTable)
     {
         if (variableTable == null)
         {
@@ -96,7 +96,7 @@ public class VariableDataService : IVariableDataService
     /// <summary>
     /// 删除变量表。
     /// </summary>
-    public async Task<bool> DeleteVariableTable(VariableTableItemViewModel variableTable, bool isDeleteDb = false)
+    public async Task<bool> DeleteVariableTable(VariableTableItem variableTable, bool isDeleteDb = false)
     {
         if (variableTable == null)
         {
@@ -126,7 +126,7 @@ public class VariableDataService : IVariableDataService
     /// <summary>
     /// 添加变量。
     /// </summary>
-    public void AddVariable(VariableItemViewModel variableItem)
+    public void AddVariable(VariableItem variableItem)
     {
         if (variableItem == null)
         {

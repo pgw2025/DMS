@@ -9,7 +9,7 @@
                   xmlns:hc="https://handyorg.github.io/handycontrol"
                   xmlns:ex="clr-namespace:DMS.Extensions"
                   xmlns:converters="clr-namespace:DMS.WPF.Converters"
-                  xmlns:items="clr-namespace:DMS.WPF.ViewModels.Items"
+                  xmlns:items="clr-namespace:DMS.WPF.ItemViewModel"
                   Title="{Binding Title}"
                   mc:Ignorable="d"
                   d:DesignHeight="700"
@@ -68,7 +68,7 @@
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type items:VariableItemViewModel}">
+                                    <DataTemplate DataType="{x:Type items:VariableItem}">
                                         <Border Background="LightBlue" 
                                                 CornerRadius="3" 
                                                 Margin="2"
@@ -115,7 +115,7 @@
                                  SelectionMode="Single"
                                  MouseDoubleClick="VariableListBox_MouseDoubleClick">
                             <ListBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type items:VariableItemViewModel}">
+                                <DataTemplate DataType="{x:Type items:VariableItem}">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                                         <TextBlock Text=" - " />

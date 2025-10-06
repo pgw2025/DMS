@@ -32,7 +32,7 @@ using DMS.WPF.Logging;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using DMS.WPF.Views;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -81,7 +81,7 @@ public partial class App : System.Windows.Application
         {
             Host.Services.GetRequiredService<GrowlNotificationService>();
             Host.Services.GetRequiredService<IDeviceMonitoringService>();
-            DeviceItemViewModel.EventService = Host.Services.GetRequiredService<IEventService>();
+            DeviceItem.EventService = Host.Services.GetRequiredService<IEventService>();
             // 初始化数据处理链
             var dataProcessingService = Host.Services.GetRequiredService<IDataProcessingService>();
             dataProcessingService.AddProcessor(Host.Services.GetRequiredService<ValueConvertProcessor>());

@@ -4,9 +4,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
-public partial class MqttServerItemViewModel : ObservableObject
+public partial class MqttServerItem : ObservableObject
 {
     public int Id { get; set; }
 

@@ -1,5 +1,5 @@
 using DMS.Application.DTOs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using DMS.Application.Configurations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,7 +16,7 @@ namespace DMS.WPF.Factories
         /// </summary>
         /// <param name="variableDto">变量数据传输对象</param>
         /// <returns>VariableItemViewModel实例</returns>
-        VariableItemViewModel CreateNewVariableItemViewModel();
+        VariableItem CreateNewVariableItemViewModel();
         
     }
 
@@ -35,10 +35,10 @@ namespace DMS.WPF.Factories
         /// </summary>
         /// <param name="variableDto">变量数据传输对象</param>
         /// <returns>VariableItemViewModel实例</returns>
-        public VariableItemViewModel CreateNewVariableItemViewModel()
+        public VariableItem CreateNewVariableItemViewModel()
         {
 
-            var viewModel = new VariableItemViewModel()
+            var viewModel = new VariableItem()
             {
                
                 IsActive = _appSettings.VariableImportTemplate.IsActive,                

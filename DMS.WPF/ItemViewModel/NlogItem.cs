@@ -1,18 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Core.Models;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
-public class NlogItemViewModel : ObservableObject
+public class NlogItem : ObservableObject
 {
     private Nlog _nlog;
 
-    public NlogItemViewModel()
+    public NlogItem()
     {
         _nlog = new Nlog();
     }
 
-    public NlogItemViewModel(Nlog nlog)
+    public NlogItem(Nlog nlog)
     {
         _nlog = nlog;
     }
@@ -25,5 +25,5 @@ public class NlogItemViewModel : ObservableObject
     public string Logger => _nlog.Logger;
     public string Exception => _nlog.Exception;
     public string StackTrace => _nlog.Exception; // Using Exception as StackTrace since it's not in the Nlog model
-    public System.DateTime TimeStamp => _nlog.LogTime;
+    public DateTime TimeStamp => _nlog.LogTime;
 }

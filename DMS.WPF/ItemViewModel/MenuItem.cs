@@ -6,14 +6,14 @@ using DMS.Application.DTOs;
 using DMS.Core.Enums;
 using DMS.WPF.Services;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
 /// <summary>
 /// 菜单项视图模型
 /// 用于在WPF界面中绑定和显示菜单项数据，实现MVVM模式
 /// 继承自ObservableObject以支持属性更改通知
 /// </summary>
-public partial class MenuItemViewModel : ObservableObject
+public partial class MenuItem : ObservableObject
 {
     /// <summary>
     /// 菜单项的唯一标识符
@@ -77,5 +77,5 @@ public partial class MenuItemViewModel : ObservableObject
     /// 使用ObservableCollection以支持动态添加和删除子项并自动更新UI
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<MenuItemViewModel> _children = new();
+    private ObservableCollection<MenuItem> _children = new();
 }

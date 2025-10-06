@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 
@@ -13,12 +13,12 @@ public interface IMenuDataService
     /// <summary>
     /// 添加菜单项。
     /// </summary>
-    Task AddMenuItem(MenuItemViewModel menuItemViewModel);
+    Task AddMenuItem(MenuItem MenuItem);
 
     /// <summary>
     /// 删除菜单项。
     /// </summary>
-    Task DeleteMenuItem(MenuItemViewModel? menuItemViewModel);
+    Task DeleteMenuItem(MenuItem? MenuItem);
 
     void LoadAllMenus();
 

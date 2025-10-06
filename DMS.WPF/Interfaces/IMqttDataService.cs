@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using DMS.Application.DTOs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 
@@ -19,15 +19,15 @@ public interface IMqttDataService
     /// <summary>
     /// 添加MQTT服务器。
     /// </summary>
-    Task<MqttServerItemViewModel> AddMqttServer(MqttServerItemViewModel mqttServer);
+    Task<MqttServerItem> AddMqttServer(MqttServerItem mqttServer);
 
     /// <summary>
     /// 更新MQTT服务器。
     /// </summary>
-    Task<bool> UpdateMqttServer(MqttServerItemViewModel mqttServer);
+    Task<bool> UpdateMqttServer(MqttServerItem mqttServer);
 
     /// <summary>
     /// 删除MQTT服务器。
     /// </summary>
-    Task<bool> DeleteMqttServer(MqttServerItemViewModel mqttServer);
+    Task<bool> DeleteMqttServer(MqttServerItem mqttServer);
 }

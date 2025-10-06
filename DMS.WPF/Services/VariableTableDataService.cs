@@ -4,7 +4,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Services;
 
@@ -52,7 +52,7 @@ public class VariableTableDataService : IVariableTableDataService
             createDto.Menu = menuDto;
             var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
             
-            _menuDataService.AddMenuItem(_mapper.Map<MenuItemViewModel>(resDto.Menu));
+            _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(resDto.Menu));
             return resDto.VariableTable.Id;
         }
 
@@ -62,7 +62,7 @@ public class VariableTableDataService : IVariableTableDataService
     }
 
 
-    public async Task<bool> UpdateVariableTable(VariableTableItemViewModel variableTable)
+    public async Task<bool> UpdateVariableTable(VariableTableItem variableTable)
     {
         if (variableTable == null)
         {
@@ -88,7 +88,7 @@ public class VariableTableDataService : IVariableTableDataService
         return false;
     }
 
-    public async Task<bool> DeleteVariableTable(VariableTableItemViewModel variableTable, bool isDeleteDb = false)
+    public async Task<bool> DeleteVariableTable(VariableTableItem variableTable, bool isDeleteDb = false)
     {
         if (variableTable == null)
         {

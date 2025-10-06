@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using DMS.Application.Configurations;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
 /// <summary>
 /// 表示单个变量项的视图模型。
 /// 此类用于UI层的数据绑定，封装了变量数据以及与UI相关的状态和逻辑。
 /// 它继承自 ObservableObject，以便于实现 INotifyPropertyChanged 接口，从而支持WPF的双向绑定。
 /// </summary>
-public partial class VariableItemViewModel : ObservableObject
+public partial class VariableItem : ObservableObject
 {
     /// <summary>
     /// 获取或设置变量的唯一标识符 (ID)。
@@ -120,7 +120,7 @@ public partial class VariableItemViewModel : ObservableObject
     [ObservableProperty]
     private int _pollingInterval;
     
-    public VariableItemViewModel()
+    public VariableItem()
     {
     }
     

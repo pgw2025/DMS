@@ -10,14 +10,14 @@ using DMS.Application.Interfaces.Database;
 using DMS.Core.Interfaces;
 using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.ViewModels.Dialogs
 {
     /// <summary>
     /// 触发器编辑器视图模型
     /// </summary>
-    public partial class TriggerDialogViewModel : DialogViewModelBase<TriggerItemViewModel?>
+    public partial class TriggerDialogViewModel : DialogViewModelBase<TriggerItem?>
     {
         private readonly IVariableAppService _variableAppService; // To populate variable selection dropdown
         private readonly IDialogService _dialogService;
@@ -28,16 +28,16 @@ namespace DMS.WPF.ViewModels.Dialogs
         private string _searchText = "";
 
         [ObservableProperty]
-        private TriggerItemViewModel _trigger = new();
+        private TriggerItem _trigger = new();
 
         [ObservableProperty]
-        private List<VariableItemViewModel> _availableVariables = new();
+        private List<VariableItem> _availableVariables = new();
         
         [ObservableProperty]
-        private ObservableCollection<VariableItemViewModel> _selectedVariables = new();
+        private ObservableCollection<VariableItem> _selectedVariables = new();
         
         [ObservableProperty]
-        private ObservableCollection<VariableItemViewModel> _filteredVariables = new();
+        private ObservableCollection<VariableItem> _filteredVariables = new();
 
         // Properties for easier binding in XAML for SendEmail action config
         [ObservableProperty]
@@ -101,7 +101,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         /// 将变量添加到选中列表
         /// </summary>
         /// <param name="variable">要添加的变量</param>
-        public void AddVariable(VariableItemViewModel variable)
+        public void AddVariable(VariableItem variable)
         {
             if (!SelectedVariables.Contains(variable))
             {
@@ -114,7 +114,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         /// 从选中列表中移除变量
         /// </summary>
         /// <param name="variable">要移除的变量</param>
-        public void RemoveVariable(VariableItemViewModel variable)
+        public void RemoveVariable(VariableItem variable)
         {
             if (SelectedVariables.Contains(variable))
             {
@@ -129,7 +129,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         /// <param name="parameter">待编辑的触发器 DTO</param>
         public async Task OnInitializedAsync(object? parameter)
         {
-            if (parameter is TriggerItemViewModel triggerItemViewModel)
+            if (parameter is TriggerItem triggerItemViewModel)
             {
                 Trigger = triggerItemViewModel;
                 Title = Trigger.Id == default(int) ? "新建触发器" : "编辑触发器";
@@ -187,13 +187,13 @@ namespace DMS.WPF.ViewModels.Dialogs
             try
             {
                 // 使用数据存储服务中的变量列表
-                AvailableVariables = new List<VariableItemViewModel>(_dataStorageService.Variables.Select(kvp => kvp.Value));
+                AvailableVariables = new List<VariableItem>(_dataStorageService.Variables.Select(kvp => kvp.Value));
                 UpdateFilteredVariables();
             }
             catch (Exception ex)
             {
                 _notificationService.ShowError($"加载变量列表失败: {ex.Message}");
-                AvailableVariables = new List<VariableItemViewModel>();
+                AvailableVariables = new List<VariableItem>();
             }
         }
 

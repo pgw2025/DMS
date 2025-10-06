@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using DMS.Application.DTOs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 
@@ -12,7 +12,7 @@ public interface IDeviceDataService
     /// <summary>
     /// 设备列表。
     /// </summary>
-    // ObservableCollection<DeviceItemViewModel> Devices { get; set; }
+    // ObservableCollection<DeviceItem> Devices { get; set; }
 
     /// <summary>
     /// 加载所有设备数据。
@@ -27,10 +27,10 @@ public interface IDeviceDataService
     /// <summary>
     /// 删除设备。
     /// </summary>
-    Task<bool> DeleteDevice(DeviceItemViewModel device);
+    Task<bool> DeleteDevice(DeviceItem device);
 
     /// <summary>
     /// 更新设备。
     /// </summary>
-    Task<bool> UpdateDevice(DeviceItemViewModel device);
+    Task<bool> UpdateDevice(DeviceItem device);
 }

@@ -9,7 +9,7 @@ using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using Microsoft.Extensions.Logging;
 using ObservableCollections;
 using System.Collections.ObjectModel;
@@ -33,14 +33,14 @@ public partial class MqttsViewModel : ViewModelBase
     /// 设备列表。
     /// </summary>
     [ObservableProperty]
-    private INotifyCollectionChangedSynchronizedViewList<MqttServerItemViewModel> _mqttServeise;
+    private INotifyCollectionChangedSynchronizedViewList<MqttServerItem> _mqttServeise;
     
 
     /// <summary>
     /// 当前选中的MQTT服务器。
     /// </summary>
     [ObservableProperty]
-    private MqttServerItemViewModel _selectedMqtt;
+    private MqttServerItem _selectedMqtt;
 
     private readonly ILogger<MqttsViewModel> _logger;
 
@@ -69,7 +69,7 @@ public partial class MqttsViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async Task ToggleIsActive(MqttServerItemViewModel mqttServerItem)
+    public async Task ToggleIsActive(MqttServerItem mqttServerItem)
     {
         try
         {
@@ -103,7 +103,7 @@ public partial class MqttsViewModel : ViewModelBase
         try
         {
             // 1. 显示添加MQTT服务器对话框
-            MqttServerItemViewModel mqtt = await _dialogService.ShowDialogAsync(new MqttDialogViewModel()
+            MqttServerItem mqtt = await _dialogService.ShowDialogAsync(new MqttDialogViewModel()
                                                                               {
                                                                                   Title = "添加MQTT服务器",
                                                                                   PrimaryButText = "添加MQTT服务器"
@@ -173,7 +173,7 @@ public partial class MqttsViewModel : ViewModelBase
                                                               PrimaryButText = "保存修改"
                                                           };
             // 1. 显示MQTT服务器对话框
-            MqttServerItemViewModel mqtt = await _dialogService.ShowDialogAsync(mqttDialogViewModel);
+            MqttServerItem mqtt = await _dialogService.ShowDialogAsync(mqttDialogViewModel);
             // 如果用户取消或对话框未返回MQTT服务器，则直接返回
             if (mqtt == null)
             {

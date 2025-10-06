@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using DMS.Application.DTOs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 
@@ -12,6 +12,6 @@ public interface IVariableTableDataService
     Task<int> AddVariableTable(VariableTableDto variableTableDto,
                                 MenuBeanDto menuDto = null, bool isAddDb = false);
 
-    Task<bool> UpdateVariableTable(VariableTableItemViewModel variableTable);
-    Task<bool> DeleteVariableTable(VariableTableItemViewModel variableTable, bool isDeleteDb = false);
+    Task<bool> UpdateVariableTable(VariableTableItem variableTable);
+    Task<bool> DeleteVariableTable(VariableTableItem variableTable, bool isDeleteDb = false);
 }

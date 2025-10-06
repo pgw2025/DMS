@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using DMS.Application.DTOs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 
@@ -17,15 +17,15 @@ public interface ITriggerDataService
     /// <summary>
     /// 添加触发器。
     /// </summary>
-    Task<TriggerItemViewModel> AddTrigger(TriggerItemViewModel dto);
+    Task<TriggerItem> AddTrigger(TriggerItem dto);
 
     /// <summary>
     /// 删除触发器。
     /// </summary>
-    Task<bool> DeleteTrigger(TriggerItemViewModel trigger);
+    Task<bool> DeleteTrigger(TriggerItem trigger);
 
     /// <summary>
     /// 更新触发器。
     /// </summary>
-    Task<bool> UpdateTrigger(TriggerItemViewModel trigger);
+    Task<bool> UpdateTrigger(TriggerItem trigger);
 }

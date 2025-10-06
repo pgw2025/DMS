@@ -6,7 +6,7 @@ using DMS.Core.Models;
 using DMS.WPF.Helper;
 using DMS.WPF.Interfaces;
 using DMS.WPF.Services;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using DMS.WPF.Views;
 using Microsoft.Extensions.Logging;
 
@@ -36,7 +36,7 @@ public partial class MainViewModel : ViewModelBase
     /// 应用程序的菜单列表。
     /// </summary>
     [ObservableProperty]
-    private ObservableCollection<MenuItemViewModel> _menuTrees;
+    private ObservableCollection<MenuItem> _menuTrees;
 
     /// <summary>
     /// 初始化 <see cref="MainViewModel"/> 类的新实例。

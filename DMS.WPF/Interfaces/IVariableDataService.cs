@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 using DMS.Application.DTOs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 
@@ -23,17 +23,17 @@ public interface IVariableDataService
     /// <summary>
     /// 更新变量表。
     /// </summary>
-    Task<bool> UpdateVariableTable(VariableTableItemViewModel variableTable);
+    Task<bool> UpdateVariableTable(VariableTableItem variableTable);
 
     /// <summary>
     /// 删除变量表。
     /// </summary>
-    Task<bool> DeleteVariableTable(VariableTableItemViewModel variableTable, bool isDeleteDb = false);
+    Task<bool> DeleteVariableTable(VariableTableItem variableTable, bool isDeleteDb = false);
 
     /// <summary>
     /// 添加变量。
     /// </summary>
-    void AddVariable(VariableItemViewModel variableItem);
+    void AddVariable(VariableItem variableItem);
 
     /// <summary>
     /// 删除变量。

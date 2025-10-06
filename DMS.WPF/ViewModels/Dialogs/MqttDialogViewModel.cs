@@ -1,13 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.ViewModels.Dialogs;
 
-public partial class MqttDialogViewModel : DialogViewModelBase<MqttServerItemViewModel>
+public partial class MqttDialogViewModel : DialogViewModelBase<MqttServerItem>
 {
     [ObservableProperty]
-    private MqttServerItemViewModel _mqttServer;
+    private MqttServerItem _mqttServer;
 
     [ObservableProperty]
     private string _title;
@@ -17,12 +17,12 @@ public partial class MqttDialogViewModel : DialogViewModelBase<MqttServerItemVie
 
     public MqttDialogViewModel()
     {
-        MqttServer = new MqttServerItemViewModel();
+        MqttServer = new MqttServerItem();
     }
 
-    public MqttDialogViewModel(MqttServerItemViewModel mqttServer)
+    public MqttDialogViewModel(MqttServerItem mqttServer)
     {
-        MqttServer = new MqttServerItemViewModel
+        MqttServer = new MqttServerItem
         {
             Id = mqttServer.Id,
             ServerName = mqttServer.ServerName,

@@ -2,7 +2,8 @@ using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Core.Models;
 using DMS.Infrastructure.Models;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Profiles
 {
@@ -10,29 +11,29 @@ namespace DMS.WPF.Profiles
     {
         public MappingProfile()
         {
-            CreateMap<DeviceDto, DeviceItemViewModel>()
+            CreateMap<DeviceDto, DeviceItem>()
                 .ReverseMap();
-            CreateMap<Variable, VariableItemViewModel>()
+            CreateMap<Variable, VariableItem>()
                 .ReverseMap();
-            CreateMap<OpcUaNode, OpcUaNodeItemViewModel>()
+            CreateMap<OpcUaNode, OpcUaNodeItem>()
                 .ReverseMap();
-            CreateMap<VariableItemViewModel, VariableItemViewModel>();
+            CreateMap<VariableItem, VariableItem>();
             CreateMap<MqttAlias, MqttAliasItem>().ReverseMap();
                 
 
-            CreateMap<MenuBeanDto, MenuItemViewModel>()
+            CreateMap<MenuBeanDto, MenuItem>()
                 .ReverseMap();
                 
-            CreateMap<MqttServerDto, MqttServerItemViewModel>().ReverseMap();
-            CreateMap<MqttServerItemViewModel, MqttServerItemViewModel>().ReverseMap();
+            CreateMap<MqttServerDto, MqttServerItem>().ReverseMap();
+            CreateMap<MqttServerItem, MqttServerItem>().ReverseMap();
 
-            CreateMap<MqttServer, MqttServerItemViewModel>().ReverseMap();
-            CreateMap<UserDto, UserItemViewModel>().ReverseMap();
-            CreateMap<VariableHistoryDto, VariableHistoryItemViewModel>().ReverseMap();
-            CreateMap<VariableDto, VariableItemViewModel>()
+            CreateMap<MqttServer, MqttServerItem>().ReverseMap();
+            CreateMap<UserDto, UserItem>().ReverseMap();
+            CreateMap<VariableHistoryDto, VariableHistoryItem>().ReverseMap();
+            CreateMap<VariableDto, VariableItem>()
                 .ReverseMap();
-            CreateMap<VariableTableDto, VariableTableItemViewModel>().ReverseMap();
-            CreateMap<NlogDto, NlogItemViewModel>().ReverseMap();
+            CreateMap<VariableTableDto, VariableTableItem>().ReverseMap();
+            CreateMap<NlogDto, NlogItem>().ReverseMap();
         }
     }
 }

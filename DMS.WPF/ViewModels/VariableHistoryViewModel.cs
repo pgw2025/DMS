@@ -10,7 +10,7 @@ using DMS.Core.Enums;
 using DMS.Core.Events;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
@@ -60,7 +60,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     /// 选中的变量历史记录
     /// </summary>
     [ObservableProperty]
-    private VariableItemViewModel _currentVariable;
+    private VariableItem _currentVariable;
 
     /// <summary>
     /// 变量历史记录列表
@@ -179,7 +179,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
 
     public override async Task OnNavigatedToAsync(NavigationParameter parameter)
     {
-        if (_dataStorageService.Variables.TryGetValue(parameter.TargetId, out VariableItemViewModel variableItem))
+        if (_dataStorageService.Variables.TryGetValue(parameter.TargetId, out VariableItem variableItem))
         {
             CurrentVariable = variableItem;
             // 加载所有变量的历史记录

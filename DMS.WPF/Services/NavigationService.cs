@@ -1,7 +1,7 @@
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using DMS.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;

@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
 public partial class MqttAliasItem : ObservableObject
 {
@@ -20,8 +20,8 @@ public partial class MqttAliasItem : ObservableObject
     private string _alias;
     
     [ObservableProperty]
-    private MqttServerItemViewModel _mqttServer;
+    private MqttServerItem _mqttServer;
     
     [ObservableProperty]
-    private VariableItemViewModel _variable;
+    private VariableItem _variable;
 }

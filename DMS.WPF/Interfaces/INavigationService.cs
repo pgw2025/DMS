@@ -1,7 +1,7 @@
 // 文件: DMS.WPF/Services/INavigationService.cs
 
 using DMS.Core.Models;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
 

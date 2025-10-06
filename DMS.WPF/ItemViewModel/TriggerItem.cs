@@ -3,12 +3,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using DMS.Application.DTOs;
 using DMS.Core.Models.Triggers;
 
-namespace DMS.WPF.ViewModels.Items
+namespace DMS.WPF.ItemViewModel
 {
     /// <summary>
     /// 触发器项视图模型
     /// </summary>
-    public partial class TriggerItemViewModel : ObservableObject
+    public partial class TriggerItem : ObservableObject
     {
         /// <summary>
         /// 触发器唯一标识符

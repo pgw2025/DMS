@@ -10,7 +10,7 @@ using DMS.WPF.Services;
 using DMS.Services;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,10 +25,10 @@ public partial class DeviceDetailViewModel : ViewModelBase
     private readonly IWPFDataService _wpfDataService;
 
     [ObservableProperty]
-    private DeviceItemViewModel _currentDevice;
+    private DeviceItem _currentDevice;
 
     [ObservableProperty]
-    private VariableTableItemViewModel _selectedVariableTable;
+    private VariableTableItem _selectedVariableTable;
 
     [ObservableProperty]
     private bool _isBusy;
@@ -60,35 +60,35 @@ public partial class DeviceDetailViewModel : ViewModelBase
                                                                             PrimaryButText = "添加变量表"
                                                                         };
             // 1. 显示添加设备对话框
-            var variableTableItemViewModel = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
+            var VariableTableItem = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
             // 如果用户取消或对话框未返回设备，则直接返回
-            if (variableTableItemViewModel == null)
+            if (VariableTableItem == null)
             {
                 return;
             }
 
-            variableTableItemViewModel.DeviceId = CurrentDevice.Id;
+            VariableTableItem.DeviceId = CurrentDevice.Id;
             var tableMenu = new MenuBeanDto()
                             {
-                                Header = variableTableItemViewModel.Name,
+                                Header = VariableTableItem.Name,
                                 Icon = SegoeFluentIcons.DataSense.Glyph,
                                 TargetViewKey = nameof(VariableTableViewModel)
                             };
             int addVarTableId = await _wpfDataService.VariableTableDataService.AddVariableTable(
-                _mapper.Map<VariableTableDto>(variableTableItemViewModel),
+                _mapper.Map<VariableTableDto>(VariableTableItem),
                 tableMenu, true);
 
             if (addVarTableId > 0)
             {
-                variableTableItemViewModel.Id = addVarTableId;
-                variableTableItemViewModel.Device = CurrentDevice;
-                CurrentDevice.VariableTables.Add(variableTableItemViewModel);
-                _dataStorageService.VariableTables.Add(variableTableItemViewModel.Id, variableTableItemViewModel);
-                _notificationService.ShowSuccess($"添加变量表成功：{variableTableItemViewModel.Name}");
+                VariableTableItem.Id = addVarTableId;
+                VariableTableItem.Device = CurrentDevice;
+                CurrentDevice.VariableTables.Add(VariableTableItem);
+                _dataStorageService.VariableTables.Add(VariableTableItem.Id, VariableTableItem);
+                _notificationService.ShowSuccess($"添加变量表成功：{VariableTableItem.Name}");
             }
             else
             {
-                _notificationService.ShowError($"添加变量表失败：{variableTableItemViewModel.Name}！！");
+                _notificationService.ShowError($"添加变量表失败：{VariableTableItem.Name}！！");
             }
         }
         catch (Exception ex)
@@ -120,7 +120,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
                       PrimaryButText = "编辑变量表"
                   };
             // 1. 显示变量表对话框
-            VariableTableItemViewModel variableTable
+            VariableTableItem variableTable
                 = await _dialogService.ShowDialogAsync(variableTableDialogViewModel);
             // 如果用户取消或对话框未返回变量表，则直接返回
             if (variableTable == null)

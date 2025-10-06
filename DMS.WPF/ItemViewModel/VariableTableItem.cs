@@ -4,9 +4,9 @@ using DMS.Core.Enums;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace DMS.WPF.ViewModels.Items;
+namespace DMS.WPF.ItemViewModel;
 
-public partial class VariableTableItemViewModel : ObservableObject
+public partial class VariableTableItem : ObservableObject
 {
     public int Id { get; set; }
 
@@ -23,13 +23,13 @@ public partial class VariableTableItemViewModel : ObservableObject
     private int _deviceId;
     
     [ObservableProperty]
-    private DeviceItemViewModel _device;
+    private DeviceItem _device;
 
     [ObservableProperty]
     private ProtocolType _protocol;
 
     [ObservableProperty]
-    private ObservableCollection<VariableItemViewModel> _variables = new();
+    private ObservableCollection<VariableItem> _variables = new();
 
    
 }

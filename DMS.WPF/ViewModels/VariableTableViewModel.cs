@@ -11,7 +11,7 @@ using DMS.Core.Events;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
-using DMS.WPF.ViewModels.Items;
+using DMS.WPF.ItemViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using ObservableCollections;
 
@@ -36,14 +36,14 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// 通过 ObservableProperty 自动生成 VariableTable 属性和 OnVariableTableChanged 方法。
     /// </summary>
     [ObservableProperty]
-    private VariableTableItemViewModel currentVariableTable;
+    private VariableTableItem currentVariableTable;
 
     /// <summary>
     /// 当前选中的变量数据。
     /// 通过 ObservableProperty 自动生成 SelectedVariable 属性和 OnSelectedVariableDataChanged 方法。
     /// </summary>
     [ObservableProperty]
-    private VariableItemViewModel _selectedVariable;
+    private VariableItem _selectedVariable;
 
 
     [ObservableProperty]
@@ -87,9 +87,9 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     private readonly IDataStorageService _dataStorageService;
 
-    private readonly ObservableList<VariableItemViewModel> _variableItemList;
-    private readonly ISynchronizedView<VariableItemViewModel, VariableItemViewModel> _synchronizedView;
-    public NotifyCollectionChangedSynchronizedViewList<VariableItemViewModel> VariableItemListView { get; }
+    private readonly ObservableList<VariableItem> _variableItemList;
+    private readonly ISynchronizedView<VariableItem, VariableItem> _synchronizedView;
+    public NotifyCollectionChangedSynchronizedViewList<VariableItem> VariableItemListView { get; }
 
     private readonly INotificationService _notificationService;
 
@@ -111,7 +111,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
 
 
-        _variableItemList = new ObservableList<VariableItemViewModel>();
+        _variableItemList = new ObservableList<VariableItem>();
         _synchronizedView = _variableItemList.CreateView(v => v);
 
         VariableItemListView = _synchronizedView.ToNotifyCollectionChanged();
@@ -123,7 +123,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// </summary>
     /// <param name="item">要过滤的集合中的单个项。</param>
     /// <returns>如果项匹配搜索条件则为 true，否则为 false。</returns>
-    private bool FilterVariables(VariableItemViewModel item)
+    private bool FilterVariables(VariableItem item)
     {
         // 尝试将项转换为 Variable 类型
         var searchTextLower = SearchText.ToLower();
@@ -194,7 +194,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             variableDialogViewModel.PrimaryButText = "保存修改";
             variableDialogViewModel.IsAddModel = false;
             // 创建一个副本用于编辑，避免直接修改原数据
-            var variableToEdit = new VariableItemViewModel();
+            var variableToEdit = new VariableItem();
             _mapper.Map(SelectedVariable, variableToEdit);
             variableDialogViewModel.Variable = variableToEdit;
 
@@ -272,7 +272,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 var addVariableDtos = await _variableManagementService.BatchImportVariablesAsync(improtVariableDtos);
                 if (addVariableDtos is { Count: > 0 })
                 {
-                    List<VariableItemViewModel> variableItemViewModels = _mapper.Map<List<VariableItemViewModel>>(addVariableDtos);
+                    List<VariableItem> variableItemViewModels = _mapper.Map<List<VariableItem>>(addVariableDtos);
                     
                     _variableItemList.AddRange(variableItemViewModels);
                     //更新数据中心
@@ -359,7 +359,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 var addVariableDtos = await _variableManagementService.BatchImportVariablesAsync(importedVariableDtos);
                 if (addVariableDtos is { Count: > 0 })
                 {
-                    List<VariableItemViewModel> variableItemViewModels = _mapper.Map<List<VariableItemViewModel>>(addVariableDtos);
+                    List<VariableItem> variableItemViewModels = _mapper.Map<List<VariableItem>>(addVariableDtos);
                     _variableItemList.AddRange(variableItemViewModels);
                     
                     foreach (var variableItemViewModel in variableItemViewModels)
@@ -400,7 +400,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 显示添加变量数据的对话框
             VariableDialogViewModel variableDialogViewModel
                 = App.Current.Services.GetRequiredService<VariableDialogViewModel>();
-            VariableItemViewModel variableItem = new VariableItemViewModel();
+            VariableItem variableItem = new VariableItem();
             variableItem.Protocol = CurrentVariableTable.Protocol;
             variableDialogViewModel.Title = "添加变量";
             variableDialogViewModel.PrimaryButText = "添加变量";
@@ -446,7 +446,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     {
         try
         {
-            List<VariableItemViewModel> variablesToDelete = SelectedVariables.Cast<VariableItemViewModel>()
+            List<VariableItem> variablesToDelete = SelectedVariables.Cast<VariableItem>()
                                                                              .ToList();
             // 检查是否有变量被选中
             if (variablesToDelete == null || !variablesToDelete.Any())
@@ -509,7 +509,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
 
         // 获取选中的变量列表
-        var validVariables = SelectedVariables.Cast<VariableItemViewModel>()
+        var validVariables = SelectedVariables.Cast<VariableItem>()
                                               .ToList();
 
         // 显示轮询间隔选择对话框，并传入第一个变量的当前轮询间隔作为默认值
@@ -552,7 +552,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
 
         // 获取选中的变量列表
-        var validVariables = SelectedVariables.Cast<VariableItemViewModel>().ToList();
+        var validVariables = SelectedVariables.Cast<VariableItem>().ToList();
 
         // --- 对话框调用 --- 
         var viewModel = new InputDialogViewModel("修改数值转换公式", "请输入新的转换公式 (使用'x'代表变量值):", validVariables.First().ConversionFormula);
@@ -592,7 +592,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     [RelayCommand]
     public async Task AddMqttServerToVariables(IList<object> variablesToAddMqtt)
     {
-        var validVariables = variablesToAddMqtt?.OfType<VariableItemViewModel>()
+        var validVariables = variablesToAddMqtt?.OfType<VariableItem>()
                                                .ToList();
 
         // 检查是否有变量被选中
@@ -703,7 +703,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
 
         // 获取选中的变量列表
-        var validVariables = SelectedVariables.Cast<VariableItemViewModel>()
+        var validVariables = SelectedVariables.Cast<VariableItem>()
                                               .ToList();
 
         // 显示启用状态选择对话框，并传入第一个变量的当前启用状态作为默认值
@@ -771,7 +771,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     public async Task ChangeHistorySettings(IList<object> variablesToChange)
     {
         // 过滤出有效的VariableItemViewModel对象
-        var validVariables = variablesToChange?.OfType<VariableItemViewModel>()
+        var validVariables = variablesToChange?.OfType<VariableItem>()
                                               .ToList();
 
         // 检查是否有变量被选中
@@ -830,7 +830,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         }
 
         // 获取选中的变量列表
-        var validVariables = SelectedVariables.Cast<VariableItemViewModel>()
+        var validVariables = SelectedVariables.Cast<VariableItem>()
                                               .ToList();
 
         // 显示报警设置对话框，并传入第一个变量的当前报警设置作为默认值

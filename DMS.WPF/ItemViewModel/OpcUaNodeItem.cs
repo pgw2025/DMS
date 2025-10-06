@@ -3,12 +3,12 @@ using DMS.Infrastructure.Models;
 using Opc.Ua;
 using System.Collections.ObjectModel;
 
-namespace DMS.WPF.ViewModels.Items
+namespace DMS.WPF.ItemViewModel
 {
     /// <summary>
     /// OPC UA节点的视图模型。
     /// </summary>
-    public partial class OpcUaNodeItemViewModel : ObservableObject
+    public partial class OpcUaNodeItem : ObservableObject
     {
 
         [ObservableProperty]
@@ -27,10 +27,10 @@ namespace DMS.WPF.ViewModels.Items
         private string? _dataType;
 
         [ObservableProperty]
-        private OpcUaNodeItemViewModel? _parentNode;
+        private OpcUaNodeItem? _parentNode;
 
         [ObservableProperty]
-        private ObservableCollection<OpcUaNodeItemViewModel> _children = new ObservableCollection<OpcUaNodeItemViewModel>();
+        private ObservableCollection<OpcUaNodeItem> _children = new ObservableCollection<OpcUaNodeItem>();
 
         [ObservableProperty]
         private bool _isExpanded;
@@ -41,7 +41,7 @@ namespace DMS.WPF.ViewModels.Items
         /// <summary>
         /// 默认构造函数（用于设计时支持）。
         /// </summary>
-        public OpcUaNodeItemViewModel()
+        public OpcUaNodeItem()
         {
             // 设计时数据支持
            
