@@ -44,7 +44,7 @@ namespace DMS.Infrastructure.Interfaces.Services
         /// <summary>
         /// 发布变量数据到MQTT服务器
         /// </summary>
-        Task PublishVariableDataAsync(VariableMqttAlias variableMqtt, CancellationToken cancellationToken = default);
+        Task PublishVariableDataAsync(MqttAlias variableMqtt, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 发布批量变量数据到MQTT服务器

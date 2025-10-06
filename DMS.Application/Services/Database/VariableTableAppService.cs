@@ -156,7 +156,7 @@ namespace DMS.Application.Services.Database
                 await _repositoryManager.Variables.DeleteByVariableTableIdAsync(id);
 
                 // 删除关联的MQTT别名
-                // await _repositoryManager.VariableMqttAlias.DeleteByVariableTableIdAsync(id);
+                // await _repositoryManager.MqttAlias.DeleteByVariableTableIdAsync(id);
 
                 // 删除关联的菜单树
                 await _repositoryManager.Menus.DeleteMenuTreeByTargetIdAsync(MenuType.VariableTableMenu, id);

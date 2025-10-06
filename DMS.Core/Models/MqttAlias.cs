@@ -4,7 +4,7 @@ using DMS.Core.Models;
 /// 领域模型：代表一个变量到一个MQTT服务器的特定关联，包含专属别名。
 /// 这是一个关联实体，用于解决多对多关系中需要额外属性（别名）的问题。
 /// </summary>
-public class VariableMqttAlias
+public class MqttAlias
 {
     /// <summary>
     /// 唯一标识符。

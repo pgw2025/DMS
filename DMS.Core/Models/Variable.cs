@@ -57,7 +57,7 @@ public class Variable
     /// <summary>
     /// 此变量的所有MQTT发布别名关联。一个变量可以关联多个MQTT服务器，每个关联可以有独立的别名。
     /// </summary>
-    public List<VariableMqttAlias> MqttAliases { get; set; } = new();
+    public List<MqttAlias> MqttAliases { get; set; } = new();
 
     /// <summary>
     /// OPC UA NodeId (仅当 Protocol 为 OpcUa 时有效)。

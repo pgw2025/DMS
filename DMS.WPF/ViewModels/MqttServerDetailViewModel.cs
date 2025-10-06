@@ -37,7 +37,7 @@ namespace DMS.WPF.ViewModels
         /// 与当前MQTT服务器关联的变量数据集合。
         /// </summary>
         [ObservableProperty]
-        private ObservableCollection<VariableMqttAlias> _associatedVariables;
+        private ObservableCollection<MqttAlias> _associatedVariables;
 
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace DMS.WPF.ViewModels
         /// 修改变量的MQTT发送名称
         /// </summary>
         [RelayCommand]
-        private async Task ModifyAlias(VariableMqttAlias variableAlias)
+        private async Task ModifyAlias(MqttAlias variableAlias)
         {
             if (variableAlias == null)
             {

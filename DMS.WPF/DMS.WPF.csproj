@@ -182,12 +182,6 @@
 
 
   <ItemGroup>
-    <Folder Include="ViewModels\Items\" />
-  </ItemGroup>
-
-
-
-  <ItemGroup>
     <None Update="Configurations\nlog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

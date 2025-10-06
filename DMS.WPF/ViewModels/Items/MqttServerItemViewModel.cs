@@ -62,7 +62,7 @@ public partial class MqttServerItemViewModel : ObservableObject
     private string _messageFooter;
 
     [ObservableProperty]
-    private ObservableCollection<VariableMqttAliasItemViewModel> _variableAliases = new();
+    private ObservableCollection<MqttAliasItem> _variableAliases = new();
 
 
 }

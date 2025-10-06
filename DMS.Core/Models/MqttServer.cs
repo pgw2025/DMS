@@ -68,5 +68,5 @@ public class MqttServer
     /// <summary>
     /// 与此服务器关联的所有变量别名。通过此集合可以反向查找关联的变量。
     /// </summary>
-    public List<VariableMqttAlias> VariableAliases { get; set; } = new();
+    public List<MqttAlias> VariableAliases { get; set; } = new();
 }

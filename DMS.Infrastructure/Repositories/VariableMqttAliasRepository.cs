@@ -36,20 +36,20 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// </summary>
     /// <param name="id">变量与MQTT别名关联的唯一标识符。</param>
     /// <returns>对应的变量与MQTT别名关联实体，如果不存在则为null。</returns>
-    public async Task<VariableMqttAlias> GetByIdAsync(int id)
+    public async Task<MqttAlias> GetByIdAsync(int id)
     {
         var dbVariableMqttAlias = await base.GetByIdAsync(id);
-        return _mapper.Map<VariableMqttAlias>(dbVariableMqttAlias);
+        return _mapper.Map<MqttAlias>(dbVariableMqttAlias);
     }
 
     /// <summary>
     /// 异步获取所有变量与MQTT别名关联。
     /// </summary>
     /// <returns>包含所有变量与MQTT别名关联实体的列表。</returns>
-    public async Task<List<VariableMqttAlias>> GetAllAsync()
+    public async Task<List<MqttAlias>> GetAllAsync()
     {
         var dbList = await base.GetAllAsync();
-        return _mapper.Map<List<VariableMqttAlias>>(dbList);
+        return _mapper.Map<List<MqttAlias>>(dbList);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// </summary>
     /// <param name="entity">要添加的变量与MQTT别名关联实体。</param>
     /// <returns>添加成功后的变量与MQTT别名关联实体（包含数据库生成的ID等信息）。</returns>
-    public async Task<VariableMqttAlias> AddAsync(VariableMqttAlias entity)
+    public async Task<MqttAlias> AddAsync(MqttAlias entity)
     {
         var dbVariableMqttAlias = await base.AddAsync(_mapper.Map<DbVariableMqttAlias>(entity));
         return _mapper.Map(dbVariableMqttAlias, entity);
@@ -68,14 +68,14 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// </summary>
     /// <param name="entity">要更新的变量与MQTT别名关联实体。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> UpdateAsync(VariableMqttAlias entity) => await base.UpdateAsync(_mapper.Map<DbVariableMqttAlias>(entity));
+    public async Task<int> UpdateAsync(MqttAlias entity) => await base.UpdateAsync(_mapper.Map<DbVariableMqttAlias>(entity));
 
     /// <summary>
     /// 异步删除变量与MQTT别名关联。
     /// </summary>
     /// <param name="entity">要删除的变量与MQTT别名关联实体。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> DeleteAsync(VariableMqttAlias entity) => await base.DeleteAsync(_mapper.Map<DbVariableMqttAlias>(entity));
+    public async Task<int> DeleteAsync(MqttAlias entity) => await base.DeleteAsync(_mapper.Map<DbVariableMqttAlias>(entity));
     
     /// <summary>
     /// 异步根据ID删除变量与MQTT别名关联。
@@ -98,24 +98,24 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// </summary>
     /// <param name="number">要获取的变量与MQTT别名关联数量。</param>
     /// <returns>包含指定数量变量与MQTT别名关联实体的列表。</returns>
-    public new async Task<List<VariableMqttAlias>> TakeAsync(int number)
+    public new async Task<List<MqttAlias>> TakeAsync(int number)
     {
         var dbList = await base.TakeAsync(number);
-        return _mapper.Map<List<VariableMqttAlias>>(dbList);
+        return _mapper.Map<List<MqttAlias>>(dbList);
 
     }
 
-    public async Task<List<VariableMqttAlias>> AddBatchAsync(List<VariableMqttAlias> entities)
+    public async Task<List<MqttAlias>> AddBatchAsync(List<MqttAlias> entities)
     {
         var dbEntities = _mapper.Map<List<DbVariableMqttAlias>>(entities);
         var addedEntities = await base.AddBatchAsync(dbEntities);
-        return _mapper.Map<List<VariableMqttAlias>>(addedEntities);
+        return _mapper.Map<List<MqttAlias>>(addedEntities);
     }
 
     /// <summary>
     /// 异步获取指定变量的所有MQTT别名关联。
     /// </summary>
-    public async Task<List<VariableMqttAlias>> GetAliasesForVariableAsync(int variableId)
+    public async Task<List<MqttAlias>> GetAliasesForVariableAsync(int variableId)
     {
         // 查询别名关联，并包含关联的Variable和MqttServer信息
         var dbList = await _dbContext.GetInstance().Queryable<DbVariableMqttAlias>()
@@ -139,7 +139,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
         var mqttServerDict = mqttServers.ToDictionary(m => m.Id, m => _mapper.Map<MqttServer>(m));
         
         // 映射主实体并设置导航属性
-        var result = _mapper.Map<List<VariableMqttAlias>>(dbList);
+        var result = _mapper.Map<List<MqttAlias>>(dbList);
         foreach (var alias in result)
         {
             if (variableDict.TryGetValue(alias.VariableId, out var variable))
@@ -159,7 +159,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// <summary>
     /// 异步根据变量和服务器获取别名关联。
     /// </summary>
-    public async Task<VariableMqttAlias> GetByVariableAndServerAsync(int variableId, int mqttServerId)
+    public async Task<MqttAlias> GetByVariableAndServerAsync(int variableId, int mqttServerId)
     {
         var dbAlias = await _dbContext.GetInstance().Queryable<DbVariableMqttAlias>()
             .Where(x => x.VariableId == variableId && x.MqttServerId == mqttServerId)
@@ -178,7 +178,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
             .FirstAsync();
             
         // 映射主实体并设置导航属性
-        var result = _mapper.Map<VariableMqttAlias>(dbAlias);
+        var result = _mapper.Map<MqttAlias>(dbAlias);
         result.Variable = _mapper.Map<Variable>(variable);
         result.MqttServer = _mapper.Map<MqttServer>(mqttServer);
         

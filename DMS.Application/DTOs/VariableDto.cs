@@ -17,7 +17,7 @@ public class VariableDto
     public double NumericValue { get; set; }
     public string DisplayValue { get; set; }
     public VariableTableDto? VariableTable { get; set; }
-    public List<VariableMqttAlias>? MqttAliases { get; set; } = new List<VariableMqttAlias>();
+    public List<MqttAlias>? MqttAliases { get; set; } = new List<MqttAlias>();
     public SignalType SignalType { get; set; }
     public int PollingInterval { get; set; }
     public bool IsActive { get; set; }

@@ -27,5 +27,5 @@ public class MqttServerDto
     public string MessageHeader { get; set; }
     public string MessageContent { get; set; }
     public string MessageFooter { get; set; }
-    public List<VariableMqttAlias> VariableAliases { get; set; } = new();
+    public List<MqttAlias> VariableAliases { get; set; } = new();
 }

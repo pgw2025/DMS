@@ -12,7 +12,7 @@ public interface IMqttAliasAppService
     /// <summary>
     /// 异步获取指定变量的所有MQTT别名关联。
     /// </summary>
-    Task<List<VariableMqttAlias>> GetAliasesForVariableAsync(int variableId);
+    Task<List<MqttAlias>> GetAliasesForVariableAsync(int variableId);
 
     /// <summary>
     /// 异步为变量分配或更新一个MQTT别名。

@@ -115,7 +115,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// <summary>
         /// 发布变量数据到MQTT服务器
         /// </summary>
-        public async Task PublishVariableDataAsync(VariableMqttAlias variableMqtt, CancellationToken cancellationToken = default)
+        public async Task PublishVariableDataAsync(MqttAlias variableMqtt, CancellationToken cancellationToken = default)
         {
             await _mqttServiceManager.PublishVariableDataAsync(variableMqtt, cancellationToken);
         }

@@ -3,7 +3,7 @@ using DMS.Application.DTOs;
 
 namespace DMS.WPF.ViewModels.Items;
 
-public partial class VariableMqttAliasItemViewModel : ObservableObject
+public partial class MqttAliasItem : ObservableObject
 {
     public int Id { get; set; }
 

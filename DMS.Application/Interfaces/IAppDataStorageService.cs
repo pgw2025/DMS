@@ -44,7 +44,7 @@ public interface IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有MQTT变量别名的数据
     /// </summary>
-    ConcurrentDictionary<int, VariableMqttAlias> VariableMqttAliases { get; }
+    ConcurrentDictionary<int, MqttAlias> VariableMqttAliases { get; }
     
     /// <summary>
     /// 安全字典，用于存储所有触发器定义数据

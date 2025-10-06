@@ -13,10 +13,10 @@ namespace DMS.WPF.ViewModels.Dialogs
     /// <summary>
     /// MQTT别名批量编辑对话框的视图模型
     /// </summary>
-    public partial class MqttAliasBatchEditDialogViewModel : DialogViewModelBase<List<VariableMqttAliasItemViewModel>>
+    public partial class MqttAliasBatchEditDialogViewModel : DialogViewModelBase<List<MqttAliasItem>>
     {
         [ObservableProperty]
-        private ObservableCollection<VariableMqttAliasItemViewModel> _variableMqttAliases = new();
+        private ObservableCollection<MqttAliasItem> _variableMqttAliases = new();
 
         [ObservableProperty]
         private MqttServerItemViewModel _selectedMqttServer;
@@ -41,7 +41,7 @@ namespace DMS.WPF.ViewModels.Dialogs
                 // 检查该变量是否已经有针对此MQTT服务器的别名
                 var existingAlias = variable.MqttAliases?.FirstOrDefault(ma => ma.MqttServerId == SelectedMqttServer.Id);
 
-                var variableMqttAlias = new VariableMqttAliasItemViewModel
+                var variableMqttAlias = new MqttAliasItem
                 {
                     VariableId = variable.Id,
                     MqttServerId = SelectedMqttServer.Id,

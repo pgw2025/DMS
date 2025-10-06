@@ -29,7 +29,7 @@ public class MqttAliasAppService : IMqttAliasAppService
     /// <summary>
     /// 异步获取指定变量的所有MQTT别名关联。
     /// </summary>
-    public async Task<List<VariableMqttAlias>> GetAliasesForVariableAsync(int variableId)
+    public async Task<List<MqttAlias>> GetAliasesForVariableAsync(int variableId)
     {
         // 从仓储获取别名，并确保加载了关联的MqttServer信息
         var aliases = await _repoManager.VariableMqttAliases.GetAliasesForVariableAsync(variableId);
@@ -61,7 +61,7 @@ public class MqttAliasAppService : IMqttAliasAppService
                 var variable = await _repoManager.Variables.GetByIdAsync(variableId);
                 var mqttServer = await _repoManager.MqttServers.GetByIdAsync(mqttServerId);
                 
-                var newAlias = new VariableMqttAlias
+                var newAlias = new MqttAlias
                 {
                     VariableId = variableId,
                     MqttServerId = mqttServerId,

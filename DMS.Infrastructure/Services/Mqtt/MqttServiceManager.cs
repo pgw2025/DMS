@@ -94,7 +94,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// <summary>
         /// 更新MQTT服务器变量别名
         /// </summary>
-        public void UpdateVariableMqttAliases(int mqttServerId, List<VariableMqttAlias> variableMqttAliases)
+        public void UpdateVariableMqttAliases(int mqttServerId, List<MqttAlias> variableMqttAliases)
         {
             if (_mqttContexts.TryGetValue(mqttServerId, out var context))
             {
@@ -232,7 +232,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// <summary>
         /// 发布变量数据到MQTT服务器
         /// </summary>
-        public async Task PublishVariableDataAsync(VariableMqttAlias variableMqtt, CancellationToken cancellationToken = default)
+        public async Task PublishVariableDataAsync(MqttAlias variableMqtt, CancellationToken cancellationToken = default)
         {
             if (variableMqtt?.MqttServer == null || variableMqtt.Variable == null)
             {
@@ -269,7 +269,7 @@ namespace DMS.Infrastructure.Services.Mqtt
             }
         }
 
-        private string BuildSendMessage(VariableMqttAlias variableMqtt)
+        private string BuildSendMessage(MqttAlias variableMqtt)
         {
             StringBuilder sb = new StringBuilder();
             var now = DateTime.Now;

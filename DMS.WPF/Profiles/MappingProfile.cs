@@ -17,7 +17,7 @@ namespace DMS.WPF.Profiles
             CreateMap<OpcUaNode, OpcUaNodeItemViewModel>()
                 .ReverseMap();
             CreateMap<VariableItemViewModel, VariableItemViewModel>();
-            CreateMap<VariableMqttAlias, VariableMqttAliasItemViewModel>().ReverseMap();
+            CreateMap<MqttAlias, MqttAliasItem>().ReverseMap();
                 
 
             CreateMap<MenuBeanDto, MenuItemViewModel>()

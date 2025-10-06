@@ -25,7 +25,7 @@ namespace DMS.Core.Interfaces.Services
         /// <summary>
         /// 更新MQTT服务器变量别名
         /// </summary>
-        void UpdateVariableMqttAliases(int mqttServerId, List<VariableMqttAlias> variableMqttAliases);
+        void UpdateVariableMqttAliases(int mqttServerId, List<MqttAlias> variableMqttAliases);
 
         /// <summary>
         /// 获取MQTT服务器连接状态
@@ -55,7 +55,7 @@ namespace DMS.Core.Interfaces.Services
         /// <summary>
         /// 发布变量数据到MQTT服务器
         /// </summary>
-        Task PublishVariableDataAsync(VariableMqttAlias variableMqtt, CancellationToken cancellationToken = default);
+        Task PublishVariableDataAsync(MqttAlias variableMqtt, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 发布批量变量数据到MQTT服务器

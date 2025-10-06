@@ -653,7 +653,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 if (existingVariableMqtt == null)
                 {
                     // 如果不存在，则添加新的关联
-                    var variableMqtt = new VariableMqttAliasItemViewModel
+                    var variableMqtt = new MqttAliasItem
                                        {
                                            VariableId = originalVariable.Id,
                                            MqttServerId = selectedMqtt.Id,
