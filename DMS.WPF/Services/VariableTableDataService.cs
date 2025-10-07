@@ -3,6 +3,7 @@ using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ItemViewModel;
 
@@ -38,17 +39,17 @@ public class VariableTableDataService : IVariableTableDataService
         }
     }
 
-    public async Task<int> AddVariableTable(VariableTableDto variableTableDto,
+    public async Task<int> AddVariableTable(VariableTable variableTable,
                                              MenuBeanDto menuDto = null, bool isAddDb = false)
     {
-        if (variableTableDto == null)
+        if (variableTable == null)
             return 0;
 
         if (isAddDb && menuDto != null)
         {
             CreateVariableTableWithMenuDto createDto = new CreateVariableTableWithMenuDto();
-            createDto.VariableTable = variableTableDto;
-            createDto.DeviceId = variableTableDto.DeviceId;
+            createDto.VariableTable = variableTable;
+            createDto.DeviceId = variableTable.DeviceId;
             createDto.Menu = menuDto;
             var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
             
@@ -69,8 +70,8 @@ public class VariableTableDataService : IVariableTableDataService
             return false;
         }
 
-        var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
-        if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTableDto) > 0)
+        var variableTable_mapped = _mapper.Map<VariableTable>(variableTable);
+        if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTable_mapped) > 0)
         {
             // 更新数据库后会自动更新内存，无需额外操作
 

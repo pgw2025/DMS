@@ -1,5 +1,6 @@
 using DMS.Application.DTOs;
 using DMS.Core.Events;
+using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces
 {
@@ -10,7 +11,7 @@ namespace DMS.Application.Interfaces
         /// </summary>
         /// <param name="variable">变量DTO</param>
         /// <returns>是否触发报警</returns>
-        bool CheckAlarm(VariableDto variable);
+        bool CheckAlarm(Variable variable);
         
         /// <summary>
         /// 警报事件

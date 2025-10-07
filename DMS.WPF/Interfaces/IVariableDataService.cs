@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Interfaces;
@@ -18,7 +19,7 @@ public interface IVariableDataService
     /// <summary>
     /// 添加变量表。
     /// </summary>
-    Task<bool> AddVariableTableToView(VariableTableDto tableDto);
+    Task<bool> AddVariableTableToView(VariableTable tableDto);
 
     /// <summary>
     /// 更新变量表。

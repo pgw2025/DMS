@@ -33,20 +33,19 @@ public class DeviceAppService : IDeviceAppService
     /// </summary>
     /// <param name="id">设备ID。</param>
     /// <returns>设备数据传输对象。</returns>
-    public async Task<DeviceDto> GetDeviceByIdAsync(int id)
-    {
+            public async Task<Device> GetDeviceByIdAsync(int id)    {
         var device = await _repoManager.Devices.GetByIdAsync(id);
-        return _mapper.Map<DeviceDto>(device);
+        return device;
     }
 
     /// <summary>
     /// 异步获取所有设备数据传输对象列表。
     /// </summary>
     /// <returns>设备数据传输对象列表。</returns>
-    public async Task<List<DeviceDto>> GetAllDevicesAsync()
+    public async Task<List<Device>> GetAllDevicesAsync()
     {
         var devices = await _repoManager.Devices.GetAllAsync();
-        return _mapper.Map<List<DeviceDto>>(devices);
+        return devices;
     }
 
     /// <summary>
@@ -62,8 +61,7 @@ public class DeviceAppService : IDeviceAppService
         {
             await _repoManager.BeginTranAsync();
 
-            var device = _mapper.Map<Device>(dto.Device);
-            var addDevice = await _repoManager.Devices.AddAsync(device);
+            var addDevice = await _repoManager.Devices.AddAsync(dto.Device);
             if (addDevice == null || addDevice.Id == 0)
             {
                 throw new InvalidOperationException($"添加设备失败：{addDevice}");
@@ -92,12 +90,12 @@ public class DeviceAppService : IDeviceAppService
             if (dto.VariableTable != null)
             {
                 var variableTable = _mapper.Map<VariableTable>(dto.VariableTable);
-                variableTable.DeviceId = device.Id; // 关联新设备ID
-                variableTable.Protocol = device.Protocol;
+                variableTable.DeviceId = dto.Device.Id; // 关联新设备ID
+                variableTable.Protocol = dto.Device.Protocol;
                 var addVariableTable = await _repoManager.VariableTables.AddAsync(variableTable);
                 if (addVariableTable == null || addVariableTable.Id == 0)
                 {
-                    throw new InvalidOperationException($"添加设备变量表失败,设备：{device.Name},变量表：{variableTable.Name}");
+                    throw new InvalidOperationException($"添加设备变量表失败,设备：{dto.Device.Name},变量表：{variableTable.Name}");
                 }
                  _mapper.Map(addVariableTable,dto.VariableTable);
                 dto.VariableTable.Device = dto.Device;
@@ -134,21 +132,21 @@ public class DeviceAppService : IDeviceAppService
     /// <summary>
     /// 异步更新一个已存在的设备。
     /// </summary>
-    /// <param name="deviceDto">要更新的设备数据传输对象。</param>
+    /// <param name="device">要更新的设备。</param>
     /// <returns>受影响的行数。</returns>
     /// <exception cref="ApplicationException">如果找不到设备。</exception>
-    public async Task<int> UpdateDeviceAsync(DeviceDto deviceDto)
+    public async Task<int> UpdateDeviceAsync(Device device)
     {
         await _repoManager.BeginTranAsync();
-        var device = await _repoManager.Devices.GetByIdAsync(deviceDto.Id);
-        if (device == null)
+        var existingDevice = await _repoManager.Devices.GetByIdAsync(device.Id);
+        if (existingDevice == null)
         {
-            throw new ApplicationException($"Device with ID {deviceDto.Id} not found.");
+            throw new ApplicationException($"Device with ID {device.Id} not found.");
         }
 
-        _mapper.Map(deviceDto, device);
-        int res=await _repoManager.Devices.UpdateAsync(device);
-        var menu=await _repoManager.Menus.GetMenuByTargetIdAsync(MenuType.DeviceMenu, deviceDto.Id);
+        _mapper.Map(device, existingDevice);
+        int res=await _repoManager.Devices.UpdateAsync(existingDevice);
+        var menu=await _repoManager.Menus.GetMenuByTargetIdAsync(MenuType.DeviceMenu, device.Id);
         if (menu != null)
         {
             menu.Header = device.Name;
@@ -230,9 +228,9 @@ public class DeviceAppService : IDeviceAppService
     /// </summary>
     /// <param name="protocol">协议类型。</param>
     /// <returns>设备数据传输对象列表。</returns>
-    public async Task<List<DeviceDto>> GetDevicesByProtocolAsync(ProtocolType protocol)
+    public async Task<List<Device>> GetDevicesByProtocolAsync(ProtocolType protocol)
     {
         var devices = await _repoManager.Devices.GetAllAsync();
-        return _mapper.Map<List<DeviceDto>>(devices);
+        return devices;
     }
 }

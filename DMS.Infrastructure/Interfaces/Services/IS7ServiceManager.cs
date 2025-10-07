@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DMS.Application.DTOs;
+using DMS.Core.Models;
 using DMS.Infrastructure.Services;
 using DMS.Infrastructure.Services.S7;
 
@@ -21,7 +21,7 @@ namespace DMS.Infrastructure.Interfaces.Services
         /// <summary>
         /// 添加设备到监控列表
         /// </summary>
-        void AddDevice(DeviceDto device);
+        void AddDevice(DMS.Core.Models.Device device);
 
         /// <summary>
         /// 移除设备监控
@@ -31,7 +31,7 @@ namespace DMS.Infrastructure.Interfaces.Services
         /// <summary>
         /// 更新设备变量
         /// </summary>
-        void UpdateVariables(int deviceId, List<VariableDto> variables);
+        void UpdateVariables(int deviceId, List<Variable> variables);
 
         /// <summary>
         /// 获取设备连接状态

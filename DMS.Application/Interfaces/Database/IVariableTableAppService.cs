@@ -1,13 +1,15 @@
+
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces.Database
 {
     public interface IVariableTableAppService
     {
-        Task<VariableTableDto> GetVariableTableByIdAsync(int id);
-        Task<List<VariableTableDto>> GetAllVariableTablesAsync();
+        Task<VariableTable> GetVariableTableByIdAsync(int id);
+        Task<List<VariableTable>> GetAllVariableTablesAsync();
         Task<CreateVariableTableWithMenuDto> CreateVariableTableAsync(CreateVariableTableWithMenuDto createDto);
-        Task<int> UpdateVariableTableAsync(VariableTableDto variableTableDto);
+        Task<int> UpdateVariableTableAsync(VariableTable variableTableDto);
         Task<bool> DeleteVariableTableAsync(int id);
     }
 }

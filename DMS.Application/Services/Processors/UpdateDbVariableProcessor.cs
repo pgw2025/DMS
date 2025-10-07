@@ -17,7 +17,7 @@ public class UpdateDbVariableProcessor : IVariableProcessor, IDisposable
     private const int BATCH_SIZE = 50; // 批量更新的阈值
     private const int TIMER_INTERVAL_MS = 30 * 1000; // 30秒
 
-    private readonly ConcurrentQueue<VariableDto> _queue = new();
+    private readonly ConcurrentQueue<Variable> _queue = new();
     private readonly Timer _timer;
     private readonly IRepositoryManager _repositoryManager;
     private readonly ILogger<UpdateDbVariableProcessor> _logger;
@@ -52,7 +52,7 @@ public class UpdateDbVariableProcessor : IVariableProcessor, IDisposable
         // 停止定时器，防止在写入过程中再次触发
         _timer.Change(Timeout.Infinite, Timeout.Infinite);
 
-        var itemsToProcess = new List<VariableDto>();
+        var itemsToProcess = new List<Variable>();
         while (_queue.TryDequeue(out var item))
         {
             itemsToProcess.Add(item);

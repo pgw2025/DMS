@@ -246,7 +246,7 @@ namespace DMS.Infrastructure.Services.S7
                             variable.UpdatedAt = DateTime.Now;
 
                             // 创建VariableDto对象
-                            var variableDto = new VariableDto
+                            var variableDto = new Variable
                             {
                                 Id = variable.Id,
                                 Name = variable.Name,

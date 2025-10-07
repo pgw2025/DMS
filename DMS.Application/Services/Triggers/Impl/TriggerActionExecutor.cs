@@ -93,7 +93,7 @@ namespace DMS.Application.Services.Triggers.Impl
 
             // Simple token replacement - in practice, use a templating engine like Scriban, RazorLight etc.
             // Note: This assumes context.Variable and context.CurrentValue have Name properties/values.
-            // You might need to adjust the token names and values based on your actual VariableDto structure.
+            // You might need to adjust the token names and values based on your actual Variable structure.
             var subject = subjectTemplate
                 .Replace("{VariableName}", context.Variable?.Name ?? "Unknown")
                 .Replace("{CurrentValue}", context.CurrentValue?.ToString() ?? "N/A")

@@ -33,20 +33,20 @@ namespace DMS.Application.Services.Database
         /// </summary>
         /// <param name="id">变量表ID。</param>
         /// <returns>变量表数据传输对象。</returns>
-        public async Task<VariableTableDto> GetVariableTableByIdAsync(int id)
+        public async Task<VariableTable> GetVariableTableByIdAsync(int id)
         {
             var variableTable = await _repositoryManager.VariableTables.GetByIdAsync(id);
-            return _mapper.Map<VariableTableDto>(variableTable);
+            return _mapper.Map<VariableTable>(variableTable);
         }
 
         /// <summary>
         /// 异步获取所有变量表。
         /// </summary>
         /// <returns>变量表数据传输对象列表。</returns>
-        public async Task<List<VariableTableDto>> GetAllVariableTablesAsync()
+        public async Task<List<VariableTable>> GetAllVariableTablesAsync()
         {
             var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-            return _mapper.Map<List<VariableTableDto>>(variableTables);
+            return _mapper.Map<List<VariableTable>>(variableTables);
         }
 
         /// <summary>
@@ -107,10 +107,10 @@ namespace DMS.Application.Services.Database
         /// <summary>
         /// 异步更新变量表。
         /// </summary>
-        /// <param name="variableTableDto">要更新的变量表数据传输对象。</param>
+        /// <param name="variableTable">要更新的变量表数据传输对象。</param>
         /// <returns>受影响的行数。</returns>
         /// <exception cref="ApplicationException">如果找不到变量表。</exception>
-        public async Task<int> UpdateVariableTableAsync(VariableTableDto variableTableDto)
+        public async Task<int> UpdateVariableTableAsync(VariableTable variableTableDto)
         {
             try
             {

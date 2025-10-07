@@ -1,5 +1,6 @@
 using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Events
 {
@@ -11,7 +12,7 @@ namespace DMS.Application.Events
         /// <summary>
         /// 导入的变量列表
         /// </summary>
-        public List<VariableDto> Variables { get; }
+        public List<Variable> Variables { get; }
 
         /// <summary>
         /// 导入的变量数量
@@ -27,9 +28,9 @@ namespace DMS.Application.Events
         /// 构造函数
         /// </summary>
         /// <param name="variables">导入的变量列表</param>
-        public BatchImportVariablesEventArgs(List<VariableDto> variables)
+        public BatchImportVariablesEventArgs(List<Variable> variables)
         {
-            Variables = variables ?? new List<VariableDto>();
+            Variables = variables ?? new List<Variable>();
             Count = Variables.Count;
             ChangeTime = DateTime.Now;
         }

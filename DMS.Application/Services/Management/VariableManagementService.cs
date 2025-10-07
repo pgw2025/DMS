@@ -6,6 +6,7 @@ using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces.Management;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Services.Management;
 
@@ -37,7 +38,7 @@ public class VariableManagementService : IVariableManagementService
     /// <summary>
     /// 异步根据ID获取变量DTO。
     /// </summary>
-    public async Task<VariableDto> GetVariableByIdAsync(int id)
+    public async Task<Variable> GetVariableByIdAsync(int id)
     {
         return await _variableAppService.GetVariableByIdAsync(id);
     }
@@ -45,7 +46,7 @@ public class VariableManagementService : IVariableManagementService
     /// <summary>
     /// 异步获取所有变量DTO列表。
     /// </summary>
-    public async Task<List<VariableDto>> GetAllVariablesAsync()
+    public async Task<List<Variable>> GetAllVariablesAsync()
     {
         return await _variableAppService.GetAllVariablesAsync();
     }
@@ -53,18 +54,16 @@ public class VariableManagementService : IVariableManagementService
     /// <summary>
     /// 异步创建一个新变量。
     /// </summary>
-    public async Task<VariableDto> CreateVariableAsync(VariableDto variableDto)
+    public async Task<Variable> CreateVariableAsync(Variable variable)
     {
-        var result = await _variableAppService.CreateVariableAsync(variableDto);
+        var result = await _variableAppService.CreateVariableAsync(variable);
         
         // 创建成功后，将变量添加到内存中
         if (result != null)
         {
-            VariableTableDto variableTableDto = null;
             if (_appDataStorageService.VariableTables.TryGetValue(result.VariableTableId, out var variableTable))
             {
-                variableTableDto = variableTable;
-                result.VariableTable = variableTableDto;
+                result.VariableTable = variableTable;
                 variableTable.Variables.Add(result);
             }
 
@@ -81,51 +80,51 @@ public class VariableManagementService : IVariableManagementService
     /// <summary>
     /// 异步更新一个已存在的变量。
     /// </summary>
-    public async Task<int> UpdateVariableAsync(VariableDto variableDto)
+    public async Task<int> UpdateVariableAsync(Variable variable)
     {
-        return await UpdateVariablesAsync(new List<VariableDto>() { variableDto});
+        return await UpdateVariablesAsync(new List<Variable>() { variable});
     }
 
     /// <summary>
     /// 异步批量更新变量。
     /// </summary>
-    public async Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos)
+    public async Task<int> UpdateVariablesAsync(List<Variable> variables)
     {
-        var result = await _variableAppService.UpdateVariablesAsync(variableDtos);
+        var result = await _variableAppService.UpdateVariablesAsync(variables);
         
         // 批量更新成功后，更新内存中的变量
-        if (result > 0 && variableDtos != null)
+        if (result > 0 && variables != null)
         {
-            foreach (var variableDto in variableDtos)
+            foreach (var variable in variables)
             {
-                if (_appDataStorageService.Variables.TryGetValue(variableDto.Id, out var mVariableDto))
+                if (_appDataStorageService.Variables.TryGetValue(variable.Id, out var mVariable))
                 {
                     // 比较旧值和新值，确定哪个属性发生了变化
-                    var changedProperties = GetChangedProperties(mVariableDto, variableDto);
+                    var changedProperties = GetChangedProperties(mVariable, variable);
                     
                     // 更新内存中的变量
-                    _mapper.Map(variableDto,mVariableDto);
+                    _mapper.Map(variable, mVariable);
 
                     // 为每个发生变化的属性触发事件
                     foreach (var property in changedProperties)
                     {
                         _eventService.RaiseVariableChanged(
-                            this, new VariableChangedEventArgs(ActionChangeType.Updated, variableDto, property));
+                            this, new VariableChangedEventArgs(ActionChangeType.Updated, variable, property));
                     }
                     
                     // 如果没有任何属性发生变化，至少触发一次更新事件
                     if (changedProperties.Count == 0)
                     {
                         _eventService.RaiseVariableChanged(
-                            this, new VariableChangedEventArgs(ActionChangeType.Updated, variableDto, VariablePropertyType.All));
+                            this, new VariableChangedEventArgs(ActionChangeType.Updated, variable, VariablePropertyType.All));
                     }
                 }
                 else
                 {
                     // 如果内存中不存在该变量，则直接添加
-                    _appDataStorageService.Variables.TryAdd(variableDto.Id, variableDto);
+                    _appDataStorageService.Variables.TryAdd(variable.Id, variable);
                     _eventService.RaiseVariableChanged(
-                        this, new VariableChangedEventArgs(ActionChangeType.Added, variableDto, VariablePropertyType.All));
+                        this, new VariableChangedEventArgs(ActionChangeType.Added, variable, VariablePropertyType.All));
                 }
             }
         }
@@ -138,23 +137,21 @@ public class VariableManagementService : IVariableManagementService
     /// </summary>
     public async Task<bool> DeleteVariableAsync(int id)
     {
-        var variable = await _variableAppService.GetVariableByIdAsync(id); // 获取变量信息用于内存删除
         var result = await _variableAppService.DeleteVariableAsync(id);
         
         // 删除成功后，从内存中移除变量
-        if (result && variable != null)
+        if (result)
         {
-            if (_appDataStorageService.Variables.TryRemove(id, out var variableDto))
+            if (_appDataStorageService.Variables.TryRemove(id, out var variable))
             {
-                VariableTableDto variableTableDto = null;
-                if (variableDto != null && _appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                if (variable != null && _appDataStorageService.VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
                 {
-                    variableTableDto = variableTable;
-                    variableTable.Variables.Remove(variableDto);
+                    variableTable.Variables.Remove(variable);
+                   
                 }
 
                 _eventService.RaiseVariableChanged(
-                    this, new VariableChangedEventArgs(ActionChangeType.Deleted, variableDto));
+                   this, new VariableChangedEventArgs(ActionChangeType.Deleted, variable));
             }
         }
         
@@ -164,14 +161,14 @@ public class VariableManagementService : IVariableManagementService
     /// <summary>
     /// 异步批量导入变量。
     /// </summary>
-    public async Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables)
+    public async Task<List<Variable>> BatchImportVariablesAsync(List<Variable> variables)
     {
         var result = await _variableAppService.BatchImportVariablesAsync(variables);
-        foreach (var variableDto in result)
+        foreach (var variable in result)
         {
-            if (_appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId ,out var variableTable))
+            if (_appDataStorageService.VariableTables.TryGetValue(variable.VariableTableId ,out var variableTable))
             {
-                variableDto.VariableTable = variableTable;
+                variable.VariableTable = variableTable;
             }
             
         }
@@ -186,7 +183,7 @@ public class VariableManagementService : IVariableManagementService
         return result;
     }
 
-    public async Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck)
+    public async Task<List<Variable>> FindExistingVariablesAsync(IEnumerable<Variable> variablesToCheck)
     {
         return await _variableAppService.FindExistingVariablesAsync(variablesToCheck);
     }
@@ -197,7 +194,7 @@ public class VariableManagementService : IVariableManagementService
     /// <param name="oldVariable">旧变量值</param>
     /// <param name="newVariable">新变量值</param>
     /// <returns>发生变化的属性列表</returns>
-    private List<VariablePropertyType> GetChangedProperties(VariableDto oldVariable, VariableDto newVariable)
+    private List<VariablePropertyType> GetChangedProperties(Variable oldVariable, Variable newVariable)
     {
         var changedProperties = new List<VariablePropertyType>();
 
@@ -261,17 +258,15 @@ public class VariableManagementService : IVariableManagementService
         {
             foreach (var id in ids)
             {
-                if (_appDataStorageService.Variables.TryRemove(id, out var variableDto))
+                if (_appDataStorageService.Variables.TryRemove(id, out var variable))
                 {
-                    VariableTableDto variableTableDto = null;
-                    if (variableDto != null && _appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId, out var variableTable))
+                    if (variable != null && _appDataStorageService.VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
                     {
-                        variableTableDto = variableTable;
-                        variableTable.Variables.Remove(variableDto);
+                        variableTable.Variables.Remove(variable);
                     }
 
                     _eventService.RaiseVariableChanged(
-                        this, new VariableChangedEventArgs(ActionChangeType.Deleted, variableDto));
+                        this, new VariableChangedEventArgs(ActionChangeType.Deleted, variable));
                 }
             }
         }

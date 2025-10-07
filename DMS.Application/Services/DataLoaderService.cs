@@ -131,7 +131,7 @@ public class DataLoaderService : IDataLoaderService
     {
         _appDataStorageService.Devices.Clear();
         var devices = await _repositoryManager.Devices.GetAllAsync();
-        var devicesDtos = _mapper.Map<List<DeviceDto>>(devices);
+        var devicesDtos = _mapper.Map<List<Device>>(devices);
 
         // 建立设备与变量表的关联
         foreach (var deviceDto in devicesDtos)
@@ -148,7 +148,7 @@ public class DataLoaderService : IDataLoaderService
     {
         _appDataStorageService.VariableTables.Clear();
         var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-        var variableTableDtos = _mapper.Map<List<VariableTableDto>>(variableTables);
+        var variableTableDtos = _mapper.Map<List<VariableTable>>(variableTables);
         // 建立变量表与变量的关联
         foreach (var variableTableDto in variableTableDtos)
         {
@@ -171,7 +171,7 @@ public class DataLoaderService : IDataLoaderService
         _appDataStorageService.Variables.Clear();
 
         var variables = await _repositoryManager.Variables.GetAllAsync();
-        var variableDtos = _mapper.Map<List<VariableDto>>(variables);
+        var variableDtos = _mapper.Map<List<Variable>>(variables);
         // 将变量添加到安全字典
         foreach (var variableDto in variableDtos)
         {

@@ -4,6 +4,7 @@ using DMS.Core.Enums;
 using System;
 using System.Collections.Generic;
 using DMS.Application.Configurations;
+using DMS.Core.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DMS.WPF.ItemViewModel;
@@ -98,7 +99,7 @@ public partial class VariableItem : ObservableObject
     /// 用于在界面上显示变量表的关联信息。
     /// </summary>
     [ObservableProperty]
-    private VariableTableDto? _variableTable;
+    private VariableTable _variableTable;
 
     /// <summary>
     /// 获取或设置与此变量关联的MQTT别名列表。
@@ -250,7 +251,7 @@ public partial class VariableItem : ObservableObject
     /// <summary>
     /// 检查死区报警和布尔值变化报警
     /// </summary>
-    public void CheckAdvancedAlarms(VariableDto variable)
+    public void CheckAdvancedAlarms(Variable variable)
     {
         // 检查死区报警
         if (variable.IsAlarmEnabled && variable.AlarmDeadband > 0)

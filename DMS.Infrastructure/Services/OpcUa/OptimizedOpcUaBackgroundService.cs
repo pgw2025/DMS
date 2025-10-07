@@ -2,6 +2,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -113,7 +114,7 @@ namespace DMS.Infrastructure.Services.OpcUa
                     var variables = device.VariableTables?
                         .SelectMany(vt => vt.Variables)
                         .Where(v => v.IsActive && v.Protocol == ProtocolType.OpcUa)
-                        .ToList() ?? new List<VariableDto>();
+                        .ToList() ?? new List<Variable>();
 
                     _opcUaServiceManager.UpdateVariables(device.Id, variables);
                 }

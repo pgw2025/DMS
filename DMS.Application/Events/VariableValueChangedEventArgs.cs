@@ -1,4 +1,5 @@
-using DMS.Application.DTOs;
+
+using DMS.Core.Models;
 
 namespace DMS.Application.Events
 {
@@ -10,7 +11,7 @@ namespace DMS.Application.Events
         /// <summary>
         /// 变量DTO对象
         /// </summary>
-        public VariableDto Variable { get; set; }
+        public Variable Variable { get; set; }
 
         /// <summary>
         /// 旧值
@@ -20,7 +21,7 @@ namespace DMS.Application.Events
         /// <summary>
         /// 构造函数
         /// </summary>
-        public VariableValueChangedEventArgs(VariableDto variable, string? oldValue)
+        public VariableValueChangedEventArgs(Variable variable, string? oldValue)
         {
             Variable = variable;
             OldValue = oldValue;

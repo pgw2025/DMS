@@ -6,6 +6,7 @@ using DMS.Application.Interfaces;
 using DMS.Application.Models;
 using DMS.Core.Enums;
 using DMS.Core.Events;
+using DMS.Core.Models;
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ public class OptimizedS7BackgroundService : BackgroundService
     private readonly int _s7PollOnceSleepTimeMs = 50;
 
     // 存储每个设备的变量按轮询间隔分组
-    private readonly ConcurrentDictionary<int, Dictionary<int, List<VariableDto>>> _variablesByPollingInterval = new();
+    private readonly ConcurrentDictionary<int, Dictionary<int, List<Variable>>> _variablesByPollingInterval = new();
     
    
     /// <summary>
@@ -132,7 +133,7 @@ public class OptimizedS7BackgroundService : BackgroundService
                 _s7ServiceManager.AddDevice(s7Device);
 
                 // 查找设备中所有要轮询的变量
-                var variables = new List<VariableDto>();
+                var variables = new List<Variable>();
 
                 foreach (var variableTable in s7Device.VariableTables)
                 {
@@ -203,7 +204,7 @@ public class OptimizedS7BackgroundService : BackgroundService
     /// <summary>
     /// 轮询设备的变量
     /// </summary>
-    private async Task PollVariablesForDeviceAsync(S7DeviceContext context, List<VariableDto> variables,
+    private async Task PollVariablesForDeviceAsync(S7DeviceContext context, List<Variable> variables,
                                                    CancellationToken stoppingToken)
     {
         if (!_appDataStorageService.Devices.TryGetValue(context.Device.Id, out var device))

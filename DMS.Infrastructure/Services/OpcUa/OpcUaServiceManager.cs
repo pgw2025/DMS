@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
-using DMS.Application.DTOs;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
@@ -99,7 +98,7 @@ namespace DMS.Infrastructure.Services.OpcUa
         /// <summary>
         /// 处理设备添加事件
         /// </summary>
-        private void HandleDeviceAdded(DeviceDto device)
+        private void HandleDeviceAdded(DMS.Core.Models.Device device)
         {
             if (device == null)
             {
@@ -151,7 +150,7 @@ namespace DMS.Infrastructure.Services.OpcUa
         /// <summary>
         /// 处理设备更新事件
         /// </summary>
-        private void HandleDeviceUpdated(DeviceDto device)
+        private void HandleDeviceUpdated(DMS.Core.Models.Device device)
         {
             if (device == null)
             {
@@ -303,7 +302,7 @@ namespace DMS.Infrastructure.Services.OpcUa
         /// <summary>
         /// 添加设备到监控列表
         /// </summary>
-        public void AddDevice(DeviceDto device)
+        public void AddDevice(DMS.Core.Models.Device device)
         {
             if (device == null)
                 throw new ArgumentNullException(nameof(device));
@@ -318,7 +317,7 @@ namespace DMS.Infrastructure.Services.OpcUa
                           {
                               Device = device,
                               OpcUaService = new OpcUaService(),
-                              Variables = new ConcurrentDictionary<string, VariableDto>(),
+                              Variables = new ConcurrentDictionary<string, Variable>(),
                               IsConnected = false
                           };
 
@@ -341,7 +340,7 @@ namespace DMS.Infrastructure.Services.OpcUa
         /// <summary>
         /// 更新设备变量
         /// </summary>
-        public void UpdateVariables(int deviceId, List<VariableDto> variables)
+        public void UpdateVariables(int deviceId, List<Variable> variables)
         {
             if (_deviceContexts.TryGetValue(deviceId, out var context))
             {
@@ -679,9 +678,9 @@ namespace DMS.Infrastructure.Services.OpcUa
                             case VariablePropertyType.OpcUaNodeId:
                             case VariablePropertyType.OpcUaUpdateType:
                             case VariablePropertyType.PollingInterval:
-                                if (context.Variables.TryGetValue(e.Variable.OpcUaNodeId, out var variableDto))
+                                if (context.Variables.TryGetValue(e.Variable.OpcUaNodeId, out var variable))
                                 {
-                                    if (variableDto.IsActive)
+                                    if (variable.IsActive)
                                     {
                                         context.OpcUaService.UnsubscribeFromNode(e.Variable.OpcUaNodeId);
                                         context.OpcUaService.SubscribeToNode(
@@ -744,9 +743,9 @@ namespace DMS.Infrastructure.Services.OpcUa
     /// </summary>
     public class DeviceContext
     {
-        public DeviceDto Device { get; set; }
+        public DMS.Core.Models.Device Device { get; set; }
         public OpcUaService OpcUaService { get; set; }
-        public ConcurrentDictionary<string, VariableDto> Variables { get; set; }
+        public ConcurrentDictionary<string, Variable> Variables { get; set; }
         public bool IsConnected { get; set; }
     }
 }

@@ -11,9 +11,11 @@ namespace DMS.WPF.Profiles
     {
         public MappingProfile()
         {
-            CreateMap<DeviceDto, DeviceItem>()
+            CreateMap<Device, DeviceItem>()
                 .ReverseMap();
             CreateMap<Variable, VariableItem>()
+                .ReverseMap();
+            CreateMap<VariableTable, VariableTableItem>()
                 .ReverseMap();
             CreateMap<OpcUaNode, OpcUaNodeItem>()
                 .ReverseMap();
@@ -29,9 +31,8 @@ namespace DMS.WPF.Profiles
             CreateMap<MqttServer, MqttServerItem>().ReverseMap();
             CreateMap<UserDto, UserItem>().ReverseMap();
             CreateMap<VariableHistoryDto, VariableHistoryItem>().ReverseMap();
-            CreateMap<VariableDto, VariableItem>()
+            CreateMap<Variable, VariableItem>()
                 .ReverseMap();
-            CreateMap<VariableTableDto, VariableTableItem>().ReverseMap();
             CreateMap<NlogDto, NlogItem>().ReverseMap();
         }
     }

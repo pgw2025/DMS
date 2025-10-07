@@ -32,10 +32,10 @@ public class VariableAppService : IVariableAppService
     /// </summary>
     /// <param name="id">变量ID。</param>
     /// <returns>变量数据传输对象。</returns>
-    public async Task<VariableDto> GetVariableByIdAsync(int id)
+    public async Task<Variable> GetVariableByIdAsync(int id)
     {
         var variable = await _repoManager.Variables.GetByIdAsync(id);
-        return _mapper.Map<VariableDto>(variable);
+        return variable;
     }
 
     /// <summary>
@@ -43,10 +43,10 @@ public class VariableAppService : IVariableAppService
     /// </summary>
     /// <param name="opcUaNodeId">OPC UA NodeId。</param>
     /// <returns>变量数据传输对象。</returns>
-    public async Task<VariableDto?> GetVariableByOpcUaNodeIdAsync(string opcUaNodeId)
+    public async Task<Variable?> GetVariableByOpcUaNodeIdAsync(string opcUaNodeId)
     {
         var variable = await _repoManager.Variables.GetByOpcUaNodeIdAsync(opcUaNodeId);
-        return variable == null ? null : _mapper.Map<VariableDto>(variable);
+        return variable ;
     }
 
     /// <summary>
@@ -54,37 +54,33 @@ public class VariableAppService : IVariableAppService
     /// </summary>
     /// <param name="opcUaNodeIds">OPC UA NodeId列表。</param>
     /// <returns>变量数据传输对象列表。</returns>
-    public async Task<List<VariableDto>> GetVariableByOpcUaNodeIdsAsync(List<string> opcUaNodeIds)
+    public async Task<List<Variable>> GetVariableByOpcUaNodeIdsAsync(List<string> opcUaNodeIds)
     {
         var variables = await _repoManager.Variables.GetByOpcUaNodeIdsAsync(opcUaNodeIds);
-        return _mapper.Map<List<VariableDto>>(variables);
+        return variables;
     }
 
     /// <summary>
     /// 异步获取所有变量数据传输对象列表。
     /// </summary>
     /// <returns>变量数据传输对象列表。</returns>
-    public async Task<List<VariableDto>> GetAllVariablesAsync()
+    public async Task<List<Variable>> GetAllVariablesAsync()
     {
         var variables = await _repoManager.Variables.GetAllAsync();
-        return _mapper.Map<List<VariableDto>>(variables);
+        return _mapper.Map<List<Variable>>(variables);
     }
 
     /// <summary>
     /// 异步创建一个新变量（事务性操作）。
     /// </summary>
-    /// <param name="variableDto">要创建的变量数据传输对象。</param>
-    /// <returns>新创建的变量数据传输对象。</returns>
-    /// <exception cref="ApplicationException">如果创建变量时发生错误。</exception>
-    public async Task<VariableDto> CreateVariableAsync(VariableDto variableDto)
+/// <param name="variable">要创建的变量数据传输对象。</param>
+    public async Task<Variable> CreateVariableAsync(Variable variable)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            var variable = _mapper.Map<Variable>(variableDto);
-            var addedVariable = await _repoManager.Variables.AddAsync(variable);
-            await _repoManager.CommitAsync();
-            return _mapper.Map<VariableDto>(addedVariable);
+            var addedVariable = await _repoManager.Variables.AddAsync(variable);            await _repoManager.CommitAsync();
+            return _mapper.Map<Variable>(addedVariable);
         }
         catch (Exception ex)
         {
@@ -96,20 +92,18 @@ public class VariableAppService : IVariableAppService
     /// <summary>
     /// 异步更新一个已存在的变量（事务性操作）。
     /// </summary>
-    /// <param name="variableDto">要更新的变量数据传输对象。</param>
-    /// <returns>受影响的行数。</returns>
-    /// <exception cref="ApplicationException">如果找不到变量或更新变量时发生错误。</exception>
-    public async Task<int> UpdateVariableAsync(VariableDto variableDto)
+/// <param name="variable">要更新的变量数据传输对象。</param>
+    public async Task<int> UpdateVariableAsync(Variable variable)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            var variable = await _repoManager.Variables.GetByIdAsync(variableDto.Id);
-            if (variable == null)
+            var existingVariable = await _repoManager.Variables.GetByIdAsync(variable.Id);
+            if (existingVariable == null)
             {
-                throw new ApplicationException($"Variable with ID {variableDto.Id} not found.");
+                throw new ApplicationException($"Variable with ID {variable.Id} not found.");
             }
-            _mapper.Map(variableDto, variable);
+            _mapper.Map(variable, existingVariable);
             int res = await _repoManager.Variables.UpdateAsync(variable);
             await _repoManager.CommitAsync();
             return res;
@@ -124,25 +118,25 @@ public class VariableAppService : IVariableAppService
     /// <summary>
     /// 异步批量更新变量（事务性操作）。
     /// </summary>
-    /// <param name="variableDtos">要更新的变量数据传输对象列表。</param>
+    /// <param name="variables">要更新的变量数据传输对象列表。</param>
     /// <returns>受影响的行数。</returns>
     /// <exception cref="ApplicationException">如果更新变量时发生错误。</exception>
-    public async Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos)
+    public async Task<int> UpdateVariablesAsync(List<Variable> variables)
     {
         try
         {
             await _repoManager.BeginTranAsync();
             int totalAffected = 0;
             
-            foreach (var variableDto in variableDtos)
+            foreach (var variable in variables)
             {
-                var variable = await _repoManager.Variables.GetByIdAsync(variableDto.Id);
-                if (variable == null)
+                var existingVariable = await _repoManager.Variables.GetByIdAsync(variable.Id);
+                if (existingVariable == null)
                 {
-                    throw new ApplicationException($"Variable with ID {variableDto.Id} not found.");
+                    throw new ApplicationException($"Variable with ID {variable.Id} not found.");
                 }
-                _mapper.Map(variableDto, variable);
-                int res = await _repoManager.Variables.UpdateAsync(variable);
+                _mapper.Map(variable, existingVariable);
+                int res = await _repoManager.Variables.UpdateAsync(existingVariable);
                 totalAffected += res;
             }
             
@@ -220,13 +214,13 @@ public class VariableAppService : IVariableAppService
         }
     }
 
-    public async Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables)
+    public async Task<List<Variable>> BatchImportVariablesAsync(List<Variable> variables)
     {
         try
         {
             var variableModels = _mapper.Map<List<Variable>>(variables);
             var addedVariables = await _repoManager.Variables.AddBatchAsync(variableModels);
-            return _mapper.Map<List<VariableDto>>(addedVariables);
+            return _mapper.Map<List<Variable>>(addedVariables);
         }
         catch (Exception ex)
         {
@@ -234,11 +228,11 @@ public class VariableAppService : IVariableAppService
         }
     }
 
-    public async Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck)
+    public async Task<List<Variable>> FindExistingVariablesAsync(IEnumerable<Variable> variablesToCheck)
     {
         if (variablesToCheck == null || !variablesToCheck.Any())
         {
-            return new List<VariableDto>();
+            return new List<Variable>();
         }
 
         var names = variablesToCheck.Select(v => v.Name).Where(n => !string.IsNullOrEmpty(n)).Distinct().ToList();
@@ -254,23 +248,23 @@ public class VariableAppService : IVariableAppService
 
         if (existingVariablesFromDb == null || !existingVariablesFromDb.Any())
         {
-            return new List<VariableDto>();
+            return new List<Variable>();
         }
 
         var existingNames = new HashSet<string>(existingVariablesFromDb.Select(v => v.Name).Where(n => !string.IsNullOrEmpty(n)));
         var existingS7Addresses = new HashSet<string>(existingVariablesFromDb.Select(v => v.S7Address).Where(a => !string.IsNullOrEmpty(a)));
         var existingOpcUaNodeIds = new HashSet<string>(existingVariablesFromDb.Select(v => v.OpcUaNodeId).Where(id => !string.IsNullOrEmpty(id)));
 
-        var result = variablesToCheck.Where(v =>
-            (!string.IsNullOrEmpty(v.Name) && existingNames.Contains(v.Name)) ||
-            (!string.IsNullOrEmpty(v.S7Address) && existingS7Addresses.Contains(v.S7Address)) ||
-            (!string.IsNullOrEmpty(v.OpcUaNodeId) && existingOpcUaNodeIds.Contains(v.OpcUaNodeId)))
+        var result = existingVariablesFromDb.Where(v =>
+            (names.Any() && !string.IsNullOrEmpty(v.Name) && names.Contains(v.Name)) ||
+            (s7Addresses.Any() && !string.IsNullOrEmpty(v.S7Address) && s7Addresses.Contains(v.S7Address)) ||
+            (opcUaNodeIds.Any() && !string.IsNullOrEmpty(v.OpcUaNodeId) && opcUaNodeIds.Contains(v.OpcUaNodeId)))
             .ToList();
 
         return result;
     }
 
-    public async Task<VariableDto?> FindExistingVariableAsync(VariableDto variableToCheck)
+    public async Task<Variable?> FindExistingVariableAsync(Variable variableToCheck)
     {
         if (variableToCheck == null)
         {
@@ -278,7 +272,7 @@ public class VariableAppService : IVariableAppService
         }
 
         // 创建一个包含单个元素的列表以便复用现有的逻辑
-        var variablesToCheck = new List<VariableDto> { variableToCheck };
+        var variablesToCheck = new List<Variable> { variableToCheck };
         var existingVariables = await FindExistingVariablesAsync(variablesToCheck);
 
         // 如果找到了匹配的变量，返回第一个（也是唯一一个）

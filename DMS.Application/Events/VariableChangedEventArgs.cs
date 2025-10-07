@@ -1,5 +1,6 @@
 using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Events
 {
@@ -16,7 +17,7 @@ namespace DMS.Application.Events
         /// <summary>
         /// 变量DTO
         /// </summary>
-        public VariableDto Variable { get; }
+        public Variable Variable { get; }
 
         /// <summary>
         /// 发生变化的属性类型
@@ -29,7 +30,7 @@ namespace DMS.Application.Events
         /// <param name="changeType">变更类型</param>
         /// <param name="variable">变量DTO</param>
         /// <param name="propertyType">发生变化的属性类型</param>
-        public VariableChangedEventArgs(ActionChangeType changeType, VariableDto variable, VariablePropertyType propertyType = VariablePropertyType.All)
+        public VariableChangedEventArgs(ActionChangeType changeType, Variable variable, VariablePropertyType propertyType = VariablePropertyType.All)
         {
             ChangeType = changeType;
             Variable = variable;

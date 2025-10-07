@@ -56,7 +56,7 @@ public class HistoryProcessor : IVariableProcessor, IDisposable
             }
         }
 
-        // 将 VariableDto 转换为 VariableHistory
+        // 将 Variable 转换为 VariableHistory
         var historyData = new VariableHistory
         {
             VariableId = context.Data.Id,

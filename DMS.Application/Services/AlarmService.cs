@@ -2,6 +2,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Events;
+using DMS.Core.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DMS.Application.Services
@@ -17,7 +18,7 @@ namespace DMS.Application.Services
 
         public event EventHandler<AlarmEventArgs> OnAlarmTriggered;
 
-        public bool CheckAlarm(VariableDto variable)
+        public bool CheckAlarm(Variable variable)
         {
             if (!variable.IsAlarmEnabled)
             {
@@ -69,7 +70,7 @@ namespace DMS.Application.Services
             
             
             // 如果需要在 AlarmService 中处理死区报警，我们需要一种方式来获取上一次的值
-            // 这可能需要修改 VariableDto 或通过其他方式传递上一次的值
+            // 这可能需要修改 Variable 或通过其他方式传递上一次的值
             // 为了保持设计的清晰性，我们暂时不在这里实现死区报警
             // 死区报警可以在 VariableItemViewModel 中实现，当检测到值变化超过死区时触发一个事件
 

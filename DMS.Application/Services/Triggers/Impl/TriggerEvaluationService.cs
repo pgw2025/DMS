@@ -47,9 +47,10 @@ namespace DMS.Application.Services.Triggers.Impl
             try
             {
                 var triggers = await _triggerManagementService.GetTriggersForVariableAsync(variableId);
-                // 注意：这里不再通过 _variableAppService 获取 VariableDto，
-                // 而是在调用 ExecuteActionAsync 时，由上层（DataEventService）提供。
-                // 如果需要 VariableDto 信息，可以在 ExecuteActionAsync 的 TriggerContext 中携带。
+// 注意：这里不再通过 _variableAppService 获取 Variable，
+// 如果需要 Variable 信息，可以在 ExecuteActionAsync 的 TriggerContext 中携带。
+// 创建一个临时的上下文对象，其中 Variable 可以为 null，
+// 在实际应用中，你可能需要通过某种方式获取 Variable。
 
                 _logger.LogDebug($"Evaluating {triggers.Count(t => t.IsActive)} active triggers for variable ID: {variableId}");
 
@@ -59,9 +60,7 @@ namespace DMS.Application.Services.Triggers.Impl
                     {
                         if (EvaluateCondition(trigger, currentValue))
                         {
-                            // 创建一个临时的上下文对象，其中 VariableDto 可以为 null，
-                            // 因为我们目前没有从 _variableAppService 获取它。
-                            // 在实际应用中，你可能需要通过某种方式获取 VariableDto。
+
                             var context = new TriggerContext(trigger, currentValue, null); 
 
                             await _actionExecutor.ExecuteActionAsync(context);

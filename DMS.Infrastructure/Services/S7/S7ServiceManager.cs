@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using DMS.Application.DTOs;
 using DMS.Application.Events;
 using DMS.Application.Interfaces;
 using DMS.Core.Enums;
 using DMS.Core.Events;
+using DMS.Core.Models;
 using DMS.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using NPOI.HSSF.Record;
@@ -85,7 +85,7 @@ namespace DMS.Infrastructure.Services.S7
         /// <summary>
         /// 添加设备到监控列表
         /// </summary>
-        public void AddDevice(DeviceDto device)
+        public void AddDevice(DMS.Core.Models.Device device)
         {
             if (device == null)
                 throw new ArgumentNullException(nameof(device));
@@ -100,7 +100,7 @@ namespace DMS.Infrastructure.Services.S7
                           {
                               Device = device,
                               S7Service = _s7ServiceFactory.CreateService(),
-                              Variables = new ConcurrentDictionary<string, VariableDto>(),
+                              Variables = new ConcurrentDictionary<string, Variable>(),
                               IsConnected = false
                           };
 
@@ -123,7 +123,7 @@ namespace DMS.Infrastructure.Services.S7
         /// <summary>
         /// 更新设备变量
         /// </summary>
-        public void UpdateVariables(int deviceId, List<VariableDto> variables)
+        public void UpdateVariables(int deviceId, List<Variable> variables)
         {
             if (_deviceContexts.TryGetValue(deviceId, out var context))
             {
@@ -467,9 +467,9 @@ namespace DMS.Infrastructure.Services.S7
     /// </summary>
     public class S7DeviceContext
     {
-        public DeviceDto Device { get; set; }
+        public DMS.Core.Models.Device Device { get; set; }
         public IS7Service S7Service { get; set; }
-        public ConcurrentDictionary<string, VariableDto> Variables { get; set; }
+        public ConcurrentDictionary<string, Variable> Variables { get; set; }
         public bool IsConnected { get; set; }
     }
 }

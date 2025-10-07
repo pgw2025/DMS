@@ -95,7 +95,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             // 添加null检查
             if (_mapper != null)
             {
-                dto.Device = _mapper.Map<DeviceDto>(device);
+                dto.Device = _mapper.Map<Device>(device);
             }
             else
             {
@@ -113,7 +113,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
 
             if (device.IsAddDefVarTable)
             {
-                dto.VariableTable = new VariableTableDto()
+                dto.VariableTable = new VariableTable()
                                     {
                                         Name = "默认变量表",
                                         Description = "默认变量表",
@@ -273,7 +273,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                 TargetViewKey = nameof(VariableTableViewModel)
                             };
             int addVarTableId = await _wpfDataService.VariableTableDataService.AddVariableTable(
-                _mapper.Map<VariableTableDto>(VariableTableItem),
+                _mapper.Map<VariableTable>(VariableTableItem),
                 tableMenu, true);
 
             if (addVarTableId > 0)

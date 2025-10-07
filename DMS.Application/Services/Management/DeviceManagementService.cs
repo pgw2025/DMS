@@ -4,6 +4,7 @@ using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces.Management;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Services.Management;
 
@@ -26,7 +27,7 @@ public class DeviceManagementService : IDeviceManagementService
     /// <summary>
     /// 异步根据ID获取设备DTO。
     /// </summary>
-    public async Task<DeviceDto> GetDeviceByIdAsync(int id)
+    public async Task<Device> GetDeviceByIdAsync(int id)
     {
         return await _deviceAppService.GetDeviceByIdAsync(id);
     }
@@ -34,7 +35,7 @@ public class DeviceManagementService : IDeviceManagementService
     /// <summary>
     /// 异步获取所有设备DTO列表。
     /// </summary>
-    public async Task<List<DeviceDto>> GetAllDevicesAsync()
+    public async Task<List<Device>> GetAllDevicesAsync()
     {
         return await _deviceAppService.GetAllDevicesAsync();
     }
@@ -65,15 +66,15 @@ public class DeviceManagementService : IDeviceManagementService
     /// <summary>
     /// 异步更新一个已存在的设备。
     /// </summary>
-    public async Task<int> UpdateDeviceAsync(DeviceDto deviceDto)
+    public async Task<int> UpdateDeviceAsync(Device device)
     {
-        var result = await _deviceAppService.UpdateDeviceAsync(deviceDto);
+        var result = await _deviceAppService.UpdateDeviceAsync(device);
         
         // 更新成功后，更新内存中的设备
-        if (result > 0 && deviceDto != null)
+        if (result > 0 && device != null)
         {
-            _appDataStorageService.Devices.AddOrUpdate(deviceDto.Id, deviceDto, (key, oldValue) => deviceDto);
-            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Updated, deviceDto));
+            _appDataStorageService.Devices.AddOrUpdate(device.Id, device, (key, oldValue) => device);
+            _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Updated, device));
         }
         
         return result;
@@ -90,9 +91,9 @@ public class DeviceManagementService : IDeviceManagementService
         // 删除成功后，从内存中移除设备
         if (result && device != null)
         {
-            if (_appDataStorageService.Devices.TryGetValue(deviceId, out var deviceDto))
+            if (_appDataStorageService.Devices.TryGetValue(deviceId, out var deviceInStorage))
             {
-                foreach (var variableTable in deviceDto.VariableTables)
+                foreach (var variableTable in deviceInStorage.VariableTables)
                 {
                     foreach (var variable in variableTable.Variables)
                     {
@@ -104,7 +105,7 @@ public class DeviceManagementService : IDeviceManagementService
 
                 _appDataStorageService.Devices.TryRemove(deviceId, out _);
 
-                _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Deleted, deviceDto));
+                _eventService.RaiseDeviceChanged(this, new DeviceChangedEventArgs(DataChangeType.Deleted, deviceInStorage));
             }
         }
         

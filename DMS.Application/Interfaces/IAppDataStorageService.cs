@@ -9,17 +9,16 @@ public interface IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有设备数据
     /// </summary>
-    ConcurrentDictionary<int, DeviceDto> Devices { get; }
-
+            ConcurrentDictionary<int, Device> Devices { get; }
     /// <summary>
     /// 安全字典，用于存储所有变量表数据
     /// </summary>
-    ConcurrentDictionary<int, VariableTableDto> VariableTables { get; }
+    ConcurrentDictionary<int, VariableTable> VariableTables { get; }
 
     /// <summary>
     /// 安全字典，用于存储所有变量数据
     /// </summary>
-    ConcurrentDictionary<int, VariableDto> Variables { get; }
+    ConcurrentDictionary<int, Variable> Variables { get; }
 
     /// <summary>
     /// 安全字典，用于存储所有菜单数据

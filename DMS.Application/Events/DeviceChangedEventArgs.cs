@@ -1,5 +1,5 @@
-using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Events
 {
@@ -16,7 +16,7 @@ namespace DMS.Application.Events
         /// <summary>
         /// 设备DTO
         /// </summary>
-        public DeviceDto Device { get; }
+        public Device Device { get; }
 
         /// <summary>
         /// 变更时间
@@ -28,7 +28,7 @@ namespace DMS.Application.Events
         /// </summary>
         /// <param name="changeType">变更类型</param>
         /// <param name="device">设备DTO</param>
-        public DeviceChangedEventArgs(DataChangeType changeType, DeviceDto device)
+        public DeviceChangedEventArgs(DataChangeType changeType, Device device)
         {
             ChangeType = changeType;
             Device = device;

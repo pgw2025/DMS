@@ -75,7 +75,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
                                 TargetViewKey = nameof(VariableTableViewModel)
                             };
             int addVarTableId = await _wpfDataService.VariableTableDataService.AddVariableTable(
-                _mapper.Map<VariableTableDto>(VariableTableItem),
+                _mapper.Map<VariableTable>(VariableTableItem),
                 tableMenu, true);
 
             if (addVarTableId > 0)

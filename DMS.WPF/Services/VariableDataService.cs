@@ -56,7 +56,7 @@ public class VariableDataService : IVariableDataService
     /// <summary>
     /// 添加变量表。
     /// </summary>
-    public async Task<bool> AddVariableTableToView(VariableTableDto tableDto)
+    public async Task<bool> AddVariableTableToView(VariableTable tableDto)
     {
         // 添加null检查
         if (tableDto == null || tableDto.DeviceId==0)
@@ -76,15 +76,15 @@ public class VariableDataService : IVariableDataService
     /// <summary>
     /// 更新变量表。
     /// </summary>
-    public async Task<bool> UpdateVariableTable(VariableTableItem variableTable)
+    public async Task<bool> UpdateVariableTable(VariableTableItem variableTableItem)
     {
-        if (variableTable == null)
+        if (variableTableItem is null)
         {
             return false;
         }
 
-        var variableTableDto = _mapper.Map<VariableTableDto>(variableTable);
-        if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTableDto) > 0)
+        var variableTable = _mapper.Map<VariableTable>(variableTableItem);
+        if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTable) > 0)
         {
             // 更新数据库后会自动更新内存，无需额外操作
             return true;

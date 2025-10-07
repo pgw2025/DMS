@@ -1,5 +1,5 @@
-using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Events
 {
@@ -16,7 +16,7 @@ namespace DMS.Application.Events
         /// <summary>
         /// 变量表DTO
         /// </summary>
-        public VariableTableDto VariableTable { get; }
+        public VariableTable VariableTable { get; }
 
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace DMS.Application.Events
         /// <param name="changeType">变更类型</param>
         /// <param name="variableTable">变量表DTO</param>
         /// <param name="device">关联的设备DTO</param>
-        public VariableTableChangedEventArgs(DataChangeType changeType, VariableTableDto variableTable)
+        public VariableTableChangedEventArgs(DataChangeType changeType, VariableTable variableTable)
         {
             ChangeType = changeType;
             VariableTable = variableTable;

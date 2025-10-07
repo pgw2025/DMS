@@ -82,9 +82,9 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     public void LoadAllDevices()
     {
-        foreach (var deviceDto in _appDataStorageService.Devices.Values)
+        foreach (var device in _appDataStorageService.Devices.Values)
         {
-            _dataStorageService.Devices.Add(deviceDto.Id, _mapper.Map<DeviceItem>(deviceDto));
+            _dataStorageService.Devices.Add(device.Id, _mapper.Map<DeviceItem>(device));
         }
     }
 
@@ -171,13 +171,13 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     public async Task<bool> UpdateDevice(DeviceItem device)
     {
-        if (!_appDataStorageService.Devices.TryGetValue(device.Id, out var deviceDto))
+        if (!_appDataStorageService.Devices.TryGetValue(device.Id, out var existingDevice))
         {
             return false;
         }
 
-        _mapper.Map(device, deviceDto);
-        if (await _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(deviceDto) > 0)
+        _mapper.Map(device, existingDevice);
+        if (await _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(existingDevice) > 0)
         {
             // 更新数据库后会自动更新内存，无需额外操作
             return true;

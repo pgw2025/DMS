@@ -1,4 +1,5 @@
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 
 namespace DMS.Application.Interfaces.Database;
 
@@ -10,37 +11,37 @@ public interface IVariableAppService
     /// <summary>
     /// 异步根据ID获取变量DTO。
     /// </summary>
-    Task<VariableDto> GetVariableByIdAsync(int id);
+    Task<Variable> GetVariableByIdAsync(int id);
 
     /// <summary>
     /// 异步根据OPC UA NodeId获取变量DTO。
     /// </summary>
-    Task<VariableDto?> GetVariableByOpcUaNodeIdAsync(string opcUaNodeId);
+    Task<Variable?> GetVariableByOpcUaNodeIdAsync(string opcUaNodeId);
 
     /// <summary>
     /// 异步根据OPC UA NodeId列表获取变量DTO列表。
     /// </summary>
-    Task<List<VariableDto>> GetVariableByOpcUaNodeIdsAsync(List<string> opcUaNodeIds);
+    Task<List<Variable>> GetVariableByOpcUaNodeIdsAsync(List<string> opcUaNodeIds);
 
     /// <summary>
     /// 异步获取所有变量DTO列表。
     /// </summary>
-    Task<List<VariableDto>> GetAllVariablesAsync();
+    Task<List<Variable>> GetAllVariablesAsync();
 
     /// <summary>
     /// 异步创建一个新变量。
     /// </summary>
-    Task<VariableDto> CreateVariableAsync(VariableDto variableDto);
+    Task<Variable> CreateVariableAsync(Variable variable);
 
     /// <summary>
     /// 异步更新一个已存在的变量。
     /// </summary>
-    Task<int> UpdateVariableAsync(VariableDto variableDto);
+    Task<int> UpdateVariableAsync(Variable variable);
 
     /// <summary>
     /// 异步更新一个已存在的变量。
     /// </summary>
-    Task<int> UpdateVariablesAsync(List<VariableDto> variableDtos);
+    Task<int> UpdateVariablesAsync(List<Variable> variables);
 
     /// <summary>
     /// 异步删除一个变量。
@@ -55,19 +56,19 @@ public interface IVariableAppService
     /// <summary>
     /// 异步批量导入变量。
     /// </summary>
-    Task<List<VariableDto>> BatchImportVariablesAsync(List<VariableDto> variables);
+    Task<List<Variable>> BatchImportVariablesAsync(List<Variable> variables);
 
     /// <summary>
     /// 检测一组变量是否已存在。
     /// </summary>
     /// <param name="variablesToCheck">要检查的变量列表。</param>
     /// <returns>返回输入列表中已存在的变量。</returns>
-    Task<List<VariableDto>> FindExistingVariablesAsync(IEnumerable<VariableDto> variablesToCheck);
+    Task<List<Variable>> FindExistingVariablesAsync(IEnumerable<Variable> variablesToCheck);
 
     /// <summary>
     /// 检测单个变量是否已存在。
     /// </summary>
     /// <param name="variableToCheck">要检查的变量。</param>
     /// <returns>如果变量已存在则返回该变量，否则返回null。</returns>
-    Task<VariableDto?> FindExistingVariableAsync(VariableDto variableToCheck);
+    Task<Variable?> FindExistingVariableAsync(Variable variableToCheck);
 }

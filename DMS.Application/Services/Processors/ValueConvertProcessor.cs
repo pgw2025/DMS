@@ -4,6 +4,7 @@ using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Models;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DMS.Application.Services.Processors;
@@ -58,7 +59,7 @@ public class ValueConvertProcessor : IVariableProcessor
     /// 根据转换公式计算用于UI显示的DisplayValue
     /// </summary>
     /// <param name="variable">需要处理的变量DTO</param>
-    private void CalculateDisplayValue(VariableDto variable)
+    private void CalculateDisplayValue(Variable variable)
     {
         // 默认情况下，显示值等于原始数据值
         variable.DisplayValue = variable.DataValue;
@@ -106,7 +107,7 @@ public class ValueConvertProcessor : IVariableProcessor
     /// </summary>
     /// <param name="variable">关联的变量 DTO</param>
     /// <param name="value">从 S7 读取的原始对象值</param>
-    private void ConvertS7ValueToStringAndNumeric(VariableDto variable, string value)
+    private void ConvertS7ValueToStringAndNumeric(Variable variable, string value)
     {
         if (value == null)
             return;

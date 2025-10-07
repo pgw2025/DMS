@@ -1,3 +1,5 @@
+using DMS.Core.Models;
+
 namespace DMS.Application.DTOs;
 
 /// <summary>
@@ -5,8 +7,7 @@ namespace DMS.Application.DTOs;
 /// </summary>
 public class CreateDeviceWithDetailsDto
 {
-    public DeviceDto Device { get; set; }
-    public VariableTableDto VariableTable { get; set; }
+            public Device Device { get; set; }    public VariableTable VariableTable { get; set; }
 
     public MenuBeanDto DeviceMenu { get; set; } // 如果需要包含菜单信息
     public MenuBeanDto VariableTableMenu { get; set; } // 如果需要包含菜单信息

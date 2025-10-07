@@ -12,21 +12,9 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<Device, DeviceDto>()
-            .ReverseMap();
-          
-        // VariableTable 映射
-        CreateMap<VariableTable, VariableTableDto>().ReverseMap();
 
         // Variable 映射
-        CreateMap<Variable, VariableDto>()
-            .ReverseMap();
 
-        CreateMap<VariableDto, Variable>()
-            .ReverseMap();
-        CreateMap<VariableDto, VariableDto>()
-            .ReverseMap();
-           
 
 
         // VariableHistory 映射
