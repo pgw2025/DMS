@@ -16,25 +16,41 @@ namespace DMS.WPF.ViewModels.Dialogs
     public partial class MqttAliasBatchEditDialogViewModel : DialogViewModelBase<List<MqttAliasItem>>
     {
         [ObservableProperty]
-        private ObservableCollection<MqttAliasItem> _variableMqttAliases = new();
+        private ObservableCollection<MqttAliasItem> _currentMqttAliases = new();
 
         [ObservableProperty]
         private MqttServerItem _selectedMqttServer;
 
         public MqttAliasBatchEditDialogViewModel(
-            List<VariableItem> variables, 
+            List<VariableItem> variables,
             MqttServerItem mqttServer)
         {
             _selectedMqttServer = mqttServer;
-            InitializeVariableMqttAliases(variables);
+            InitializeCurrentMqttAliases(variables);
+        }
+
+        public MqttAliasBatchEditDialogViewModel(List<MqttAliasItem> mqttAliasItems)
+        {
+            foreach (var item in mqttAliasItems)
+            {
+                MqttAliasItem aliasItem = new MqttAliasItem();
+                aliasItem.Id = item.Id;
+                aliasItem.Alias = item.Alias;
+                aliasItem.VariableId = item.VariableId;
+                aliasItem.MqttServerId = item.MqttServerId;
+                aliasItem.Variable = item.Variable;
+                aliasItem.MqttServerName = item.MqttServerName;
+                aliasItem.MqttServer = item.MqttServer;
+                CurrentMqttAliases.Add(aliasItem);
+            }
         }
 
         /// <summary>
         /// 初始化变量MQTT别名列表
         /// </summary>
-        private void InitializeVariableMqttAliases(List<VariableItem> variables)
+        private void InitializeCurrentMqttAliases(List<VariableItem> variables)
         {
-            VariableMqttAliases.Clear();
+            CurrentMqttAliases.Clear();
 
             foreach (var variable in variables)
             {
@@ -51,7 +67,7 @@ namespace DMS.WPF.ViewModels.Dialogs
                     Alias = existingAlias?.Alias ?? GenerateDefaultAlias(variable)
                 };
 
-                VariableMqttAliases.Add(variableMqttAlias);
+                CurrentMqttAliases.Add(variableMqttAlias);
             }
         }
 
@@ -70,7 +86,7 @@ namespace DMS.WPF.ViewModels.Dialogs
         [RelayCommand]
         private void Confirm()
         {
-            var result = VariableMqttAliases.ToList();
+            var result = CurrentMqttAliases.ToList();
             Close(result);
         }
 
@@ -92,7 +108,7 @@ namespace DMS.WPF.ViewModels.Dialogs
             if (string.IsNullOrWhiteSpace(prefix))
                 return;
 
-            foreach (var alias in VariableMqttAliases)
+            foreach (var alias in CurrentMqttAliases)
             {
                 alias.Alias = $"{prefix}_{alias.Variable.Name}";
             }

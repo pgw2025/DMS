@@ -39,7 +39,7 @@
         </StackPanel>
 
         <DataGrid Grid.Row="2"
-                  ItemsSource="{Binding VariableMqttAliases}"
+                  ItemsSource="{Binding CurrentMqttAliases}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"

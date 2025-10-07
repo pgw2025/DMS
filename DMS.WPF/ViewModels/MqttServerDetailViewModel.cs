@@ -5,9 +5,10 @@ using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Management;
 using DMS.Core.Models;
 using DMS.WPF.Interfaces;
-using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ItemViewModel;
+using DMS.WPF.ViewModels.Dialogs;
 using Microsoft.Extensions.Logging;
+using System.Collections;
 using System.Collections.ObjectModel;
 
 namespace DMS.WPF.ViewModels
@@ -38,6 +39,9 @@ namespace DMS.WPF.ViewModels
         /// </summary>
         [ObservableProperty]
         private ObservableCollection<MqttAlias> _associatedVariables;
+
+        [ObservableProperty]
+        private IList _selectedMqttAliaes = new ArrayList();
 
 
         /// <summary>
@@ -198,9 +202,9 @@ namespace DMS.WPF.ViewModels
         /// 修改变量的MQTT发送名称
         /// </summary>
         [RelayCommand]
-        private async Task ModifyAlias(MqttAlias variableAlias)
+        private async Task ModifyAlias()
         {
-            if (variableAlias == null)
+            if (SelectedMqttAliaes.Count == 0)
             {
                 _notificationService.ShowError("请选择要修改的变量项。");
                 return;
@@ -208,38 +212,52 @@ namespace DMS.WPF.ViewModels
 
             try
             {
+                List<MqttAliasItem> selectedMqttAliaes = SelectedMqttAliaes.Cast<MqttAliasItem>().ToList();
                 // 创建一个用于输入新名称的简单对话框
-                var oldAlias = variableAlias.Alias;
-                InputDialogViewModel viewModel = new InputDialogViewModel("修改发送名称", "请输入新的MQTT发送名称:", oldAlias);
-                var dialogResult = await _dialogService.ShowDialogAsync(viewModel);
-                
-                if (dialogResult != null) // 用户没有取消操作
+
+                MqttAliasBatchEditDialogViewModel viewModel = new MqttAliasBatchEditDialogViewModel(selectedMqttAliaes);
+                var resMqttAliaes = await _dialogService.ShowDialogAsync(viewModel);
+
+                if (resMqttAliaes is null) // 用户没有取消操作
                 {
-                    var newAlias = dialogResult.Trim();
-                    
-                    if (string.IsNullOrEmpty(newAlias))
+                    return;
+                }
+                foreach (var item in resMqttAliaes)
+                {
+                    foreach (var selectItem in selectedMqttAliaes)
                     {
-                        _notificationService.ShowWarn("发送名称不能为空。");
-                        return;
+                        if (item.Id == selectItem.Id)
+                        {
+                            selectItem.Alias = item.Alias;
+                        }
                     }
 
-                    // 更新变量的发送名称
-                    variableAlias.Alias = newAlias;
-
-                    // 保存更改到数据服务
-                    // var result = await _wpfDataService.UpdateMqttServer(CurrentMqtt);
-                    //
-                    // if (result)
-                    // {
-                    //     _notificationService.ShowSuccess($"变量 '{variableAlias.Variable.Name}' 的发送名称已更新为 '{newAlias}'");
-                    // }
-                    // else
-                    // {
-                    //     _notificationService.ShowError("更新发送名称失败。");
-                    //     // 如果更新失败，恢复原来的值
-                    //     variableAlias.Alias = oldAlias;
-                    // }
                 }
+
+                //var newAlias = dialogResult.Trim();
+
+                //if (string.IsNullOrEmpty(newAlias))
+                //{
+                //    _notificationService.ShowWarn("发送名称不能为空。");
+                //    return;
+                //}
+
+                //// 更新变量的发送名称
+                //variableAlias.Alias = newAlias;
+
+                // 保存更改到数据服务
+                // var result = await _wpfDataService.UpdateMqttServer(CurrentMqtt);
+                //
+                // if (result)
+                // {
+                //     _notificationService.ShowSuccess($"变量 '{variableAlias.Variable.Name}' 的发送名称已更新为 '{newAlias}'");
+                // }
+                // else
+                // {
+                //     _notificationService.ShowError("更新发送名称失败。");
+                //     // 如果更新失败，恢复原来的值
+                //     variableAlias.Alias = oldAlias;
+                // }
             }
             catch (Exception e)
             {
