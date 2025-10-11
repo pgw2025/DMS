@@ -49,7 +49,7 @@ public class RepositoryManager : IRepositoryManager
         VariableTables = variableTables;
         Variables = variables;
         MqttServers = mqttServers;
-        VariableMqttAliases = variableMqttAliases;
+        MqttAliases = variableMqttAliases;
         Menus = menus;
         VariableHistories = variableHistories;
         Users = users;
@@ -86,7 +86,7 @@ public class RepositoryManager : IRepositoryManager
     /// <summary>
     /// 获取变量MQTT别名仓储实例。
     /// </summary>
-    public IVariableMqttAliasRepository VariableMqttAliases { get; set; }
+    public IVariableMqttAliasRepository MqttAliases { get; set; }
     /// <summary>
     /// 获取菜单仓储实例。
     /// </summary>

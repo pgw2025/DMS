@@ -270,9 +270,12 @@ namespace DMS.Infrastructure.Services.Mqtt
             StringBuilder sb = new StringBuilder();
             var now = DateTime.Now;
             var timestamp = ((DateTimeOffset)now).ToUnixTimeMilliseconds();
-            sb.Append(variableMqtt.MqttServer.MessageHeader.Replace("{timestamp}", timestamp.ToString()));
-            sb.Append(variableMqtt.MqttServer.MessageContent.Replace("{name}", variableMqtt.Alias).Replace("{value}", variableMqtt.Variable.DisplayValue));
-            sb.Append(variableMqtt.MqttServer.MessageFooter);
+            if (!String.IsNullOrWhiteSpace(variableMqtt.MqttServer.MessageHeader))
+                sb.Append(variableMqtt.MqttServer.MessageHeader.Replace("{timestamp}", timestamp.ToString()));
+            if (!String.IsNullOrWhiteSpace(variableMqtt.MqttServer.MessageContent))
+                sb.Append(variableMqtt.MqttServer.MessageContent.Replace("{name}", variableMqtt.Alias).Replace("{value}", variableMqtt.Variable.DisplayValue));
+            if (!String.IsNullOrWhiteSpace(variableMqtt.MqttServer.MessageFooter))
+                sb.Append(variableMqtt.MqttServer.MessageFooter);
 
             return sb.ToString();
         }

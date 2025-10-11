@@ -222,42 +222,36 @@ namespace DMS.WPF.ViewModels
                 {
                     return;
                 }
-                foreach (var item in resMqttAliaes)
+
+                int counter = 0;
+                foreach (var mqttAliasItem in resMqttAliaes)
                 {
                     foreach (var selectItem in selectedMqttAliaes)
                     {
-                        if (item.Id == selectItem.Id)
+                        if (mqttAliasItem.Id == selectItem.Id)
                         {
-                            selectItem.Alias = item.Alias;
+                            selectItem.Alias = mqttAliasItem.Alias;
                         }
+                    }
+
+
+                    // 保存更改到数据服务
+                    var result = await _wpfDataService.MqttAliasDataService.UpdateMqttAlias(mqttAliasItem);
+                    if (result)
+                    {
+                        counter++;
                     }
 
                 }
 
-                //var newAlias = dialogResult.Trim();
-
-                //if (string.IsNullOrEmpty(newAlias))
-                //{
-                //    _notificationService.ShowWarn("发送名称不能为空。");
-                //    return;
-                //}
-
-                //// 更新变量的发送名称
-                //variableAlias.Alias = newAlias;
-
-                // 保存更改到数据服务
-                // var result = await _wpfDataService.UpdateMqttServer(CurrentMqtt);
-                //
-                // if (result)
-                // {
-                //     _notificationService.ShowSuccess($"变量 '{variableAlias.Variable.Name}' 的发送名称已更新为 '{newAlias}'");
-                // }
-                // else
-                // {
-                //     _notificationService.ShowError("更新发送名称失败。");
-                //     // 如果更新失败，恢复原来的值
-                //     variableAlias.Alias = oldAlias;
-                // }
+                if (counter>0)
+                {
+                    _notificationService.ShowSuccess($"成功修改发送名称：{counter}个");
+                }
+                else
+                {
+                    _notificationService.ShowError("更新发送名称失败。");
+                }
             }
             catch (Exception e)
             {

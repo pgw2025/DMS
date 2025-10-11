@@ -627,48 +627,14 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             // 为每个变量分配MQTT别名
             foreach (var editedVariableMqtt in editedVariableMqtts)
             {
-                await _mqttAliasAppService.AssignAliasAsync(
-                    editedVariableMqtt.VariableId,
-                    selectedMqtt.Id,
-                    editedVariableMqtt.Alias);
-
-                totalAffectedCount++;
-
-                // 更新内存中的 Variable 对象
-                var originalVariable = validVariables.FirstOrDefault(v => v.Id == editedVariableMqtt.VariableId);
-                if (originalVariable == null)
+               var mqttAliasItem = await _wpfDataService.MqttAliasDataService.AssignAliasAsync(editedVariableMqtt);
+                if (mqttAliasItem is not null)
                 {
-                    continue;
+                    totalAffectedCount++;
                 }
+                
 
-                if (originalVariable.MqttAliases == null)
-                {
-                    originalVariable.MqttAliases = new();
-                }
 
-                // 检查是否已存在该变量与该MQTT服务器的关联
-                var existingVariableMqtt
-                    = originalVariable.MqttAliases.FirstOrDefault(vm => vm.MqttServerId == selectedMqtt.Id);
-
-                if (existingVariableMqtt == null)
-                {
-                    // 如果不存在，则添加新的关联
-                    var variableMqtt = new MqttAliasItem
-                                       {
-                                           VariableId = originalVariable.Id,
-                                           MqttServerId = selectedMqtt.Id,
-                                           Alias = editedVariableMqtt.Alias,
-                                           MqttServer = selectedMqtt,
-                                           Variable = originalVariable
-                                       };
-                     originalVariable.MqttAliases.Add(variableMqtt);
-                    selectedMqtt.VariableAliases.Add(variableMqtt);
-                }
-                else
-                {
-                    // 如果存在，则更新别名
-                    existingVariableMqtt.Alias = editedVariableMqtt.Alias;
-                }
             }
 
             if (totalAffectedCount > 0)

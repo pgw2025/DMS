@@ -68,6 +68,18 @@ public interface IEventService
     /// <param name="e">MQTT服务器改变事件参数</param>
     void RaiseMqttServerChanged(object sender, MqttServerChangedEventArgs e);
 
+    /// <summary>
+    /// Mqtt别名改变事件
+    /// </summary>
+    event EventHandler<MqttAliasChangedEventArgs> OnMqttAliasChanged;
+
+    /// <summary>
+    /// 触发Mqtt别名改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">Mqtt别名改变事件参数</param>
+    void RaiseMqttAliasChanged(object sender, MqttAliasChangedEventArgs e);
+
     #endregion
 
     

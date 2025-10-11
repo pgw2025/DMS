@@ -27,6 +27,7 @@ public class DataLoaderService : IDataLoaderService
     private readonly IMenuAppService _menuService;
     private readonly IMqttAppService _mqttAppService;
     private readonly INlogAppService _nlogAppService;
+    private readonly IMqttAliasManagementService _mqttAliasManagementService;
     private readonly ITriggerManagementService _triggerManagementService; // 添加触发器管理服务
     private readonly IEventService _eventService; // 添加事件服务
 
@@ -43,6 +44,7 @@ public class DataLoaderService : IDataLoaderService
         IMenuAppService menuService,
         IMqttAppService mqttAppService,
         INlogAppService nlogAppService,
+        IMqttAliasManagementService mqttAliasManagementService,
         ITriggerManagementService triggerManagementService, // 添加触发器管理服务参数
         IEventService eventService) // 添加事件服务参数
     {
@@ -55,6 +57,7 @@ public class DataLoaderService : IDataLoaderService
         _menuService = menuService;
         _mqttAppService = mqttAppService;
         _nlogAppService = nlogAppService;
+        this._mqttAliasManagementService = mqttAliasManagementService;
         _triggerManagementService = triggerManagementService; // 初始化触发器管理服务
         _eventService = eventService; // 初始化事件服务
     }
@@ -81,7 +84,7 @@ public class DataLoaderService : IDataLoaderService
         await LoadAllNlogsAsync(LoadLogCount);
 
         // 获取变量MQTT别名
-        await LoadAllVariableMqttAliases();
+        await _mqttAliasManagementService.LoadAllMqttAliasAsync();
         
         // 加载所有触发器
         await LoadAllTriggersAsync();
@@ -103,26 +106,7 @@ public class DataLoaderService : IDataLoaderService
         }
     }
 
-    private async Task LoadAllVariableMqttAliases()
-    {
 
-        var variableMqttAliases = await _repositoryManager.VariableMqttAliases.GetAllAsync();
-        foreach (var variableMqttAlias in variableMqttAliases)
-        {
-            _appDataStorageService.VariableMqttAliases.TryAdd(variableMqttAlias.Id, variableMqttAlias);
-            if (_appDataStorageService.Variables.TryGetValue(variableMqttAlias.VariableId, out var variable))
-            {
-                variableMqttAlias.Variable = _mapper.Map<Variable>(variable);
-                variable.MqttAliases?.Add(variableMqttAlias);
-            }
-
-            if (_appDataStorageService.MqttServers.TryGetValue(variableMqttAlias.MqttServerId, out var mqttServer))
-            {
-                variableMqttAlias.MqttServer = mqttServer;
-                mqttServer.VariableAliases?.Add(variableMqttAlias);
-            }
-        }
-    }
 
     /// <summary>
     /// 异步加载所有设备数据

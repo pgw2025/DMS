@@ -33,7 +33,7 @@ public interface IRepositoryManager : IDisposable
     /// <summary>
     /// 获取变量MQTT别名仓储的实例。
     /// </summary>
-    IVariableMqttAliasRepository VariableMqttAliases { get; set; }
+    IVariableMqttAliasRepository MqttAliases { get; set; }
 
     /// <summary>
     /// 获取菜单仓储的实例。

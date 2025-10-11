@@ -43,6 +43,11 @@ public interface IDataStorageService
     ObservableCollection<NlogItem> Nlogs { get; set; }
 
     /// <summary>
+    /// MQTT别名列表。
+    /// </summary>
+    ObservableDictionary<int, MqttAliasItem> MqttAliases { get; set; }
+
+    /// <summary>
     /// 触发器列表。
     /// </summary>
     ObservableDictionary<int, TriggerItem> Triggers { get; set; }

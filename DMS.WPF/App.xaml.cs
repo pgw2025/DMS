@@ -264,6 +264,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IVariableManagementService, VariableManagementService>();
         services.AddSingleton<IMenuManagementService, MenuManagementService>();
         services.AddSingleton<IMqttManagementService, MqttManagementService>();
+        services.AddSingleton<IMqttAliasAppService, MqttAliasAppService>();
+        services.AddSingleton<IMqttAliasManagementService, MqttAliasManagementService>();
         services.AddSingleton<ILogManagementService, LogManagementService>();
         services.AddSingleton<ITriggerManagementService, TriggerManagementService>(); // 注册触发器管理服务
         services.AddSingleton<ITriggerEvaluationService, TriggerEvaluationService>();   // 注册触发器评估服务
@@ -301,6 +303,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IVariableTableDataService, VariableTableDataService>();
         services.AddSingleton<IMenuDataService, MenuDataService>();
         services.AddSingleton<IMqttDataService, MqttDataService>();
+        services.AddSingleton<IMqttAliasDataService, MqttAliasDataService>();
         services.AddSingleton<ILogDataService, LogDataService>();
         services.AddSingleton<ITriggerDataService, TriggerDataService>(); // 注册触发器数据服务
         services.AddSingleton<IDataEventService, DataEventService>();

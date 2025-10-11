@@ -32,6 +32,11 @@ public interface IWPFDataService
     IMqttDataService MqttDataService { get; }
 
     /// <summary>
+    /// MQTT别名数据服务。
+    /// </summary>
+    IMqttAliasDataService MqttAliasDataService { get; }
+
+    /// <summary>
     /// 日志数据服务。
     /// </summary>
     ILogDataService LogDataService { get; }

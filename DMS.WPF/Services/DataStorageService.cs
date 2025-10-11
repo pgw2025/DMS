@@ -47,6 +47,11 @@ public class DataStorageService : IDataStorageService
     public ObservableCollection<NlogItem> Nlogs { get; set; }
 
     /// <summary>
+    /// MQTT别名列表。
+    /// </summary>
+    public ObservableDictionary<int, MqttAliasItem> MqttAliases { get; set; }
+
+    /// <summary>
     /// 触发器列表。
     /// </summary>
     public ObservableDictionary<int, TriggerItem> Triggers { get; set; }
@@ -60,6 +65,7 @@ public class DataStorageService : IDataStorageService
         Menus=new ObservableCollection<MenuItem>();
         MenuTrees=new ObservableCollection<MenuItem>();
         Nlogs=new ObservableCollection<NlogItem>();
+        MqttAliases=new ObservableDictionary<int, MqttAliasItem>();
         Triggers = new ObservableDictionary<int, TriggerItem>();
         
     }

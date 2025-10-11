@@ -134,6 +134,21 @@ public class EventService : IEventService
         OnMqttServerChanged?.Invoke(sender, e);
     }
 
+    /// <summary>
+    /// Mqtt别名改变事件
+    /// </summary>
+    public event EventHandler<MqttAliasChangedEventArgs> OnMqttAliasChanged;
+
+    /// <summary>
+    /// 触发Mqtt别名改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">Mqtt别名改变事件参数</param>
+    public void RaiseMqttAliasChanged(object sender, MqttAliasChangedEventArgs e)
+    {
+        OnMqttAliasChanged?.Invoke(sender, e);
+    }
+
     #endregion
 
     #region 数据加载事件

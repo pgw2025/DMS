@@ -106,7 +106,7 @@ public partial class VariableItem : ObservableObject
     /// 一个变量可以有多个MQTT别名。
     /// </summary>
     [ObservableProperty]
-    private List<MqttAliasItem>? _mqttAliases=new List<MqttAliasItem>();
+    private List<MqttAliasItem> _mqttAliases=new List<MqttAliasItem>();
 
     /// <summary>
     /// 获取或设置变量的信号类型 (如：AI, DI, AO, DO)。

@@ -40,7 +40,7 @@ public class AppDataStorageService : IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有MQTT变量别名的数据
     /// </summary>
-    public ConcurrentDictionary<int, MqttAlias> VariableMqttAliases { get; } = new();
+    public ConcurrentDictionary<int, MqttAlias> MqttAliases { get; } = new();
     
         
     

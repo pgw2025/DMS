@@ -35,4 +35,16 @@ public class MqttAlias
     /// 关联的MQTT服务器导航属性。
     /// </summary>
     public MqttServer MqttServer { get; set; }
+
+    public MqttAlias()
+    {
+        
+    }
+
+    public MqttAlias(int variableId, int mqttServerId, string alias)
+    {
+        VariableId = variableId;
+        MqttServerId = mqttServerId;
+        Alias = alias;
+    }
 }
