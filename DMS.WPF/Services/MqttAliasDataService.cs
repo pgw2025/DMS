@@ -133,21 +133,23 @@ public class MqttAliasDataService : IMqttAliasDataService
     public async Task<bool> DeleteMqttAlias(MqttAliasItem mqttAlias)
     {
         // 从数据库和内存中删除MQTT别名
-        var result = await _mqttAliasManagementService.UpdateAsync(new MqttAlias 
-        { 
-            Id = mqttAlias.Id, 
-            VariableId = mqttAlias.VariableId, 
-            MqttServerId = mqttAlias.MqttServerId,
-            Alias = null // Setting alias to null effectively removes the alias
-        });
+        var result = await _mqttAliasManagementService.DeleteAsync(mqttAlias.Id);
 
-        if (result > 0)
+        if (result )
         {
-            // 从界面删除MQTT别名
-            _dataStorageService.MqttAliases.Remove(mqttAlias.Id);
+            
+            if (_dataStorageService.MqttServers.TryGetValue(mqttAlias.MqttServerId, out var mqttServerItem))
+            {
+                mqttServerItem.VariableAliases.Remove(mqttAlias);
+            }
+            if (_dataStorageService.Variables.TryGetValue(mqttAlias.VariableId, out var variableItem))
+            {
+                variableItem.MqttAliases.Remove(mqttAlias);
+            }
+            _dataStorageService.MqttAliases.Remove(mqttAlias.Id, out _);
         }
 
-        return result > 0;
+        return result;
     }
     
     /// <summary>

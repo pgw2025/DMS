@@ -32,15 +32,17 @@ public class MqttAliasManagementService : IMqttAliasManagementService
             // Add to cache
             if (_storageService.MqttServers.TryGetValue(newAlias.MqttServerId, out var server))
             {
+                newAlias.MqttServer = server;
                 server.VariableAliases.Add(newAlias);
             }
 
             // Add to cache
             if (_storageService.Variables.TryGetValue(newAlias.VariableId, out var variable))
             {
+                newAlias.Variable = variable;
                 variable.MqttAliases.Add(newAlias);
             }
-
+            _storageService.MqttAliases.TryAdd(newAlias.Id, newAlias);
             _eventService.RaiseMqttAliasChanged(this, new MqttAliasChangedEventArgs(ActionChangeType.Added, newAlias));
         }
 
@@ -90,51 +92,19 @@ public class MqttAliasManagementService : IMqttAliasManagementService
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var res = await DeleteBatchAsync(new List<int> { id });
-        return res > 0;
-    }
+        var result = await _appService.RemoveAliasAsync(id);
+        if (result == 0) return false;
 
-    public async Task<int> DeleteBatchAsync(List<int> ids)
-    {
-        int counter = 0;
-        foreach (var id in ids)
+        if (_storageService.MqttAliases.TryGetValue(id, out var mqttAlias))
         {
-            if (!_storageService.MqttAliases.TryGetValue(id, out var mqttAlias))
-            {
-                continue;
-            }
 
-            var variableId = mqttAlias.VariableId;
-            var mqttServerId = mqttAlias.MqttServerId;
-
-            var result = await _appService.RemoveAliasAsync(id);
-            if (result == 0)  continue;
-
-            // Remove from cache
-            if (_storageService.MqttServers.TryGetValue(mqttServerId, out var server))
-            {
-                var aliasToRemove = server.VariableAliases.FirstOrDefault(a => a.Id == id);
-                if (aliasToRemove != null)
-                {
-                    server.VariableAliases.Remove(aliasToRemove);
-                    
-                }
-            }
-            // Remove from cache
-            if (_storageService.Variables.TryGetValue(mqttServerId, out var variable))
-            {
-                var aliasToRemove = variable.MqttAliases.FirstOrDefault(a => a.Id == id);
-                if (aliasToRemove != null)
-                {
-                    variable.MqttAliases.Remove(aliasToRemove);
-                    
-                }
-            }
-            
+            mqttAlias.MqttServer.VariableAliases.Remove(mqttAlias);
+            mqttAlias.Variable.MqttAliases.Remove(mqttAlias);
+            _storageService.MqttAliases.TryRemove(mqttAlias.Id,out _);
             _eventService.RaiseMqttAliasChanged(
                 this, new MqttAliasChangedEventArgs(ActionChangeType.Deleted, mqttAlias));
-            counter++;
+
         }
-        return counter;
+        return true;
     }
 }

@@ -24,6 +24,7 @@ namespace DMS.WPF.ViewModels
         private readonly INotificationService _notificationService;
         private readonly IEventService _eventService;
         private readonly IMqttManagementService _mqttManagementService;
+        private readonly IMqttAliasDataService _mqttAliasDataService;
         private readonly IWPFDataService _wpfDataService;
         private readonly IDataStorageService _dataStorageService;
         private readonly INavigationService _navigationService;
@@ -58,6 +59,7 @@ namespace DMS.WPF.ViewModels
                                          INotificationService notificationService,
                                          IEventService eventService,
                                          IMqttManagementService mqttManagementService,
+                                         IMqttAliasDataService mqttAliasDataService,
                                          IWPFDataService wpfDataService,
                                          IDataStorageService dataStorageService,
                                          INavigationService navigationService)
@@ -67,6 +69,7 @@ namespace DMS.WPF.ViewModels
             _notificationService = notificationService;
             this._eventService = eventService;
             _mqttManagementService = mqttManagementService;
+            this._mqttAliasDataService = mqttAliasDataService;
             this._wpfDataService = wpfDataService;
             this._dataStorageService = dataStorageService;
             _navigationService = navigationService;
@@ -257,6 +260,59 @@ namespace DMS.WPF.ViewModels
             {
                 _logger.LogError(e, "修改变量发送名称时发生错误");
                 _notificationService.ShowError($"修改发送名称时发生错误：{e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 取消关联变量
+        /// </summary>
+        [RelayCommand]
+        private async Task UnassignAlias()
+        {
+            if (SelectedMqttAliaes.Count == 0)
+            {
+                _notificationService.ShowError("请选择要取消关联的变量项。");
+                return;
+            }
+
+            try
+            {
+               var mqttAliasItems= SelectedMqttAliaes.Cast<MqttAliasItem>().ToList();
+                // 拼接要删除的变量名称，用于确认提示
+                var names = string.Join("、", mqttAliasItems.Select(v => v.Alias));
+
+                // 显示确认删除对话框
+                ConfirmDialogViewModel confirmDialogViewModel
+                    = new ConfirmDialogViewModel("取消关联", $"确认要取消关联变量：{names}与MQTT服务器的关联吗,取消后不可恢复，确认要取消吗？", "取消关联");
+                var isDel = await _dialogService.ShowDialogAsync(confirmDialogViewModel);
+
+                if (!isDel)
+                    return; // 如果用户取消删除，则返回
+
+                int successCount = 0;
+
+                foreach (var mqttAliasItem in mqttAliasItems)
+                {
+                    var deleteResult = await _mqttAliasDataService.DeleteMqttAlias(mqttAliasItem);
+                    if (deleteResult)
+                    {
+                        successCount++;
+                    }
+                }
+
+                if (successCount > 0)
+                {
+                    _notificationService.ShowSuccess($"成功取消关联：{successCount}个变量");
+                }
+                else
+                {
+                    _notificationService.ShowError("取消关联失败。");
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "取消关联变量时发生错误");
+                _notificationService.ShowError($"取消关联时发生错误：{e.Message}");
             }
         }
         
