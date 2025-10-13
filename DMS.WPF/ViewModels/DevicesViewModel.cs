@@ -104,7 +104,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             }
 
 
-            dto.DeviceMenu = new MenuBeanDto()
+            dto.DeviceMenu = new MenuBean()
                              {
                                  Header = device.Name,
                                  Icon = SegoeFluentIcons.Devices2.Glyph,
@@ -119,7 +119,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
                                         Description = "默认变量表",
                                         IsActive = true
                                     };
-                dto.VariableTableMenu = new MenuBeanDto()
+                dto.VariableTableMenu = new MenuBean()
                                         {
                                             Header = dto.VariableTable.Name,
                                             Icon = SegoeFluentIcons.DataSense.Glyph,
@@ -266,7 +266,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
             }
 
             VariableTableItem.DeviceId = device.Id;
-            var tableMenu = new MenuBeanDto()
+            var tableMenu = new MenuBean()
                             {
                                 Header = VariableTableItem.Name,
                                 Icon = SegoeFluentIcons.DataSense.Glyph,

@@ -25,7 +25,7 @@ namespace DMS.WPF.Profiles
                 .ReverseMap();
 
 
-            CreateMap<MenuBeanDto, MenuItem>()
+            CreateMap<MenuBean, MenuItem>()
                 .ReverseMap();
 
 

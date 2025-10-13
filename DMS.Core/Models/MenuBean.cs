@@ -57,4 +57,9 @@ public class MenuBean
     /// 数值越小显示越靠前
     /// </summary>
     public int DisplayOrder { get; set; }
+    
+    /// <summary>
+    /// 子菜单项集合，用于构建层级菜单结构
+    /// </summary>
+    public List<MenuBean> Children { get; set; } = new List<MenuBean>();
 }

@@ -7,6 +7,6 @@ namespace DMS.Application.DTOs
     {
         public VariableTable VariableTable { get; set; }
         public int DeviceId { get; set; }
-        public MenuBeanDto Menu { get; set; }
+        public MenuBean Menu { get; set; }
     }
 }

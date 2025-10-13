@@ -1,5 +1,4 @@
 using AutoMapper;
-using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Interfaces;
 using System.Collections.Concurrent;
@@ -178,11 +177,10 @@ public class DataLoaderService : IDataLoaderService
         _appDataStorageService.Menus.Clear();
         _appDataStorageService.MenuTrees.Clear();
         var menus = await _repositoryManager.Menus.GetAllAsync();
-        var menuDtos = _mapper.Map<List<MenuBeanDto>>(menus);
         // 将菜单添加到安全字典
-        foreach (var menuDto in menuDtos)
+        foreach (var menuBean in menus)
         {
-            _appDataStorageService.Menus.TryAdd(menuDto.Id, menuDto);
+            _appDataStorageService.Menus.TryAdd(menuBean.Id, menuBean);
         }
 
     }

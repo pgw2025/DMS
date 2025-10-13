@@ -24,12 +24,12 @@ public class AppDataStorageService : IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有菜单数据
     /// </summary>
-    public ConcurrentDictionary<int, MenuBeanDto> Menus { get; } = new();
+    public ConcurrentDictionary<int, MenuBean> Menus { get; } = new();
 
     /// <summary>
     /// 安全字典，用于存储所有菜单数据
     /// </summary>
-    public ConcurrentDictionary<int, MenuBeanDto> MenuTrees { get; } = new();
+    public ConcurrentDictionary<int, MenuBean> MenuTrees { get; } = new();
 
     /// <summary>
     /// 安全字典，用于存储所有MQTT服务器数据

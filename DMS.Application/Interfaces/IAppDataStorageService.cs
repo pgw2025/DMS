@@ -23,12 +23,12 @@ public interface IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有菜单数据
     /// </summary>
-    ConcurrentDictionary<int, MenuBeanDto> Menus { get; }
+    ConcurrentDictionary<int, MenuBean> Menus { get; }
 
     /// <summary>
     /// 安全字典，用于存储所有菜单数据
     /// </summary>
-    ConcurrentDictionary<int, MenuBeanDto> MenuTrees { get; }
+    ConcurrentDictionary<int, MenuBean> MenuTrees { get; }
 
     /// <summary>
     /// 安全字典，用于存储所有MQTT服务器数据

@@ -68,7 +68,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
             }
 
             VariableTableItem.DeviceId = CurrentDevice.Id;
-            var tableMenu = new MenuBeanDto()
+            var tableMenu = new MenuBean()
                             {
                                 Header = VariableTableItem.Name,
                                 Icon = SegoeFluentIcons.DataSense.Glyph,

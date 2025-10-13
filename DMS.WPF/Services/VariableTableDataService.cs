@@ -40,7 +40,7 @@ public class VariableTableDataService : IVariableTableDataService
     }
 
     public async Task<int> AddVariableTable(VariableTable variableTable,
-                                             MenuBeanDto menuDto = null, bool isAddDb = false)
+                                             MenuBean menuDto = null, bool isAddDb = false)
     {
         if (variableTable == null)
             return 0;
@@ -53,7 +53,7 @@ public class VariableTableDataService : IVariableTableDataService
             createDto.Menu = menuDto;
             var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
             
-            _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(resDto.Menu));
+            await _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(resDto.Menu));
             return resDto.VariableTable.Id;
         }
 
@@ -114,7 +114,7 @@ public class VariableTableDataService : IVariableTableDataService
 
         var variableTableMenu
             =_dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu && m.TargetId == variableTable.Id);
-        _menuDataService.DeleteMenuItem(variableTableMenu);
+       await _menuDataService.DeleteMenuItem(variableTableMenu);
         // 删除变量表
         _dataStorageService.VariableTables.Remove(variableTable.Id);
         variableTable.Device.VariableTables.Remove(variableTable);

@@ -1,8 +1,8 @@
 using AutoMapper;
-using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Application.Interfaces.Management;
 using DMS.Application.Services.Management;
+using DMS.Core.Models;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ItemViewModel;
 using System.Collections.ObjectModel;
@@ -79,7 +79,7 @@ public class MenuDataService : IMenuDataService
         if (deviceMenu is not null)
         {
 
-        var menuId= await _menuManagementService.CreateMenuAsync(_mapper.Map<MenuBeanDto>(MenuItem));
+        var menuId= await _menuManagementService.CreateMenuAsync(_mapper.Map<MenuBean>(MenuItem));
             if (menuId>0)
             {
                 MenuItem.Id = menuId;

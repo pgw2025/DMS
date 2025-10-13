@@ -11,7 +11,7 @@ public interface IVariableTableDataService
     void LoadAllVariableTables();
 
     Task<int> AddVariableTable(VariableTable variableTable,
-                                MenuBeanDto menuDto = null, bool isAddDb = false);
+                                MenuBean menu = null, bool isAddDb = false);
 
     Task<bool> UpdateVariableTable(VariableTableItem variableTable);
     Task<bool> DeleteVariableTable(VariableTableItem variableTable, bool isDeleteDb = false);

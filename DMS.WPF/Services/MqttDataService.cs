@@ -78,7 +78,7 @@ public class MqttDataService : IMqttDataService
 
         if (mqttRootMenu is not null)
         {
-            var mqttServerMenu = new MenuBeanDto()
+            var mqttServerMenu = new MenuBean()
             {
                 Header = mqttServerItem.ServerName,
                 TargetId = mqttServerItem.Id,
@@ -111,7 +111,7 @@ public class MqttDataService : IMqttDataService
                 menu.Header = mqttServer.ServerName;
 
                 // 使用菜单管理服务更新菜单
-                var menuDto = _mapper.Map<MenuBeanDto>(menu);
+                var menuDto = _mapper.Map<MenuBean>(menu);
                 await _menuManagementServiceImpl.UpdateMenuAsync(menuDto);
             }
         }

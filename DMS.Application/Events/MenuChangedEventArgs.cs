@@ -1,5 +1,5 @@
-using DMS.Application.DTOs;
 using DMS.Core.Enums;
+using DMS.Core.Models;
 
 namespace DMS.Application.Events
 {
@@ -14,17 +14,17 @@ namespace DMS.Application.Events
         public DataChangeType ChangeType { get; }
 
         /// <summary>
-        /// 菜单DTO
+        /// 菜单
         /// </summary>
-        public MenuBeanDto Menu { get; }
+        public MenuBean Menu { get; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="changeType">变更类型</param>
-        /// <param name="menu">菜单DTO</param>
-        /// <param name="parentMenu">父级菜单DTO</param>
-        public MenuChangedEventArgs(DataChangeType changeType, MenuBeanDto menu)
+        /// <param name="menu">菜单</param>
+        /// <param name="parentMenu">父级菜单</param>
+        public MenuChangedEventArgs(DataChangeType changeType, MenuBean menu)
         {
             ChangeType = changeType;
             Menu = menu;

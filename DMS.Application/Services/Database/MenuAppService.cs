@@ -1,7 +1,6 @@
 using AutoMapper;
 using DMS.Core.Interfaces;
 using DMS.Core.Models;
-using DMS.Application.DTOs;
 using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces;
 
@@ -28,38 +27,37 @@ public class MenuAppService : IMenuAppService
     }
 
     /// <summary>
-    /// 异步根据ID获取菜单数据传输对象。
+    /// 异步根据ID获取菜单。
     /// </summary>
     /// <param name="id">菜单ID。</param>
-    /// <returns>菜单数据传输对象。</returns>
-    public async Task<MenuBeanDto> GetMenuByIdAsync(int id)
+    /// <returns>菜单对象。</returns>
+    public async Task<MenuBean> GetMenuByIdAsync(int id)
     {
         var menu = await _repoManager.Menus.GetByIdAsync(id);
-        return _mapper.Map<MenuBeanDto>(menu);
+        return _mapper.Map<MenuBean>(menu);
     }
 
     /// <summary>
-    /// 异步获取所有菜单数据传输对象列表。
+    /// 异步获取所有菜单列表。
     /// </summary>
-    /// <returns>菜单数据传输对象列表。</returns>
-    public async Task<List<MenuBeanDto>> GetAllMenusAsync()
+    /// <returns>菜单列表。</returns>
+    public async Task<List<MenuBean>> GetAllMenusAsync()
     {
         var menus = await _repoManager.Menus.GetAllAsync();
-        return _mapper.Map<List<MenuBeanDto>>(menus);
+        return _mapper.Map<List<MenuBean>>(menus);
     }
 
     /// <summary>
     /// 异步创建一个新菜单（事务性操作）。
     /// </summary>
-    /// <param name="menuDto">要创建的菜单数据传输对象。</param>
+    /// <param name="menu">要创建的菜单。</param>
     /// <returns>新创建菜单的ID。</returns>
     /// <exception cref="ApplicationException">如果创建菜单时发生错误。</exception>
-    public async Task<int> CreateMenuAsync(MenuBeanDto menuDto)
+    public async Task<int> CreateMenuAsync(MenuBean menu)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            var menu = _mapper.Map<MenuBean>(menuDto);
             await _repoManager.Menus.AddAsync(menu);
             await _repoManager.CommitAsync();
             return menu.Id;
@@ -74,21 +72,21 @@ public class MenuAppService : IMenuAppService
     /// <summary>
     /// 异步更新一个已存在的菜单（事务性操作）。
     /// </summary>
-    /// <param name="menuDto">要更新的菜单数据传输对象。</param>
+    /// <param name="menu">要更新的菜单。</param>
     /// <returns>受影响的行数。</returns>
     /// <exception cref="ApplicationException">如果找不到菜单或更新菜单时发生错误。</exception>
-    public async Task<int> UpdateMenuAsync(MenuBeanDto menuDto)
+    public async Task<int> UpdateMenuAsync(MenuBean menu)
     {
         try
         {
             await _repoManager.BeginTranAsync();
-            var menu = await _repoManager.Menus.GetByIdAsync(menuDto.Id);
-            if (menu == null)
+            var dbmenu = await _repoManager.Menus.GetByIdAsync(menu.Id);
+            if (dbmenu == null)
             {
-                throw new ApplicationException($"Menu with ID {menuDto.Id} not found.");
+                throw new ApplicationException($"Menu with ID {menu.Id} not found.");
             }
-            _mapper.Map(menuDto, menu);
-            int res = await _repoManager.Menus.UpdateAsync(menu);
+            _mapper.Map(menu, dbmenu);
+            int res = await _repoManager.Menus.UpdateAsync(dbmenu);
             await _repoManager.CommitAsync();
             return res;
         }

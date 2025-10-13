@@ -15,6 +15,6 @@ namespace DMS.Application.DTOs
         /// <summary>
         /// 菜单项信息
         /// </summary>
-        public MenuBeanDto MqttServerMenu { get; set; }
+        public MenuBean MqttServerMenu { get; set; }
     }
 }

@@ -1,13 +1,12 @@
 using AutoMapper;
-using DMS.Core.Models;
 using DMS.Application.DTOs;
+using DMS.Core.Models;
 using DMS.Core.Models.Triggers;
 
 namespace DMS.Application.Profiles;
 
 /// <summary>
-/// 配置AutoMapper的映射规则。
-/// </summary>
+/// 配置AutoMapper的映射规则�?/// </summary>
 public class MappingProfile : Profile
 {
     public MappingProfile()
@@ -22,8 +21,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.VariableName, opt => opt.MapFrom(src => src.Variable.Name))
             .ReverseMap();
 
-        // MenuBean 映射
-        CreateMap<MenuBean, MenuBeanDto>().ReverseMap();
+
 
         // User 映射
         CreateMap<User, UserDto>().ReverseMap();
