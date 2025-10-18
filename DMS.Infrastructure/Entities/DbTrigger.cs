@@ -9,8 +9,8 @@ namespace DMS.Infrastructure.Entities;
 /// <summary>
 /// 触发器定义实体类，对应数据库中的 TriggerDefinitions 表。
 /// </summary>
-[SugarTable("TriggerDefinitions")]
-public class DbTriggerDefinition
+[SugarTable("Triggers")]
+public class DbTrigger
 {
     /// <summary>
     /// 触发器唯一标识符，主键。

@@ -45,7 +45,7 @@ public class MappingProfile : Profile
         CreateMap<DbEmailTemplate, EmailTemplate>().ReverseMap();
         
         // --- 触发器映射 ---
-        CreateMap<DbTriggerDefinition, Trigger>()
+        CreateMap<DbTrigger, Trigger>()
             .ForMember(dest => dest.Variables, opt => opt.Ignore()) // 忽略Variables属性映射，因为可能需要特殊处理
             .ReverseMap();
     }

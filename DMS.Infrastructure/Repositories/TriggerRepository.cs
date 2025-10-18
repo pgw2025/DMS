@@ -13,9 +13,9 @@ namespace DMS.Infrastructure.Repositories
 {
     /// <summary>
     /// 触发器仓储实现类，负责触发器数据的持久化操作。
-    /// 继承自 <see cref="BaseRepository{DbTriggerDefinition}"/> 并实现 <see cref="ITriggerRepository"/> 接口。
+    /// 继承自 <see cref="BaseRepository{DbTrigger}"/> 并实现 <see cref="ITriggerRepository"/> 接口。
     /// </summary>
-    public class TriggerRepository : BaseRepository<DbTriggerDefinition>, ITriggerRepository
+    public class TriggerRepository : BaseRepository<DbTrigger>, ITriggerRepository
     {
         private readonly IMapper _mapper;
 
@@ -59,7 +59,7 @@ namespace DMS.Infrastructure.Repositories
         /// <returns>添加成功后的触发器定义实体（包含数据库生成的ID等信息）。</returns>
         public async Task<Trigger> AddAsync(Trigger entity)
         {
-            var dbTrigger = _mapper.Map<DbTriggerDefinition>(entity);
+            var dbTrigger = _mapper.Map<DbTrigger>(entity);
             var addedDbTrigger = await base.AddAsync(dbTrigger);
             return _mapper.Map(addedDbTrigger, entity);
         }
@@ -71,7 +71,7 @@ namespace DMS.Infrastructure.Repositories
         /// <returns>受影响的行数。</returns>
         public async Task<int> UpdateAsync(Trigger entity)
         {
-            var dbTrigger = _mapper.Map<DbTriggerDefinition>(entity);
+            var dbTrigger = _mapper.Map<DbTrigger>(entity);
             return await base.UpdateAsync(dbTrigger);
         }
 
@@ -82,7 +82,7 @@ namespace DMS.Infrastructure.Repositories
         /// <returns>受影响的行数。</returns>
         public async Task<int> DeleteAsync(Trigger entity)
         {
-            return await base.DeleteAsync(_mapper.Map<DbTriggerDefinition>(entity));
+            return await base.DeleteAsync(_mapper.Map<DbTrigger>(entity));
         }
 
         /// <summary>
@@ -94,10 +94,10 @@ namespace DMS.Infrastructure.Repositories
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            var result = await _dbContext.GetInstance().Deleteable(new DbTriggerDefinition() { Id = id })
+            var result = await _dbContext.GetInstance().Deleteable(new DbTrigger() { Id = id })
                                  .ExecuteCommandAsync();
             stopwatch.Stop();
-            _logger.LogInformation($"Delete {typeof(DbTriggerDefinition)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+            _logger.LogInformation($"Delete {typeof(DbTrigger)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
             return result;
         }
         
@@ -114,7 +114,7 @@ namespace DMS.Infrastructure.Repositories
 
         public async Task<List<Trigger>> AddBatchAsync(List<Trigger> entities)
         {
-            var dbEntities = _mapper.Map<List<DbTriggerDefinition>>(entities);
+            var dbEntities = _mapper.Map<List<DbTrigger>>(entities);
             var addedEntities = await base.AddBatchAsync(dbEntities);
             return _mapper.Map<List<Trigger>>(addedEntities);
         }
