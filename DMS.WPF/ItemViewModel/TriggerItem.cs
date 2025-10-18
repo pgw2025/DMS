@@ -17,6 +17,12 @@ namespace DMS.WPF.ItemViewModel
         private int _id;
 
         /// <summary>
+        /// 触发器名称
+        /// </summary>
+        [ObservableProperty]
+        private string _name = string.Empty;
+
+        /// <summary>
         /// 触发器描述
         /// </summary>
         [ObservableProperty]
@@ -27,30 +33,6 @@ namespace DMS.WPF.ItemViewModel
         /// </summary>
         [ObservableProperty]
         private bool _isActive;
-
-        /// <summary>
-        /// 触发条件类型
-        /// </summary>
-        [ObservableProperty]
-        private ConditionType _condition;
-
-        /// <summary>
-        /// 阈值 (用于 GreaterThan, LessThan, EqualTo, NotEqualTo)
-        /// </summary>
-        [ObservableProperty]
-        private double? _threshold;
-
-        /// <summary>
-        /// 下限 (用于 InRange, OutOfRange)
-        /// </summary>
-        [ObservableProperty]
-        private double? _lowerBound;
-
-        /// <summary>
-        /// 上限 (用于 InRange, OutOfRange)
-        /// </summary>
-        [ObservableProperty]
-        private double? _upperBound;
 
         /// <summary>
         /// 动作类型

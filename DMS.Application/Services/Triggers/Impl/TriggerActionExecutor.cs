@@ -38,7 +38,7 @@ namespace DMS.Application.Services.Triggers.Impl
                 switch (context.Trigger.Action)
                 {
                     case ActionType.SendEmail:
-                        await ExecuteSendEmail(context);
+                        // await ExecuteSendEmail(context);
                         break;
                     case ActionType.ActivateAlarm:
                         _logger.LogWarning("Action 'ActivateAlarm' is not implemented yet.");
@@ -61,72 +61,5 @@ namespace DMS.Application.Services.Triggers.Impl
             }
         }
 
-        #region 私有执行方法
-
-        private async Task ExecuteSendEmail(TriggerContext context)
-        {
-            if (_emailService == null)
-            {
-                _logger.LogWarning("Email service is not configured, skipping SendEmail action for trigger '{TriggerId}'.", context.Trigger.Id);
-                return;
-            }
-
-            var config = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(context.Trigger.ActionConfigurationJson);
-            if (config == null ||
-                !config.TryGetValue("Recipients", out var recipientsElement) ||
-                !config.TryGetValue("SubjectTemplate", out var subjectTemplateElement) ||
-                !config.TryGetValue("BodyTemplate", out var bodyTemplateElement))
-            {
-                _logger.LogError("Invalid configuration for SendEmail action for trigger '{TriggerId}'.", context.Trigger.Id);
-                return;
-            }
-
-            var recipients = recipientsElement.Deserialize<List<string>>();
-            var subjectTemplate = subjectTemplateElement.GetString();
-            var bodyTemplate = bodyTemplateElement.GetString();
-
-            if (recipients == null || string.IsNullOrEmpty(subjectTemplate) || string.IsNullOrEmpty(bodyTemplate))
-            {
-                _logger.LogError("Missing required fields in SendEmail configuration for trigger '{TriggerId}'.", context.Trigger.Id);
-                return;
-            }
-
-            // Simple token replacement - in practice, use a templating engine like Scriban, RazorLight etc.
-            // Note: This assumes context.Variable and context.CurrentValue have Name properties/values.
-            // You might need to adjust the token names and values based on your actual Variable structure.
-            var subject = subjectTemplate
-                .Replace("{VariableName}", context.Variable?.Name ?? "Unknown")
-                .Replace("{CurrentValue}", context.CurrentValue?.ToString() ?? "N/A")
-                .Replace("{Threshold}", context.Trigger.Threshold?.ToString() ?? "N/A")
-                .Replace("{LowerBound}", context.Trigger.LowerBound?.ToString() ?? "N/A")
-                .Replace("{UpperBound}", context.Trigger.UpperBound?.ToString() ?? "N/A");
-
-            var body = bodyTemplate
-                .Replace("{VariableName}", context.Variable?.Name ?? "Unknown")
-                .Replace("{CurrentValue}", context.CurrentValue?.ToString() ?? "N/A")
-                .Replace("{Threshold}", context.Trigger.Threshold?.ToString() ?? "N/A")
-                .Replace("{LowerBound}", context.Trigger.LowerBound?.ToString() ?? "N/A")
-                .Replace("{UpperBound}", context.Trigger.UpperBound?.ToString() ?? "N/A")
-                .Replace("{Timestamp}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
-
-             // await _emailService.SendEmailAsync(recipients, subject, body);
-        }
-
-         private async Task ExecuteActivateAlarm(TriggerContext context)
-         {
-             var alarmId = $"trigger_{context.Trigger.Id}_{context.Variable.Id}";
-             var message = $"Trigger '{context.Trigger.Description}' activated for variable '{context.Variable.Name}' with value '{context.CurrentValue}'.";
-             // 假设 INotificationService 有 RaiseAlarmAsync 方法
-             // await _notificationService.RaiseAlarmAsync(alarmId, message); 
-         }
-
-         private async Task ExecuteWriteToLog(TriggerContext context)
-         {
-             var message = $"Trigger '{context.Trigger.Description}' activated for variable '{context.Variable.Name}' with value '{context.CurrentValue}'.";
-             // 假设 ILoggingService 有 LogTriggerAsync 方法
-             // await _loggingService.LogTriggerAsync(message); 
-         }
-
-        #endregion
     }
 }

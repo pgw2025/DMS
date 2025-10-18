@@ -38,12 +38,6 @@
             <FontFamily x:Key="MdFontIcons">/Assets/Fonts/materialdesignicons-webfont.ttf#Material Design Icons</FontFamily>
             
             <!-- Enum Values for ComboBoxes -->
-            <ObjectDataProvider x:Key="ConditionTypeEnum" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
-                <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="triggers:ConditionType"/>
-                </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>
-            
             <ObjectDataProvider x:Key="ActionTypeEnum" ObjectType="{x:Type sys:Enum}" MethodName="GetValues">
                 <ObjectDataProvider.MethodParameters>
                     <x:Type TypeName="triggers:ActionType"/>

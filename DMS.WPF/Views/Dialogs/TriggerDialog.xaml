@@ -27,8 +27,6 @@
         <converters:EnumToVisibilityConverter x:Key="LocalEnumToVisibilityConverter" />
         <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
         <converters:EmptyCollectionToVisibilityConverter x:Key="EmptyCollectionToVisibilityConverter" />
-        <ex:EnumBindingSource x:Key="ConditionTypeEnum"
-                              EnumType="{x:Type enums:ConditionType}" />
         <ex:EnumBindingSource x:Key="ActionTypeEnum"
                               EnumType="{x:Type enums:ActionType}" />
     </ui:ContentDialog.Resources>
@@ -39,6 +37,15 @@
             <GroupBox Header="基本信息"
                       Padding="5">
                 <StackPanel>
+                    <DockPanel Margin="0,0,0,5">
+                        <Label Content="名称:"
+                               Width="100"
+                               VerticalAlignment="Center" />
+                        <TextBox Text="{Binding Trigger.Name, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="300"
+                                 HorizontalAlignment="Left" />
+                    </DockPanel>
+                    
                     <DockPanel Margin="0,0,0,5">
                         <Label Content="描述:"
                                Width="100"
@@ -51,188 +58,10 @@
                     <CheckBox Content="激活"
                               IsChecked="{Binding Trigger.IsActive}"
                               Margin="0,0,0,10" />
-                              
-                    <!-- Selected Variables Section -->
-                    <Label Content="已选择的变量:" 
-                           FontWeight="Bold"
-                           Margin="0,0,0,5"/>
-                    <Border BorderBrush="LightGray" BorderThickness="1" 
-                            Padding="5" 
-                            Margin="0,0,0,10"
-                            Background="WhiteSmoke">
-                        <WrapPanel x:Name="SelectedVariablesPanel">
-                            <ItemsControl ItemsSource="{Binding SelectedVariables}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type items:VariableItem}">
-                                        <Border Background="LightBlue" 
-                                                CornerRadius="3" 
-                                                Margin="2"
-                                                Padding="5,2">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Name}" 
-                                                           VerticalAlignment="Center" 
-                                                           Margin="0,0,5,0"/>
-                                                <Button Content="×" 
-                                                        FontSize="12" 
-                                                        FontWeight="Bold"
-                                                        Background="Transparent" 
-                                                        BorderThickness="0"
-                                                        Padding="2"
-                                                        Click="RemoveVariableButton_Click"
-                                                        Tag="{Binding}"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <TextBlock Text="暂无选择的变量" 
-                                       FontStyle="Italic" 
-                                       Foreground="Gray"
-                                       Visibility="{Binding SelectedVariables, Converter={StaticResource EmptyCollectionToVisibilityConverter}}"/>
-                        </WrapPanel>
-                    </Border>
-                    
-                    <!-- Variable Search Section -->
-                    <Label Content="搜索变量:" 
-                           FontWeight="Bold"
-                           Margin="0,0,0,5"/>
-                    <TextBox x:Name="SearchTextBox"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,5"
-                             ui:ControlHelper.PlaceholderText="输入变量名称进行搜索"/>
-                             
-                    <Border BorderBrush="LightGray" 
-                            BorderThickness="1" 
-                            Height="150"
-                            Margin="0,0,0,10">
-                        <ListBox x:Name="VariableListBox"
-                                 ItemsSource="{Binding FilteredVariables}"
-                                 SelectionMode="Single"
-                                 MouseDoubleClick="VariableListBox_MouseDoubleClick">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type items:VariableItem}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                        <TextBlock Text=" - " />
-                                        <TextBlock Text="{Binding Description}" FontStyle="Italic" Foreground="Gray"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </Border>
                 </StackPanel>
             </GroupBox>
 
-            <!-- Condition Section -->
-            <GroupBox Header="触发条件"
-                      Padding="5"
-                      Margin="0,10,0,0">
-                <StackPanel>
-                    <DockPanel Margin="0,0,0,5">
-                        <Label Content="条件类型:"
-                               Width="100"
-                               VerticalAlignment="Center" />
-                        <ComboBox ItemsSource="{Binding Source={StaticResource ConditionTypeEnum}}"
-                                  SelectedItem="{Binding Trigger.Condition}"
-                                  Width="200"
-                                  HorizontalAlignment="Left" />
-                    </DockPanel>
 
-                    <!-- Conditional Fields based on Condition Type -->
-                    <StackPanel
-                        Visibility="{Binding Trigger.Condition, Converter={StaticResource LocalEnumToVisibilityConverter}, ConverterParameter=GreaterThan}">
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="阈值:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.Threshold, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                    </StackPanel>
-
-                    <StackPanel
-                        Visibility="{Binding Trigger.Condition, Converter={StaticResource LocalEnumToVisibilityConverter}, ConverterParameter=LessThan}">
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="阈值:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.Threshold, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                    </StackPanel>
-
-                    <StackPanel
-                        Visibility="{Binding Trigger.Condition, Converter={StaticResource LocalEnumToVisibilityConverter}, ConverterParameter=EqualTo}">
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="阈值:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.Threshold, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                    </StackPanel>
-
-                    <StackPanel
-                        Visibility="{Binding Trigger.Condition, Converter={StaticResource LocalEnumToVisibilityConverter}, ConverterParameter=NotEqualTo}">
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="阈值:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.Threshold, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                    </StackPanel>
-
-                    <StackPanel
-                        Visibility="{Binding Trigger.Condition, Converter={StaticResource LocalEnumToVisibilityConverter}, ConverterParameter=InRange}">
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="下限:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.LowerBound, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="上限:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.UpperBound, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                    </StackPanel>
-
-                    <StackPanel
-                        Visibility="{Binding Trigger.Condition, Converter={StaticResource LocalEnumToVisibilityConverter}, ConverterParameter=OutOfRange}">
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="下限:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.LowerBound, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                        <DockPanel Margin="0,0,0,5">
-                            <Label Content="上限:"
-                                   Width="100"
-                                   VerticalAlignment="Center" />
-                            <TextBox Text="{Binding Trigger.UpperBound, UpdateSourceTrigger=PropertyChanged}"
-                                     Width="100"
-                                     HorizontalAlignment="Left" />
-                        </DockPanel>
-                    </StackPanel>
-                </StackPanel>
-            </GroupBox>
 
             <!-- Action Section -->
             <GroupBox Header="触发动作"

@@ -38,6 +38,11 @@ namespace DMS.WPF.Profiles
             CreateMap<Variable, VariableItem>()
                 .ReverseMap();
             CreateMap<NlogDto, NlogItem>().ReverseMap();
+            
+            // 添加触发器相关映射
+            CreateMap<TriggerItem, Core.Models.Triggers.Trigger>()
+                .ForMember(dest => dest.Variables, opt => opt.Ignore()) // 忽略Variables属性，因为这个通常在业务逻辑中处理
+                .ReverseMap();
         }
     }
 }

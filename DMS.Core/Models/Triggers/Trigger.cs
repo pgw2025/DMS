@@ -4,19 +4,6 @@ using System.Collections.Generic;
 namespace DMS.Core.Models.Triggers
 {
     /// <summary>
-    /// 触发器条件类型枚举
-    /// </summary>
-    public enum ConditionType
-    {
-        GreaterThan,
-        LessThan,
-        EqualTo,
-        NotEqualTo,
-        InRange, // 值在 LowerBound 和 UpperBound 之间 (包含边界)
-        OutOfRange // 值低于 LowerBound 或高于 UpperBound
-    }
-
-    /// <summary>
     /// 触发器动作类型枚举
     /// </summary>
     public enum ActionType
@@ -38,6 +25,11 @@ namespace DMS.Core.Models.Triggers
         public int Id { get; set; }
 
         /// <summary>
+        /// 触发器名称
+        /// </summary>
+        public string Name { get; set; } = "";
+
+        /// <summary>
         /// 关联的变量列表
         /// </summary>
         public List<Variable> Variables { get; set; } = new List<Variable>();
@@ -46,28 +38,6 @@ namespace DMS.Core.Models.Triggers
         /// 触发器是否处于激活状态
         /// </summary>
         public bool IsActive { get; set; } = true;
-
-        // --- 条件部分 ---
-
-        /// <summary>
-        /// 触发条件类型
-        /// </summary>
-        public ConditionType Condition { get; set; }
-
-        /// <summary>
-        /// 阈值 (用于 GreaterThan, LessThan, EqualTo, NotEqualTo)
-        /// </summary>
-        public double? Threshold { get; set; }
-
-        /// <summary>
-        /// 下限 (用于 InRange, OutOfRange)
-        /// </summary>
-        public double? LowerBound { get; set; }
-
-        /// <summary>
-        /// 上限 (用于 InRange, OutOfRange)
-        /// </summary>
-        public double? UpperBound { get; set; }
 
         // --- 动作部分 ---
 
@@ -92,6 +62,7 @@ namespace DMS.Core.Models.Triggers
         /// 上次触发的时间。用于抑制逻辑。
         /// </summary>
         public DateTime? LastTriggeredAt { get; set; }
+
 
         /// <summary>
         /// 触发器描述

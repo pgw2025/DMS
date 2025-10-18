@@ -31,28 +31,6 @@ namespace DMS.WPF.Views.Dialogs
             }
         }
         
-        /// <summary>
-        /// 处理变量列表双击事件，将选中的变量添加到已选择列表
-        /// </summary>
-        private void VariableListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (VariableListBox.SelectedItem is VariableItem selectedVariable)
-            {
-                var viewModel = DataContext as ViewModels.Dialogs.TriggerDialogViewModel;
-                viewModel?.AddVariable(selectedVariable);
-            }
-        }
-        
-        /// <summary>
-        /// 处理移除变量按钮点击事件
-        /// </summary>
-        private void RemoveVariableButton_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (sender is System.Windows.Controls.Button button && button.Tag is VariableItem variable)
-            {
-                var viewModel = DataContext as ViewModels.Dialogs.TriggerDialogViewModel;
-                viewModel?.RemoveVariable(variable);
-            }
-        }
+
     }
 }

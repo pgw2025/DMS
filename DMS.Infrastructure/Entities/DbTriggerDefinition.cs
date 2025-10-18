@@ -19,35 +19,15 @@ public class DbTriggerDefinition
     public int Id { get; set; }
 
     /// <summary>
+    /// 触发器名称
+    /// </summary>
+    [SugarColumn(Length = 200, IsNullable = true)]
+    public string Name { get; set; } = "";
+
+    /// <summary>
     /// 触发器是否处于激活状态。
     /// </summary>
     public bool IsActive { get; set; } = true;
-
-    // --- 条件部分 ---
-
-    /// <summary>
-    /// 触发条件类型。
-    /// </summary>
-    [SugarColumn(ColumnDataType = "varchar(20)", SqlParameterDbType = typeof(EnumToStringConvert))]
-    public ConditionType Condition { get; set; }
-
-    /// <summary>
-    /// 阈值 (用于 GreaterThan, LessThan, EqualTo, NotEqualTo)。
-    /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public double? Threshold { get; set; }
-
-    /// <summary>
-    /// 下限 (用于 InRange, OutOfRange)。
-    /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public double? LowerBound { get; set; }
-
-    /// <summary>
-    /// 上限 (用于 InRange, OutOfRange)。
-    /// </summary>
-    [SugarColumn(IsNullable = true)]
-    public double? UpperBound { get; set; }
 
     // --- 动作部分 ---
 

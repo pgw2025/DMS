@@ -109,31 +109,10 @@ namespace DMS.Application.Services.Triggers.Impl
                 return false; // Cannot evaluate null
             }
             
-            // Attempt conversion from object to double - adjust parsing logic as needed for your data types
-            if (!double.TryParse(currentValueObj.ToString(), out double currentValue))
-            {
-                _logger.LogWarning("Could not parse current value '{CurrentValue}' to double for trigger evaluation (trigger ID: {TriggerId}).", currentValueObj, trigger.Id);
-                return false;
-            }
+            // 由于移除了条件，所有激活的触发器都会被触发
+            _logger.LogInformation("Trigger activated for trigger ID: {TriggerId}", trigger.Id);
 
-            bool result = trigger.Condition switch
-            {
-                ConditionType.GreaterThan => currentValue > trigger.Threshold,
-                ConditionType.LessThan => currentValue < trigger.Threshold,
-                ConditionType.EqualTo => Math.Abs(currentValue - trigger.Threshold.GetValueOrDefault()) < double.Epsilon,
-                ConditionType.NotEqualTo => Math.Abs(currentValue - trigger.Threshold.GetValueOrDefault()) >= double.Epsilon,
-                ConditionType.InRange => currentValue >= trigger.LowerBound && currentValue <= trigger.UpperBound,
-                ConditionType.OutOfRange => currentValue < trigger.LowerBound || currentValue > trigger.UpperBound,
-                _ => false
-            };
-
-            if(result)
-            {
-                 _logger.LogInformation("Trigger condition met: Variable value {CurrentValue} satisfies {Condition} for trigger ID: {TriggerId}", 
-                     currentValue, trigger.Condition, trigger.Id);
-            }
-
-            return result;
+            return true;
         }
 
         /// <summary>

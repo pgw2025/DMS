@@ -49,7 +49,7 @@ namespace DMS.Application.Services.Management
         public async Task<Trigger> CreateTriggerAsync(Trigger triggerDto)
         {
             // 1. 验证 DTO (可以在应用层或领域层做)
-            ValidateTriggerDto(triggerDto);
+            // ValidateTriggerDto(triggerDto);
 
             // 2. 转换 DTO 到实体
             var triggerEntity = _mapper.Map<Trigger>(triggerDto);
@@ -150,23 +150,6 @@ namespace DMS.Application.Services.Management
                 throw new ArgumentException("触发器必须至少关联一个变量。");
 
             // 添加必要的验证逻辑
-            switch (dto.Condition)
-            {
-                case ConditionType.GreaterThan:
-                case ConditionType.LessThan:
-                case ConditionType.EqualTo:
-                case ConditionType.NotEqualTo:
-                    if (!dto.Threshold.HasValue)
-                        throw new ArgumentException($"{dto.Condition} requires Threshold.");
-                    break;
-                case ConditionType.InRange:
-                case ConditionType.OutOfRange:
-                    if (!dto.LowerBound.HasValue || !dto.UpperBound.HasValue)
-                        throw new ArgumentException($"{dto.Condition} requires LowerBound and UpperBound.");
-                    if (dto.LowerBound > dto.UpperBound)
-                        throw new ArgumentException("LowerBound must be less than or equal to UpperBound.");
-                    break;
-            }
         }
     }
 }

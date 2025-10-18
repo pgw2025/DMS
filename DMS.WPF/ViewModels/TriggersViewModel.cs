@@ -57,7 +57,6 @@ namespace DMS.WPF.ViewModels
             var newTrigger = new TriggerItem()
                 {
                     IsActive = true,
-                    Condition = Core.Models.Triggers.ConditionType.GreaterThan,
                     Action = Core.Models.Triggers.ActionType.SendEmail,
                     Description = "新建触发器",
                     CreatedAt = DateTime.UtcNow,
