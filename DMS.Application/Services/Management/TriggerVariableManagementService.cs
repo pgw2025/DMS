@@ -50,6 +50,7 @@ public class TriggerVariableManagementService : ITriggerVariableManagementServic
                 if (_appStorageService.Variables.TryGetValue(triggerVariable.VariableId, out var variable))
                 {
                     trigger.Variables.Add(variable);
+                    variable.Triggers.Add(trigger);
                     
                 }    
             }

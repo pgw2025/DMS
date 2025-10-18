@@ -14,27 +14,27 @@ namespace DMS.Application.Interfaces.Database
         /// </summary>
         /// <param name="id">触发器ID。</param>
         /// <returns>触发器定义实体。</returns>
-        Task<TriggerDefinition> GetTriggerByIdAsync(int id);
+        Task<Trigger> GetTriggerByIdAsync(int id);
 
         /// <summary>
         /// 异步获取所有触发器定义。
         /// </summary>
         /// <returns>触发器定义实体列表。</returns>
-        Task<List<TriggerDefinition>> GetAllTriggersAsync();
+        Task<List<Trigger>> GetAllTriggersAsync();
 
         /// <summary>
         /// 异步创建一个新触发器定义及其关联的变量ID。
         /// </summary>
         /// <param name="trigger">要创建的触发器定义。</param>
         /// <returns>新创建的触发器定义。</returns>
-        Task<TriggerDefinition> CreateTriggerAsync(TriggerDefinition trigger);
+        Task<Trigger> CreateTriggerAsync(Trigger trigger);
 
         /// <summary>
         /// 异步更新一个已存在的触发器定义及其关联的变量ID。
         /// </summary>
         /// <param name="trigger">要更新的触发器定义。</param>
         /// <returns>受影响的行数。</returns>
-        Task<int> UpdateTriggerAsync(TriggerDefinition trigger);
+        Task<int> UpdateTriggerAsync(Trigger trigger);
 
         /// <summary>
         /// 异步删除一个触发器定义及其关联的变量关系。
@@ -48,6 +48,6 @@ namespace DMS.Application.Interfaces.Database
         /// </summary>
         /// <param name="variableId">变量ID。</param>
         /// <returns>与指定变量关联的触发器定义实体列表。</returns>
-        Task<IEnumerable<TriggerDefinition>> GetTriggersByVariableIdAsync(int variableId);
+        Task<IEnumerable<Trigger>> GetTriggersByVariableIdAsync(int variableId);
     }
 }

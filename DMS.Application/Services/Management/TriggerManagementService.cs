@@ -27,16 +27,16 @@ namespace DMS.Application.Services.Management
         /// <summary>
         /// 获取所有触发器定义
         /// </summary>
-        public  List<TriggerDefinition> GetAllTriggersAsync()
+        public  List<Trigger> GetAllTriggersAsync()
         {
             var triggers =  _appStorageService.Triggers.Values.ToList();
-            return _mapper.Map<List<TriggerDefinition>>(triggers);
+            return _mapper.Map<List<Trigger>>(triggers);
         }
 
         /// <summary>
         /// 根据 ID 获取触发器定义
         /// </summary>
-        public async Task<TriggerDefinition?> GetTriggerByIdAsync(int id)
+        public async Task<Trigger?> GetTriggerByIdAsync(int id)
         {
             _appStorageService.Triggers.TryGetValue(id, out var trigger);
             return trigger;
@@ -46,13 +46,13 @@ namespace DMS.Application.Services.Management
         /// <summary>
         /// 创建一个新的触发器定义
         /// </summary>
-        public async Task<TriggerDefinition> CreateTriggerAsync(TriggerDefinition triggerDto)
+        public async Task<Trigger> CreateTriggerAsync(Trigger triggerDto)
         {
             // 1. 验证 DTO (可以在应用层或领域层做)
             ValidateTriggerDto(triggerDto);
 
             // 2. 转换 DTO 到实体
-            var triggerEntity = _mapper.Map<TriggerDefinition>(triggerDto);
+            var triggerEntity = _mapper.Map<Trigger>(triggerDto);
             triggerEntity.CreatedAt = DateTime.UtcNow;
             triggerEntity.UpdatedAt = DateTime.UtcNow;
 
@@ -60,7 +60,7 @@ namespace DMS.Application.Services.Management
             var createdTrigger = await _repositoryManager.Triggers.AddAsync(triggerEntity);
 
             // 4. 转换回 DTO 并返回
-            var result = _mapper.Map<TriggerDefinition>(createdTrigger);
+            var result = _mapper.Map<Trigger>(createdTrigger);
             
             // 5. 同步更新AppDataStorageService中的Triggers字典
             _appStorageService.Triggers[result.Id] = result;
@@ -71,7 +71,7 @@ namespace DMS.Application.Services.Management
         /// <summary>
         /// 更新一个已存在的触发器定义
         /// </summary>
-        public async Task<TriggerDefinition?> UpdateTriggerAsync(int id, TriggerDefinition triggerDto)
+        public async Task<Trigger?> UpdateTriggerAsync(int id, Trigger triggerDto)
         {
             // 1. 获取现有实体
             var existingTrigger = await _repositoryManager.Triggers.GetByIdAsync(id);
@@ -91,7 +91,7 @@ namespace DMS.Application.Services.Management
                 return null;
 
             // 5. 转换回 DTO 并返回
-            var result = _mapper.Map<TriggerDefinition>(updatedTrigger);
+            var result = _mapper.Map<Trigger>(updatedTrigger);
             
             // 6. 同步更新AppDataStorageService中的Triggers字典
             _appStorageService.Triggers[result.Id] = result;
@@ -119,10 +119,10 @@ namespace DMS.Application.Services.Management
         /// <summary>
         /// 获取与指定变量关联的所有触发器定义
         /// </summary>
-        public async Task<List<TriggerDefinition>> GetTriggersForVariableAsync(int variableId)
+        public async Task<List<Trigger>> GetTriggersForVariableAsync(int variableId)
         {
             // var triggers = await _repositoryManager.Triggers.GetByVariableIdAsync(variableId);
-            // return _mapper.Map<List<TriggerDefinition>>(triggers);
+            // return _mapper.Map<List<Trigger>>(triggers);
             return null;
         }
 
@@ -141,9 +141,9 @@ namespace DMS.Application.Services.Management
         }
 
         /// <summary>
-        /// 内部方法：验证 TriggerDefinition 的有效性
+        /// 内部方法：验证 Trigger 的有效性
         /// </summary>
-        private void ValidateTriggerDto(TriggerDefinition dto)
+        private void ValidateTriggerDto(Trigger dto)
         {
             // 检查是否至少关联了一个变量
             if (dto.Variables == null || !dto.Variables.Any())

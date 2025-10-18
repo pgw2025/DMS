@@ -36,20 +36,20 @@ namespace DMS.Infrastructure.Repositories
         /// </summary>
         /// <param name="id">触发器定义的唯一标识符。</param>
         /// <returns>对应的触发器定义实体，如果不存在则为null。</returns>
-        public async Task<TriggerDefinition> GetByIdAsync(int id)
+        public async Task<Trigger> GetByIdAsync(int id)
         {
             var dbTrigger = await base.GetByIdAsync(id);
-            return _mapper.Map<TriggerDefinition>(dbTrigger);
+            return _mapper.Map<Trigger>(dbTrigger);
         }
 
         /// <summary>
         /// 异步获取所有触发器定义。
         /// </summary>
         /// <returns>包含所有触发器定义实体的列表。</returns>
-        public async Task<List<TriggerDefinition>> GetAllAsync()
+        public async Task<List<Trigger>> GetAllAsync()
         {
             var dbList = await base.GetAllAsync();
-            return _mapper.Map<List<TriggerDefinition>>(dbList);
+            return _mapper.Map<List<Trigger>>(dbList);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace DMS.Infrastructure.Repositories
         /// </summary>
         /// <param name="entity">要添加的触发器定义实体。</param>
         /// <returns>添加成功后的触发器定义实体（包含数据库生成的ID等信息）。</returns>
-        public async Task<TriggerDefinition> AddAsync(TriggerDefinition entity)
+        public async Task<Trigger> AddAsync(Trigger entity)
         {
             var dbTrigger = _mapper.Map<DbTriggerDefinition>(entity);
             var addedDbTrigger = await base.AddAsync(dbTrigger);
@@ -69,7 +69,7 @@ namespace DMS.Infrastructure.Repositories
         /// </summary>
         /// <param name="entity">要更新的触发器定义实体。</param>
         /// <returns>受影响的行数。</returns>
-        public async Task<int> UpdateAsync(TriggerDefinition entity)
+        public async Task<int> UpdateAsync(Trigger entity)
         {
             var dbTrigger = _mapper.Map<DbTriggerDefinition>(entity);
             return await base.UpdateAsync(dbTrigger);
@@ -80,7 +80,7 @@ namespace DMS.Infrastructure.Repositories
         /// </summary>
         /// <param name="entity">要删除的触发器定义实体。</param>
         /// <returns>受影响的行数。</returns>
-        public async Task<int> DeleteAsync(TriggerDefinition entity)
+        public async Task<int> DeleteAsync(Trigger entity)
         {
             return await base.DeleteAsync(_mapper.Map<DbTriggerDefinition>(entity));
         }
@@ -106,17 +106,17 @@ namespace DMS.Infrastructure.Repositories
         /// </summary>
         /// <param name="number">要获取的触发器定义数量。</param>
         /// <returns>包含指定数量触发器定义实体的列表。</returns>
-        public new async Task<List<TriggerDefinition>> TakeAsync(int number)
+        public new async Task<List<Trigger>> TakeAsync(int number)
         {
             var dbList = await base.TakeAsync(number);
-            return _mapper.Map<List<TriggerDefinition>>(dbList);
+            return _mapper.Map<List<Trigger>>(dbList);
         }
 
-        public async Task<List<TriggerDefinition>> AddBatchAsync(List<TriggerDefinition> entities)
+        public async Task<List<Trigger>> AddBatchAsync(List<Trigger> entities)
         {
             var dbEntities = _mapper.Map<List<DbTriggerDefinition>>(entities);
             var addedEntities = await base.AddBatchAsync(dbEntities);
-            return _mapper.Map<List<TriggerDefinition>>(addedEntities);
+            return _mapper.Map<List<Trigger>>(addedEntities);
         }
     }
 }

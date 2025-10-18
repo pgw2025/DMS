@@ -17,7 +17,7 @@ public interface ITriggerDataService
     /// <summary>
     /// 添加触发器。
     /// </summary>
-    Task<TriggerItem> AddTrigger(TriggerItem dto);
+    Task<TriggerItem> AddTrigger(TriggerItem triggerItem);
 
     /// <summary>
     /// 删除触发器。

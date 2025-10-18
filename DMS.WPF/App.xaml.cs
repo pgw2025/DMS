@@ -271,6 +271,8 @@ public partial class App : System.Windows.Application
         services.AddSingleton<ITriggerManagementService, TriggerManagementService>(); // 注册触发器管理服务
         services.AddSingleton<ITriggerEvaluationService, TriggerEvaluationService>();   // 注册触发器评估服务
         services.AddSingleton<ITriggerActionExecutor, TriggerActionExecutor>();       // 注册触发器动作执行器
+        services.AddSingleton<ITriggerVariableManagementService, TriggerVariableManagementService>(); // 注册触发器变量管理服务
+        services.AddSingleton<ITriggerVariableAppService, TriggerVariableAppService>(); // 注册触发器变量应用服务
 
         services.AddSingleton<IDataLoaderService, DataLoaderService>();
         services.AddSingleton<INlogAppService, NlogAppService>();

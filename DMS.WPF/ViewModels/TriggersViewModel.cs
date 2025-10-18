@@ -105,7 +105,7 @@ namespace DMS.WPF.ViewModels
             }
 
             // 传递副本以避免直接修改原始对象
-            var triggerToEdit = _mapper.Map<TriggerDefinition>(SelectedTrigger);
+            var triggerToEdit = _mapper.Map<Trigger>(SelectedTrigger);
             
             TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
             await viewModel.OnInitializedAsync(triggerToEdit);

@@ -33,7 +33,7 @@ namespace DMS.Application.Services.Database
         /// </summary>
         /// <param name="id">触发器ID。</param>
         /// <returns>触发器定义实体。</returns>
-        public async Task<TriggerDefinition> GetTriggerByIdAsync(int id)
+        public async Task<Trigger> GetTriggerByIdAsync(int id)
         {
             var dbTrigger = await _repositoryManager.Triggers.GetByIdAsync(id);
             return dbTrigger;
@@ -43,7 +43,7 @@ namespace DMS.Application.Services.Database
         /// 异步获取所有触发器定义。
         /// </summary>
         /// <returns>触发器定义实体列表。</returns>
-        public async Task<List<TriggerDefinition>> GetAllTriggersAsync()
+        public async Task<List<Trigger>> GetAllTriggersAsync()
         {
             var triggers = await _repositoryManager.Triggers.GetAllAsync();
             var triggerVariables = await _repositoryManager.TriggerVariables.GetAllAsync();
@@ -62,7 +62,7 @@ namespace DMS.Application.Services.Database
         /// </summary>
         /// <param name="trigger">要创建的触发器定义。</param>
         /// <returns>新创建的触发器定义。</returns>
-        public async Task<TriggerDefinition> CreateTriggerAsync(TriggerDefinition trigger)
+        public async Task<Trigger> CreateTriggerAsync(Trigger trigger)
         {
             try
             {
@@ -99,7 +99,7 @@ namespace DMS.Application.Services.Database
         /// </summary>
         /// <param name="trigger">要更新的触发器定义。</param>
         /// <returns>受影响的行数。</returns>
-        public async Task<int> UpdateTriggerAsync(TriggerDefinition trigger)
+        public async Task<int> UpdateTriggerAsync(Trigger trigger)
         {
             try
             {
@@ -169,7 +169,7 @@ namespace DMS.Application.Services.Database
         /// </summary>
         /// <param name="variableId">变量ID。</param>
         /// <returns>与指定变量关联的触发器定义实体列表。</returns>
-        public async Task<IEnumerable<TriggerDefinition>> GetTriggersByVariableIdAsync(int variableId)
+        public async Task<IEnumerable<Trigger>> GetTriggersByVariableIdAsync(int variableId)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -177,7 +177,7 @@ namespace DMS.Application.Services.Database
             // // 获取关联的触发器ID列表
             // var triggerIds = await _repositoryManager.GetTriggerIdsByVariableIdAsync(variableId);
 
-            // var triggers = new List<TriggerDefinition>();
+            // var triggers = new List<Trigger>();
             // if (triggerIds.Any())
             // {
             //     // 获取所有关联的触发器

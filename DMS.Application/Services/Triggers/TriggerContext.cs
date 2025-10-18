@@ -11,5 +11,5 @@ namespace DMS.Application.Services.Triggers
     /// <param name="Trigger">被触发的触发器定义</param>
     /// <param name="CurrentValue">触发时变量的当前值</param>
     /// <param name="Variable">关联的变量信息</param>
-    public record TriggerContext(TriggerDefinition Trigger, object CurrentValue, Variable Variable);
+    public record TriggerContext(Trigger Trigger, object CurrentValue, Variable Variable);
 }

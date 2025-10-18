@@ -58,7 +58,7 @@ public class AppStorageService : IAppStorageService
     /// <summary>
     /// 安全字典，用于存储所有触发器定义数据
     /// </summary>
-    public ConcurrentDictionary<int, TriggerDefinition> Triggers { get; } = new();
+    public ConcurrentDictionary<int, Trigger> Triggers { get; } = new();
 
     /// <summary>
     /// 安全字典，用于存储所有触发器与变量关联数据

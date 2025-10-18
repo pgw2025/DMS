@@ -16,6 +16,7 @@ public class DataLoaderService : IDataLoaderService
 {
     private readonly IMqttManagementService _mqttManagementService;
     private readonly IMqttAliasManagementService _mqttAliasManagementService;
+    private readonly ITriggerVariableManagementService _triggerVariableManagementService;
     private readonly ITriggerManagementService _triggerManagementService; // 添加触发器管理服务
     private readonly IEventService _eventService; // 添加事件服务
     private readonly IDeviceManagementService _deviceManagementService; // 添加设备管理服务
@@ -29,6 +30,7 @@ public class DataLoaderService : IDataLoaderService
     public const int LoadLogCount =100;
     public DataLoaderService(IMqttManagementService mqttManagementService,
                              IMqttAliasManagementService mqttAliasManagementService,
+                             ITriggerVariableManagementService  triggerVariableManagementService,
                              ITriggerManagementService triggerManagementService, // 添加触发器管理服务参数
                              IEventService eventService, // 添加事件服务参数
                              IDeviceManagementService deviceManagementService, // 添加设备管理服务参数
@@ -39,6 +41,7 @@ public class DataLoaderService : IDataLoaderService
     {
         _mqttManagementService = mqttManagementService;
         _mqttAliasManagementService = mqttAliasManagementService;
+        _triggerVariableManagementService = triggerVariableManagementService;
         _triggerManagementService = triggerManagementService; // 初始化触发器管理服务
         _eventService = eventService; // 初始化事件服务
         _deviceManagementService = deviceManagementService; // 初始化设备管理服务
@@ -74,6 +77,8 @@ public class DataLoaderService : IDataLoaderService
         
         // 加载所有触发器
         await _triggerManagementService.LoadAllTriggersAsync();
+        // 加载触发器和变量的关联
+        await _triggerVariableManagementService.LoadAllTriggerVariablesAsync();
 
         _eventService.RaiseLoadDataCompleted(this, new DataLoadCompletedEventArgs(true, "数据加载成功"));
     }

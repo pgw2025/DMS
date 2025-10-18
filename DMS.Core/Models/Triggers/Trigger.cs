@@ -30,7 +30,7 @@ namespace DMS.Core.Models.Triggers
     /// <summary>
     /// 触发器定义领域模型
     /// </summary>
-    public class TriggerDefinition
+    public class Trigger
     {
         /// <summary>
         /// 触发器唯一标识符

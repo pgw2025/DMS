@@ -101,7 +101,7 @@ namespace DMS.Application.Services.Triggers.Impl
         /// <summary>
         /// 内部方法：评估单个触发器的条件
         /// </summary>
-        private bool EvaluateCondition(TriggerDefinition trigger, object currentValueObj)
+        private bool EvaluateCondition(Trigger trigger, object currentValueObj)
         {
             if (currentValueObj == null) 
             {
@@ -139,7 +139,7 @@ namespace DMS.Application.Services.Triggers.Impl
         /// <summary>
         /// 内部方法：检查触发器是否处于抑制窗口期内
         /// </summary>
-        private bool IsWithinSuppressionWindow(TriggerDefinition trigger)
+        private bool IsWithinSuppressionWindow(Trigger trigger)
         {
             if (!trigger.SuppressionDuration.HasValue || !trigger.LastTriggeredAt.HasValue)
                 return false;

@@ -59,15 +59,15 @@ public class TriggerDataService : ITriggerDataService
     /// <summary>
     /// 添加触发器。
     /// </summary>
-    public async Task<TriggerItem> AddTrigger(TriggerItem dto)
+    public async Task<TriggerItem> AddTrigger(TriggerItem triggerItem)
     {
         // 添加null检查
-        if (dto == null)
+        if (triggerItem == null)
             return null;
 
         var addDto
             = await _appCenterService.TriggerManagementService.CreateTriggerAsync(
-                _mapper.Map<TriggerDefinition>(dto));
+                _mapper.Map<Trigger>(triggerItem));
 
         // 添加null检查
         if (addDto == null)

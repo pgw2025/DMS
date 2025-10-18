@@ -1,6 +1,7 @@
 ﻿using DMS.Core.Enums;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using DMS.Core.Models.Triggers;
 
 namespace DMS.Core.Models;
 
@@ -58,6 +59,10 @@ public class Variable
     /// 此变量的所有MQTT发布别名关联。一个变量可以关联多个MQTT服务器，每个关联可以有独立的别名。
     /// </summary>
     public List<MqttAlias> MqttAliases { get; set; } = new();
+    /// <summary>
+    /// 此变量的所有触发器关联。一个变量可以关联多个触发器
+    /// </summary>
+    public List<Trigger> Triggers { get; set; } = new();
 
     /// <summary>
     /// OPC UA NodeId (仅当 Protocol 为 OpcUa 时有效)。

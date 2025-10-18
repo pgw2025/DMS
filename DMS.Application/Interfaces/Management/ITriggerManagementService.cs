@@ -12,21 +12,21 @@ namespace DMS.Application.Interfaces.Management
         /// 获取所有触发器定义
         /// </summary>
         /// <returns>触发器定义列表</returns>
-        List<TriggerDefinition> GetAllTriggersAsync();
+        List<Trigger> GetAllTriggersAsync();
 
         /// <summary>
         /// 根据 ID 获取触发器定义
         /// </summary>
         /// <param name="id">触发器 ID</param>
         /// <returns>触发器定义 DTO，如果未找到则返回 null</returns>
-        Task<TriggerDefinition> GetTriggerByIdAsync(int id);
+        Task<Trigger> GetTriggerByIdAsync(int id);
 
         /// <summary>
         /// 创建一个新的触发器定义
         /// </summary>
         /// <param name="triggerDto">要创建的触发器定义 DTO</param>
         /// <returns>创建成功的触发器定义 DTO</returns>
-        Task<TriggerDefinition> CreateTriggerAsync(TriggerDefinition triggerDto);
+        Task<Trigger> CreateTriggerAsync(Trigger triggerDto);
 
         /// <summary>
         /// 更新一个已存在的触发器定义
@@ -34,7 +34,7 @@ namespace DMS.Application.Interfaces.Management
         /// <param name="id">要更新的触发器 ID</param>
         /// <param name="triggerDto">包含更新信息的触发器定义 DTO</param>
         /// <returns>更新后的触发器定义 DTO，如果未找到则返回 null</returns>
-        Task<TriggerDefinition?> UpdateTriggerAsync(int id, TriggerDefinition triggerDto);
+        Task<Trigger?> UpdateTriggerAsync(int id, Trigger triggerDto);
 
         /// <summary>
         /// 删除一个触发器定义
@@ -48,7 +48,7 @@ namespace DMS.Application.Interfaces.Management
         /// </summary>
         /// <param name="variableId">变量 ID</param>
         /// <returns>该变量关联的触发器定义列表</returns>
-        Task<List<TriggerDefinition>> GetTriggersForVariableAsync(int variableId);
+        Task<List<Trigger>> GetTriggersForVariableAsync(int variableId);
 
         /// <summary>
         /// 异步加载所有触发器数据
