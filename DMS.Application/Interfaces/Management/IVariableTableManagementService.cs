@@ -30,4 +30,9 @@ public interface IVariableTableManagementService
     /// 异步删除一个变量表。
     /// </summary>
     Task<bool> DeleteVariableTableAsync(int id);
+
+    /// <summary>
+    /// 异步加载所有变量表数据到内存中。
+    /// </summary>
+    Task LoadAllVariableTablesAsync();
 }

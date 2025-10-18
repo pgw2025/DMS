@@ -160,4 +160,19 @@ public class MenuManagementService : IMenuManagementService
     {
         _eventService.RaiseMenuChanged(this, e);
     }
+
+    /// <summary>
+    /// 异步加载所有菜单数据到内存中。
+    /// </summary>
+    public async Task LoadAllMenusAsync()
+    {
+        _appStorageService.Menus.Clear();
+        _appStorageService.MenuTrees.Clear();
+        var menus = await _menuService.GetAllMenusAsync();
+        // 将菜单添加到安全字典
+        foreach (var menuBean in menus)
+        {
+            _appStorageService.Menus.TryAdd(menuBean.Id, menuBean);
+        }
+    }
 }

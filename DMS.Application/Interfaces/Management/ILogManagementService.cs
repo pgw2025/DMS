@@ -44,4 +44,9 @@ public interface ILogManagementService
     /// 当日志数据发生变化时触发
     /// </summary>
     event EventHandler<NlogChangedEventArgs> OnLogChanged;
+
+    /// <summary>
+    /// 异步加载所有日志数据到内存中。
+    /// </summary>
+    Task LoadAllNlogsAsync(int count);
 }

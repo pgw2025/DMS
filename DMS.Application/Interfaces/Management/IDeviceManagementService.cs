@@ -6,7 +6,7 @@ namespace DMS.Application.Interfaces.Management;
 
 public interface IDeviceManagementService
 {
-    
+
 
     /// <summary>
     /// 异步根据ID获取设备DTO。
@@ -35,7 +35,9 @@ public interface IDeviceManagementService
     /// </summary>
     Task ToggleDeviceActiveStateAsync(int id);
 
-    
+    /// <summary>
+    /// 异步加载所有设备数据到内存中。
+    /// </summary>
+    Task LoadAllDevicesAsync();
 
-  
 }

@@ -131,6 +131,27 @@ public class VariableTableManagementService : IVariableTableManagementService
     }
 
 
+    /// <summary>
+    /// 异步加载所有变量表数据到内存中。
+    /// </summary>
+    public async Task LoadAllVariableTablesAsync()
+    {
+        _appStorageService.VariableTables.Clear();
+        var variableTables = await _variableTableAppService.GetAllVariableTablesAsync();
+        // 建立变量表与变量的关联
+        foreach (var variableTable in variableTables)
+        {
+            if (_appStorageService.Devices.TryGetValue(variableTable.DeviceId, out var device))
+            {
+                variableTable.Device = device;
+                if (device.VariableTables == null)
+                    device.VariableTables = new List<VariableTable>();
+                device.VariableTables.Add(variableTable);
+            }
 
+            // 将变量表添加到安全字典
+            _appStorageService.VariableTables.TryAdd(variableTable.Id, variableTable);
+        }
+    }
 
 }

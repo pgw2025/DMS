@@ -233,4 +233,18 @@ public class MqttManagementService : IMqttManagementService
 
         return changedProperties;
     }
+
+    /// <summary>
+    /// 异步加载所有MQTT服务器数据到内存中。
+    /// </summary>
+    public async Task LoadAllMqttServersAsync()
+    {
+        _appStorageService.MqttServers.Clear();
+        var mqttServers = await _mqttAppService.GetAllMqttServersAsync();
+        // 加载MQTT服务器数据到内存
+        foreach (var mqttServer in mqttServers)
+        {
+            _appStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
+        }
+    }
 }

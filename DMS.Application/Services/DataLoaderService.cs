@@ -1,9 +1,6 @@
-using AutoMapper;
 using DMS.Application.Interfaces;
-using DMS.Core.Interfaces;
 using System.Collections.Concurrent;
 using DMS.Application.Events;
-using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces.Management;
 using DMS.Application.Services.Management;
 using DMS.Core.Models;
@@ -17,48 +14,38 @@ namespace DMS.Application.Services;
 /// </summary>
 public class DataLoaderService : IDataLoaderService
 {
-    private readonly IRepositoryManager _repositoryManager;
-    private readonly IMapper _mapper;
-    private readonly IAppStorageService _appStorageService;
-    private readonly IDeviceAppService _deviceAppService;
-    private readonly IVariableTableAppService _variableTableAppService;
-    private readonly IVariableAppService _variableAppService;
-    private readonly IMenuAppService _menuService;
-    private readonly IMqttAppService _mqttAppService;
-    private readonly INlogAppService _nlogAppService;
+    private readonly IMqttManagementService _mqttManagementService;
     private readonly IMqttAliasManagementService _mqttAliasManagementService;
     private readonly ITriggerManagementService _triggerManagementService; // 添加触发器管理服务
     private readonly IEventService _eventService; // 添加事件服务
+    private readonly IDeviceManagementService _deviceManagementService; // 添加设备管理服务
+    private readonly IVariableTableManagementService _variableTableManagementService; // 添加变量表管理服务
+    private readonly IVariableManagementService _variableManagementService; // 添加变量管理服务
+    private readonly IMenuManagementService _menuManagementService; // 添加菜单管理服务
+    private readonly ILogManagementService _logManagementService; // 添加日志管理服务
 
 
 
     public const int LoadLogCount =100;
-    public DataLoaderService(
-        IRepositoryManager repositoryManager,
-        IMapper mapper,
-        IAppStorageService appStorageService,
-        IDeviceAppService deviceAppService,
-        IVariableTableAppService variableTableAppService,
-        IVariableAppService variableAppService,
-        IMenuAppService menuService,
-        IMqttAppService mqttAppService,
-        INlogAppService nlogAppService,
-        IMqttAliasManagementService mqttAliasManagementService,
-        ITriggerManagementService triggerManagementService, // 添加触发器管理服务参数
-        IEventService eventService) // 添加事件服务参数
+    public DataLoaderService(IMqttManagementService mqttManagementService,
+                             IMqttAliasManagementService mqttAliasManagementService,
+                             ITriggerManagementService triggerManagementService, // 添加触发器管理服务参数
+                             IEventService eventService, // 添加事件服务参数
+                             IDeviceManagementService deviceManagementService, // 添加设备管理服务参数
+                             IVariableTableManagementService variableTableManagementService, // 添加变量表管理服务参数
+                             IVariableManagementService variableManagementService, // 添加变量管理服务参数
+                             IMenuManagementService menuManagementService, // 添加菜单管理服务参数
+                             ILogManagementService logManagementService) // 添加日志管理服务参数
     {
-        _repositoryManager = repositoryManager;
-        _mapper = mapper;
-        _appStorageService = appStorageService;
-        _deviceAppService = deviceAppService;
-        _variableTableAppService = variableTableAppService;
-        _variableAppService = variableAppService;
-        _menuService = menuService;
-        _mqttAppService = mqttAppService;
-        _nlogAppService = nlogAppService;
-        this._mqttAliasManagementService = mqttAliasManagementService;
+        _mqttManagementService = mqttManagementService;
+        _mqttAliasManagementService = mqttAliasManagementService;
         _triggerManagementService = triggerManagementService; // 初始化触发器管理服务
         _eventService = eventService; // 初始化事件服务
+        _deviceManagementService = deviceManagementService; // 初始化设备管理服务
+        _variableTableManagementService = variableTableManagementService; // 初始化变量表管理服务
+        _variableManagementService = variableManagementService; // 初始化变量管理服务
+        _menuManagementService = menuManagementService; // 初始化菜单管理服务
+        _logManagementService = logManagementService; // 初始化日志管理服务
     }
 
 
@@ -68,149 +55,27 @@ public class DataLoaderService : IDataLoaderService
     public async Task LoadAllDataToMemoryAsync()
     {
 
-        await LoadAllDevicesAsync();
+        await _deviceManagementService.LoadAllDevicesAsync();
 
-        await LoadAllVariableTablesAsync();
+        await _variableTableManagementService.LoadAllVariableTablesAsync();
 
-        await LoadAllVariablesAsync();
+        await _variableManagementService.LoadAllVariablesAsync();
         // 加载所有菜单
-        await LoadAllMenusAsync();
+        await _menuManagementService.LoadAllMenusAsync();
 
         // 加载所有MQTT服务器
-        await LoadAllMqttServersAsync();
+        await _mqttManagementService.LoadAllMqttServersAsync();
 
         // 加载所有日志
-        await LoadAllNlogsAsync(LoadLogCount);
+        await _logManagementService.LoadAllNlogsAsync(LoadLogCount);
 
         // 获取变量MQTT别名
         await _mqttAliasManagementService.LoadAllMqttAliasAsync();
         
         // 加载所有触发器
-        await LoadAllTriggersAsync();
+        await _triggerManagementService.LoadAllTriggersAsync();
 
         _eventService.RaiseLoadDataCompleted(this, new DataLoadCompletedEventArgs(true, "数据加载成功"));
     }
 
-    /// <summary>
-    /// 异步加载所有触发器数据
-    /// </summary>
-    public async Task LoadAllTriggersAsync()
-    {
-        _appStorageService.Triggers.Clear();
-        var triggers =  _triggerManagementService.GetAllTriggersAsync();
-        // 加载触发器数据到内存
-        foreach (var trigger in triggers)
-        {
-            _appStorageService.Triggers.TryAdd(trigger.Id, trigger);
-        }
-    }
-
-
-
-    /// <summary>
-    /// 异步加载所有设备数据
-    /// </summary>
-    public async Task LoadAllDevicesAsync()
-    {
-        _appStorageService.Devices.Clear();
-        var devices = await _repositoryManager.Devices.GetAllAsync();
-        var devicesDtos = _mapper.Map<List<Device>>(devices);
-
-        // 建立设备与变量表的关联
-        foreach (var deviceDto in devicesDtos)
-        {
-            // 将设备添加到安全字典
-            _appStorageService.Devices.TryAdd(deviceDto.Id, deviceDto);
-        }
-    }
-
-    /// <summary>
-    /// 异步加载所有变量表数据
-    /// </summary>
-    public async Task LoadAllVariableTablesAsync()
-    {
-        _appStorageService.VariableTables.Clear();
-        var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
-        var variableTableDtos = _mapper.Map<List<VariableTable>>(variableTables);
-        // 建立变量表与变量的关联
-        foreach (var variableTableDto in variableTableDtos)
-        {
-            if (_appStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var deviceDto))
-            {
-                variableTableDto.Device = deviceDto;
-                variableTableDto.Device.VariableTables.Add(variableTableDto);
-            }
-
-            // 将变量表添加到安全字典
-            _appStorageService.VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
-        }
-    }
-
-    /// <summary>
-    /// 异步加载所有变量数据
-    /// </summary>
-    public async Task LoadAllVariablesAsync()
-    {
-        _appStorageService.Variables.Clear();
-
-        var variables = await _repositoryManager.Variables.GetAllAsync();
-        var variableDtos = _mapper.Map<List<Variable>>(variables);
-        // 将变量添加到安全字典
-        foreach (var variableDto in variableDtos)
-        {
-            if (_appStorageService.VariableTables.TryGetValue(variableDto.VariableTableId,
-                                                                  out var variableTableDto))
-            {
-                variableDto.VariableTable = variableTableDto;
-                variableDto.VariableTable.Variables.Add(variableDto);
-            }
-
-            _appStorageService.Variables.TryAdd(variableDto.Id, variableDto);
-        }
-    }
-
-    /// <summary>
-    /// 异步加载所有菜单数据
-    /// </summary>
-    public async Task LoadAllMenusAsync()
-    {
-        _appStorageService.Menus.Clear();
-        _appStorageService.MenuTrees.Clear();
-        var menus = await _repositoryManager.Menus.GetAllAsync();
-        // 将菜单添加到安全字典
-        foreach (var menuBean in menus)
-        {
-            _appStorageService.Menus.TryAdd(menuBean.Id, menuBean);
-        }
-
-    }
-
-    /// <summary>
-    /// 异步加载所有MQTT服务器数据
-    /// </summary>
-    public async Task LoadAllMqttServersAsync()
-    {
-        _appStorageService.MqttServers.Clear();
-        var  mqttServers =await _mqttAppService.GetAllMqttServersAsync();
-        // 加载MQTT服务器数据到内存
-        foreach (var mqttServer in mqttServers)
-        {
-            _appStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
-        }
-    }
-
-    /// <summary>
-    /// 异步加载所有日志数据
-    /// </summary>
-    public async Task LoadAllNlogsAsync(int count)
-    {
-        _appStorageService.Nlogs.Clear();
-        var nlogDtos =await _nlogAppService.GetLatestLogsAsync(count);
-        // 加载日志数据到内存
-        foreach (var nlogDto in nlogDtos)
-        {
-            _appStorageService.Nlogs.TryAdd(nlogDto.Id, nlogDto);
-        }
-        
-    }
 }

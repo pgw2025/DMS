@@ -50,4 +50,9 @@ public interface IVariableManagementService
     /// 查找已存在的变量。
     /// </summary>
     Task<List<Variable>> FindExistingVariablesAsync(IEnumerable<Variable> variablesToCheck);
+
+    /// <summary>
+    /// 异步加载所有变量数据到内存中。
+    /// </summary>
+    Task LoadAllVariablesAsync();
 }

@@ -50,4 +50,9 @@ public interface IMenuManagementService
     /// 当菜单数据发生变化时触发
     /// </summary>
     event EventHandler<DMS.Application.Events.MenuChangedEventArgs> MenuChanged;
+
+    /// <summary>
+    /// 异步加载所有菜单数据到内存中。
+    /// </summary>
+    Task LoadAllMenusAsync();
 }

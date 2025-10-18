@@ -275,4 +275,26 @@ public class VariableManagementService : IVariableManagementService
     }
 
     
+    /// <summary>
+    /// 异步加载所有变量数据到内存中。
+    /// </summary>
+    public async Task LoadAllVariablesAsync()
+    {
+        _appStorageService.Variables.Clear();
+
+        var variables = await _variableAppService.GetAllVariablesAsync();
+        // 将变量添加到安全字典
+        foreach (var variable in variables)
+        {
+            if (_appStorageService.VariableTables.TryGetValue(variable.VariableTableId,
+                                                                  out var variableTable))
+            {
+                variable.VariableTable = variableTable;
+                variableTable.Variables.Add(variable);
+            }
+
+            _appStorageService.Variables.TryAdd(variable.Id, variable);
+        }
+    }
+
 }

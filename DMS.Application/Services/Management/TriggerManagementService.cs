@@ -41,7 +41,8 @@ namespace DMS.Application.Services.Management
             _appStorageService.Triggers.TryGetValue(id, out var trigger);
             return trigger;
         }
-
+        
+        
         /// <summary>
         /// 创建一个新的触发器定义
         /// </summary>
@@ -125,6 +126,9 @@ namespace DMS.Application.Services.Management
             return null;
         }
 
+        /// <summary>
+        /// 异步加载所有触发器数据
+        /// </summary>
         public async Task LoadAllTriggersAsync()
         {
             _appStorageService.Triggers.Clear();

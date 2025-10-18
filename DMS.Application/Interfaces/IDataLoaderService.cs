@@ -14,35 +14,5 @@ public interface IDataLoaderService
     /// </summary>
     Task LoadAllDataToMemoryAsync();
 
-    /// <summary>
-    /// 异步加载所有设备数据
-    /// </summary>
-    Task LoadAllDevicesAsync();
-
-    /// <summary>
-    /// 异步加载所有变量表数据
-    /// </summary>
-    Task LoadAllVariableTablesAsync();
-
-    /// <summary>
-    /// 异步加载所有变量数据
-    /// </summary>
-    Task LoadAllVariablesAsync();
-
-    /// <summary>
-    /// 异步加载所有菜单数据
-    /// </summary>
-    Task LoadAllMenusAsync();
-
-    /// <summary>
-    /// 异步加载所有MQTT服务器数据
-    /// </summary>
-    Task LoadAllMqttServersAsync();
-
-    /// <summary>
-    /// 异步加载所有日志数据
-    /// </summary>
-    Task LoadAllNlogsAsync(int count);
-
 
 }

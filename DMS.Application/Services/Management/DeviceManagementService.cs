@@ -128,7 +128,20 @@ public class DeviceManagementService : IDeviceManagementService
         }
     }
 
-    
-
+    /// <summary>
+    /// 异步加载所有设备数据到内存中。
+    /// </summary>
+    public async Task LoadAllDevicesAsync()
+    {
+        _appStorageService.Devices.Clear();
+        var devices = await _deviceAppService.GetAllDevicesAsync();
+        
+        // 建立设备与变量表的关联
+        foreach (var device in devices)
+        {
+            // 将设备添加到安全字典
+            _appStorageService.Devices.TryAdd(device.Id, device);
+        }
+    }
 
 }

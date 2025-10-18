@@ -89,5 +89,18 @@ public class LogManagementService : ILogManagementService
         }
     }
 
+    /// <summary>
+    /// 异步加载所有日志数据到内存中。
+    /// </summary>
+    public async Task LoadAllNlogsAsync(int count)
+    {
+        _appStorageService.Nlogs.Clear();
+        var nlogDtos = await _nlogAppService.GetLatestLogsAsync(count);
+        // 加载日志数据到内存
+        foreach (var nlogDto in nlogDtos)
+        {
+            _appStorageService.Nlogs.TryAdd(nlogDto.Id, nlogDto);
+        }
+    }
 
 }

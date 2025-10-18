@@ -49,5 +49,10 @@ namespace DMS.Application.Interfaces.Management
         /// <param name="variableId">变量 ID</param>
         /// <returns>该变量关联的触发器定义列表</returns>
         Task<List<TriggerDefinition>> GetTriggersForVariableAsync(int variableId);
+
+        /// <summary>
+        /// 异步加载所有触发器数据
+        /// </summary>
+        Task LoadAllTriggersAsync();
     }
 }
