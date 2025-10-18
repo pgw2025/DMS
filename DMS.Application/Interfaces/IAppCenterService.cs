@@ -10,7 +10,7 @@ namespace DMS.Application.Interfaces;
 /// <summary>
 /// 定义数据管理相关的应用服务操作，负责管理所有的数据，包括设备、变量表和变量。
 /// </summary>
-public interface IAppDataCenterService
+public interface IAppCenterService
 {
     ILogManagementService LogManagementService { get; set; }
     IMqttManagementService MqttManagementService { get; set; }

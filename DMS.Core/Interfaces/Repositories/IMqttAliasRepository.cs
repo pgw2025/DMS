@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace DMS.Core.Interfaces.Repositories
 {
-    public interface IVariableMqttAliasRepository : IBaseRepository<MqttAlias>
+    public interface IMqttAliasRepository : IBaseRepository<MqttAlias>
     {
 
         /// <summary>

@@ -2,10 +2,11 @@ using System.Collections.Concurrent;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Models;
+using DMS.Core.Models.Triggers;
 
 namespace DMS.Application.Services;
 
-public class AppDataStorageService : IAppDataStorageService
+public class AppStorageService : IAppStorageService
 {
     /// <summary>
     /// 安全字典，用于存储所有设备数据
@@ -57,5 +58,10 @@ public class AppDataStorageService : IAppDataStorageService
     /// <summary>
     /// 安全字典，用于存储所有触发器定义数据
     /// </summary>
-    public ConcurrentDictionary<int, TriggerDefinitionDto> Triggers { get; } = new();
+    public ConcurrentDictionary<int, TriggerDefinition> Triggers { get; } = new();
+
+    /// <summary>
+    /// 安全字典，用于存储所有触发器与变量关联数据
+    /// </summary>
+    public ConcurrentDictionary<int, TriggerVariable> TriggerVariables { get; } = new();
 }

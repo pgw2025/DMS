@@ -9,11 +9,11 @@ namespace DMS.Application.Services;
 /// </summary>
 public class EventService : IEventService
 {
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
 
-    public EventService(IAppDataStorageService appDataStorageService)
+    public EventService(IAppStorageService appStorageService)
     {
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
     }
 
     #region 设备事件
@@ -185,6 +185,25 @@ public class EventService : IEventService
     public void RaiseMenuChanged(object sender, MenuChangedEventArgs e)
     {
         OnMenuChanged?.Invoke(sender, e);
+    }
+
+    #endregion
+    
+    #region 触发器变量事件
+
+    /// <summary>
+    /// 触发器与变量关联改变事件
+    /// </summary>
+    public event EventHandler<TriggerVariableChangedEventArgs> OnTriggerVariableChanged;
+
+    /// <summary>
+    /// 触发触发器与变量关联改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">触发器与变量关联改变事件参数</param>
+    public void RaiseTriggerVariableChanged(object sender, TriggerVariableChangedEventArgs e)
+    {
+        OnTriggerVariableChanged?.Invoke(sender, e);
     }
 
     #endregion

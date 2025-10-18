@@ -6,7 +6,7 @@ using DMS.Core.Models.Triggers;
 namespace DMS.Application.Profiles;
 
 /// <summary>
-/// 配置AutoMapper的映射规则�?/// </summary>
+/// 配置AutoMapper的映射规则�?/// </summary>
 public class MappingProfile : Profile
 {
     public MappingProfile()
@@ -39,9 +39,5 @@ public class MappingProfile : Profile
         CreateMap<EmailTemplate, EmailTemplateDto>().ReverseMap();
         
         CreateMap<EmailLog, EmailLogDto>().ReverseMap();
-        CreateMap<TriggerDefinition, TriggerDefinitionDto>()
-            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds))
-            .ReverseMap()
-            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds));
     }
 }

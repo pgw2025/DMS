@@ -12,7 +12,7 @@ namespace DMS.Application.Services.Management;
 public class MenuManagementService : IMenuManagementService
 {
     private readonly IMenuAppService _menuService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IEventService _eventService;
 
     /// <summary>
@@ -20,10 +20,10 @@ public class MenuManagementService : IMenuManagementService
     /// </summary>
     public event EventHandler<MenuChangedEventArgs> MenuChanged;
 
-    public MenuManagementService(IMenuAppService menuService, IAppDataStorageService appDataStorageService, IEventService eventService)
+    public MenuManagementService(IMenuAppService menuService, IAppStorageService appStorageService, IEventService eventService)
     {
         _menuService = menuService;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _eventService = eventService;
     }
 
@@ -54,10 +54,10 @@ public class MenuManagementService : IMenuManagementService
         if (result > 0)
         {
             menu.Id = result; // 假设返回的ID是新创建的
-            if (_appDataStorageService.Menus.TryAdd(menu.Id, menu))
+            if (_appStorageService.Menus.TryAdd(menu.Id, menu))
             {
                 MenuBean parentMenu = null;
-                if (menu.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menu.ParentId.Value, out var parent))
+                if (menu.ParentId > 0 && _appStorageService.Menus.TryGetValue(menu.ParentId.Value, out var parent))
                 {
                     parentMenu = parent;
                     parent.Children.Add(menu);
@@ -80,7 +80,7 @@ public class MenuManagementService : IMenuManagementService
         // 更新成功后，更新内存中的菜单
         if (result > 0 && menu != null)
         {
-            _appDataStorageService.Menus.AddOrUpdate(menu.Id, menu, (key, oldValue) => menu);
+            _appStorageService.Menus.AddOrUpdate(menu.Id, menu, (key, oldValue) => menu);
             
 
             _eventService.RaiseMenuChanged(this, new MenuChangedEventArgs(DataChangeType.Updated, menu));
@@ -100,10 +100,10 @@ public class MenuManagementService : IMenuManagementService
         // 删除成功后，从内存中移除菜单
         if (result && menu != null)
         {
-            if (_appDataStorageService.Menus.TryRemove(id, out var menuData))
+            if (_appStorageService.Menus.TryRemove(id, out var menuData))
             {
                 // 从父菜单中移除子菜单
-                if (menuData.ParentId > 0 && _appDataStorageService.Menus.TryGetValue(menuData.ParentId.Value, out var parentMenu))
+                if (menuData.ParentId > 0 && _appStorageService.Menus.TryGetValue(menuData.ParentId.Value, out var parentMenu))
                 {
                     parentMenu.Children.Remove(menuData);
                 }
@@ -120,7 +120,7 @@ public class MenuManagementService : IMenuManagementService
     /// </summary>
     public List<MenuBean> GetRootMenus()
     {
-        return _appDataStorageService.Menus.Values.Where(m => m.ParentId == 0)
+        return _appStorageService.Menus.Values.Where(m => m.ParentId == 0)
                     .ToList();
     }
 
@@ -131,7 +131,7 @@ public class MenuManagementService : IMenuManagementService
     /// <returns>子菜单列表</returns>
     public List<MenuBean> GetChildMenus(int parentId)
     {
-        return _appDataStorageService.Menus.Values.Where(m => m.ParentId == parentId)
+        return _appStorageService.Menus.Values.Where(m => m.ParentId == parentId)
                     .ToList();
     }
 
@@ -141,7 +141,7 @@ public class MenuManagementService : IMenuManagementService
     public void BuildMenuTree()
     {
         // 清空现有菜单树
-        _appDataStorageService.MenuTrees.Clear();
+        _appStorageService.MenuTrees.Clear();
 
         // 获取所有根菜单
         var rootMenus = GetRootMenus();
@@ -149,7 +149,7 @@ public class MenuManagementService : IMenuManagementService
         // 将根菜单添加到菜单树中
         foreach (var rootMenu in rootMenus)
         {
-            _appDataStorageService.MenuTrees.TryAdd(rootMenu.Id, rootMenu);
+            _appStorageService.MenuTrees.TryAdd(rootMenu.Id, rootMenu);
         }
     }
 

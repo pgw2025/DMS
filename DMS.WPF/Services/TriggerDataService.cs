@@ -3,6 +3,7 @@ using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
 using DMS.Core.Events;
+using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ItemViewModel;
 using Opc.Ua;
@@ -15,8 +16,8 @@ namespace DMS.WPF.Services;
 public class TriggerDataService : ITriggerDataService
 {
     private readonly IMapper _mapper;
-    private readonly IAppDataCenterService _appDataCenterService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppCenterService _appCenterService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IDataStorageService _dataStorageService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
@@ -26,18 +27,18 @@ public class TriggerDataService : ITriggerDataService
     /// TriggerDataService类的构造函数。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="appDataCenterService">数据服务中心实例。</param>
-    /// <param name="appDataStorageService">应用数据存储服务实例。</param>
+    /// <param name="appCenterService">数据服务中心实例。</param>
+    /// <param name="appStorageService">应用数据存储服务实例。</param>
     /// <param name="dataStorageService">数据存储服务实例。</param>
     /// <param name="eventService">事件服务实例。</param>
     /// <param name="notificationService">通知服务实例。</param>
-    public TriggerDataService(IMapper mapper, IAppDataCenterService appDataCenterService,
-                              IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService,
+    public TriggerDataService(IMapper mapper, IAppCenterService appCenterService,
+                              IAppStorageService appStorageService, IDataStorageService dataStorageService,
                               IEventService eventService, INotificationService notificationService)
     {
         _mapper = mapper;
-        _appDataCenterService = appDataCenterService;
-        _appDataStorageService = appDataStorageService;
+        _appCenterService = appCenterService;
+        _appStorageService = appStorageService;
         _dataStorageService = dataStorageService;
         _eventService = eventService;
         _notificationService = notificationService;
@@ -49,7 +50,7 @@ public class TriggerDataService : ITriggerDataService
     /// </summary>
     public void LoadAllTriggers()
     {
-        foreach (var triggerDto in _appDataStorageService.Triggers.Values)
+        foreach (var triggerDto in _appStorageService.Triggers.Values)
         {
             _dataStorageService.Triggers.Add(triggerDto.Id, _mapper.Map<TriggerItem>(triggerDto));
         }
@@ -65,8 +66,8 @@ public class TriggerDataService : ITriggerDataService
             return null;
 
         var addDto
-            = await _appDataCenterService.TriggerManagementService.CreateTriggerAsync(
-                _mapper.Map<TriggerDefinitionDto>(dto));
+            = await _appCenterService.TriggerManagementService.CreateTriggerAsync(
+                _mapper.Map<TriggerDefinition>(dto));
 
         // 添加null检查
         if (addDto == null)
@@ -87,7 +88,7 @@ public class TriggerDataService : ITriggerDataService
     public async Task<bool> DeleteTrigger(TriggerItem trigger)
     {
         // 从数据库删除触发器数据
-        if (!await _appDataCenterService.TriggerManagementService.DeleteTriggerAsync(trigger.Id))
+        if (!await _appCenterService.TriggerManagementService.DeleteTriggerAsync(trigger.Id))
         {
             return false;
         }
@@ -103,13 +104,13 @@ public class TriggerDataService : ITriggerDataService
     /// </summary>
     public async Task<bool> UpdateTrigger(TriggerItem trigger)
     {
-        if (!_appDataStorageService.Triggers.TryGetValue(trigger.Id, out var triggerDto))
+        if (!_appStorageService.Triggers.TryGetValue(trigger.Id, out var triggerDto))
         {
             return false;
         }
 
         _mapper.Map(trigger, triggerDto);
-        if (await _appDataCenterService.TriggerManagementService.UpdateTriggerAsync(trigger.Id, triggerDto) != null)
+        if (await _appCenterService.TriggerManagementService.UpdateTriggerAsync(trigger.Id, triggerDto) != null)
         {
             return true;
         }

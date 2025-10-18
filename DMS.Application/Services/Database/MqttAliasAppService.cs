@@ -12,16 +12,16 @@ namespace DMS.Application.Services.Database;
 public class MqttAliasAppService : IMqttAliasAppService
 {
     private readonly IRepositoryManager _repoManager;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IMapper _mapper;
 
     /// <summary>
     /// 构造函数。
     /// </summary>
-    public MqttAliasAppService(IRepositoryManager repoManager,IAppDataStorageService appDataStorageService, IMapper mapper)
+    public MqttAliasAppService(IRepositoryManager repoManager,IAppStorageService appStorageService, IMapper mapper)
     {
         _repoManager = repoManager;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _mapper = mapper;
     }
 

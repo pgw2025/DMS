@@ -13,17 +13,17 @@ public class VariableTableDataService : IVariableTableDataService
 {
     private readonly IMapper _mapper;
     private readonly IDataStorageService _dataStorageService;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppCenterService _appCenterService;
     private readonly IMenuDataService _menuDataService;
 
 
 
-    public VariableTableDataService(IMapper mapper, IDataStorageService dataStorageService, IAppDataCenterService appDataCenterService,
+    public VariableTableDataService(IMapper mapper, IDataStorageService dataStorageService, IAppCenterService appCenterService,
                                     IMenuDataService menuDataService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
-        _appDataCenterService = appDataCenterService;
+        _appCenterService = appCenterService;
         _menuDataService = menuDataService;
     }
 
@@ -51,7 +51,7 @@ public class VariableTableDataService : IVariableTableDataService
             createDto.VariableTable = variableTable;
             createDto.DeviceId = variableTable.DeviceId;
             createDto.Menu = menuDto;
-            var resDto = await _appDataCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
+            var resDto = await _appCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
             
             await _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(resDto.Menu));
             return resDto.VariableTable.Id;
@@ -71,7 +71,7 @@ public class VariableTableDataService : IVariableTableDataService
         }
 
         var variableTable_mapped = _mapper.Map<VariableTable>(variableTable);
-        if (await _appDataCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTable_mapped) > 0)
+        if (await _appCenterService.VariableTableManagementService.UpdateVariableTableAsync(variableTable_mapped) > 0)
         {
             // 更新数据库后会自动更新内存，无需额外操作
 
@@ -98,7 +98,7 @@ public class VariableTableDataService : IVariableTableDataService
 
         if (isDeleteDb)
         {
-            if (!await _appDataCenterService.VariableTableManagementService.DeleteVariableTableAsync(variableTable.Id))
+            if (!await _appCenterService.VariableTableManagementService.DeleteVariableTableAsync(variableTable.Id))
             {
                 return false;
             }

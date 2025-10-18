@@ -40,7 +40,7 @@ namespace DMS.Core.Models.Triggers
         /// <summary>
         /// 关联的变量列表
         /// </summary>
-        public List<int> VariableIds { get; set; } = new List<int>();
+        public List<Variable> Variables { get; set; } = new List<Variable>();
 
         /// <summary>
         /// 触发器是否处于激活状态

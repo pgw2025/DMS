@@ -18,20 +18,20 @@ public class VariableManagementService : IVariableManagementService
     private readonly IVariableAppService _variableAppService;
     private readonly IEventService _eventService;
     private readonly IMapper _mapper;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IDataProcessingService _dataProcessingService;
 
 
     public VariableManagementService(IVariableAppService variableAppService,
                                      IEventService eventService,
                                      IMapper mapper,
-                                     IAppDataStorageService appDataStorageService,
+                                     IAppStorageService appStorageService,
                                      IDataProcessingService dataProcessingService)
     {
         _variableAppService = variableAppService;
         _eventService = eventService;
         _mapper = mapper;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _dataProcessingService = dataProcessingService;
     }
 
@@ -61,13 +61,13 @@ public class VariableManagementService : IVariableManagementService
         // 创建成功后，将变量添加到内存中
         if (result != null)
         {
-            if (_appDataStorageService.VariableTables.TryGetValue(result.VariableTableId, out var variableTable))
+            if (_appStorageService.VariableTables.TryGetValue(result.VariableTableId, out var variableTable))
             {
                 result.VariableTable = variableTable;
                 variableTable.Variables.Add(result);
             }
 
-            if (_appDataStorageService.Variables.TryAdd(result.Id, result))
+            if (_appStorageService.Variables.TryAdd(result.Id, result))
             {
                 _eventService.RaiseVariableChanged(
                     this, new VariableChangedEventArgs(ActionChangeType.Added, result));
@@ -97,7 +97,7 @@ public class VariableManagementService : IVariableManagementService
         {
             foreach (var variable in variables)
             {
-                if (_appDataStorageService.Variables.TryGetValue(variable.Id, out var mVariable))
+                if (_appStorageService.Variables.TryGetValue(variable.Id, out var mVariable))
                 {
                     // 比较旧值和新值，确定哪个属性发生了变化
                     var changedProperties = GetChangedProperties(mVariable, variable);
@@ -122,7 +122,7 @@ public class VariableManagementService : IVariableManagementService
                 else
                 {
                     // 如果内存中不存在该变量，则直接添加
-                    _appDataStorageService.Variables.TryAdd(variable.Id, variable);
+                    _appStorageService.Variables.TryAdd(variable.Id, variable);
                     _eventService.RaiseVariableChanged(
                         this, new VariableChangedEventArgs(ActionChangeType.Added, variable, VariablePropertyType.All));
                 }
@@ -142,9 +142,9 @@ public class VariableManagementService : IVariableManagementService
         // 删除成功后，从内存中移除变量
         if (result)
         {
-            if (_appDataStorageService.Variables.TryRemove(id, out var variable))
+            if (_appStorageService.Variables.TryRemove(id, out var variable))
             {
-                if (variable != null && _appDataStorageService.VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
+                if (variable != null && _appStorageService.VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
                 {
                     variableTable.Variables.Remove(variable);
                    
@@ -166,7 +166,7 @@ public class VariableManagementService : IVariableManagementService
         var result = await _variableAppService.BatchImportVariablesAsync(variables);
         foreach (var variable in result)
         {
-            if (_appDataStorageService.VariableTables.TryGetValue(variable.VariableTableId ,out var variableTable))
+            if (_appStorageService.VariableTables.TryGetValue(variable.VariableTableId ,out var variableTable))
             {
                 variable.VariableTable = variableTable;
             }
@@ -258,9 +258,9 @@ public class VariableManagementService : IVariableManagementService
         {
             foreach (var id in ids)
             {
-                if (_appDataStorageService.Variables.TryRemove(id, out var variable))
+                if (_appStorageService.Variables.TryRemove(id, out var variable))
                 {
-                    if (variable != null && _appDataStorageService.VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
+                    if (variable != null && _appStorageService.VariableTables.TryGetValue(variable.VariableTableId, out var variableTable))
                     {
                         variableTable.Variables.Remove(variable);
                     }

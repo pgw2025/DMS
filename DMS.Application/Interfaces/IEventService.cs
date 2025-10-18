@@ -148,4 +148,20 @@ public interface IEventService
     void RaiseMenuChanged(object sender, MenuChangedEventArgs e);
 
     #endregion
+    
+    #region 触发器变量事件
+
+    /// <summary>
+    /// 触发器与变量关联改变事件
+    /// </summary>
+    event EventHandler<TriggerVariableChangedEventArgs> OnTriggerVariableChanged;
+
+    /// <summary>
+    /// 触发触发器与变量关联改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">触发器与变量关联改变事件参数</param>
+    void RaiseTriggerVariableChanged(object sender, TriggerVariableChangedEventArgs e);
+
+    #endregion
 }

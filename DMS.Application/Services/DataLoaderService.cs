@@ -19,7 +19,7 @@ public class DataLoaderService : IDataLoaderService
 {
     private readonly IRepositoryManager _repositoryManager;
     private readonly IMapper _mapper;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IDeviceAppService _deviceAppService;
     private readonly IVariableTableAppService _variableTableAppService;
     private readonly IVariableAppService _variableAppService;
@@ -36,7 +36,7 @@ public class DataLoaderService : IDataLoaderService
     public DataLoaderService(
         IRepositoryManager repositoryManager,
         IMapper mapper,
-        IAppDataStorageService appDataStorageService,
+        IAppStorageService appStorageService,
         IDeviceAppService deviceAppService,
         IVariableTableAppService variableTableAppService,
         IVariableAppService variableAppService,
@@ -49,7 +49,7 @@ public class DataLoaderService : IDataLoaderService
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _deviceAppService = deviceAppService;
         _variableTableAppService = variableTableAppService;
         _variableAppService = variableAppService;
@@ -96,12 +96,12 @@ public class DataLoaderService : IDataLoaderService
     /// </summary>
     public async Task LoadAllTriggersAsync()
     {
-        _appDataStorageService.Triggers.Clear();
-        var triggers = await _triggerManagementService.GetAllTriggersAsync();
+        _appStorageService.Triggers.Clear();
+        var triggers =  _triggerManagementService.GetAllTriggersAsync();
         // 加载触发器数据到内存
         foreach (var trigger in triggers)
         {
-            _appDataStorageService.Triggers.TryAdd(trigger.Id, trigger);
+            _appStorageService.Triggers.TryAdd(trigger.Id, trigger);
         }
     }
 
@@ -112,7 +112,7 @@ public class DataLoaderService : IDataLoaderService
     /// </summary>
     public async Task LoadAllDevicesAsync()
     {
-        _appDataStorageService.Devices.Clear();
+        _appStorageService.Devices.Clear();
         var devices = await _repositoryManager.Devices.GetAllAsync();
         var devicesDtos = _mapper.Map<List<Device>>(devices);
 
@@ -120,7 +120,7 @@ public class DataLoaderService : IDataLoaderService
         foreach (var deviceDto in devicesDtos)
         {
             // 将设备添加到安全字典
-            _appDataStorageService.Devices.TryAdd(deviceDto.Id, deviceDto);
+            _appStorageService.Devices.TryAdd(deviceDto.Id, deviceDto);
         }
     }
 
@@ -129,20 +129,20 @@ public class DataLoaderService : IDataLoaderService
     /// </summary>
     public async Task LoadAllVariableTablesAsync()
     {
-        _appDataStorageService.VariableTables.Clear();
+        _appStorageService.VariableTables.Clear();
         var variableTables = await _repositoryManager.VariableTables.GetAllAsync();
         var variableTableDtos = _mapper.Map<List<VariableTable>>(variableTables);
         // 建立变量表与变量的关联
         foreach (var variableTableDto in variableTableDtos)
         {
-            if (_appDataStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var deviceDto))
+            if (_appStorageService.Devices.TryGetValue(variableTableDto.DeviceId, out var deviceDto))
             {
                 variableTableDto.Device = deviceDto;
                 variableTableDto.Device.VariableTables.Add(variableTableDto);
             }
 
             // 将变量表添加到安全字典
-            _appDataStorageService.VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
+            _appStorageService.VariableTables.TryAdd(variableTableDto.Id, variableTableDto);
         }
     }
 
@@ -151,21 +151,21 @@ public class DataLoaderService : IDataLoaderService
     /// </summary>
     public async Task LoadAllVariablesAsync()
     {
-        _appDataStorageService.Variables.Clear();
+        _appStorageService.Variables.Clear();
 
         var variables = await _repositoryManager.Variables.GetAllAsync();
         var variableDtos = _mapper.Map<List<Variable>>(variables);
         // 将变量添加到安全字典
         foreach (var variableDto in variableDtos)
         {
-            if (_appDataStorageService.VariableTables.TryGetValue(variableDto.VariableTableId,
+            if (_appStorageService.VariableTables.TryGetValue(variableDto.VariableTableId,
                                                                   out var variableTableDto))
             {
                 variableDto.VariableTable = variableTableDto;
                 variableDto.VariableTable.Variables.Add(variableDto);
             }
 
-            _appDataStorageService.Variables.TryAdd(variableDto.Id, variableDto);
+            _appStorageService.Variables.TryAdd(variableDto.Id, variableDto);
         }
     }
 
@@ -174,13 +174,13 @@ public class DataLoaderService : IDataLoaderService
     /// </summary>
     public async Task LoadAllMenusAsync()
     {
-        _appDataStorageService.Menus.Clear();
-        _appDataStorageService.MenuTrees.Clear();
+        _appStorageService.Menus.Clear();
+        _appStorageService.MenuTrees.Clear();
         var menus = await _repositoryManager.Menus.GetAllAsync();
         // 将菜单添加到安全字典
         foreach (var menuBean in menus)
         {
-            _appDataStorageService.Menus.TryAdd(menuBean.Id, menuBean);
+            _appStorageService.Menus.TryAdd(menuBean.Id, menuBean);
         }
 
     }
@@ -190,12 +190,12 @@ public class DataLoaderService : IDataLoaderService
     /// </summary>
     public async Task LoadAllMqttServersAsync()
     {
-        _appDataStorageService.MqttServers.Clear();
+        _appStorageService.MqttServers.Clear();
         var  mqttServers =await _mqttAppService.GetAllMqttServersAsync();
         // 加载MQTT服务器数据到内存
         foreach (var mqttServer in mqttServers)
         {
-            _appDataStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
+            _appStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
         }
     }
 
@@ -204,12 +204,12 @@ public class DataLoaderService : IDataLoaderService
     /// </summary>
     public async Task LoadAllNlogsAsync(int count)
     {
-        _appDataStorageService.Nlogs.Clear();
+        _appStorageService.Nlogs.Clear();
         var nlogDtos =await _nlogAppService.GetLatestLogsAsync(count);
         // 加载日志数据到内存
         foreach (var nlogDto in nlogDtos)
         {
-            _appDataStorageService.Nlogs.TryAdd(nlogDto.Id, nlogDto);
+            _appStorageService.Nlogs.TryAdd(nlogDto.Id, nlogDto);
         }
         
     }

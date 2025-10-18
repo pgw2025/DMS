@@ -5,7 +5,7 @@ namespace DMS.Infrastructure.Entities;
 /// <summary>
 /// 数据库实体：对应数据库中的 MqttAliases 表。
 /// </summary>
-public class DbVariableMqttAlias
+public class DbMqttAlias
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
     public int Id { get; set; }

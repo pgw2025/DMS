@@ -12,7 +12,7 @@ namespace DMS.WPF.Services;
 public class WPFDataService : IWPFDataService
 {
     private readonly IMapper _mapper;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppCenterService _appCenterService;
 
     /// <summary>
     /// 设备数据服务。
@@ -59,7 +59,7 @@ public class WPFDataService : IWPFDataService
     /// </summary>
     public WPFDataService(
         IMapper mapper,
-        IAppDataCenterService appDataCenterService,
+        IAppCenterService appCenterService,
         IDeviceDataService deviceDataService,
         IVariableDataService variableDataService,
         IMenuDataService menuDataService,
@@ -70,7 +70,7 @@ public class WPFDataService : IWPFDataService
         IMqttAliasDataService mqttAliasDataService)
     {
         _mapper = mapper;
-        _appDataCenterService = appDataCenterService;
+        _appCenterService = appCenterService;
         DeviceDataService = deviceDataService;
         VariableDataService = variableDataService;
         MenuDataService = menuDataService;

@@ -19,8 +19,8 @@ namespace DMS.Infrastructure.Services.S7
         private readonly ILogger<S7ServiceManager> _logger;
         private readonly IEventService _eventService;
         private readonly IDataProcessingService _dataProcessingService;
-        private readonly IAppDataCenterService _appDataCenterService;
-        private readonly IAppDataStorageService _appDataStorageService;
+        private readonly IAppCenterService _appCenterService;
+        private readonly IAppStorageService _appStorageService;
         private readonly IS7ServiceFactory _s7ServiceFactory;
         private readonly ConcurrentDictionary<int, S7DeviceContext> _deviceContexts;
         private readonly SemaphoreSlim _semaphore;
@@ -30,17 +30,17 @@ namespace DMS.Infrastructure.Services.S7
             ILogger<S7ServiceManager> logger,
             IEventService eventService,
             IDataProcessingService dataProcessingService,
-            IAppDataCenterService appDataCenterService,
-            IAppDataStorageService appDataStorageService,
+            IAppCenterService appCenterService,
+            IAppStorageService appStorageService,
             IS7ServiceFactory s7ServiceFactory)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _eventService = eventService;
             _dataProcessingService
                 = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
-            _appDataCenterService
-                = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
-            _appDataStorageService = appDataStorageService;
+            _appCenterService
+                = appCenterService ?? throw new ArgumentNullException(nameof(appCenterService));
+            _appStorageService = appStorageService;
             _s7ServiceFactory = s7ServiceFactory ?? throw new ArgumentNullException(nameof(s7ServiceFactory));
             _deviceContexts = new ConcurrentDictionary<int, S7DeviceContext>();
             _semaphore = new SemaphoreSlim(10, 10); // 默认最大并发连接数为10
@@ -54,7 +54,7 @@ namespace DMS.Infrastructure.Services.S7
         //    if (_deviceContexts.TryGetValue(e.DeviceId, out var s7DeviceContext))
         //    {
                 
-        //        var variables = _appDataStorageService.Variables.Values.Where(v => e.VariableIds.Contains(v.Id))
+        //        var variables = _appStorageService.Variables.Values.Where(v => e.VariableIds.Contains(v.Id))
         //                                              .ToList();
         //        foreach (var variable in variables)
         //        {

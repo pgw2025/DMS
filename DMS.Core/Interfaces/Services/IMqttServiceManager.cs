@@ -25,7 +25,7 @@ namespace DMS.Core.Interfaces.Services
         /// <summary>
         /// 更新MQTT服务器变量别名
         /// </summary>
-        void UpdateVariableMqttAliases(int mqttServerId, List<MqttAlias> variableMqttAliases);
+        void UpdateMqttAliases(int mqttServerId, List<MqttAlias> mqttAliases);
 
         /// <summary>
         /// 获取MQTT服务器连接状态

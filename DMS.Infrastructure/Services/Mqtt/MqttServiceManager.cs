@@ -19,7 +19,7 @@ namespace DMS.Infrastructure.Services.Mqtt
     {
         private readonly ILogger<MqttServiceManager> _logger;
         private readonly IDataProcessingService _dataProcessingService;
-        private readonly IAppDataCenterService _appDataCenterService;
+        private readonly IAppCenterService _appDataCenterService;
         private readonly IMqttServiceFactory _mqttServiceFactory;
         private readonly IEventService _eventService;
 
@@ -30,7 +30,7 @@ namespace DMS.Infrastructure.Services.Mqtt
         public MqttServiceManager(
             ILogger<MqttServiceManager> logger,
             IDataProcessingService dataProcessingService,
-            IAppDataCenterService appDataCenterService,
+            IAppCenterService appDataCenterService,
             IMqttServiceFactory mqttServiceFactory,
             IEventService eventService)
         {
@@ -91,16 +91,16 @@ namespace DMS.Infrastructure.Services.Mqtt
         /// <summary>
         /// 更新MQTT服务器变量别名
         /// </summary>
-        public void UpdateVariableMqttAliases(int mqttServerId, List<MqttAlias> variableMqttAliases)
+        public void UpdateMqttAliases(int mqttServerId, List<MqttAlias> mqttAliases)
         {
             if (_mqttContexts.TryGetValue(mqttServerId, out var context))
             {
-                context.VariableMqttAliases.Clear();
-                foreach (var alias in variableMqttAliases)
+                context.MqttAliases.Clear();
+                foreach (var alias in mqttAliases)
                 {
-                    context.VariableMqttAliases.AddOrUpdate(alias.Id, alias, (key, oldValue) => alias);
+                    context.MqttAliases.AddOrUpdate(alias.Id, alias, (key, oldValue) => alias);
                 }
-                _logger.LogInformation("已更新MQTT服务器 {MqttServerId} 的变量别名列表，共 {Count} 个别名", mqttServerId, variableMqttAliases.Count);
+                _logger.LogInformation("已更新MQTT服务器 {MqttServerId} 的变量别名列表，共 {Count} 个别名", mqttServerId, mqttAliases.Count);
             }
         }
 

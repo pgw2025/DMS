@@ -17,7 +17,7 @@ namespace DMS.WPF.Services;
 public class MqttDataService : IMqttDataService
 {
     private readonly IMapper _mapper;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IMqttManagementService _mqttManagementService;
     private readonly IMenuDataService _menuDataService;
     private readonly IMenuManagementService _menuManagementServiceImpl;
@@ -29,10 +29,10 @@ public class MqttDataService : IMqttDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="mqttAppService">MQTT应用服务实例。</param>
-    public MqttDataService(IMapper mapper, IAppDataStorageService appDataStorageService, IMqttManagementService mqttManagementService, IMenuDataService menuDataService, IMenuManagementService menuManagementServiceImpl, IDataStorageService dataStorageService)
+    public MqttDataService(IMapper mapper, IAppStorageService appStorageService, IMqttManagementService mqttManagementService, IMenuDataService menuDataService, IMenuManagementService menuManagementServiceImpl, IDataStorageService dataStorageService)
     {
         _mapper = mapper;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _mqttManagementService = mqttManagementService;
         _menuDataService = menuDataService;
         _menuManagementServiceImpl = menuManagementServiceImpl;
@@ -47,7 +47,7 @@ public class MqttDataService : IMqttDataService
         try
         {
             // 加载MQTT服务器数据
-            foreach (var mqttServer in _appDataStorageService.MqttServers.Values)
+            foreach (var mqttServer in _appStorageService.MqttServers.Values)
             {
                 _dataStorageService.MqttServers.TryAdd(mqttServer.Id, _mapper.Map<MqttServerItem>(mqttServer));
             }

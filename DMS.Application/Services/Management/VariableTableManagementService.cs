@@ -14,7 +14,7 @@ namespace DMS.Application.Services.Management;
 public class VariableTableManagementService : IVariableTableManagementService
 {
     private readonly IVariableTableAppService _variableTableAppService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IEventService _eventService;
 
     /// <summary>
@@ -23,11 +23,11 @@ public class VariableTableManagementService : IVariableTableManagementService
     public event EventHandler<VariableTableChangedEventArgs> OnVariableTableChanged;
 
     public VariableTableManagementService(IVariableTableAppService variableTableAppService,
-                                         IAppDataStorageService appDataStorageService,
+                                         IAppStorageService appStorageService,
                                          IEventService eventService)
     {
         _variableTableAppService = variableTableAppService;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _eventService = eventService;
     }
 
@@ -58,8 +58,8 @@ public class VariableTableManagementService : IVariableTableManagementService
         if (result?.VariableTable != null)
         {
             // 添加null检查
-            if (_appDataStorageService.Devices != null &&
-                _appDataStorageService.Devices.TryGetValue(result.VariableTable.DeviceId, out var device))
+            if (_appStorageService.Devices != null &&
+                _appStorageService.Devices.TryGetValue(result.VariableTable.DeviceId, out var device))
             {
                 // 确保VariableTables不为null
                 if (device.VariableTables == null)
@@ -73,7 +73,7 @@ public class VariableTableManagementService : IVariableTableManagementService
             }
 
             // 确保_variableTables和result.VariableTable不为null
-            if (_appDataStorageService.VariableTables.TryAdd(result.VariableTable.Id, result.VariableTable))
+            if (_appStorageService.VariableTables.TryAdd(result.VariableTable.Id, result.VariableTable))
             {
                 _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
                                            DataChangeType.Added,
@@ -94,7 +94,7 @@ public class VariableTableManagementService : IVariableTableManagementService
         // 更新成功后，更新内存中的变量表
         if (result > 0 && variableTable != null)
         {
-            _appDataStorageService.VariableTables.AddOrUpdate(variableTable.Id, variableTable, (key, oldValue) => variableTable);
+            _appStorageService.VariableTables.AddOrUpdate(variableTable.Id, variableTable, (key, oldValue) => variableTable);
             _eventService.RaiseVariableTableChanged(this, new VariableTableChangedEventArgs(
                                              DataChangeType.Updated,
                                              variableTable));
@@ -113,9 +113,9 @@ public class VariableTableManagementService : IVariableTableManagementService
         // 删除成功后，从内存中移除变量表
         if (result )
         {
-            if (_appDataStorageService.VariableTables.TryRemove(id, out var variableTable))
+            if (_appStorageService.VariableTables.TryRemove(id, out var variableTable))
             {
-                if (variableTable != null && _appDataStorageService.Devices.TryGetValue(variableTable.DeviceId, out var device))
+                if (variableTable != null && _appStorageService.Devices.TryGetValue(variableTable.DeviceId, out var device))
                 {
                     if (device.VariableTables != null)
                         device.VariableTables.Remove(variableTable);

@@ -17,7 +17,7 @@ public class MenuDataService : IMenuDataService
 {
     private readonly IMapper _mapper;
     private readonly IDataStorageService _dataStorageService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IMenuManagementService _menuManagementService;
 
 
@@ -26,18 +26,18 @@ public class MenuDataService : IMenuDataService
     /// MenuDataService类的构造函数。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="appDataStorageService">数据服务中心实例。</param>
-    public MenuDataService(IMapper mapper,IDataStorageService dataStorageService, IAppDataStorageService appDataStorageService,IMenuManagementService menuManagementService)
+    /// <param name="appStorageService">数据服务中心实例。</param>
+    public MenuDataService(IMapper mapper,IDataStorageService dataStorageService, IAppStorageService appStorageService,IMenuManagementService menuManagementService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _menuManagementService = menuManagementService;
     }
 
     public void LoadAllMenus()
     {
-        _dataStorageService.Menus = _mapper.Map<ObservableCollection<MenuItem>>(_appDataStorageService.Menus.Values);
+        _dataStorageService.Menus = _mapper.Map<ObservableCollection<MenuItem>>(_appStorageService.Menus.Values);
         BuildMenuTrees();
     }
 

@@ -229,7 +229,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IVariableTableRepository, VariableTableRepository>();
         services.AddSingleton<IVariableRepository, VariableRepository>();
         services.AddSingleton<IMqttServerRepository, MqttServerRepository>();
-        services.AddSingleton<IVariableMqttAliasRepository, VariableMqttAliasRepository>();
+        services.AddSingleton<IMqttAliasRepository, MqttAliasRepository>();
         services.AddSingleton<IMenuRepository, MenuRepository>();
         services.AddSingleton<IVariableHistoryRepository, VariableHistoryRepository>();
         services.AddSingleton<IUserRepository, UserRepository>();
@@ -237,6 +237,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IRepositoryManager, RepositoryManager>();
         services.AddSingleton<IAlarmHistoryRepository, AlarmHistoryRepository>(); // 添加这行
         services.AddSingleton<ITriggerRepository, TriggerRepository>(); // 注册触发器仓储
+        services.AddSingleton<ITriggerVariableRepository, TriggerVariableRepository>(); // 注册触发器与变量关联仓储
         services.AddSingleton<IEmailAccountRepository, EmailAccountRepository>();
         services.AddSingleton<IEmailMessageRepository, EmailMessageRepository>();
         services.AddSingleton<IEmailTemplateRepository, EmailTemplateRepository>();
@@ -255,10 +256,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IHistoryAppService, HistoryAppService>();
         services.AddSingleton<IVariableTableAppService, VariableTableAppService>();
         services.AddSingleton<IMenuAppService, MenuAppService>();
-        services.AddSingleton<IAppDataCenterService, AppDataCenterService>();
+        services.AddSingleton<IAppCenterService, AppCenterService>();
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<IAppDataStorageService, AppDataStorageService>();
+        services.AddSingleton<IAppStorageService, AppStorageService>();
         services.AddSingleton<IDeviceManagementService, DeviceManagementService>();
         services.AddSingleton<IVariableTableManagementService, VariableTableManagementService>();
         services.AddSingleton<IVariableManagementService, VariableManagementService>();

@@ -22,7 +22,7 @@ namespace DMS.Infrastructure.Services.OpcUa
     {
         private readonly ILogger<OpcUaServiceManager> _logger;
         private readonly IDataProcessingService _dataProcessingService;
-        private readonly IAppDataCenterService _appDataCenterService;
+        private readonly IAppCenterService _appCenterService;
         private readonly IEventService _eventService;
         private readonly OpcUaServiceOptions _options;
         private readonly ConcurrentDictionary<int, DeviceContext> _deviceContexts;
@@ -33,15 +33,15 @@ namespace DMS.Infrastructure.Services.OpcUa
             ILogger<OpcUaServiceManager> logger,
             IDataProcessingService dataProcessingService,
             IEventService eventService,
-            IAppDataCenterService appDataCenterService,
+            IAppCenterService appCenterService,
             IOptions<OpcUaServiceOptions> options)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dataProcessingService
                 = dataProcessingService ?? throw new ArgumentNullException(nameof(dataProcessingService));
             _eventService = eventService;
-            _appDataCenterService
-                = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
+            _appCenterService
+                = appCenterService ?? throw new ArgumentNullException(nameof(appCenterService));
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _deviceContexts = new ConcurrentDictionary<int, DeviceContext>();
             _semaphore = new SemaphoreSlim(_options.MaxConcurrentConnections, _options.MaxConcurrentConnections);

@@ -19,9 +19,9 @@ namespace DMS.Application.Services;
 
 /// <summary>
 /// 数据中心服务，负责管理所有的数据，包括设备、变量表、变量、菜单和日志。
-/// 实现 <see cref="IAppDataCenterService"/> 接口。
+/// 实现 <see cref="IAppCenterService"/> 接口。
 /// </summary>
-public class AppDataCenterService : IAppDataCenterService
+public class AppCenterService : IAppCenterService
 {
     private readonly IMapper _mapper;
     private readonly IRepositoryManager _repositoryManager;
@@ -69,7 +69,7 @@ public class AppDataCenterService : IAppDataCenterService
     #endregion
 
  
-    public AppDataCenterService(
+    public AppCenterService(
         IRepositoryManager repositoryManager,
         IMapper mapper,
         IDataLoaderService dataLoaderService,

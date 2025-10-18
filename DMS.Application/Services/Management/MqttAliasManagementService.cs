@@ -12,11 +12,11 @@ public class MqttAliasManagementService : IMqttAliasManagementService
 {
     private readonly IMqttAliasAppService _appService;
     private readonly IEventService _eventService;
-    private readonly IAppDataStorageService _storageService;
+    private readonly IAppStorageService _storageService;
     private readonly IMapper _mapper;
 
     public MqttAliasManagementService(IMqttAliasAppService appService, IEventService eventService,
-                                      IAppDataStorageService storageService, IMapper mapper)
+                                      IAppStorageService storageService, IMapper mapper)
     {
         _appService = appService;
         _eventService = eventService;

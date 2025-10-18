@@ -13,17 +13,17 @@ namespace DMS.Application.Services.Management;
 public class LogManagementService : ILogManagementService
 {
     private readonly INlogAppService _nlogAppService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
 
     /// <summary>
     /// 当日志数据发生变化时触发
     /// </summary>
     public event EventHandler<NlogChangedEventArgs> OnLogChanged;
 
-    public LogManagementService(INlogAppService nlogAppService,IAppDataStorageService appDataStorageService)
+    public LogManagementService(INlogAppService nlogAppService,IAppStorageService appStorageService)
     {
         _nlogAppService = nlogAppService;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ public class LogManagementService : ILogManagementService
     /// </summary>
     public void AddNlogToMemory(NlogDto nlogDto)
     {
-        if (_appDataStorageService.Nlogs.TryAdd(nlogDto.Id, nlogDto))
+        if (_appStorageService.Nlogs.TryAdd(nlogDto.Id, nlogDto))
         {
             OnLogChanged?.Invoke(this,new NlogChangedEventArgs(DataChangeType.Added, nlogDto));
         }
@@ -74,7 +74,7 @@ public class LogManagementService : ILogManagementService
     /// </summary>
     public void UpdateNlogInMemory(NlogDto nlogDto)
     {
-        _appDataStorageService.Nlogs.AddOrUpdate(nlogDto.Id, nlogDto, (key, oldValue) => nlogDto);
+        _appStorageService.Nlogs.AddOrUpdate(nlogDto.Id, nlogDto, (key, oldValue) => nlogDto);
         OnLogChanged?.Invoke(this,new NlogChangedEventArgs(DataChangeType.Updated, nlogDto));
     }
 
@@ -83,7 +83,7 @@ public class LogManagementService : ILogManagementService
     /// </summary>
     public void RemoveNlogFromMemory(int nlogId)
     {
-        if (_appDataStorageService.Nlogs.TryRemove(nlogId, out var nlogDto))
+        if (_appStorageService.Nlogs.TryRemove(nlogId, out var nlogDto))
         {
             OnLogChanged?.Invoke(this,new NlogChangedEventArgs(DataChangeType.Deleted, nlogDto));
         }

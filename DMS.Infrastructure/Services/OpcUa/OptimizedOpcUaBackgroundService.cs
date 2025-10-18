@@ -14,22 +14,22 @@ namespace DMS.Infrastructure.Services.OpcUa
     /// </summary>
     public class OptimizedOpcUaBackgroundService : BackgroundService
     {
-        private readonly IAppDataCenterService _appDataCenterService;
-        private readonly IAppDataStorageService _appDataStorageService;
+        private readonly IAppCenterService _appCenterService;
+        private readonly IAppStorageService _appStorageService;
         private readonly IEventService _eventService;
         private readonly IOpcUaServiceManager _opcUaServiceManager;
         private readonly ILogger<OptimizedOpcUaBackgroundService> _logger;
         private readonly SemaphoreSlim _reloadSemaphore = new SemaphoreSlim(0);
 
         public OptimizedOpcUaBackgroundService(
-            IAppDataCenterService appDataCenterService,
-            IAppDataStorageService appDataStorageService,
+            IAppCenterService appCenterService,
+            IAppStorageService appStorageService,
             IEventService eventService,
             IOpcUaServiceManager opcUaServiceManager,
             ILogger<OptimizedOpcUaBackgroundService> logger)
         {
-            _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
-            _appDataStorageService = appDataStorageService;
+            _appCenterService = appCenterService ?? throw new ArgumentNullException(nameof(appCenterService));
+            _appStorageService = appStorageService;
             _opcUaServiceManager = opcUaServiceManager ?? throw new ArgumentNullException(nameof(opcUaServiceManager));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _eventService = eventService;
@@ -60,7 +60,7 @@ namespace DMS.Infrastructure.Services.OpcUa
                     if (stoppingToken.IsCancellationRequested)
                         break;
 
-                    if (_appDataStorageService.Devices.IsEmpty)
+                    if (_appStorageService.Devices.IsEmpty)
                     {
                         _logger.LogInformation("没有可用的OPC UA设备，等待设备列表更新...");
                         continue;
@@ -96,7 +96,7 @@ namespace DMS.Infrastructure.Services.OpcUa
             try
             {
                 // 获取所有活动的OPC UA设备
-                var opcUaDevices = _appDataStorageService.Devices.Values
+                var opcUaDevices = _appStorageService.Devices.Values
                                                          .Where(d => d.Protocol == ProtocolType.OpcUa )
                                                          .ToList();
 

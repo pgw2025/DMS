@@ -15,15 +15,15 @@ namespace DMS.Application.Services.Management;
 public class MqttManagementService : IMqttManagementService
 {
     private readonly IMqttAppService _mqttAppService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IEventService _eventService;
 
     public MqttManagementService(IMqttAppService mqttAppService, 
-                                IAppDataStorageService appDataStorageService, 
+                                IAppStorageService appStorageService, 
                                 IEventService eventService)
     {
         _mqttAppService = mqttAppService;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _eventService = eventService;
     }
 
@@ -32,7 +32,7 @@ public class MqttManagementService : IMqttManagementService
     /// </summary>
     public async Task<MqttServer> GetMqttServerByIdAsync(int id)
     {
-        if (_appDataStorageService.MqttServers.TryGetValue(id,out var mqttServer))
+        if (_appStorageService.MqttServers.TryGetValue(id,out var mqttServer))
         {
             return mqttServer;
         }
@@ -44,7 +44,7 @@ public class MqttManagementService : IMqttManagementService
     /// </summary>
     public async Task<List<MqttServer>> GetAllMqttServersAsync()
     {
-        return _appDataStorageService.MqttServers.Values.ToList();
+        return _appStorageService.MqttServers.Values.ToList();
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public class MqttManagementService : IMqttManagementService
         {
             foreach (var mqttServer in mqttServers)
             {
-                if (_appDataStorageService.MqttServers.TryGetValue(mqttServer.Id, out var mMqttServer))
+                if (_appStorageService.MqttServers.TryGetValue(mqttServer.Id, out var mMqttServer))
                 {
                     // 比较旧值和新值，确定哪个属性发生了变化
                     var changedProperties = GetChangedProperties(mMqttServer, mqttServer);
@@ -99,7 +99,7 @@ public class MqttManagementService : IMqttManagementService
                 else
                 {
                     // 如果内存中不存在该MQTT服务器，则直接添加
-                    _appDataStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
+                    _appStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer);
                     _eventService.RaiseMqttServerChanged(
                         this, new MqttServerChangedEventArgs(ActionChangeType.Added, mqttServer, MqttServerPropertyType.All));
                 }
@@ -120,7 +120,7 @@ public class MqttManagementService : IMqttManagementService
         // 删除成功后，从内存中移除MQTT服务器
         if (result && mqttServer != null)
         {
-            if (_appDataStorageService.MqttServers.TryRemove(id, out var mqttServerFromCache))
+            if (_appStorageService.MqttServers.TryRemove(id, out var mqttServerFromCache))
             {
                 _eventService.RaiseMqttServerChanged(
                     this, new MqttServerChangedEventArgs(ActionChangeType.Deleted, mqttServerFromCache));
@@ -142,7 +142,7 @@ public class MqttManagementService : IMqttManagementService
         {
             foreach (var id in ids)
             {
-                if (_appDataStorageService.MqttServers.TryRemove(id, out var mqttServer))
+                if (_appStorageService.MqttServers.TryRemove(id, out var mqttServer))
                 {
                     _eventService.RaiseMqttServerChanged(
                         this, new MqttServerChangedEventArgs(ActionChangeType.Deleted, mqttServer));
@@ -167,7 +167,7 @@ public class MqttManagementService : IMqttManagementService
             
             
             // 将MQTT服务器添加到内存中
-            if (_appDataStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer))
+            if (_appStorageService.MqttServers.TryAdd(mqttServer.Id, mqttServer))
             {
                 _eventService.RaiseMqttServerChanged(
                     this, new MqttServerChangedEventArgs(ActionChangeType.Added, mqttServer));

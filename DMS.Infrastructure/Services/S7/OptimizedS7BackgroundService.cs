@@ -19,8 +19,8 @@ namespace DMS.Infrastructure.Services.S7;
 /// </summary>
 public class OptimizedS7BackgroundService : BackgroundService
 {
-    private readonly IAppDataCenterService _appDataCenterService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppCenterService _appCenterService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IEventService _eventService;
     private readonly IDataProcessingService _dataProcessingService;
     private readonly IS7ServiceManager _s7ServiceManager;
@@ -38,15 +38,15 @@ public class OptimizedS7BackgroundService : BackgroundService
     /// 构造函数，注入数据服务和数据处理服务。
     /// </summary>
     public OptimizedS7BackgroundService(
-        IAppDataCenterService appDataCenterService,
-        IAppDataStorageService appDataStorageService,
+        IAppCenterService appCenterService,
+        IAppStorageService appStorageService,
         IEventService eventService,
         IDataProcessingService dataProcessingService,
         IS7ServiceManager s7ServiceManager,
         ILogger<OptimizedS7BackgroundService> logger)
     {
-        _appDataCenterService = appDataCenterService;
-        _appDataStorageService = appDataStorageService;
+        _appCenterService = appCenterService;
+        _appStorageService = appStorageService;
         _eventService = eventService;
         _dataProcessingService = dataProcessingService;
         _s7ServiceManager = s7ServiceManager;
@@ -76,7 +76,7 @@ public class OptimizedS7BackgroundService : BackgroundService
                     break;
                 }
 
-                if (_appDataStorageService.Devices.IsEmpty)
+                if (_appStorageService.Devices.IsEmpty)
                 {
                     _logger.LogInformation("没有可用的S7设备，等待设备列表更新...");
                     continue;
@@ -124,7 +124,7 @@ public class OptimizedS7BackgroundService : BackgroundService
             _variablesByPollingInterval.Clear();
             _logger.LogInformation("开始加载S7变量....");
 
-            var s7Devices = _appDataStorageService
+            var s7Devices = _appStorageService
                             .Devices.Values.Where(d => d.Protocol == ProtocolType.S7 && d.IsActive == true)
                             .ToList();
 
@@ -161,7 +161,7 @@ public class OptimizedS7BackgroundService : BackgroundService
     /// </summary>
     private async Task ConnectS7ServiceAsync(CancellationToken stoppingToken)
     {
-        var s7Devices = _appDataStorageService
+        var s7Devices = _appStorageService
                         .Devices.Values.Where(d => d.Protocol == ProtocolType.S7 && d.IsActive == true)
                         .ToList();
 
@@ -207,7 +207,7 @@ public class OptimizedS7BackgroundService : BackgroundService
     private async Task PollVariablesForDeviceAsync(S7DeviceContext context, List<Variable> variables,
                                                    CancellationToken stoppingToken)
     {
-        if (!_appDataStorageService.Devices.TryGetValue(context.Device.Id, out var device))
+        if (!_appStorageService.Devices.TryGetValue(context.Device.Id, out var device))
         {
             _logger.LogWarning($"轮询时没有找到设备ID：{context.Device.Id}");
             return;

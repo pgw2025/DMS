@@ -30,7 +30,7 @@ public class MappingProfile : Profile
         CreateMap<DbMqttServer, MqttServer>()
             .ForMember(dest => dest.VariableAliases, opt => opt.Ignore())
             .ReverseMap();
-        CreateMap<DbVariableMqttAlias, MqttAlias>()
+        CreateMap<DbMqttAlias, MqttAlias>()
             .ReverseMap();
         
         CreateMap<DbMenu, MenuBean>().ReverseMap();
@@ -46,16 +46,6 @@ public class MappingProfile : Profile
         
         // --- 触发器映射 ---
         CreateMap<DbTriggerDefinition, TriggerDefinition>()
-            .ForMember(dest => dest.SuppressionDuration, 
-                       opt => opt.MapFrom(src => src.SuppressionDurationTicks.HasValue ? 
-                                                 TimeSpan.FromTicks(src.SuppressionDurationTicks.Value) : 
-                                                 (TimeSpan?)null))
-            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds))
-            .ReverseMap()
-            .ForMember(dest => dest.SuppressionDurationTicks, 
-                       opt => opt.MapFrom(src => src.SuppressionDuration.HasValue ? 
-                                                 src.SuppressionDuration.Value.Ticks : 
-                                                 (long?)null))
-            .ForMember(dest => dest.VariableIds, opt => opt.MapFrom(src => src.VariableIds));
+            .ReverseMap();
     }
 }

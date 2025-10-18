@@ -43,7 +43,7 @@ public class InitializeRepository : IInitializeRepository
         _db.CodeFirst.InitTables<DbVariableHistory>();
         _db.CodeFirst.InitTables<DbUser>();
         _db.CodeFirst.InitTables<DbMqttServer>();
-        _db.CodeFirst.InitTables<DbVariableMqttAlias>();
+        _db.CodeFirst.InitTables<DbMqttAlias>();
         _db.CodeFirst.InitTables<DbMenu>();
         _db.CodeFirst.InitTables<DbNlog>();
         _db.CodeFirst.InitTables<DbEmailAccount>();

@@ -13,39 +13,39 @@ namespace DMS.Application.Services.Management
     /// </summary>
     public class TriggerManagementService : ITriggerManagementService
     {
+        private readonly IAppStorageService _appStorageService;
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
-        private readonly IAppDataStorageService _appDataStorageService;
 
-        public TriggerManagementService(IRepositoryManager repositoryManager, IMapper mapper, IAppDataStorageService appDataStorageService)
+        public TriggerManagementService(IAppStorageService appStorageService,IRepositoryManager repositoryManager, IMapper mapper)
         {
-            _repositoryManager = repositoryManager ?? throw new ArgumentNullException(nameof(repositoryManager));
+            _appStorageService = appStorageService;
+            _repositoryManager = repositoryManager;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _appDataStorageService = appDataStorageService ?? throw new ArgumentNullException(nameof(appDataStorageService));
         }
 
         /// <summary>
         /// 获取所有触发器定义
         /// </summary>
-        public async Task<List<TriggerDefinitionDto>> GetAllTriggersAsync()
+        public  List<TriggerDefinition> GetAllTriggersAsync()
         {
-            var triggers = await _repositoryManager.Triggers.GetAllAsync();
-            return _mapper.Map<List<TriggerDefinitionDto>>(triggers);
+            var triggers =  _appStorageService.Triggers.Values.ToList();
+            return _mapper.Map<List<TriggerDefinition>>(triggers);
         }
 
         /// <summary>
         /// 根据 ID 获取触发器定义
         /// </summary>
-        public async Task<TriggerDefinitionDto?> GetTriggerByIdAsync(int id)
+        public async Task<TriggerDefinition?> GetTriggerByIdAsync(int id)
         {
-            var trigger = await _repositoryManager.Triggers.GetByIdAsync(id);
-            return trigger != null ? _mapper.Map<TriggerDefinitionDto>(trigger) : null;
+            _appStorageService.Triggers.TryGetValue(id, out var trigger);
+            return trigger;
         }
 
         /// <summary>
         /// 创建一个新的触发器定义
         /// </summary>
-        public async Task<TriggerDefinitionDto> CreateTriggerAsync(TriggerDefinitionDto triggerDto)
+        public async Task<TriggerDefinition> CreateTriggerAsync(TriggerDefinition triggerDto)
         {
             // 1. 验证 DTO (可以在应用层或领域层做)
             ValidateTriggerDto(triggerDto);
@@ -59,10 +59,10 @@ namespace DMS.Application.Services.Management
             var createdTrigger = await _repositoryManager.Triggers.AddAsync(triggerEntity);
 
             // 4. 转换回 DTO 并返回
-            var result = _mapper.Map<TriggerDefinitionDto>(createdTrigger);
+            var result = _mapper.Map<TriggerDefinition>(createdTrigger);
             
             // 5. 同步更新AppDataStorageService中的Triggers字典
-            _appDataStorageService.Triggers[result.Id] = result;
+            _appStorageService.Triggers[result.Id] = result;
 
             return result;
         }
@@ -70,7 +70,7 @@ namespace DMS.Application.Services.Management
         /// <summary>
         /// 更新一个已存在的触发器定义
         /// </summary>
-        public async Task<TriggerDefinitionDto?> UpdateTriggerAsync(int id, TriggerDefinitionDto triggerDto)
+        public async Task<TriggerDefinition?> UpdateTriggerAsync(int id, TriggerDefinition triggerDto)
         {
             // 1. 获取现有实体
             var existingTrigger = await _repositoryManager.Triggers.GetByIdAsync(id);
@@ -90,10 +90,10 @@ namespace DMS.Application.Services.Management
                 return null;
 
             // 5. 转换回 DTO 并返回
-            var result = _mapper.Map<TriggerDefinitionDto>(updatedTrigger);
+            var result = _mapper.Map<TriggerDefinition>(updatedTrigger);
             
             // 6. 同步更新AppDataStorageService中的Triggers字典
-            _appDataStorageService.Triggers[result.Id] = result;
+            _appStorageService.Triggers[result.Id] = result;
 
             return result;
         }
@@ -103,33 +103,46 @@ namespace DMS.Application.Services.Management
         /// </summary>
         public async Task<bool> DeleteTriggerAsync(int id)
         {
-            var result = await _repositoryManager.Triggers.DeleteAsync(id);
-            
-            // 如果删除成功，也从AppDataStorageService中的Triggers字典中移除
-            if (result)
-            {
-                _appDataStorageService.Triggers.TryRemove(id, out _);
-            }
-            
-            return result;
+            // var result = await _repositoryManager.Triggers.DeleteAsync(id);
+            //
+            // // 如果删除成功，也从AppDataStorageService中的Triggers字典中移除
+            // if (result)
+            // {
+            //     _appStorageService.Triggers.TryRemove(id, out _);
+            // }
+            //
+            // return result;
+            return false;
         }
 
         /// <summary>
         /// 获取与指定变量关联的所有触发器定义
         /// </summary>
-        public async Task<List<TriggerDefinitionDto>> GetTriggersForVariableAsync(int variableId)
+        public async Task<List<TriggerDefinition>> GetTriggersForVariableAsync(int variableId)
         {
-            var triggers = await _repositoryManager.Triggers.GetByVariableIdAsync(variableId);
-            return _mapper.Map<List<TriggerDefinitionDto>>(triggers);
+            // var triggers = await _repositoryManager.Triggers.GetByVariableIdAsync(variableId);
+            // return _mapper.Map<List<TriggerDefinition>>(triggers);
+            return null;
+        }
+
+        public async Task LoadAllTriggersAsync()
+        {
+            _appStorageService.Triggers.Clear();
+            var triggerDefinitions = await  _repositoryManager.Triggers.GetAllAsync();
+            foreach (var triggerDefinition in triggerDefinitions)
+            {
+                _appStorageService.Triggers.TryAdd(triggerDefinition.Id, triggerDefinition);
+            }
+
         }
 
         /// <summary>
-        /// 内部方法：验证 TriggerDefinitionDto 的有效性
+        /// 内部方法：验证 TriggerDefinition 的有效性
         /// </summary>
-        private void ValidateTriggerDto(TriggerDefinitionDto dto)
+        private void ValidateTriggerDto(TriggerDefinition dto)
         {
             // 检查是否至少关联了一个变量
-            if (dto.VariableIds == null || !dto.VariableIds.Any())
+            if (dto.Variables == null || !dto.Variables.Any())
                 throw new ArgumentException("触发器必须至少关联一个变量。");
 
             // 添加必要的验证逻辑

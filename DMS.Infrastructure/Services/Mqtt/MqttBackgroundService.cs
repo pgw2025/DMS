@@ -17,8 +17,8 @@ namespace DMS.Infrastructure.Services.Mqtt
         private readonly ILogger<MqttBackgroundService> _logger;
         private readonly IMqttServiceManager _mqttServiceManager;
         private readonly IEventService _eventService;
-        private readonly IAppDataStorageService _appDataStorageService;
-        private readonly IAppDataCenterService _appDataCenterService;
+        private readonly IAppStorageService _appStorageService;
+        private readonly IAppCenterService _appCenterService;
         private readonly ConcurrentDictionary<int, MqttServer> _mqttServers;
         private readonly SemaphoreSlim _reloadSemaphore = new(0);
 
@@ -26,14 +26,14 @@ namespace DMS.Infrastructure.Services.Mqtt
             ILogger<MqttBackgroundService> logger,
             IMqttServiceManager mqttServiceManager,
             IEventService eventService,
-            IAppDataStorageService appDataStorageService,
-            IAppDataCenterService appDataCenterService)
+            IAppStorageService appStorageService,
+            IAppCenterService appCenterService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mqttServiceManager = mqttServiceManager ?? throw new ArgumentNullException(nameof(mqttServiceManager));
             _eventService = eventService;
-            _appDataStorageService = appDataStorageService;
-            _appDataCenterService = appDataCenterService ?? throw new ArgumentNullException(nameof(appDataCenterService));
+            _appStorageService = appStorageService;
+            _appCenterService = appCenterService ?? throw new ArgumentNullException(nameof(appCenterService));
             _mqttServers = new ConcurrentDictionary<int, MqttServer>();
 
             _eventService.OnLoadDataCompleted += OnLoadDataCompleted;
@@ -186,7 +186,7 @@ namespace DMS.Infrastructure.Services.Mqtt
                 _mqttServers.Clear();
 
                 // 从数据服务中心获取所有激活的MQTT服务器
-                var mqttServers = _appDataStorageService.MqttServers.Values.ToList();
+                var mqttServers = _appStorageService.MqttServers.Values.ToList();
 
                 foreach (var mqttServer in mqttServers)
                 {

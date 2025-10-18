@@ -13,9 +13,9 @@ namespace DMS.Infrastructure.Repositories;
 
 /// <summary>
 /// 变量与MQTT别名关联仓储实现类，负责变量与MQTT别名关联数据的持久化操作。
-/// 继承自 <see cref="BaseRepository{DbVariableMqttAlias}"/> 并实现 <see cref="IVariableMqttAliasRepository"/> 接口。
+/// 继承自 <see cref="BaseRepository{DbMqttAlias}"/> 并实现 <see cref="IMqttAliasRepository"/> 接口。
 /// </summary>
-public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, IVariableMqttAliasRepository
+public class MqttAliasRepository : BaseRepository<DbMqttAlias>, IMqttAliasRepository
 {
     private readonly IMapper _mapper;
 
@@ -25,7 +25,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// <param name="mapper">AutoMapper 实例，用于实体模型和数据库模型之间的映射。</param>
     /// <param name="dbContext">SqlSugar 数据库上下文，用于数据库操作。</param>
     /// <param name="logger">日志记录器实例。</param>
-    public VariableMqttAliasRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<VariableMqttAliasRepository> logger)
+    public MqttAliasRepository(IMapper mapper, SqlSugarDbContext dbContext, ILogger<MqttAliasRepository> logger)
         : base(dbContext, logger)
     {
         _mapper = mapper;
@@ -38,8 +38,8 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// <returns>对应的变量与MQTT别名关联实体，如果不存在则为null。</returns>
     public async Task<MqttAlias> GetByIdAsync(int id)
     {
-        var dbVariableMqttAlias = await base.GetByIdAsync(id);
-        return _mapper.Map<MqttAlias>(dbVariableMqttAlias);
+        var dbMqttAlias = await base.GetByIdAsync(id);
+        return _mapper.Map<MqttAlias>(dbMqttAlias);
     }
 
     /// <summary>
@@ -59,8 +59,8 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// <returns>添加成功后的变量与MQTT别名关联实体（包含数据库生成的ID等信息）。</returns>
     public async Task<MqttAlias> AddAsync(MqttAlias entity)
     {
-        var dbVariableMqttAlias = await base.AddAsync(_mapper.Map<DbVariableMqttAlias>(entity));
-        return _mapper.Map(dbVariableMqttAlias, entity);
+        var dbMqttAlias = await base.AddAsync(_mapper.Map<DbMqttAlias>(entity));
+        return _mapper.Map(dbMqttAlias, entity);
     }
 
     /// <summary>
@@ -68,14 +68,14 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     /// </summary>
     /// <param name="entity">要更新的变量与MQTT别名关联实体。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> UpdateAsync(MqttAlias entity) => await base.UpdateAsync(_mapper.Map<DbVariableMqttAlias>(entity));
+    public async Task<int> UpdateAsync(MqttAlias entity) => await base.UpdateAsync(_mapper.Map<DbMqttAlias>(entity));
 
     /// <summary>
     /// 异步删除变量与MQTT别名关联。
     /// </summary>
     /// <param name="entity">要删除的变量与MQTT别名关联实体。</param>
     /// <returns>受影响的行数。</returns>
-    public async Task<int> DeleteAsync(MqttAlias entity) => await base.DeleteAsync(_mapper.Map<DbVariableMqttAlias>(entity));
+    public async Task<int> DeleteAsync(MqttAlias entity) => await base.DeleteAsync(_mapper.Map<DbMqttAlias>(entity));
     
     /// <summary>
     /// 异步根据ID删除变量与MQTT别名关联。
@@ -86,10 +86,10 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        var result = await _dbContext.GetInstance().Deleteable(new DbVariableMqttAlias() { Id = id })
+        var result = await _dbContext.GetInstance().Deleteable(new DbMqttAlias() { Id = id })
                              .ExecuteCommandAsync();
         stopwatch.Stop();
-        _logger.LogInformation($"Delete {typeof(DbVariableMqttAlias)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
+        _logger.LogInformation($"Delete {typeof(DbMqttAlias)},ID={id},耗时：{stopwatch.ElapsedMilliseconds}ms");
         return result;
     }
     
@@ -107,7 +107,7 @@ public class VariableMqttAliasRepository : BaseRepository<DbVariableMqttAlias>, 
 
     public async Task<List<MqttAlias>> AddBatchAsync(List<MqttAlias> entities)
     {
-        var dbEntities = _mapper.Map<List<DbVariableMqttAlias>>(entities);
+        var dbEntities = _mapper.Map<List<DbMqttAlias>>(entities);
         var addedEntities = await base.AddBatchAsync(dbEntities);
         return _mapper.Map<List<MqttAlias>>(addedEntities);
     }

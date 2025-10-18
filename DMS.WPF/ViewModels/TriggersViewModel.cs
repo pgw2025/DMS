@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
+using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
 using DMS.WPF.ItemViewModel;
@@ -15,6 +17,7 @@ namespace DMS.WPF.ViewModels
     /// </summary>
     public partial class TriggersViewModel : ViewModelBase
     {
+        private readonly IMapper _mapper;
         private readonly ITriggerDataService _triggerDataService;
         private readonly IDataStorageService _dataStorageService;
         private readonly IDialogService _dialogService;
@@ -27,11 +30,13 @@ namespace DMS.WPF.ViewModels
         private TriggerItem? _selectedTrigger;
 
         public TriggersViewModel(
+            IMapper mapper,
             ITriggerDataService triggerDataService,
             IDataStorageService dataStorageService,
             IDialogService dialogService,
             INotificationService notificationService)
         {
+            _mapper = mapper;
             _triggerDataService = triggerDataService ?? throw new ArgumentNullException(nameof(triggerDataService));
             _dataStorageService = dataStorageService ?? throw new ArgumentNullException(nameof(dataStorageService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -100,23 +105,7 @@ namespace DMS.WPF.ViewModels
             }
 
             // 传递副本以避免直接修改原始对象
-            var triggerToEdit = new TriggerDefinitionDto
-            {
-                Id = SelectedTrigger.Id,
-                VariableIds = new List<int>(SelectedTrigger.VariableIds),
-                IsActive = SelectedTrigger.IsActive,
-                Condition = SelectedTrigger.Condition,
-                Threshold = SelectedTrigger.Threshold,
-                LowerBound = SelectedTrigger.LowerBound,
-                UpperBound = SelectedTrigger.UpperBound,
-                Action = SelectedTrigger.Action,
-                ActionConfigurationJson = SelectedTrigger.ActionConfigurationJson,
-                SuppressionDuration = SelectedTrigger.SuppressionDuration,
-                LastTriggeredAt = SelectedTrigger.LastTriggeredAt,
-                Description = SelectedTrigger.Description,
-                CreatedAt = SelectedTrigger.CreatedAt,
-                UpdatedAt = SelectedTrigger.UpdatedAt
-            };
+            var triggerToEdit = _mapper.Map<TriggerDefinition>(SelectedTrigger);
             
             TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
             await viewModel.OnInitializedAsync(triggerToEdit);

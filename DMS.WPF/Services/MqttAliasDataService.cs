@@ -13,7 +13,7 @@ namespace DMS.WPF.Services;
 public class MqttAliasDataService : IMqttAliasDataService
 {
     private readonly IMapper _mapper;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IMqttAliasManagementService _mqttAliasManagementService;
     private readonly IDataStorageService _dataStorageService;
 
@@ -21,16 +21,16 @@ public class MqttAliasDataService : IMqttAliasDataService
     /// MqttAliasDataService类的构造函数。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="appDataStorageService">应用数据存储服务实例。</param>
+    /// <param name="appStorageService">应用数据存储服务实例。</param>
     /// <param name="mqttAliasManagementService">MQTT别名管理服务实例。</param>
     /// <param name="dataStorageService">数据存储服务实例。</param>
     public MqttAliasDataService(IMapper mapper, 
-        IAppDataStorageService appDataStorageService, 
+        IAppStorageService appStorageService, 
         IMqttAliasManagementService mqttAliasManagementService, 
         IDataStorageService dataStorageService)
     {
         _mapper = mapper;
-        _appDataStorageService = appDataStorageService;
+        _appStorageService = appStorageService;
         _mqttAliasManagementService = mqttAliasManagementService;
         _dataStorageService = dataStorageService;
     }
@@ -46,7 +46,7 @@ public class MqttAliasDataService : IMqttAliasDataService
             _dataStorageService.MqttAliases.Clear();
             
             // 加载MQTT别名数据
-            foreach (var mqttAlias in _appDataStorageService.MqttAliases.Values)
+            foreach (var mqttAlias in _appStorageService.MqttAliases.Values)
             {
                 MqttAliasItem mqttAliasItem = _mapper.Map<MqttAliasItem>(mqttAlias);
                 if(_dataStorageService.MqttAliases.TryAdd(mqttAlias.Id, mqttAliasItem))

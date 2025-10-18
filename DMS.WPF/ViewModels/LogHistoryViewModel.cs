@@ -30,7 +30,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     private readonly IDialogService _dialogService;
     private readonly IDataStorageService _dataStorageService;
     private readonly INotificationService _notificationService;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppCenterService _appCenterService;
 
     [ObservableProperty]
     private NlogItem _selectedLog;
@@ -51,7 +51,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     public ObservableCollection<string> LogLevels { get; } = new ObservableCollection<string> { "Trace", "Debug", "Info", "Warn", "Error", "Fatal" };
 
     public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, IDataStorageService dataStorageService
-                             , INotificationService notificationService, IWPFDataService wpfDataService, IAppDataCenterService appDataCenterService)
+                             , INotificationService notificationService, IWPFDataService wpfDataService, IAppCenterService appCenterService)
     {
         _mapper = mapper;
         _nlogAppService = nlogAppService;
@@ -59,7 +59,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
         _dataStorageService = dataStorageService;
         _notificationService = notificationService;
         _wpfDataService = wpfDataService;
-        _appDataCenterService = appDataCenterService;
+        _appCenterService = appCenterService;
 
         _logItemList = new ObservableList<NlogItem>(_dataStorageService.Nlogs);
         
@@ -67,7 +67,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
         LogItemListView = _synchronizedView.ToNotifyCollectionChanged();
         
         // 订阅日志变更事件
-        _appDataCenterService.LogManagementService.OnLogChanged += _wpfDataService.LogDataService.OnNlogChanged;
+        _appCenterService.LogManagementService.OnLogChanged += _wpfDataService.LogDataService.OnNlogChanged;
     }
 
     /// <summary>
@@ -246,7 +246,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     public void Dispose()
     {
         // 取消订阅事件
-        _appDataCenterService.LogManagementService.OnLogChanged -= OnNlogChanged;
+        _appCenterService.LogManagementService.OnLogChanged -= OnNlogChanged;
 
     }
 }

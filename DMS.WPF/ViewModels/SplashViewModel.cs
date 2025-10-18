@@ -26,7 +26,7 @@ public partial class SplashViewModel : ObservableObject
     private readonly IServiceProvider _serviceProvider;
     private readonly IInitializeService _initializeService;
     private readonly IDataEventService _dataEventService;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppCenterService _appCenterService;
     private readonly AppSettings _appSettings;
 
     [ObservableProperty]
@@ -34,13 +34,13 @@ public partial class SplashViewModel : ObservableObject
 
     public SplashViewModel(ILogger<SplashViewModel> logger, IServiceProvider serviceProvider,
                            IInitializeService initializeService, IDataEventService dataEventService,
-                           IAppDataCenterService appDataCenterService, AppSettings appSettings)
+                           IAppCenterService appCenterService, AppSettings appSettings)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
         _initializeService = initializeService;
         _dataEventService = dataEventService;
-        this._appDataCenterService = appDataCenterService;
+        this._appCenterService = appCenterService;
         _appSettings = appSettings;
     }
 
@@ -60,7 +60,7 @@ public partial class SplashViewModel : ObservableObject
             _initializeService.InitializeMenus();
 
 
-            await _appDataCenterService.DataLoaderService.LoadAllDataToMemoryAsync();
+            await _appCenterService.DataLoaderService.LoadAllDataToMemoryAsync();
 
             // 可以在这里添加加载配置的逻辑
             await Task.Delay(500); // 模拟耗时

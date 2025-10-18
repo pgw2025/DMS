@@ -33,7 +33,7 @@ public interface IRepositoryManager : IDisposable
     /// <summary>
     /// 获取变量MQTT别名仓储的实例。
     /// </summary>
-    IVariableMqttAliasRepository MqttAliases { get; set; }
+    IMqttAliasRepository MqttAliases { get; set; }
 
     /// <summary>
     /// 获取菜单仓储的实例。
@@ -61,6 +61,11 @@ public interface IRepositoryManager : IDisposable
     ITriggerRepository Triggers { get; set; }
 
     /// <summary>
+    /// 获取触发器与变量关联仓储的实例。
+    /// </summary>
+    ITriggerVariableRepository TriggerVariables { get; set; }
+
+    /// <summary>
     /// 初始化数据库
     /// </summary>
     IInitializeRepository InitializeRepository { get; set; }
@@ -81,4 +86,6 @@ public interface IRepositoryManager : IDisposable
     /// </summary>
     /// <returns>一个表示异步操作的任务。</returns>
     Task RollbackAsync();
+    
+
 }

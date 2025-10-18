@@ -18,8 +18,8 @@ namespace DMS.WPF.Services;
 public class DeviceDataService : IDeviceDataService
 {
     private readonly IMapper _mapper;
-    private readonly IAppDataCenterService _appDataCenterService;
-    private readonly IAppDataStorageService _appDataStorageService;
+    private readonly IAppCenterService _appCenterService;
+    private readonly IAppStorageService _appStorageService;
     private readonly IDataStorageService _dataStorageService;
     private readonly IVariableTableDataService _variableTableDataService;
     private readonly IEventService _eventService;
@@ -32,15 +32,15 @@ public class DeviceDataService : IDeviceDataService
     /// DeviceDataService类的构造函数。
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
-    /// <param name="appDataCenterService">数据服务中心实例。</param>
-    public DeviceDataService(IMapper mapper, IAppDataCenterService appDataCenterService,
-                             IAppDataStorageService appDataStorageService, IDataStorageService dataStorageService,IVariableTableDataService variableTableDataService,
+    /// <param name="appCenterService">数据服务中心实例。</param>
+    public DeviceDataService(IMapper mapper, IAppCenterService appCenterService,
+                             IAppStorageService appStorageService, IDataStorageService dataStorageService,IVariableTableDataService variableTableDataService,
                              IEventService eventService, INotificationService notificationService,
                              IMenuDataService menuDataService, IVariableDataService variableDataService)
     {
         _mapper = mapper;
-        _appDataCenterService = appDataCenterService;
-        _appDataStorageService = appDataStorageService;
+        _appCenterService = appCenterService;
+        _appStorageService = appStorageService;
         _dataStorageService = dataStorageService;
         _variableTableDataService = variableTableDataService;
         _eventService = eventService;
@@ -82,7 +82,7 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     public void LoadAllDevices()
     {
-        foreach (var device in _appDataStorageService.Devices.Values)
+        foreach (var device in _appStorageService.Devices.Values)
         {
             _dataStorageService.Devices.Add(device.Id, _mapper.Map<DeviceItem>(device));
         }
@@ -97,7 +97,7 @@ public class DeviceDataService : IDeviceDataService
         if (dto == null)
             return null;
 
-        var addDto = await _appDataCenterService.DeviceManagementService.CreateDeviceWithDetailsAsync(dto);
+        var addDto = await _appCenterService.DeviceManagementService.CreateDeviceWithDetailsAsync(dto);
 
         // 添加null检查
         if (addDto == null && addDto.Device == null)
@@ -142,7 +142,7 @@ public class DeviceDataService : IDeviceDataService
     {
         
         //从数据库和内存中删除设备相关数据
-        if (!await _appDataCenterService.DeviceManagementService.DeleteDeviceByIdAsync(device.Id))
+        if (!await _appCenterService.DeviceManagementService.DeleteDeviceByIdAsync(device.Id))
         {
             return false;
         }
@@ -171,13 +171,13 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     public async Task<bool> UpdateDevice(DeviceItem device)
     {
-        if (!_appDataStorageService.Devices.TryGetValue(device.Id, out var existingDevice))
+        if (!_appStorageService.Devices.TryGetValue(device.Id, out var existingDevice))
         {
             return false;
         }
 
         _mapper.Map(device, existingDevice);
-        if (await _appDataCenterService.DeviceManagementService.UpdateDeviceAsync(existingDevice) > 0)
+        if (await _appCenterService.DeviceManagementService.UpdateDeviceAsync(existingDevice) > 0)
         {
             // 更新数据库后会自动更新内存，无需额外操作
             return true;

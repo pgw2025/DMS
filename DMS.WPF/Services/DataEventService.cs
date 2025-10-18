@@ -24,7 +24,7 @@ public class DataEventService : IDataEventService
     private readonly IDataStorageService _dataStorageService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
-    private readonly IAppDataCenterService _appDataCenterService;
+    private readonly IAppCenterService _appCenterService;
     private readonly IWPFDataService _wpfDataService;
     private readonly ILogger<DataEventService> _logger;
 
@@ -35,7 +35,7 @@ public class DataEventService : IDataEventService
         IDataStorageService dataStorageService, 
         IEventService eventService,
         INotificationService notificationService,
-        IAppDataCenterService appDataCenterService,
+        IAppCenterService appCenterService,
         IWPFDataService wpfDataService,
         ILogger<DataEventService> logger)
     {
@@ -43,7 +43,7 @@ public class DataEventService : IDataEventService
         _dataStorageService = dataStorageService;
         _eventService = eventService;
         _notificationService = notificationService;
-        _appDataCenterService = appDataCenterService;
+        _appCenterService = appCenterService;
         _wpfDataService = wpfDataService;
         _logger = logger;
         
@@ -54,7 +54,7 @@ public class DataEventService : IDataEventService
         _eventService.OnMqttServerChanged += OnMqttServerChanged;
         _eventService.OnLoadDataCompleted += OnLoadDataCompleted;
         // 监听日志变更事件
-        // _appDataCenterService.OnLogChanged += _logDataService.OnNlogChanged;
+        // _appCenterService.OnLogChanged += _logDataService.OnNlogChanged;
         
         _logger?.LogInformation("DataEventService 初始化完成");
     }
