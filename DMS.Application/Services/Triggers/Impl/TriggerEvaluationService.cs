@@ -110,7 +110,7 @@ namespace DMS.Application.Services.Triggers.Impl
             }
             
             // 由于移除了条件，所有激活的触发器都会被触发
-            _logger.LogInformation("Trigger activated for trigger ID: {TriggerId}", trigger.Id);
+            _logger.LogInformation("TriggerMenu activated for trigger ID: {TriggerId}", trigger.Id);
 
             return true;
         }
@@ -128,7 +128,7 @@ namespace DMS.Application.Services.Triggers.Impl
             
             if(isSuppressed)
             {
-                _logger.LogTrace("Trigger is suppressed (until {SuppressionEnd}) for trigger ID: {TriggerId}", suppressionEndTime, trigger.Id);
+                _logger.LogTrace("TriggerMenu is suppressed (until {SuppressionEnd}) for trigger ID: {TriggerId}", suppressionEndTime, trigger.Id);
             }
             
             return isSuppressed;

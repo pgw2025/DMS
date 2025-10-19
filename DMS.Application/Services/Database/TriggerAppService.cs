@@ -177,7 +177,7 @@ namespace DMS.Application.Services.Database
             // // 获取关联的触发器ID列表
             // var triggerIds = await _repositoryManager.GetTriggerIdsByVariableIdAsync(variableId);
 
-            // var triggers = new List<Trigger>();
+            // var triggers = new List<TriggerMenu>();
             // if (triggerIds.Any())
             // {
             //     // 获取所有关联的触发器

@@ -71,8 +71,8 @@ namespace DMS.WPF.ViewModels
                     IsActive = true,
                     Action = Core.Models.Triggers.ActionType.SendEmail,
                     Description = "新建触发器",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
             };
 
             TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
@@ -83,13 +83,33 @@ namespace DMS.WPF.ViewModels
             {
                 try
                 {
-                    // 使用TriggerDataService添加触发器
-                    var createdTrigger = await _triggerDataService.AddTrigger(newTrigger);
-                    
-                    if (createdTrigger != null )
+                    // 创建包含菜单信息的 DTO
+                    CreateTriggerWithMenuDto dto = new CreateTriggerWithMenuDto();
+                    if (_mapper != null)
                     {
-                        // 触发器已添加到数据存储中，只需更新本地集合
-                        _notificationService.ShowSuccess("触发器创建成功");
+                        dto.Trigger = _mapper.Map<Trigger>(result);
+                    }
+                    else
+                    {
+                        _notificationService?.ShowError("映射服务未初始化");
+                        return;
+                    }
+
+                    // 创建菜单项
+                    dto.TriggerMenu = new MenuBean()
+                    {
+                        Header = result.Name ?? result.Description,
+                        Icon = "\uE945", // 使用触发器图标
+                        TargetViewKey = nameof(TriggerDetailViewModel),
+                    };
+
+                    // 使用TriggerDataService添加触发器和菜单
+                    var createdTriggerDto = await _triggerDataService.AddTriggerWithMenu(dto);
+                    
+                    if (createdTriggerDto != null && createdTriggerDto.Trigger != null)
+                    {
+                        // 更新UI显示
+                        _notificationService.ShowSuccess($"触发器创建成功：{createdTriggerDto.Trigger.Name ?? createdTriggerDto.Trigger.Description}");
                     }
                     else
                     {

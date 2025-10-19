@@ -140,7 +140,7 @@ public class InitializeRepository : IInitializeRepository
                                },
                                new DbMenu
                                {
-                                   Id = 5, Header = "触发器", Icon = "\uE7BA", ParentId = 0,
+                                   Id = 5, Header = "触发器", Icon = "\uE945", ParentId = 0,
                                    MenuType = MenuType.MainMenu, TargetViewKey = "TriggersViewModel",
                                    DisplayOrder = 5
                                },

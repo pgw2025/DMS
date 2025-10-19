@@ -20,6 +20,11 @@ public interface ITriggerDataService
     Task<TriggerItem> AddTrigger(TriggerItem triggerItem);
 
     /// <summary>
+    /// 添加触发器及其关联菜单。
+    /// </summary>
+    Task<CreateTriggerWithMenuDto> AddTriggerWithMenu(CreateTriggerWithMenuDto dto);
+
+    /// <summary>
     /// 删除触发器。
     /// </summary>
     Task<bool> DeleteTrigger(TriggerItem trigger);

@@ -1,12 +1,14 @@
-using System.Windows.Threading;
 using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Application.Interfaces;
+using DMS.Application.Services;
+using DMS.Core.Enums;
 using DMS.Core.Events;
 using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ItemViewModel;
 using Opc.Ua;
+using System.Windows.Threading;
 
 namespace DMS.WPF.Services;
 
@@ -98,6 +100,48 @@ public class TriggerDataService : ITriggerDataService
         _dataStorageService.Triggers.Remove(trigger.Id);
 
         return true;
+    }
+
+    /// <summary>
+    /// 添加触发器及其关联菜单。
+    /// </summary>
+    public async Task<CreateTriggerWithMenuDto> AddTriggerWithMenu(CreateTriggerWithMenuDto dto)
+    {
+        // 添加null检查
+        if (dto == null || dto.Trigger == null)
+            return null;
+
+        try
+        {
+            // 首先添加触发器
+            var createdTrigger = await _appCenterService.TriggerManagementService.CreateTriggerAsync(dto.Trigger);
+            if (createdTrigger == null)
+                return null;
+
+            
+            var  parentMenu=_appStorageService.Menus.Values.OrderBy(m=>m.Id).FirstOrDefault(m=>m.MenuType==MenuType.TriggerMenu);
+            if (parentMenu is not null)
+            {
+                // 将菜单关联到触发器
+                dto.TriggerMenu.TargetId = createdTrigger.Id;
+                dto.TriggerMenu.MenuType = MenuType.TriggerMenu;
+
+            }
+
+
+           
+            
+            // 添加到UI数据存储
+            var addItem = _mapper.Map<TriggerItem>(createdTrigger);
+            _dataStorageService.Triggers.Add(createdTrigger.Id, addItem);
+
+            return dto;
+        }
+        catch (Exception ex)
+        {
+            _notificationService?.ShowError($"添加触发器及菜单时发生错误：{ex.Message}", ex);
+            return null;
+        }
     }
 
     /// <summary>

@@ -59,13 +59,10 @@ namespace DMS.Application.Services.Management
             // 3. 调用仓储保存实体
             var createdTrigger = await _repositoryManager.Triggers.AddAsync(triggerEntity);
 
-            // 4. 转换回 DTO 并返回
-            var result = _mapper.Map<Trigger>(createdTrigger);
-            
             // 5. 同步更新AppDataStorageService中的Triggers字典
-            _appStorageService.Triggers[result.Id] = result;
+            _appStorageService.Triggers[createdTrigger.Id] = createdTrigger;
 
-            return result;
+            return createdTrigger;
         }
 
         /// <summary>
@@ -122,7 +119,7 @@ namespace DMS.Application.Services.Management
         public async Task<List<Trigger>> GetTriggersForVariableAsync(int variableId)
         {
             // var triggers = await _repositoryManager.Triggers.GetByVariableIdAsync(variableId);
-            // return _mapper.Map<List<Trigger>>(triggers);
+            // return _mapper.Map<List<TriggerMenu>>(triggers);
             return null;
         }
 
@@ -141,7 +138,7 @@ namespace DMS.Application.Services.Management
         }
 
         /// <summary>
-        /// 内部方法：验证 Trigger 的有效性
+        /// 内部方法：验证 TriggerMenu 的有效性
         /// </summary>
         private void ValidateTriggerDto(Trigger dto)
         {
