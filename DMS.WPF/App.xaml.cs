@@ -332,6 +332,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<MqttsViewModel>();
         services.AddSingleton<LogHistoryViewModel>();
         services.AddScoped<MqttServerDetailViewModel>();
+        services.AddScoped<TriggerDetailViewModel>();
         services.AddSingleton<VariableHistoryViewModel>();
         services.AddSingleton<EmailManagementViewModel>();
         services.AddSingleton<TriggersViewModel>(); // 注册 TriggersViewModel
@@ -370,6 +371,7 @@ public partial class App : System.Windows.Application
         services.AddScoped<MqttsView>();
         services.AddSingleton<EmailManagementView>();
         services.AddSingleton<TriggersView>(); // 注册 TriggersView
+        services.AddSingleton<TriggerDetailView>(); // 注册 TriggersView
 
     }
 

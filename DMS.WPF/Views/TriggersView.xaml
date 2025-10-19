@@ -7,28 +7,23 @@
       xmlns:hc="https://handyorg.github.io/handycontrol"
       xmlns:converters="clr-namespace:DMS.WPF.Converters"
       mc:Ignorable="d" 
+      
       d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <!-- Converters -->
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:BoolToStringConverter x:Key="BoolToStringConverter" />
         <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
-        
+
         <!-- 触发器项模板 -->
         <DataTemplate x:Key="TriggerItemTemplate">
-            <Border Background="White" 
-                    BorderBrush="#E0E0E0" 
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                    BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" 
                     BorderThickness="1" 
                     CornerRadius="8"
                     Margin="5"
-                    Padding="15">
-                <Border.Effect>
-                    <DropShadowEffect ShadowDepth="2" 
-                                      BlurRadius="5" 
-                                      Opacity="0.1" 
-                                      Color="#888888"/>
-                </Border.Effect>
-
+                    Padding="15"
+                    Effect="{DynamicResource SharedDropShadow}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -43,40 +38,39 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- 触发器描述和变量信息 -->
+                            <!-- 触发器名称和描述 -->
                             <StackPanel Grid.Column="0">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                                    <ui:FontIcon Glyph="&#xE76C;" 
+                                    <ui:FontIcon Glyph="&#xE7F3;" 
                                                  FontSize="20" 
                                                  Foreground="{DynamicResource SystemAccentColorBrush}"
                                                  Margin="0,0,8,0"/>
-                                    <TextBlock Text="{Binding Description}" 
+                                    <!-- 显示触发器名称 -->
+                                    <TextBlock Text="{Binding Name}" 
                                                FontWeight="SemiBold" 
                                                FontSize="16" 
-                                               VerticalAlignment="Center"/>
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                    <!-- 分隔符 -->
+                                    <TextBlock Text=" | " 
+                                               Margin="8,0,8,0" 
+                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+                                    <!-- 显示触发器描述 -->
+                                    <TextBlock Text="{Binding Description}" 
+                                               FontWeight="Normal" 
+                                               FontSize="14" 
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
                                 </StackPanel>
 
+                                <!-- 变量ID显示 -->
                                 <StackPanel Orientation="Horizontal">
                                     <ui:FontIcon Glyph="&#xE975;" 
                                                  FontSize="14" 
-                                                 Foreground="#888888"
+                                                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                                                  Margin="0,0,5,0"/>
-                                    <TextBlock Text="{Binding VariableId}" 
-                                               Foreground="#888888" 
-                                               FontSize="12"
-                                               Margin="0,0,15,0"/>
-
-                                    <Rectangle Width="1" 
-                                               Height="12" 
-                                               Fill="#CCCCCC" 
-                                               Margin="5,0"/>
-
-                                    <ui:FontIcon Glyph="&#xE76C;" 
-                                                 FontSize="14" 
-                                                 Foreground="#888888"
-                                                 Margin="10,0,5,0"/>
-                                    <TextBlock Text="{Binding Condition}" 
-                                               Foreground="#888888" 
+                                    <TextBlock Text="{Binding VariableIds.Count, StringFormat='关联变量数量: {0}'}" 
+                                               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                                FontSize="12"/>
                                 </StackPanel>
                             </StackPanel>
@@ -88,16 +82,24 @@
                                 <Border Background="{Binding IsActive, 
                                                      Converter={StaticResource BoolToColorConverter}, 
                                                      ConverterParameter='Green;Red'}"
-                                        CornerRadius="8"
-                                        Width="16"
-                                        Height="16"
-                                        Margin="0,0,10,0">
+                                        CornerRadius="20"
+                                        Width="12"
+                                        Height="12"
+                                        Margin="0,0,5,0">
                                     <Border.ToolTip>
                                         <TextBlock Text="{Binding IsActive, 
                                                                   Converter={StaticResource BoolToStringConverter}, 
                                                                   ConverterParameter='已激活;未激活'}"/>
                                     </Border.ToolTip>
                                 </Border>
+                                <TextBlock Text="{Binding IsActive, 
+                                                          Converter={StaticResource BoolToStringConverter}, 
+                                                          ConverterParameter='已激活;未激活'}" 
+                                           Foreground="{Binding IsActive, 
+                                                                Converter={StaticResource BoolToColorConverter}, 
+                                                                ConverterParameter='Green;Red'}" 
+                                           FontSize="12" 
+                                           VerticalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
@@ -110,56 +112,47 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- 左侧信息 -->
-                        <StackPanel Grid.Column="0">
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
-                                <TextBlock Text="阈值/范围: " 
+                                <TextBlock Text="动作类型: " 
                                            FontWeight="SemiBold" 
-                                           Foreground="#666666" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                            FontSize="12"/>
-                                <TextBlock Text="{Binding Threshold, StringFormat='{}{0:N2}'}" 
-                                           Foreground="#333333" 
+                                <TextBlock Text="{Binding Action}" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" 
                                            FontSize="12"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="下限: " 
+                                <TextBlock Text="创建时间: " 
                                            FontWeight="SemiBold" 
-                                           Foreground="#666666" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                            FontSize="12"/>
-                                <TextBlock Text="{Binding LowerBound, StringFormat='{}{0:N2}'}" 
-                                           Foreground="#333333" 
-                                           FontSize="12"
-                                           Margin="0,0,15,0"/>
-
-                                <TextBlock Text="上限: " 
-                                           FontWeight="SemiBold" 
-                                           Foreground="#666666" 
-                                           FontSize="12"/>
-                                <TextBlock Text="{Binding UpperBound, StringFormat='{}{0:N2}'}" 
-                                           Foreground="#333333" 
+                                <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" 
                                            FontSize="12"/>
                             </StackPanel>
                         </StackPanel>
 
                         <!-- 右侧信息 -->
-                        <StackPanel Grid.Column="1">
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
-                                <TextBlock Text="动作: " 
+                                <TextBlock Text="最后更新: " 
                                            FontWeight="SemiBold" 
-                                           Foreground="#666666" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                            FontSize="12"/>
-                                <TextBlock Text="{Binding Action}" 
-                                           Foreground="#333333" 
+                                <TextBlock Text="{Binding UpdatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" 
                                            FontSize="12"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="最后触发: " 
                                            FontWeight="SemiBold" 
-                                           Foreground="#666666" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" 
                                            FontSize="12"/>
                                 <TextBlock Text="{Binding LastTriggeredAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" 
-                                           Foreground="#333333" 
+                                           Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" 
                                            FontSize="12"/>
                             </StackPanel>
                         </StackPanel>
@@ -167,47 +160,62 @@
                 </Grid>
             </Border>
         </DataTemplate>
+
+        <!-- 定义阴影效果 -->
+        <DropShadowEffect x:Key="SharedDropShadow" 
+                          ShadowDepth="2" 
+                          BlurRadius="8" 
+                          Opacity="0.15" 
+                          Color="#888888"/>
     </UserControl.Resources>
 
-    <StackPanel>
-        <!-- Toolbar -->
-        <ui:CommandBar DefaultLabelPosition="Right" IsOpen="False" Margin="0,0,0,10">
-            <ui:AppBarButton Command="{Binding AddTriggerCommand}" Label="添加触发器">
-                <ui:AppBarButton.Icon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
-                </ui:AppBarButton.Icon>
-            </ui:AppBarButton>
-            <ui:AppBarButton Command="{Binding EditTriggerCommand}" Label="编辑触发器">
-                <ui:AppBarButton.Icon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
-                </ui:AppBarButton.Icon>
-            </ui:AppBarButton>
-            <ui:AppBarButton Command="{Binding DeleteTriggerCommand}" Label="删除触发器">
-                <ui:AppBarButton.Icon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
-                </ui:AppBarButton.Icon>
-            </ui:AppBarButton>
-            <ui:AppBarButton Command="{Binding LoadTriggersCommand}" Label="刷新">
-                <ui:AppBarButton.Icon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
-                </ui:AppBarButton.Icon>
-            </ui:AppBarButton>
-        </ui:CommandBar>
+    <Border Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}" 
+            CornerRadius="8" 
+            Margin="10">
+        <StackPanel>
+            <!-- Toolbar -->
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}" 
+                    CornerRadius="8" 
+                    Margin="15,15,15,10">
+                <ui:CommandBar DefaultLabelPosition="Right" IsOpen="False" Margin="10">
+                    <ui:AppBarButton Command="{Binding AddTriggerCommand}" Label="添加触发器">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding EditTriggerCommand}" Label="编辑触发器">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding DeleteTriggerCommand}" Label="删除触发器">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                    <ui:AppBarButton Command="{Binding RefreshCommand}" Label="刷新">
+                        <ui:AppBarButton.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
+                        </ui:AppBarButton.Icon>
+                    </ui:AppBarButton>
+                </ui:CommandBar>
+            </Border>
 
-        <!-- Triggers List -->
-        <ui:GridView
-            x:Name="TriggersGridView"
-            Margin="20"
-            IsItemClickEnabled="True"
-            ItemTemplate="{StaticResource TriggerItemTemplate}"
-            ItemsSource="{Binding Triggers}" 
-            SelectedItem="{Binding SelectedTrigger}"
-            SelectionMode="Single">
-            <hc:Interaction.Triggers>
-                <hc:EventTrigger EventName="MouseDoubleClick">
-                    <hc:InvokeCommandAction Command="{Binding EditTriggerCommand}" />
-                </hc:EventTrigger>
-            </hc:Interaction.Triggers>
-        </ui:GridView>
-    </StackPanel>
+            <!-- Triggers List -->
+            <ui:GridView
+                x:Name="TriggersGridView"
+                Margin="15"
+                IsItemClickEnabled="True"
+                ItemTemplate="{StaticResource TriggerItemTemplate}"
+                ItemsSource="{Binding TriggerItemListView}" 
+                SelectedItem="{Binding SelectedTrigger}"
+                SelectionMode="Single">
+                <hc:Interaction.Triggers>
+                    <hc:EventTrigger EventName="MouseDoubleClick">
+                        <hc:InvokeCommandAction Command="{Binding NavigateToTriggerDetailCommand}" />
+                    </hc:EventTrigger>
+                </hc:Interaction.Triggers>
+            </ui:GridView>
+        </StackPanel>
+    </Border>
 </UserControl>

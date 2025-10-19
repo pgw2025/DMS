@@ -144,6 +144,8 @@ public class DataEventService : IDataEventService
             
             _wpfDataService.MqttAliasDataService.LoadMqttAliases();
             _logger?.LogDebug("MQTT别名加载完成");
+            _wpfDataService.TriggerDataService.LoadAllTriggers();
+            _logger?.LogDebug("触发器加载完成");
             
             _wpfDataService.LogDataService.LoadAllLog();
             _logger?.LogDebug("日志数据加载完成");

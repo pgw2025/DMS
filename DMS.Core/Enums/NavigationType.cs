@@ -9,4 +9,5 @@ public enum NavigationType
     VariableTable,
     Variable,
     Mqtt,
+    Trigger,
 }

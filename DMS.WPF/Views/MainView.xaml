@@ -130,6 +130,10 @@
                           <!--Mqtt服务器详情页-->  
                          <DataTemplate DataType="{x:Type vm:MqttServerDetailViewModel}"> 
                              <local:MqttServerDetailView DataContext="{Binding }"/> 
+                         </DataTemplate>
+                         <!--触发器详情页-->  
+                         <DataTemplate DataType="{x:Type vm:TriggerDetailViewModel}"> 
+                             <local:TriggerDetailView DataContext="{Binding }"/> 
                          </DataTemplate> 
                     </ContentControl.Resources>
                 </ContentControl>

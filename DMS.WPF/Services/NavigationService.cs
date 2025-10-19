@@ -86,6 +86,8 @@ public class NavigationService : INavigationService
                     return App.Current.Services.GetRequiredService<EmailManagementViewModel>();
                 case nameof(TriggersViewModel):
                     return App.Current.Services.GetRequiredService<TriggersViewModel>();
+                case nameof(TriggerDetailViewModel):
+                    return App.Current.Services.GetRequiredService<TriggerDetailViewModel>();
                 default:
                     return null;
             }

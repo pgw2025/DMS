@@ -3,6 +3,8 @@ using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DMS.Application.DTOs;
+using DMS.Core.Enums;
+using DMS.Core.Models;
 using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ViewModels.Dialogs;
@@ -22,6 +24,10 @@ namespace DMS.WPF.ViewModels
         private readonly IDataStorageService _dataStorageService;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
+        private readonly INavigationService _navigationService;
+
+        public ISynchronizedView<KeyValuePair<int, TriggerItem>, TriggerItem> _synchronizedView;
+        public NotifyCollectionChangedSynchronizedViewList<TriggerItem> TriggerItemListView { get; }
 
         [ObservableProperty]
         private ObservableDictionary<int, TriggerItem> _triggers ;
@@ -34,16 +40,22 @@ namespace DMS.WPF.ViewModels
             ITriggerDataService triggerDataService,
             IDataStorageService dataStorageService,
             IDialogService dialogService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            INavigationService navigationService)
         {
             _mapper = mapper;
             _triggerDataService = triggerDataService ?? throw new ArgumentNullException(nameof(triggerDataService));
             _dataStorageService = dataStorageService ?? throw new ArgumentNullException(nameof(dataStorageService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
-            
+            _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
+
             // 初始化时加载触发器数据
-            Triggers=_dataStorageService.Triggers;
+            _synchronizedView = _dataStorageService.Triggers.CreateView(v=>v.Value);
+            TriggerItemListView= _synchronizedView.ToNotifyCollectionChanged();
+           
+
+
         }
 
   
@@ -165,6 +177,32 @@ namespace DMS.WPF.ViewModels
                     _notificationService.ShowError($"删除触发器失败: {ex.Message}");
                 }
             }
+        }
+
+        /// <summary>
+        /// 刷新触发器列表
+        /// </summary>
+        [RelayCommand]
+        private async Task RefreshAsync()
+        {
+            try
+            {
+                // 重新加载所有触发器数据
+                _triggerDataService.LoadAllTriggers();
+                _notificationService.ShowSuccess("触发器列表已刷新");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError($"刷新触发器列表失败: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        public void NavigateToTriggerDetail()
+        {
+            if (SelectedTrigger == null) return;
+
+            _navigationService.NavigateToAsync(this, new NavigationParameter(nameof(TriggerDetailViewModel), SelectedTrigger.Id, NavigationType.Trigger));
         }
 
     }
