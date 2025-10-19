@@ -145,10 +145,10 @@ namespace DMS.WPF.ViewModels.Dialogs
             }
 
             // Set timestamps
-            Trigger.UpdatedAt = DateTime.UtcNow;
+            Trigger.UpdatedAt = DateTime.Now;
             if (Trigger.Id == default(int))
             {
-                Trigger.CreatedAt = DateTime.UtcNow;
+                Trigger.CreatedAt = DateTime.Now;
                 Trigger.Id = 0; // 对于自增ID，设置为0让数据库自动生成
             }
 

@@ -207,4 +207,23 @@ public class EventService : IEventService
     }
 
     #endregion
+    
+    #region 触发器事件
+
+    /// <summary>
+    /// 触发器改变事件
+    /// </summary>
+    public event EventHandler<TriggerChangedEventArgs> OnTriggerChanged;
+
+    /// <summary>
+    /// 触发触发器改变事件
+    /// </summary>
+    /// <param name="sender">事件发送者</param>
+    /// <param name="e">触发器改变事件参数</param>
+    public void RaiseTriggerChanged(object sender, TriggerChangedEventArgs e)
+    {
+        OnTriggerChanged?.Invoke(sender, e);
+    }
+
+    #endregion
 }

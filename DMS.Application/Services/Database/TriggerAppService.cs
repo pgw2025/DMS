@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Diagnostics;
 using DMS.Application.Interfaces;
+using DMS.Application.DTOs;
 
 namespace DMS.Application.Services.Database
 {
@@ -62,7 +63,7 @@ namespace DMS.Application.Services.Database
         /// </summary>
         /// <param name="trigger">要创建的触发器定义。</param>
         /// <returns>新创建的触发器定义。</returns>
-        public async Task<Trigger> CreateTriggerAsync(Trigger trigger)
+        public async Task<Trigger> AddTriggerAsync(Trigger trigger)
         {
             try
             {
@@ -71,19 +72,6 @@ namespace DMS.Application.Services.Database
                 // 添加触发器定义
                 var addedTrigger = await _repositoryManager.Triggers.AddAsync(trigger);
 
-                // // 添加关联的变量ID
-                // if (trigger.Variables != null && trigger.Variables.Any())
-                // {
-                //     var triggerVariables = trigger.Variables.Select(variableId => new DbTriggerVariable
-                //                                                           {
-                //                                                               TriggerDefinitionId = addedTrigger.Id,
-                //                                                               VariableId = variableId
-                //                                                           })
-                //                                   .ToList();
-                //
-                //     await _repositoryManager.AddTriggerVariablesAsync(triggerVariables);
-                // }
-
                 await _repositoryManager.CommitAsync();
                 return addedTrigger;
             }
@@ -91,6 +79,62 @@ namespace DMS.Application.Services.Database
             {
                 await _repositoryManager.RollbackAsync();
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// 异步创建触发器及其关联菜单。
+        /// </summary>
+        /// <param name="dto">包含触发器和菜单信息的数据传输对象。</param>
+        /// <returns>包含新创建触发器和菜单信息的数据传输对象。</returns>
+        public async Task<CreateTriggerWithMenuDto> CreateTriggerWithMenuAsync(CreateTriggerWithMenuDto dto)
+        {
+            try
+            {
+                await _repositoryManager.BeginTranAsync();
+
+                // 创建触发器
+                var createdTrigger = await _repositoryManager.Triggers.AddAsync(dto.Trigger);
+                if (createdTrigger == null || createdTrigger.Id == 0)
+                {
+                    throw new InvalidOperationException($"添加触发器失败：{createdTrigger}");
+                }
+
+                // 确保DTO中的触发器对象也更新为新创建的触发器
+                dto.Trigger = createdTrigger;
+
+                // 创建菜单
+                if (dto.TriggerMenu != null)
+                {
+                    // 使用现有的菜单查找逻辑来获取父菜单
+                    var parentMenu = await _repositoryManager.Menus.GetMenuByTargetIdAsync(Core.Enums.MenuType.TriggerMenu, 0);
+                    if (parentMenu != null)
+                    {
+                        // 设置菜单的关联信息
+                        dto.TriggerMenu.ParentId = parentMenu.Id;
+                        dto.TriggerMenu.MenuType = Core.Enums.MenuType.TriggerMenu;
+                        dto.TriggerMenu.TargetId = createdTrigger.Id;
+
+                        // 添加菜单到数据库
+                        var addMenu = await _repositoryManager.Menus.AddAsync(dto.TriggerMenu);
+                        if (addMenu == null || addMenu.Id == 0)
+                        {
+                            throw new InvalidOperationException($"添加触发器菜单失败：{addMenu}");
+                        }
+
+                        // 更新dto中的菜单对象
+                        dto.TriggerMenu = addMenu;
+                    }
+                }
+
+                await _repositoryManager.CommitAsync();
+
+                return dto;
+            }
+            catch (Exception ex)
+            {
+                await _repositoryManager.RollbackAsync();
+                throw new ApplicationException($"创建触发器及其菜单时发生错误，操作已回滚，错误信息：{ex.Message}", ex);
             }
         }
 
@@ -107,25 +151,6 @@ namespace DMS.Application.Services.Database
 
                 // 更新触发器定义
                 var rowsAffected = await _repositoryManager.Triggers.UpdateAsync(trigger);
-
-                // if (rowsAffected > 0)
-                // {
-                //     // 删除旧的关联关系
-                //     await _repositoryManager.DeleteTriggerVariablesByTriggerIdAsync(trigger.Id);
-                //
-                //     // 插入新的关联关系
-                //     if (trigger.Variables != null && trigger.Variables.Any())
-                //     {
-                //         var triggerVariables = trigger.Variables.Select(variableId => new DbTriggerVariable
-                //                                                               {
-                //                                                                   TriggerDefinitionId = trigger.Id,
-                //                                                                   VariableId = variableId
-                //                                                               })
-                //                                       .ToList();
-                //
-                //         await _repositoryManager.AddTriggerVariablesAsync(triggerVariables);
-                //     }
-                // }
 
                 await _repositoryManager.CommitAsync();
                 return rowsAffected;
@@ -147,9 +172,6 @@ namespace DMS.Application.Services.Database
             try
             {
                 await _repositoryManager.BeginTranAsync();
-
-                // // 删除关联的变量关系
-                // await _repositoryManager.DeleteTriggerVariablesByTriggerIdAsync(id);
 
                 // 删除触发器本身
                 var rowsAffected = await _repositoryManager.Triggers.DeleteByIdAsync(id);

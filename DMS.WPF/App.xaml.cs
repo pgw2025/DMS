@@ -268,6 +268,7 @@ public partial class App : System.Windows.Application
         services.AddSingleton<IMqttAliasAppService, MqttAliasAppService>();
         services.AddSingleton<IMqttAliasManagementService, MqttAliasManagementService>();
         services.AddSingleton<ILogManagementService, LogManagementService>();
+        services.AddSingleton<ITriggerAppService, TriggerAppService>(); // 注册触发器应用服务
         services.AddSingleton<ITriggerManagementService, TriggerManagementService>(); // 注册触发器管理服务
         services.AddSingleton<ITriggerEvaluationService, TriggerEvaluationService>();   // 注册触发器评估服务
         services.AddSingleton<ITriggerActionExecutor, TriggerActionExecutor>();       // 注册触发器动作执行器

@@ -21,5 +21,5 @@ public interface IMenuDataService
     Task DeleteMenuItem(MenuItem? MenuItem);
 
     void LoadAllMenus();
-
+    Task UpdateMenuItem(MenuItem MenuItem);
 }

@@ -78,10 +78,12 @@ public class MenuManagementService : IMenuManagementService
         var result = await _menuService.UpdateMenuAsync(menu);
         
         // 更新成功后，更新内存中的菜单
-        if (result > 0 && menu != null)
+        if (result > 0)
         {
-            _appStorageService.Menus.AddOrUpdate(menu.Id, menu, (key, oldValue) => menu);
-            
+            if (_appStorageService.Menus.TryGetValue(menu.Id,out var mMenu))
+            {
+                mMenu.Header = menu.Header;
+            }
 
             _eventService.RaiseMenuChanged(this, new MenuChangedEventArgs(DataChangeType.Updated, menu));
         }

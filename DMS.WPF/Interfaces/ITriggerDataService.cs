@@ -22,7 +22,7 @@ public interface ITriggerDataService
     /// <summary>
     /// 添加触发器及其关联菜单。
     /// </summary>
-    Task<CreateTriggerWithMenuDto> AddTriggerWithMenu(CreateTriggerWithMenuDto dto);
+    Task<CreateTriggerWithMenuDto> CreateTriggerWithMenu(CreateTriggerWithMenuDto dto);
 
     /// <summary>
     /// 删除触发器。

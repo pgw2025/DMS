@@ -26,7 +26,14 @@ namespace DMS.Application.Interfaces.Management
         /// </summary>
         /// <param name="triggerDto">要创建的触发器定义 DTO</param>
         /// <returns>创建成功的触发器定义 DTO</returns>
-        Task<Trigger> CreateTriggerAsync(Trigger triggerDto);
+        Task<Trigger> AddTriggerAsync(Trigger triggerDto);
+
+        /// <summary>
+        /// 创建触发器及其关联菜单
+        /// </summary>
+        /// <param name="dto">包含触发器和菜单信息的数据传输对象</param>
+        /// <returns>包含新创建触发器和菜单信息的数据传输对象</returns>
+        Task<CreateTriggerWithMenuDto> CreateTriggerWithMenuAsync(CreateTriggerWithMenuDto dto);
 
         /// <summary>
         /// 更新一个已存在的触发器定义
@@ -34,7 +41,7 @@ namespace DMS.Application.Interfaces.Management
         /// <param name="id">要更新的触发器 ID</param>
         /// <param name="triggerDto">包含更新信息的触发器定义 DTO</param>
         /// <returns>更新后的触发器定义 DTO，如果未找到则返回 null</returns>
-        Task<Trigger?> UpdateTriggerAsync(int id, Trigger triggerDto);
+        Task<int> UpdateTriggerAsync( Trigger trigger);
 
         /// <summary>
         /// 删除一个触发器定义

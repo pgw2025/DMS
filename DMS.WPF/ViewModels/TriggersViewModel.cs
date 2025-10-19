@@ -30,7 +30,7 @@ namespace DMS.WPF.ViewModels
         public NotifyCollectionChangedSynchronizedViewList<TriggerItem> TriggerItemListView { get; }
 
         [ObservableProperty]
-        private ObservableDictionary<int, TriggerItem> _triggers ;
+        private ObservableDictionary<int, TriggerItem> _triggers;
 
         [ObservableProperty]
         private TriggerItem? _selectedTrigger;
@@ -51,14 +51,14 @@ namespace DMS.WPF.ViewModels
             _navigationService = navigationService ?? throw new ArgumentNullException(nameof(navigationService));
 
             // 初始化时加载触发器数据
-            _synchronizedView = _dataStorageService.Triggers.CreateView(v=>v.Value);
-            TriggerItemListView= _synchronizedView.ToNotifyCollectionChanged();
-           
+            _synchronizedView = _dataStorageService.Triggers.CreateView(v => v.Value);
+            TriggerItemListView = _synchronizedView.ToNotifyCollectionChanged();
+
 
 
         }
 
-  
+
 
         /// <summary>
         /// 添加新触发器
@@ -67,59 +67,40 @@ namespace DMS.WPF.ViewModels
         private async Task AddTriggerAsync()
         {
             var newTrigger = new TriggerItem()
-                {
-                    IsActive = true,
-                    Action = Core.Models.Triggers.ActionType.SendEmail,
-                    Description = "新建触发器",
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+            {
+                IsActive = true,
+                Action = Core.Models.Triggers.ActionType.SendEmail,
+                Name = "新建触发器",
+                Description = "新建触发器",
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
 
             TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
             await viewModel.OnInitializedAsync(newTrigger);
 
             var result = await _dialogService.ShowDialogAsync(viewModel);
-            if (result != null)
+            if (result is null) return;
+
+            try
             {
-                try
-                {
-                    // 创建包含菜单信息的 DTO
-                    CreateTriggerWithMenuDto dto = new CreateTriggerWithMenuDto();
-                    if (_mapper != null)
-                    {
-                        dto.Trigger = _mapper.Map<Trigger>(result);
-                    }
-                    else
-                    {
-                        _notificationService?.ShowError("映射服务未初始化");
-                        return;
-                    }
 
-                    // 创建菜单项
-                    dto.TriggerMenu = new MenuBean()
-                    {
-                        Header = result.Name ?? result.Description,
-                        Icon = "\uE945", // 使用触发器图标
-                        TargetViewKey = nameof(TriggerDetailViewModel),
-                    };
+                // 使用TriggerDataService添加触发器和菜单
+                var resTriggerItem = await _triggerDataService.AddTrigger(result);
 
-                    // 使用TriggerDataService添加触发器和菜单
-                    var createdTriggerDto = await _triggerDataService.AddTriggerWithMenu(dto);
-                    
-                    if (createdTriggerDto != null && createdTriggerDto.Trigger != null)
-                    {
-                        // 更新UI显示
-                        _notificationService.ShowSuccess($"触发器创建成功：{createdTriggerDto.Trigger.Name ?? createdTriggerDto.Trigger.Description}");
-                    }
-                    else
-                    {
-                        _notificationService.ShowError("触发器创建失败");
-                    }
-                }
-                catch (Exception ex)
+                if (resTriggerItem is not null)
                 {
-                    _notificationService.ShowError($"创建触发器失败: {ex.Message}");
+                    // 更新UI显示
+                    _notificationService.ShowSuccess($"触发器创建成功：{resTriggerItem.Name}");
                 }
+                else
+                {
+                    _notificationService.ShowError("触发器创建失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError($"创建触发器失败: {ex.Message},");
             }
         }
 
@@ -136,10 +117,11 @@ namespace DMS.WPF.ViewModels
             }
 
             // 传递副本以避免直接修改原始对象
-            var triggerToEdit = _mapper.Map<Trigger>(SelectedTrigger);
-            
+            TriggerItem triggerItemToEdit = new TriggerItem();
+             _mapper.Map(SelectedTrigger, triggerItemToEdit);
+
             TriggerDialogViewModel viewModel = App.Current.Services.GetRequiredService<TriggerDialogViewModel>();
-            await viewModel.OnInitializedAsync(triggerToEdit);
+            await viewModel.OnInitializedAsync(triggerItemToEdit);
 
             var result = await _dialogService.ShowDialogAsync(viewModel);
             if (result != null)
@@ -147,7 +129,7 @@ namespace DMS.WPF.ViewModels
                 try
                 {
                     // 使用TriggerDataService更新触发器
-                    var updatedTrigger = await _triggerDataService.UpdateTrigger(SelectedTrigger);
+                    var updatedTrigger = await _triggerDataService.UpdateTrigger(result);
                     if (updatedTrigger)
                     {
                         _notificationService.ShowSuccess("触发器更新成功");
@@ -176,7 +158,7 @@ namespace DMS.WPF.ViewModels
                 return;
             }
 
-            var confirm = await _dialogService.ShowDialogAsync(new ConfirmDialogViewModel("确认删除", $"确定要删除触发器 '{SelectedTrigger.Description}' 吗？","删除"));
+            var confirm = await _dialogService.ShowDialogAsync(new ConfirmDialogViewModel("确认删除", $"确定要删除触发器 '{SelectedTrigger.Description}' 吗？", "删除"));
             if (confirm)
             {
                 try

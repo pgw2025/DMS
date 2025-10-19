@@ -27,7 +27,7 @@ public class MenuDataService : IMenuDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appStorageService">数据服务中心实例。</param>
-    public MenuDataService(IMapper mapper,IDataStorageService dataStorageService, IAppStorageService appStorageService,IMenuManagementService menuManagementService)
+    public MenuDataService(IMapper mapper, IDataStorageService dataStorageService, IAppStorageService appStorageService, IMenuManagementService menuManagementService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
@@ -79,15 +79,35 @@ public class MenuDataService : IMenuDataService
         if (deviceMenu is not null)
         {
 
-        var menuId= await _menuManagementService.CreateMenuAsync(_mapper.Map<MenuBean>(MenuItem));
-            if (menuId>0)
+            var menuId = await _menuManagementService.CreateMenuAsync(_mapper.Map<MenuBean>(MenuItem));
+            if (menuId > 0)
             {
                 MenuItem.Id = menuId;
                 deviceMenu.Children.Add(MenuItem);
                 _dataStorageService.Menus.Add(MenuItem);
                 BuildMenuTrees();
             }
-            
+
+        }
+    }
+
+    /// <summary>
+    /// 更新菜单项。
+    /// </summary>
+    public async Task UpdateMenuItem(MenuItem MenuItem)
+    {
+        if (MenuItem is null) return;
+
+        var menu = _dataStorageService.Menus.FirstOrDefault(m => m.Id == MenuItem.Id);
+        if (menu is not null)
+        {
+
+            var res = await _menuManagementService.UpdateMenuAsync(_mapper.Map<MenuBean>(MenuItem));
+            if (res > 0)
+            {
+                menu.Header = MenuItem.Header;
+            }
+
         }
     }
 
@@ -99,8 +119,8 @@ public class MenuDataService : IMenuDataService
     {
         if (MenuItem is null) return;
 
-       await _menuManagementService.DeleteMenuAsync(MenuItem.Id);
-        
+        await _menuManagementService.DeleteMenuAsync(MenuItem.Id);
+
         // 从扁平菜单列表中移除
         _dataStorageService.Menus.Remove(MenuItem);
 

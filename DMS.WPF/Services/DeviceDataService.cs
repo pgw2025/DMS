@@ -111,7 +111,7 @@ public class DeviceDataService : IDeviceDataService
         // 给界面添加设备菜单
         if (addDto.DeviceMenu != null)
         {
-            _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.DeviceMenu));
+           await _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.DeviceMenu));
             
         }
 
@@ -124,7 +124,7 @@ public class DeviceDataService : IDeviceDataService
 
             if (addDto.VariableTable != null && addDto.VariableTableMenu != null)
             {
-                _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.VariableTableMenu));
+              await  _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.VariableTableMenu));
             }
 
 
@@ -158,7 +158,7 @@ public class DeviceDataService : IDeviceDataService
         var deviceMenu= _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu && m.TargetId == device.Id);
         if (deviceMenu != null)
         {
-            _menuDataService.DeleteMenuItem(deviceMenu);
+           await _menuDataService.DeleteMenuItem(deviceMenu);
         }
         _dataStorageService.Devices.Remove(device.Id);
         

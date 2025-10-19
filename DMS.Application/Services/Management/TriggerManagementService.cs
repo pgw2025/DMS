@@ -1,8 +1,12 @@
 using AutoMapper;
 using DMS.Application.DTOs;
+using DMS.Application.Events;
 using DMS.Application.Interfaces;
+using DMS.Application.Interfaces.Database;
 using DMS.Application.Interfaces.Management;
 using DMS.Application.Services.Triggers;
+using DMS.Core.Enums;
+using DMS.Core.Events;
 using DMS.Core.Interfaces;
 using DMS.Core.Models.Triggers;
 
@@ -14,22 +18,24 @@ namespace DMS.Application.Services.Management
     public class TriggerManagementService : ITriggerManagementService
     {
         private readonly IAppStorageService _appStorageService;
-        private readonly IRepositoryManager _repositoryManager;
+        private readonly ITriggerAppService _triggerAppService;
         private readonly IMapper _mapper;
+        private readonly IEventService _eventService;
 
-        public TriggerManagementService(IAppStorageService appStorageService,IRepositoryManager repositoryManager, IMapper mapper)
+        public TriggerManagementService(IAppStorageService appStorageService, ITriggerAppService triggerAppService, IMapper mapper, IEventService eventService)
         {
             _appStorageService = appStorageService;
-            _repositoryManager = repositoryManager;
+            _triggerAppService = triggerAppService;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _eventService = eventService;
         }
 
         /// <summary>
         /// 获取所有触发器定义
         /// </summary>
-        public  List<Trigger> GetAllTriggersAsync()
+        public List<Trigger> GetAllTriggersAsync()
         {
-            var triggers =  _appStorageService.Triggers.Values.ToList();
+            var triggers = _appStorageService.Triggers.Values.ToList();
             return _mapper.Map<List<Trigger>>(triggers);
         }
 
@@ -41,59 +47,73 @@ namespace DMS.Application.Services.Management
             _appStorageService.Triggers.TryGetValue(id, out var trigger);
             return trigger;
         }
-        
-        
+
+
         /// <summary>
         /// 创建一个新的触发器定义
         /// </summary>
-        public async Task<Trigger> CreateTriggerAsync(Trigger triggerDto)
+        public async Task<Trigger> AddTriggerAsync(Trigger trigger)
         {
-            // 1. 验证 DTO (可以在应用层或领域层做)
-            // ValidateTriggerDto(triggerDto);
+            var createdTrigger = await _triggerAppService.AddTriggerAsync(trigger);
 
-            // 2. 转换 DTO 到实体
-            var triggerEntity = _mapper.Map<Trigger>(triggerDto);
-            triggerEntity.CreatedAt = DateTime.UtcNow;
-            triggerEntity.UpdatedAt = DateTime.UtcNow;
-
-            // 3. 调用仓储保存实体
-            var createdTrigger = await _repositoryManager.Triggers.AddAsync(triggerEntity);
-
-            // 5. 同步更新AppDataStorageService中的Triggers字典
-            _appStorageService.Triggers[createdTrigger.Id] = createdTrigger;
+            // 创建成功后，将触发器添加到内存中
+            if (createdTrigger != null)
+            {
+                if (_appStorageService.Triggers.TryAdd(createdTrigger.Id, createdTrigger))
+                {
+                    _eventService.RaiseTriggerChanged(this, new TriggerChangedEventArgs(DataChangeType.Added, createdTrigger));
+                }
+            }
 
             return createdTrigger;
         }
 
         /// <summary>
-        /// 更新一个已存在的触发器定义
+        /// 创建触发器及其关联菜单
         /// </summary>
-        public async Task<Trigger?> UpdateTriggerAsync(int id, Trigger triggerDto)
+        public async Task<CreateTriggerWithMenuDto> CreateTriggerWithMenuAsync(CreateTriggerWithMenuDto dto)
         {
-            // 1. 获取现有实体
-            var existingTrigger = await _repositoryManager.Triggers.GetByIdAsync(id);
-            if (existingTrigger == null)
+            var result = await _triggerAppService.CreateTriggerWithMenuAsync(dto);
+
+            // 创建成功后，将触发器添加到内存中
+            if (result is null || result.Trigger is null)
+            {
                 return null;
+            }
 
-            // 2. 验证 DTO
-            ValidateTriggerDto(triggerDto);
+            if (_appStorageService.Triggers.TryAdd(result.Trigger.Id, result.Trigger))
+            {
+                _eventService.RaiseTriggerChanged(this, new TriggerChangedEventArgs(DataChangeType.Added, result.Trigger));
+            }
 
-            // 3. 将 DTO 映射到现有实体 (排除不可变字段如 Id, CreatedAt)
-            _mapper.Map(triggerDto, existingTrigger, opts => opts.Items["IgnoreIdAndCreatedAt"] = true);
-            existingTrigger.UpdatedAt = DateTime.UtcNow;
+            if (_appStorageService.Menus.TryAdd(result.TriggerMenu.Id, result.TriggerMenu))
+            {
+                _eventService.RaiseMenuChanged(this, new MenuChangedEventArgs(DataChangeType.Added, result.TriggerMenu));
+            }
 
-            // 4. 调用仓储更新实体
-            var updatedTrigger = await _repositoryManager.Triggers.UpdateAsync(existingTrigger);
-            if (updatedTrigger == null)
-                return null;
-
-            // 5. 转换回 DTO 并返回
-            var result = _mapper.Map<Trigger>(updatedTrigger);
-            
-            // 6. 同步更新AppDataStorageService中的Triggers字典
-            _appStorageService.Triggers[result.Id] = result;
 
             return result;
+        }
+
+        /// <summary>
+        /// 更新一个已存在的触发器定义
+        /// </summary>
+        public async Task<int> UpdateTriggerAsync(Trigger trigger)
+        {
+
+            // 4. 调用仓储更新实体
+            var res = await _triggerAppService.UpdateTriggerAsync(trigger);
+            if (res == 0)
+                return res;
+
+            // 6. 同步更新AppDataStorageService中的Triggers字典
+            if (_appStorageService.Triggers.TryGetValue(trigger.Id, out var memTrigger))
+            {
+                _mapper.Map(trigger, memTrigger);
+            }
+
+
+            return res;
         }
 
         /// <summary>
@@ -101,16 +121,18 @@ namespace DMS.Application.Services.Management
         /// </summary>
         public async Task<bool> DeleteTriggerAsync(int id)
         {
-            // var result = await _repositoryManager.Triggers.DeleteAsync(id);
-            //
-            // // 如果删除成功，也从AppDataStorageService中的Triggers字典中移除
-            // if (result)
-            // {
-            //     _appStorageService.Triggers.TryRemove(id, out _);
-            // }
-            //
-            // return result;
-            return false;
+
+            // 如果删除成功，也从AppDataStorageService中的Triggers字典中移除
+            if (await _triggerAppService.DeleteTriggerByIdAsync(id))
+            {
+                _appStorageService.Triggers.TryRemove(id, out _);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
 
         /// <summary>
@@ -129,7 +151,7 @@ namespace DMS.Application.Services.Management
         public async Task LoadAllTriggersAsync()
         {
             _appStorageService.Triggers.Clear();
-            var triggerDefinitions = await  _repositoryManager.Triggers.GetAllAsync();
+            var triggerDefinitions = await _triggerAppService.GetAllTriggersAsync();
             foreach (var triggerDefinition in triggerDefinitions)
             {
                 _appStorageService.Triggers.TryAdd(triggerDefinition.Id, triggerDefinition);

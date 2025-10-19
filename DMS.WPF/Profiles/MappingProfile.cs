@@ -38,6 +38,7 @@ namespace DMS.WPF.Profiles
             CreateMap<Variable, VariableItem>()
                 .ReverseMap();
             CreateMap<NlogDto, NlogItem>().ReverseMap();
+            CreateMap<TriggerItem, TriggerItem>().ReverseMap();
             
             // 添加触发器相关映射
             CreateMap<TriggerItem, Core.Models.Triggers.Trigger>()

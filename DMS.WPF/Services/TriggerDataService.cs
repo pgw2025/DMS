@@ -4,10 +4,15 @@ using DMS.Application.Interfaces;
 using DMS.Application.Services;
 using DMS.Core.Enums;
 using DMS.Core.Events;
+using DMS.Core.Models;
 using DMS.Core.Models.Triggers;
 using DMS.WPF.Interfaces;
 using DMS.WPF.ItemViewModel;
+using DMS.WPF.ViewModels;
+using HandyControl.Data;
 using Opc.Ua;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace DMS.WPF.Services;
@@ -19,6 +24,7 @@ public class TriggerDataService : ITriggerDataService
 {
     private readonly IMapper _mapper;
     private readonly IAppCenterService _appCenterService;
+    private readonly IMenuDataService _menuDataService;
     private readonly IAppStorageService _appStorageService;
     private readonly IDataStorageService _dataStorageService;
     private readonly IEventService _eventService;
@@ -35,11 +41,13 @@ public class TriggerDataService : ITriggerDataService
     /// <param name="eventService">事件服务实例。</param>
     /// <param name="notificationService">通知服务实例。</param>
     public TriggerDataService(IMapper mapper, IAppCenterService appCenterService,
+                              IMenuDataService menuDataService,
                               IAppStorageService appStorageService, IDataStorageService dataStorageService,
                               IEventService eventService, INotificationService notificationService)
     {
         _mapper = mapper;
         _appCenterService = appCenterService;
+        _menuDataService = menuDataService;
         _appStorageService = appStorageService;
         _dataStorageService = dataStorageService;
         _eventService = eventService;
@@ -65,22 +73,39 @@ public class TriggerDataService : ITriggerDataService
     public async Task<TriggerItem> AddTrigger(TriggerItem triggerItem)
     {
         // 添加null检查
-        if (triggerItem == null)
-            return null;
+        if (triggerItem is null) return null;
 
         var addDto
-            = await _appCenterService.TriggerManagementService.CreateTriggerAsync(
-                _mapper.Map<Trigger>(triggerItem));
+            = await _appCenterService.TriggerManagementService.AddTriggerAsync(
+                _mapper.Map<Core.Models.Triggers.Trigger>(triggerItem));
 
         // 添加null检查
-        if (addDto == null)
-        {
-            return null;
-        }
+        if (addDto is null) return null;
 
         // 给界面添加触发器
-        var addItem = _mapper.Map<TriggerItem>(addDto);
-        _dataStorageService.Triggers.Add(addDto.Id, addItem);
+        var addItem = _mapper.Map(addDto, triggerItem);
+
+        _dataStorageService.Triggers.Add(triggerItem.Id, triggerItem);
+
+        //添加菜单
+        
+        var parentMenu=_dataStorageService.Menus.FirstOrDefault(m => m.TargetViewKey == nameof(TriggersViewModel) && m.TargetId == 0);
+        if (parentMenu is not null)
+        {
+            var menuItem = new ItemViewModel.MenuItem()
+            {
+                Header = triggerItem.Name,
+                ParentId=parentMenu.Id,
+                MenuType=MenuType.TriggerMenu,
+                TargetId=addItem.Id,
+                Icon = "\uE945", // 使用触发器图标
+                TargetViewKey = nameof(TriggerDetailViewModel),
+            };
+            await _menuDataService.AddMenuItem(menuItem);
+
+        }
+        
+
 
         return addItem;
     }
@@ -91,21 +116,27 @@ public class TriggerDataService : ITriggerDataService
     public async Task<bool> DeleteTrigger(TriggerItem trigger)
     {
         // 从数据库删除触发器数据
-        if (!await _appCenterService.TriggerManagementService.DeleteTriggerAsync(trigger.Id))
+        if (await _appCenterService.TriggerManagementService.DeleteTriggerAsync(trigger.Id))
         {
-            return false;
+            //删除菜单
+            var menu=_dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.TriggerMenu && m.TargetId == trigger.Id);
+            if (menu is not null)
+            {
+              await  _menuDataService.DeleteMenuItem(menu);
+            }
+
+            // 从界面删除触发器
+            _dataStorageService.Triggers.Remove(trigger.Id);
+
+            return true;
         }
-
-        // 从界面删除触发器
-        _dataStorageService.Triggers.Remove(trigger.Id);
-
-        return true;
+        return false;
     }
 
     /// <summary>
     /// 添加触发器及其关联菜单。
     /// </summary>
-    public async Task<CreateTriggerWithMenuDto> AddTriggerWithMenu(CreateTriggerWithMenuDto dto)
+    public async Task<CreateTriggerWithMenuDto> CreateTriggerWithMenu(CreateTriggerWithMenuDto dto)
     {
         // 添加null检查
         if (dto == null || dto.Trigger == null)
@@ -114,26 +145,16 @@ public class TriggerDataService : ITriggerDataService
         try
         {
             // 首先添加触发器
-            var createdTrigger = await _appCenterService.TriggerManagementService.CreateTriggerAsync(dto.Trigger);
+            var createdTrigger = await _appCenterService.TriggerManagementService.CreateTriggerWithMenuAsync(dto);
             if (createdTrigger == null)
                 return null;
 
-            
-            var  parentMenu=_appStorageService.Menus.Values.OrderBy(m=>m.Id).FirstOrDefault(m=>m.MenuType==MenuType.TriggerMenu);
-            if (parentMenu is not null)
-            {
-                // 将菜单关联到触发器
-                dto.TriggerMenu.TargetId = createdTrigger.Id;
-                dto.TriggerMenu.MenuType = MenuType.TriggerMenu;
 
-            }
-
-
-           
-            
             // 添加到UI数据存储
-            var addItem = _mapper.Map<TriggerItem>(createdTrigger);
-            _dataStorageService.Triggers.Add(createdTrigger.Id, addItem);
+            var addItem = _mapper.Map<TriggerItem>(createdTrigger.Trigger);
+            _dataStorageService.Triggers.Add(addItem.Id, addItem);
+
+
 
             return dto;
         }
@@ -147,18 +168,34 @@ public class TriggerDataService : ITriggerDataService
     /// <summary>
     /// 更新触发器。
     /// </summary>
-    public async Task<bool> UpdateTrigger(TriggerItem trigger)
+    public async Task<bool> UpdateTrigger(TriggerItem triggerItem)
     {
-        if (!_appStorageService.Triggers.TryGetValue(trigger.Id, out var triggerDto))
+        if (_appStorageService.Triggers.TryGetValue(triggerItem.Id, out var triggerDto))
         {
-            return false;
+            _mapper.Map(triggerItem, triggerDto);
+            if (await _appCenterService.TriggerManagementService.UpdateTriggerAsync(triggerDto) > 0)
+            {
+                if (_dataStorageService.Triggers.TryGetValue(triggerItem.Id,out var mTrigger))
+                {
+                    _mapper.Map(triggerItem,mTrigger);
+
+                    //菜单
+                    var menuItem = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.TriggerMenu && m.TargetId == triggerItem.Id);
+                    if (menuItem is not null)
+                    {
+                        menuItem.Header = triggerItem.Name;
+                       await _menuDataService.UpdateMenuItem(menuItem);
+                    }
+
+                    return true;
+                }
+
+                
+            }
         }
 
-        _mapper.Map(trigger, triggerDto);
-        if (await _appCenterService.TriggerManagementService.UpdateTriggerAsync(trigger.Id, triggerDto) != null)
-        {
-            return true;
-        }
+        
+        
 
         return false;
     }

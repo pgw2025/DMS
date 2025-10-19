@@ -1,3 +1,4 @@
+using DMS.Application.DTOs;
 using DMS.Core.Models.Triggers;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -27,7 +28,14 @@ namespace DMS.Application.Interfaces.Database
         /// </summary>
         /// <param name="trigger">要创建的触发器定义。</param>
         /// <returns>新创建的触发器定义。</returns>
-        Task<Trigger> CreateTriggerAsync(Trigger trigger);
+        Task<Trigger> AddTriggerAsync(Trigger trigger);
+
+        /// <summary>
+        /// 异步创建触发器及其关联菜单。
+        /// </summary>
+        /// <param name="dto">包含触发器和菜单信息的数据传输对象。</param>
+        /// <returns>包含新创建触发器和菜单信息的数据传输对象。</returns>
+        Task<CreateTriggerWithMenuDto> CreateTriggerWithMenuAsync(CreateTriggerWithMenuDto dto);
 
         /// <summary>
         /// 异步更新一个已存在的触发器定义及其关联的变量ID。
