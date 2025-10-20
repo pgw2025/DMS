@@ -355,6 +355,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<EmailAccountDialogViewModel>();
         services.AddTransient<EmailTemplateDialogViewModel>();
         services.AddTransient<TriggerDialogViewModel>(); // 注册 TriggerEditorViewModel
+        services.AddTransient<TriggerSelectionDialogViewModel>(); // 注册 TriggerSelectionDialogViewModel
         
         // 注册工厂
         services.AddTransient<IVariableItemViewModelFactory, VariableItemViewModelFactory>();

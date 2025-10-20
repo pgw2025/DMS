@@ -93,11 +93,15 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     private readonly INotificationService _notificationService;
 
+    private readonly ITriggerAppService _triggerAppService;
+    private readonly ITriggerVariableAppService _triggerVariableAppService;
+
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableManagementService variableManagementService,
                                   IEventService eventService,
                                   IMqttAliasAppService mqttAliasAppService, IMqttAppService mqttAppService,
                                   IWPFDataService wpfDataService, IDataStorageService dataStorageService,
-                                  INotificationService notificationService)
+                                  INotificationService notificationService, ITriggerAppService triggerAppService,
+                                  ITriggerVariableAppService triggerVariableAppService)
     {
         _mapper = mapper;
         _dialogService = dialogService;
@@ -108,6 +112,8 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         _wpfDataService = wpfDataService;
         _dataStorageService = dataStorageService;
         _notificationService = notificationService;
+        _triggerAppService = triggerAppService;
+        _triggerVariableAppService = triggerVariableAppService;
         IsLoadCompletion = false; // 初始设置为 false，表示未完成加载
 
 
@@ -172,7 +178,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     /// <summary>
     /// 编辑选定的变量数据。
-    /// 此命令通常绑定到UI中的“编辑”按钮或双击事件。
+    /// 此命令通常绑定到UI中的"编辑"按钮或双击事件。
     /// </summary>
     /// <param name="variableTable">当前操作的变量表，用于更新其内部的变量数据。</param>
     [RelayCommand]
@@ -232,7 +238,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     /// <summary>
     /// 从TIA Portal导出的变量表Excel文件中导入变量数据。
-    /// 此命令通常绑定到UI中的“从TIA导入”按钮。
+    /// 此命令通常绑定到UI中的"从TIA导入"按钮。
     /// </summary>
     [RelayCommand]
     private async void ImprotFromTiaVarTable()
@@ -297,7 +303,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     /// <summary>
     /// 从OPC UA服务器导入变量数据。
-    /// 此命令通常绑定到UI中的“从OPC UA导入”按钮。
+    /// 此命令通常绑定到UI中的"从OPC UA导入"按钮。
     /// </summary>
     [RelayCommand]
     private async void ImportFromOpcUaServer()
@@ -390,7 +396,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// <summary>
     /// 添加新的变量数据。
     /// </summary>
-    /// 此命令通常绑定到UI中的“添加”按钮。
+    /// 此命令通常绑定到UI中的"添加"按钮。
     /// <param name="variableTable">当前操作的变量表，用于设置新变量的所属ID。</param>
     [RelayCommand]
     private async void AddVariable()
@@ -438,7 +444,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     /// <summary>
     /// 删除选定的变量数据。
-    /// 此命令通常绑定到UI中的“删除”按钮。
+    /// 此命令通常绑定到UI中的"删除"按钮。
     /// </summary>
     /// <param name="variablesToDelete">要删除的变量数据列表。</param>
     [RelayCommand]
@@ -495,7 +501,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     /// <summary>
     /// 更改选定变量的轮询频率。
-    /// 此命令通常绑定到UI中的“修改轮询频率”按钮。
+    /// 此命令通常绑定到UI中的"修改轮询频率"按钮。
     /// </summary>
     /// <param name="variablesToChange">要修改轮询频率的变量数据列表。</param>
     [RelayCommand]
@@ -586,7 +592,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
 
     /// <summary>
     /// 为选定的变量添加MQTT服务器。
-    /// 此命令通常绑定到UI中的“添加MQTT服务器”按钮。
+    /// 此命令通常绑定到UI中的"添加MQTT服务器"按钮。
     /// </summary>
     /// <param name="variablesToAddMqtt">要添加MQTT服务器的变量数据列表。</param>
     [RelayCommand]
@@ -632,9 +638,6 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
                 {
                     totalAffectedCount++;
                 }
-                
-
-
             }
 
             if (totalAffectedCount > 0)
@@ -651,6 +654,69 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         {
             // 捕获并显示错误通知
             _notificationService.ShowError($"添加MQTT服务器失败: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// 为选定的变量添加触发器。
+    /// 此命令通常绑定到UI中的"添加触发器"按钮。
+    /// </summary>
+    /// <param name="variablesToAddTrigger">要添加触发器的变量数据列表。</param>
+    [RelayCommand]
+    public async Task AddTriggerToVariables(IList<object> variablesToAddTrigger)
+    {
+        var validVariables = variablesToAddTrigger?.OfType<VariableItem>()
+                                               .ToList();
+
+        // 检查是否有变量被选中
+        if (validVariables == null || !validVariables.Any())
+        {
+            _notificationService.ShowInfo("请选择要添加触发器的变量");
+            return;
+        }
+
+        try
+        {
+            // 显示触发器选择对话框，让用户选择一个触发器
+            var triggerSelectionViewModel = new TriggerSelectionDialogViewModel(_triggerAppService);
+            var selectedTrigger = await _dialogService.ShowDialogAsync(triggerSelectionViewModel);
+            if (selectedTrigger == null)
+            {
+                return; // 用户取消选择
+            }
+
+            int totalAffectedCount = 0;
+
+            // 为每个选中的变量分配触发器
+            foreach (var variable in validVariables)
+            {
+                var triggerVariable = new DMS.Core.Models.Triggers.TriggerVariable
+                {
+                    TriggerDefinitionId = selectedTrigger.Id,
+                    VariableId = variable.Id
+                };
+
+                var triggerVariableItem = await _triggerVariableAppService.AssignTriggerVariableAsync(triggerVariable);
+                if (triggerVariableItem is not null)
+                {
+                    totalAffectedCount++;
+                }
+            }
+
+            if (totalAffectedCount > 0)
+            {
+                _notificationService.ShowSuccess(
+                    $"已成功为 {totalAffectedCount} 个变量添加触发器: {selectedTrigger.Name}");
+            }
+            else
+            {
+                _notificationService.ShowInfo($"没有新的变量关联到触发器: {selectedTrigger.Name}。");
+            }
+        }
+        catch (Exception ex)
+        {
+            // 捕获并显示错误通知
+            _notificationService.ShowError($"添加触发器失败: {ex.Message}", ex);
         }
     }
 
@@ -855,7 +921,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
         // {
         //     // 显示失败通知
         //     NotificationHelper.ShowError($"变量表：{VariableTable.Name},状态修改失败，状态：{active}");
-        //     // _logger.LogInformation($"变量表：{VariableTable.Name},状态修改失败，状态：{active}"); // 可以选择记录日志
+        //     // _logger.LogInformation($"变量表：{VariableTable.Name},状态修改失败，状态：{active}") // 可以选择记录日志
         // }
     }
 

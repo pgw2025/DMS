@@ -236,6 +236,15 @@
                     </MenuItem>
 
                     <MenuItem
+                        Command="{Binding AddTriggerToVariablesCommand}"
+                        CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                        Header="添加触发器">
+                        <MenuItem.Icon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+
+                    <MenuItem
                         Command="{Binding ChangeHistorySettingsCommand}"
                         CommandParameter="{Binding PlacementTarget.SelectedItems, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                         Header="修改历史记录">
