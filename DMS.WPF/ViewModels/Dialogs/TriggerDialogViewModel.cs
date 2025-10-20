@@ -21,7 +21,7 @@ namespace DMS.WPF.ViewModels.Dialogs
     {
 
         private readonly IDialogService _dialogService;
-        private readonly IDataStorageService _dataStorageService;
+        private readonly IWpfDataService _dataStorageService;
         private readonly INotificationService _notificationService;
 
         [ObservableProperty]
@@ -39,7 +39,7 @@ namespace DMS.WPF.ViewModels.Dialogs
 
         public TriggerDialogViewModel(
             IDialogService dialogService,
-            IDataStorageService dataStorageService,
+            IWpfDataService dataStorageService,
             INotificationService notificationService)
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));

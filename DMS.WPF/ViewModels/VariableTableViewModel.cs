@@ -85,7 +85,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     /// <param name="dialogService">对话服务接口的实例。</param>
     private readonly IWPFDataService _wpfDataService;
 
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
 
     private readonly ObservableList<VariableItem> _variableItemList;
     private readonly ISynchronizedView<VariableItem, VariableItem> _synchronizedView;
@@ -99,7 +99,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
     public VariableTableViewModel(IMapper mapper, IDialogService dialogService, IVariableManagementService variableManagementService,
                                   IEventService eventService,
                                   IMqttAliasAppService mqttAliasAppService, IMqttAppService mqttAppService,
-                                  IWPFDataService wpfDataService, IDataStorageService dataStorageService,
+                                  IWPFDataService wpfDataService, IWpfDataService dataStorageService,
                                   INotificationService notificationService, ITriggerAppService triggerAppService,
                                   ITriggerVariableAppService triggerVariableAppService)
     {

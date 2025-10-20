@@ -23,7 +23,7 @@ public partial class MqttsViewModel : ViewModelBase
 {
     private readonly IWPFDataService _wpfDataService;
     private readonly IMqttAppService _mqttAppService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
@@ -49,7 +49,7 @@ public partial class MqttsViewModel : ViewModelBase
         IDialogService dialogService, 
         IWPFDataService wpfDataService,
         IMqttAppService mqttAppService,
-        IDataStorageService dataStorageService,
+        IWpfDataService dataStorageService,
         IMapper mapper,
         INavigationService navigationService,
         INotificationService notificationService

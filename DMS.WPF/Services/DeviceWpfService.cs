@@ -15,16 +15,16 @@ namespace DMS.WPF.Services;
 /// <summary>
 /// 设备数据服务类，负责管理设备相关的数据和操作。
 /// </summary>
-public class DeviceDataService : IDeviceDataService
+public class DeviceWpfService : IDeviceDataService
 {
     private readonly IMapper _mapper;
     private readonly IAppCenterService _appCenterService;
     private readonly IAppStorageService _appStorageService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IVariableTableDataService _variableTableDataService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
-    private readonly IMenuDataService _menuDataService;
+    private readonly IMenuWpfService _menuDataService;
     private readonly IVariableDataService _variableDataService;
     private readonly Dispatcher _uiDispatcher;
 
@@ -33,11 +33,12 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appCenterService">数据服务中心实例。</param>
-    public DeviceDataService(IMapper mapper, IAppCenterService appCenterService,
-                             IAppStorageService appStorageService, IDataStorageService dataStorageService,IVariableTableDataService variableTableDataService,
+    public DeviceWpfService(IMapper mapper, IAppCenterService appCenterService,
+                             IAppStorageService appStorageService, IWpfDataService dataStorageService, IVariableTableDataService variableTableDataService,
                              IEventService eventService, INotificationService notificationService,
-                             IMenuDataService menuDataService, IVariableDataService variableDataService)
+                             IMenuWpfService menuDataService, IVariableDataService variableDataService)
     {
+       
         _mapper = mapper;
         _appCenterService = appCenterService;
         _appStorageService = appStorageService;
@@ -91,19 +92,15 @@ public class DeviceDataService : IDeviceDataService
     /// <summary>
     /// 添加设备。
     /// </summary>
-    public async Task<CreateDeviceWithDetailsDto> AddDevice(CreateDeviceWithDetailsDto dto)
+    public async Task<CreateDeviceWithDetailsDto?> AddDevice(CreateDeviceWithDetailsDto dto)
     {
         // 添加null检查
-        if (dto == null)
-            return null;
+        if (dto is null) return null;
 
         var addDto = await _appCenterService.DeviceManagementService.CreateDeviceWithDetailsAsync(dto);
 
         // 添加null检查
-        if (addDto == null && addDto.Device == null)
-        {
-            return null;
-        }
+        if (addDto is null) return null;
 
         //给界面添加设备
         _dataStorageService.Devices.Add(addDto.Device.Id, _mapper.Map<DeviceItem>(addDto.Device));
@@ -111,8 +108,8 @@ public class DeviceDataService : IDeviceDataService
         // 给界面添加设备菜单
         if (addDto.DeviceMenu != null)
         {
-           await _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.DeviceMenu));
-            
+            _menuDataService.AddMenuToView(_mapper.Map<MenuItem>(addDto.DeviceMenu));
+
         }
 
 
@@ -124,13 +121,13 @@ public class DeviceDataService : IDeviceDataService
 
             if (addDto.VariableTable != null && addDto.VariableTableMenu != null)
             {
-              await  _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(addDto.VariableTableMenu));
+                _menuDataService.AddMenuToView(_mapper.Map<MenuItem>(addDto.VariableTableMenu));
             }
 
 
         }
 
-        
+
 
         return addDto;
     }
@@ -140,28 +137,28 @@ public class DeviceDataService : IDeviceDataService
     /// </summary>
     public async Task<bool> DeleteDevice(DeviceItem device)
     {
-        
+
         //从数据库和内存中删除设备相关数据
         if (!await _appCenterService.DeviceManagementService.DeleteDeviceByIdAsync(device.Id))
         {
             return false;
         }
-        
+
 
         // 从界面删除设备相关数据集
         var variableTablesCopy = device.VariableTables.ToList();
         foreach (var variableTable in variableTablesCopy)
         {
-            await  _variableTableDataService.DeleteVariableTable(variableTable);
+            await _variableTableDataService.DeleteVariableTable(variableTable);
         }
 
-        var deviceMenu= _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu && m.TargetId == device.Id);
+        var deviceMenu = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.DeviceMenu && m.TargetId == device.Id);
         if (deviceMenu != null)
         {
-           await _menuDataService.DeleteMenuItem(deviceMenu);
+            await _menuDataService.DeleteMenuItem(deviceMenu);
         }
         _dataStorageService.Devices.Remove(device.Id);
-        
+
 
         return true;
     }

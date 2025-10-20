@@ -5,6 +5,7 @@ using DMS.Application.Interfaces.Database;
 using DMS.Core.Enums;
 using DMS.Core.Interfaces;
 using DMS.Core.Models;
+using System.ComponentModel;
 
 namespace DMS.Application.Services.Database;
 
@@ -61,59 +62,38 @@ public class DeviceAppService : IDeviceAppService
         {
             await _repoManager.BeginTranAsync();
 
-            var addDevice = await _repoManager.Devices.AddAsync(dto.Device);
-            if (addDevice == null || addDevice.Id == 0)
-            {
-                throw new InvalidOperationException($"添加设备失败：{addDevice}");
-            }
+            dto.Device = await _repoManager.Devices.AddAsync(dto.Device);
 
-            _mapper.Map(addDevice,dto.Device);
-            MenuBean addDeviceMenu = null;
 
             // 假设有设备菜单
-            if (dto.DeviceMenu != null)
+            if (dto.DeviceMenu is not null)
             {
-                var deviceMenu = _mapper.Map<MenuBean>(dto.DeviceMenu);
-                deviceMenu.ParentId = 2; // 假设父菜单ID为2
-                deviceMenu.MenuType = MenuType.DeviceMenu;
-                deviceMenu.TargetId = addDevice.Id;
-                addDeviceMenu = await _repoManager.Menus.AddAsync(deviceMenu);
-                if (addDeviceMenu == null || addDeviceMenu.Id == 0)
-                {
-                    throw new InvalidOperationException($"添加设备菜单失败：{addDeviceMenu}");
-                }
-                _mapper.Map(addDeviceMenu,dto.DeviceMenu);
+                dto.DeviceMenu = await _repoManager.Menus.AddAsync(dto.DeviceMenu);
             }
 
 
             // 假设 CreateDeviceWithDetailsDto 包含了变量表和菜单信息
-            if (dto.VariableTable != null)
+            if (dto.VariableTable is not null)
             {
-                var variableTable = _mapper.Map<VariableTable>(dto.VariableTable);
-                variableTable.DeviceId = dto.Device.Id; // 关联新设备ID
-                variableTable.Protocol = dto.Device.Protocol;
-                var addVariableTable = await _repoManager.VariableTables.AddAsync(variableTable);
-                if (addVariableTable == null || addVariableTable.Id == 0)
+                dto.VariableTable.DeviceId = dto.Device.Id; // 关联新设备ID
+                dto.VariableTable.Protocol = dto.Device.Protocol;
+                dto.VariableTable = await _repoManager.VariableTables.AddAsync(dto.VariableTable);
+                if (dto.VariableTable == null || dto.VariableTable.Id == 0)
                 {
-                    throw new InvalidOperationException($"添加设备变量表失败,设备：{dto.Device.Name},变量表：{variableTable.Name}");
+                    throw new InvalidOperationException($"添加设备变量表失败,设备：{dto.Device.Name},变量表：{dto?.VariableTable?.Name}");
                 }
-                 _mapper.Map(addVariableTable,dto.VariableTable);
-                dto.VariableTable.Device = dto.Device;
 
                 // 假设有设备菜单
-                if (dto.VariableTableMenu != null)
+                if (dto.VariableTableMenu is not null && dto.VariableTableMenu is not null)
                 {
-                    var menu = _mapper.Map<MenuBean>(dto.VariableTableMenu);
-                    menu.ParentId = addDeviceMenu.Id; // 关联设备菜单作为父级
-                    menu.MenuType = MenuType.VariableTableMenu;
-                    menu.TargetId = addVariableTable.Id;
-                    var addVariableTableMenu = await _repoManager.Menus.AddAsync(menu);
-                    if (addVariableTableMenu == null || addVariableTableMenu.Id == 0)
+                    dto.VariableTableMenu.ParentId = dto.DeviceMenu.Id; // 关联设备菜单作为父级
+                    dto.VariableTableMenu.TargetId = dto.VariableTable.Id;
+                    dto.VariableTableMenu = await _repoManager.Menus.AddAsync(dto.VariableTableMenu);
+                    if (dto.VariableTableMenu == null || dto.VariableTableMenu.Id == 0)
                     {
                         throw new InvalidOperationException(
-                            $"添加设备变量表菜单失败,变量表：{variableTable.Name},变量表菜单：{menu.Header}");
+                            $"添加设备变量表菜单失败,变量表：{dto.VariableTable.Name},变量表菜单：{dto.VariableTableMenu.Header}");
                     }
-                    _mapper.Map(menu,dto.VariableTableMenu);
                 }
             }
 

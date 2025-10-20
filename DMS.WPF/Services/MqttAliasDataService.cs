@@ -15,7 +15,7 @@ public class MqttAliasDataService : IMqttAliasDataService
     private readonly IMapper _mapper;
     private readonly IAppStorageService _appStorageService;
     private readonly IMqttAliasManagementService _mqttAliasManagementService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
 
     /// <summary>
     /// MqttAliasDataService类的构造函数。
@@ -27,7 +27,7 @@ public class MqttAliasDataService : IMqttAliasDataService
     public MqttAliasDataService(IMapper mapper, 
         IAppStorageService appStorageService, 
         IMqttAliasManagementService mqttAliasManagementService, 
-        IDataStorageService dataStorageService)
+        IWpfDataService dataStorageService)
     {
         _mapper = mapper;
         _appStorageService = appStorageService;

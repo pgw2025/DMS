@@ -21,7 +21,7 @@ namespace DMS.WPF.Services;
 public class DataEventService : IDataEventService
 {
     private readonly IMapper _mapper;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
     private readonly IAppCenterService _appCenterService;
@@ -32,7 +32,7 @@ public class DataEventService : IDataEventService
     /// DataEventService类的构造函数。
     /// </summary>
     public DataEventService(IMapper mapper,
-        IDataStorageService dataStorageService, 
+        IWpfDataService dataStorageService, 
         IEventService eventService,
         INotificationService notificationService,
         IAppCenterService appCenterService,

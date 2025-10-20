@@ -26,7 +26,7 @@ namespace DMS.WPF.ViewModels
         private readonly IMqttManagementService _mqttManagementService;
         private readonly IMqttAliasDataService _mqttAliasDataService;
         private readonly IWPFDataService _wpfDataService;
-        private readonly IDataStorageService _dataStorageService;
+        private readonly IWpfDataService _dataStorageService;
         private readonly INavigationService _navigationService;
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace DMS.WPF.ViewModels
                                          IMqttManagementService mqttManagementService,
                                          IMqttAliasDataService mqttAliasDataService,
                                          IWPFDataService wpfDataService,
-                                         IDataStorageService dataStorageService,
+                                         IWpfDataService dataStorageService,
                                          INavigationService navigationService)
         {
             _logger = logger;

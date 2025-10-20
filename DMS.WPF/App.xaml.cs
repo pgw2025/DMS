@@ -302,16 +302,16 @@ public partial class App : System.Windows.Application
         services.AddSingleton<DMS.Application.Interfaces.IEventService, DMS.Application.Services.EventService>();
 
         // 注册新的数据服务
-        services.AddSingleton<IDeviceDataService, DeviceDataService>();
+        services.AddSingleton<IDeviceDataService, DeviceWpfService>();
         services.AddSingleton<IVariableDataService, VariableDataService>();
         services.AddSingleton<IVariableTableDataService, VariableTableDataService>();
-        services.AddSingleton<IMenuDataService, MenuDataService>();
+        services.AddSingleton<IMenuWpfService, MenuWpfService>();
         services.AddSingleton<IMqttDataService, MqttDataService>();
         services.AddSingleton<IMqttAliasDataService, MqttAliasDataService>();
         services.AddSingleton<ILogDataService, LogDataService>();
         services.AddSingleton<ITriggerDataService, TriggerDataService>(); // 注册触发器数据服务
         services.AddSingleton<IDataEventService, DataEventService>();
-        services.AddSingleton<IDataStorageService, DataStorageService>();
+        services.AddSingleton<IWpfDataService, WpfDataService>();
         services.AddSingleton<IEmailDataService, EmailDataService>();
 
         // 注册主数据服务

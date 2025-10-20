@@ -21,7 +21,7 @@ namespace DMS.WPF.ViewModels
     {
         private readonly IMapper _mapper;
         private readonly ITriggerDataService _triggerDataService;
-        private readonly IDataStorageService _dataStorageService;
+        private readonly IWpfDataService _dataStorageService;
         private readonly IDialogService _dialogService;
         private readonly INotificationService _notificationService;
         private readonly INavigationService _navigationService;
@@ -38,7 +38,7 @@ namespace DMS.WPF.ViewModels
         public TriggersViewModel(
             IMapper mapper,
             ITriggerDataService triggerDataService,
-            IDataStorageService dataStorageService,
+            IWpfDataService dataStorageService,
             IDialogService dialogService,
             INotificationService notificationService,
             INavigationService navigationService)

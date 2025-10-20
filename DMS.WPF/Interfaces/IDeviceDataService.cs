@@ -33,4 +33,5 @@ public interface IDeviceDataService
     /// 更新设备。
     /// </summary>
     Task<bool> UpdateDevice(DeviceItem device);
+    Task<CreateDeviceWithDetailsDto?> AddDevice(CreateDeviceWithDetailsDto dto);
 }

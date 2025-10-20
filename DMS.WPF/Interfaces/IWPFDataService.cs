@@ -24,7 +24,7 @@ public interface IWPFDataService
     /// <summary>
     /// 菜单数据服务。
     /// </summary>
-    IMenuDataService MenuDataService { get; }
+    IMenuWpfService MenuDataService { get; }
 
     /// <summary>
     /// MQTT数据服务。

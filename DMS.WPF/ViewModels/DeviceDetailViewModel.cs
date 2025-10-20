@@ -20,7 +20,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
 {
     private readonly IMapper _mapper;
     private readonly IDialogService _dialogService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly INavigationService _navigationService;
     private readonly IWPFDataService _wpfDataService;
 
@@ -36,7 +36,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
     private readonly INotificationService _notificationService;
 
 
-    public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, IDataStorageService dataStorageService,
+    public DeviceDetailViewModel(IMapper mapper, IDialogService dialogService, IWpfDataService dataStorageService,
                                  INavigationService navigationService,
                                  IWPFDataService wpfDataService, INotificationService notificationService)
     {
@@ -207,7 +207,7 @@ public partial class DeviceDetailViewModel : ViewModelBase
     public void NavigateToVariableTable()
     {
         if (SelectedVariableTable == null) return;
-        // var menu = _dataStorageService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu &&
+        // var menu = _wpfDataService.Menus.FirstOrDefault(m => m.MenuType == MenuType.VariableTableMenu &&
         //                                                          m.TargetId == SelectedVariableTable.Id);
         // if (menu == null) return;
         _navigationService.NavigateToAsync(

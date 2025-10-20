@@ -27,7 +27,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     private readonly IDialogService _dialogService;
     private readonly IHistoryAppService _historyAppService;
     private readonly IWPFDataService _wpfDataService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
     private readonly INavigationService _navigationService;
@@ -85,7 +85,7 @@ partial class VariableHistoryViewModel : ViewModelBase, INavigatable
     private List<VariableHistoryDto> _allVariableHistories;
 
     public VariableHistoryViewModel(IMapper mapper, IDialogService dialogService, IHistoryAppService historyAppService,
-                                    IWPFDataService wpfDataService, IDataStorageService dataStorageService,
+                                    IWPFDataService wpfDataService, IWpfDataService dataStorageService,
                                     IEventService eventService, INotificationService notificationService,
                                     INavigationService navigationService)
     {

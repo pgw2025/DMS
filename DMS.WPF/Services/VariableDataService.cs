@@ -16,7 +16,7 @@ namespace DMS.WPF.Services;
 public class VariableDataService : IVariableDataService
 {
     private readonly IMapper _mapper;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IAppCenterService _appCenterService;
 
 
@@ -26,7 +26,7 @@ public class VariableDataService : IVariableDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appCenterService">数据服务中心实例。</param>
-    public VariableDataService(IMapper mapper, IDataStorageService dataStorageService, IAppCenterService appCenterService)
+    public VariableDataService(IMapper mapper, IWpfDataService dataStorageService, IAppCenterService appCenterService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;

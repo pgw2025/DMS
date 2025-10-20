@@ -24,7 +24,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     private readonly IWPFDataService _wpfDataService;
     private readonly IDeviceAppService _deviceAppService;
     private readonly IMapper _mapper;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IDialogService _dialogService;
     private readonly INavigationService _navigationService;
 
@@ -54,7 +54,7 @@ public partial class DevicesViewModel : ViewModelBase, INavigatable
     /// <param name="wpfDataService">主数据服务。</param>
     /// <param name="deviceAppService">设备应用服务。</param>
     /// <param name="notificationService">通知服务。</param>
-    public DevicesViewModel(IMapper mapper, IDataStorageService dataStorageService,
+    public DevicesViewModel(IMapper mapper, IWpfDataService dataStorageService,
                             IDialogService dialogService, INavigationService navigationService,
                             IWPFDataService wpfDataService, IDeviceAppService deviceAppService,
                             INotificationService notificationService)

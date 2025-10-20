@@ -19,9 +19,9 @@ public class MqttDataService : IMqttDataService
     private readonly IMapper _mapper;
     private readonly IAppStorageService _appStorageService;
     private readonly IMqttManagementService _mqttManagementService;
-    private readonly IMenuDataService _menuDataService;
+    private readonly IMenuWpfService _menuDataService;
     private readonly IMenuManagementService _menuManagementServiceImpl;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
 
 
     /// <summary>
@@ -29,7 +29,7 @@ public class MqttDataService : IMqttDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="mqttAppService">MQTT应用服务实例。</param>
-    public MqttDataService(IMapper mapper, IAppStorageService appStorageService, IMqttManagementService mqttManagementService, IMenuDataService menuDataService, IMenuManagementService menuManagementServiceImpl, IDataStorageService dataStorageService)
+    public MqttDataService(IMapper mapper, IAppStorageService appStorageService, IMqttManagementService mqttManagementService, IMenuWpfService menuDataService, IMenuManagementService menuManagementServiceImpl, IWpfDataService dataStorageService)
     {
         _mapper = mapper;
         _appStorageService = appStorageService;
@@ -87,7 +87,7 @@ public class MqttDataService : IMqttDataService
                 MenuType = MenuType.MqttServerMenu,
                 TargetViewKey = nameof(MqttServerDetailViewModel),
             };
-            await _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(mqttServerMenu));
+            await _menuDataService.AddMenuToView(_mapper.Map<MenuItem>(mqttServerMenu));
         }
 
         return mqttServerItem;

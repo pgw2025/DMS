@@ -6,14 +6,14 @@ namespace DMS.WPF.Interfaces;
 /// <summary>
 /// 菜单数据服务接口。
 /// </summary>
-public interface IMenuDataService
+public interface IMenuWpfService
 {
 
 
     /// <summary>
     /// 添加菜单项。
     /// </summary>
-    Task AddMenuItem(MenuItem MenuItem);
+    void AddMenuToView(MenuItem MenuItem);
 
     /// <summary>
     /// 删除菜单项。

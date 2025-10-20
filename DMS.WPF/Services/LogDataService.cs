@@ -16,7 +16,7 @@ namespace DMS.WPF.Services;
 public class LogDataService : ILogDataService
 {
     private readonly IMapper _mapper;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IAppStorageService _appStorageService;
 
 
@@ -26,7 +26,7 @@ public class LogDataService : ILogDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appStorageService">数据服务中心实例。</param>
-    public LogDataService(IMapper mapper,IDataStorageService dataStorageService, IAppStorageService appStorageService)
+    public LogDataService(IMapper mapper,IWpfDataService dataStorageService, IAppStorageService appStorageService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;

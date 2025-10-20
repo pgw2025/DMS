@@ -22,7 +22,7 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly IDialogService _dialogService;
     private readonly IWPFDataService _wpfDataService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly INavigationService _navigationService;
     private readonly ILogger<MainViewModel> _logger;
 
@@ -46,7 +46,7 @@ public partial class MainViewModel : ViewModelBase
     /// <param name="dialogService">对话框服务。</param>
     /// <param name="logger">日志记录器。</param>
     /// <param name="wpfDataService"></param>
-    public MainViewModel(IWPFDataService wpfDataService ,IDataStorageService dataStorageService,INavigationService navigationService,
+    public MainViewModel(IWPFDataService wpfDataService ,IWpfDataService dataStorageService,INavigationService navigationService,
                          ILogger<MainViewModel> logger)
     {
         _wpfDataService = wpfDataService;

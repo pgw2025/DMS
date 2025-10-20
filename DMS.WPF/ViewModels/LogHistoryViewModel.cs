@@ -28,7 +28,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
     private readonly IMapper _mapper;
     private readonly INlogAppService _nlogAppService;
     private readonly IDialogService _dialogService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly INotificationService _notificationService;
     private readonly IAppCenterService _appCenterService;
 
@@ -50,7 +50,7 @@ partial class LogHistoryViewModel : ViewModelBase,IDisposable
 
     public ObservableCollection<string> LogLevels { get; } = new ObservableCollection<string> { "Trace", "Debug", "Info", "Warn", "Error", "Fatal" };
 
-    public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, IDataStorageService dataStorageService
+    public LogHistoryViewModel(IMapper mapper, INlogAppService nlogAppService, IDialogService dialogService, IWpfDataService dataStorageService
                              , INotificationService notificationService, IWPFDataService wpfDataService, IAppCenterService appCenterService)
     {
         _mapper = mapper;

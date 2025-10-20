@@ -6,7 +6,7 @@ using ObservableCollections;
 
 namespace DMS.WPF.Services;
 
-public class DataStorageService : IDataStorageService
+public class WpfDataService : IWpfDataService
 {
 
 
@@ -56,7 +56,7 @@ public class DataStorageService : IDataStorageService
     /// </summary>
     public ObservableDictionary<int, TriggerItem> Triggers { get; set; }
 
-    public DataStorageService()
+    public WpfDataService()
     {
         Devices=new ObservableDictionary<int,DeviceItem>();
         VariableTables = new ObservableDictionary<int,VariableTableItem>();

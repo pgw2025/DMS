@@ -32,7 +32,7 @@ public class WPFDataService : IWPFDataService
     /// <summary>
     /// 菜单数据服务。
     /// </summary>
-    public IMenuDataService MenuDataService { get; }
+    public IMenuWpfService MenuDataService { get; }
 
     /// <summary>
     /// MQTT数据服务。
@@ -62,7 +62,7 @@ public class WPFDataService : IWPFDataService
         IAppCenterService appCenterService,
         IDeviceDataService deviceDataService,
         IVariableDataService variableDataService,
-        IMenuDataService menuDataService,
+        IMenuWpfService menuDataService,
         IMqttDataService mqttDataService,
         ILogDataService logDataService, 
         IVariableTableDataService variableTableDataService,

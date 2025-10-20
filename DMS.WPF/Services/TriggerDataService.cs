@@ -24,9 +24,9 @@ public class TriggerDataService : ITriggerDataService
 {
     private readonly IMapper _mapper;
     private readonly IAppCenterService _appCenterService;
-    private readonly IMenuDataService _menuDataService;
+    private readonly IMenuWpfService _menuDataService;
     private readonly IAppStorageService _appStorageService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IEventService _eventService;
     private readonly INotificationService _notificationService;
     private readonly Dispatcher _uiDispatcher;
@@ -41,8 +41,8 @@ public class TriggerDataService : ITriggerDataService
     /// <param name="eventService">事件服务实例。</param>
     /// <param name="notificationService">通知服务实例。</param>
     public TriggerDataService(IMapper mapper, IAppCenterService appCenterService,
-                              IMenuDataService menuDataService,
-                              IAppStorageService appStorageService, IDataStorageService dataStorageService,
+                              IMenuWpfService menuDataService,
+                              IAppStorageService appStorageService, IWpfDataService dataStorageService,
                               IEventService eventService, INotificationService notificationService)
     {
         _mapper = mapper;
@@ -111,7 +111,7 @@ public class TriggerDataService : ITriggerDataService
                 Icon = "\uE945", // 使用触发器图标
                 TargetViewKey = nameof(TriggerDetailViewModel),
             };
-            await _menuDataService.AddMenuItem(menuItem);
+            await _menuDataService.AddMenuToView(menuItem);
 
         }
         

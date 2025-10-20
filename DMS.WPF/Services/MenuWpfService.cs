@@ -13,10 +13,10 @@ namespace DMS.WPF.Services;
 /// <summary>
 /// 菜单数据服务类，负责管理菜单相关的数据和操作。
 /// </summary>
-public class MenuDataService : IMenuDataService
+public class MenuWpfService : IMenuWpfService
 {
     private readonly IMapper _mapper;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _wpfDataService;
     private readonly IAppStorageService _appStorageService;
     private readonly IMenuManagementService _menuManagementService;
 
@@ -27,17 +27,17 @@ public class MenuDataService : IMenuDataService
     /// </summary>
     /// <param name="mapper">AutoMapper 实例。</param>
     /// <param name="appStorageService">数据服务中心实例。</param>
-    public MenuDataService(IMapper mapper, IDataStorageService dataStorageService, IAppStorageService appStorageService, IMenuManagementService menuManagementService)
+    public MenuWpfService(IMapper mapper, IWpfDataService dataStorageService, IAppStorageService appStorageService, IMenuManagementService menuManagementService)
     {
         _mapper = mapper;
-        _dataStorageService = dataStorageService;
+        _wpfDataService = dataStorageService;
         _appStorageService = appStorageService;
         _menuManagementService = menuManagementService;
     }
 
     public void LoadAllMenus()
     {
-        _dataStorageService.Menus = _mapper.Map<ObservableCollection<MenuItem>>(_appStorageService.Menus.Values);
+        _wpfDataService.Menus = _mapper.Map<ObservableCollection<MenuItem>>(_appStorageService.Menus.Values);
         BuildMenuTrees();
     }
 
@@ -46,11 +46,11 @@ public class MenuDataService : IMenuDataService
     /// </summary>
     public void BuildMenuTrees()
     {
-        _dataStorageService.MenuTrees.Clear();
+        _wpfDataService.MenuTrees.Clear();
         // 遍历所有菜单项，构建树形结构
-        foreach (var menu in _dataStorageService.Menus)
+        foreach (var menu in _wpfDataService.Menus)
         {
-            var parentMenu = _dataStorageService.Menus.FirstOrDefault(m => m.Id == menu.ParentId);
+            var parentMenu = _wpfDataService.Menus.FirstOrDefault(m => m.Id == menu.ParentId);
             // 检查是否有父ID，并且父ID不为0（通常0或null表示根节点）
             if (parentMenu != null && menu.ParentId != 0)
             {
@@ -63,7 +63,7 @@ public class MenuDataService : IMenuDataService
             else
             {
                 // 如果没有父ID，则这是一个根菜单
-                _dataStorageService.MenuTrees.Add(menu);
+                _wpfDataService.MenuTrees.Add(menu);
             }
         }
     }
@@ -71,22 +71,17 @@ public class MenuDataService : IMenuDataService
     /// <summary>
     /// 添加菜单项。
     /// </summary>
-    public async Task AddMenuItem(MenuItem MenuItem)
+    public void AddMenuToView(MenuItem MenuItem)
     {
         if (MenuItem is null) return;
 
-        var deviceMenu = _dataStorageService.Menus.FirstOrDefault(m => m.Id == MenuItem.ParentId);
+        var deviceMenu = _wpfDataService.Menus.FirstOrDefault(m => m.Id == MenuItem.ParentId);
         if (deviceMenu is not null)
         {
 
-            var menuId = await _menuManagementService.CreateMenuAsync(_mapper.Map<MenuBean>(MenuItem));
-            if (menuId > 0)
-            {
-                MenuItem.Id = menuId;
-                deviceMenu.Children.Add(MenuItem);
-                _dataStorageService.Menus.Add(MenuItem);
-                BuildMenuTrees();
-            }
+            deviceMenu.Children.Add(MenuItem);
+            _wpfDataService.Menus.Add(MenuItem);
+            BuildMenuTrees();
 
         }
     }
@@ -98,7 +93,7 @@ public class MenuDataService : IMenuDataService
     {
         if (MenuItem is null) return;
 
-        var menu = _dataStorageService.Menus.FirstOrDefault(m => m.Id == MenuItem.Id);
+        var menu = _wpfDataService.Menus.FirstOrDefault(m => m.Id == MenuItem.Id);
         if (menu is not null)
         {
 
@@ -122,19 +117,19 @@ public class MenuDataService : IMenuDataService
         await _menuManagementService.DeleteMenuAsync(MenuItem.Id);
 
         // 从扁平菜单列表中移除
-        _dataStorageService.Menus.Remove(MenuItem);
+        _wpfDataService.Menus.Remove(MenuItem);
 
         //// 从树形结构中移除
         if (MenuItem.ParentId.HasValue && MenuItem.ParentId.Value != 0)
         {
             // 如果有父菜单，从父菜单的Children中移除
-            var parentMenu = _dataStorageService.Menus.FirstOrDefault(m => m.Id == MenuItem.ParentId.Value);
+            var parentMenu = _wpfDataService.Menus.FirstOrDefault(m => m.Id == MenuItem.ParentId.Value);
             parentMenu?.Children.Remove(MenuItem);
         }
         else
         {
             // 如果是根菜单，从MenuTrees中移除
-            _dataStorageService.MenuTrees.Remove(MenuItem);
+            _wpfDataService.MenuTrees.Remove(MenuItem);
         }
 
         //BuildMenuTrees();

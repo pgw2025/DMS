@@ -5,7 +5,7 @@ using ObservableCollections;
 
 namespace DMS.WPF.Interfaces;
 
-public interface IDataStorageService
+public interface IWpfDataService
 {
     /// <summary>
     /// 设备列表。

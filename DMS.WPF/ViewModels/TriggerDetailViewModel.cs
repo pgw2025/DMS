@@ -24,7 +24,7 @@ namespace DMS.WPF.ViewModels
         private readonly INotificationService _notificationService;
         private readonly ITriggerManagementService _triggerManagementService;
         private readonly ITriggerDataService _triggerDataService;
-        private readonly IDataStorageService _dataStorageService;
+        private readonly IWpfDataService _dataStorageService;
         private readonly INavigationService _navigationService;
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace DMS.WPF.ViewModels
                                       INotificationService notificationService,
                                       ITriggerManagementService triggerManagementService,
                                       ITriggerDataService triggerDataService,
-                                      IDataStorageService dataStorageService,
+                                      IWpfDataService dataStorageService,
                                       INavigationService navigationService)
         {
             _logger = logger;

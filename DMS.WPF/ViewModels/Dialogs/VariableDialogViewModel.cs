@@ -26,11 +26,11 @@ public partial class VariableDialogViewModel : DialogViewModelBase<VariableItem>
     private bool _hasError;
 
     private readonly IWPFDataService _wpfDataService;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IVariableAppService _variableAppService;
     private readonly IMapper _mapper;
 
-    public VariableDialogViewModel(IWPFDataService wpfDataService,IDataStorageService dataStorageService, IVariableAppService variableAppService, IMapper mapper)
+    public VariableDialogViewModel(IWPFDataService wpfDataService,IWpfDataService dataStorageService, IVariableAppService variableAppService, IMapper mapper)
     {
 
         Variable = new VariableItem();

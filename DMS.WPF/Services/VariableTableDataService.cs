@@ -12,14 +12,14 @@ namespace DMS.WPF.Services;
 public class VariableTableDataService : IVariableTableDataService
 {
     private readonly IMapper _mapper;
-    private readonly IDataStorageService _dataStorageService;
+    private readonly IWpfDataService _dataStorageService;
     private readonly IAppCenterService _appCenterService;
-    private readonly IMenuDataService _menuDataService;
+    private readonly IMenuWpfService _menuDataService;
 
 
 
-    public VariableTableDataService(IMapper mapper, IDataStorageService dataStorageService, IAppCenterService appCenterService,
-                                    IMenuDataService menuDataService)
+    public VariableTableDataService(IMapper mapper, IWpfDataService dataStorageService, IAppCenterService appCenterService,
+                                    IMenuWpfService menuDataService)
     {
         _mapper = mapper;
         _dataStorageService = dataStorageService;
@@ -53,7 +53,7 @@ public class VariableTableDataService : IVariableTableDataService
             createDto.Menu = menuDto;
             var resDto = await _appCenterService.VariableTableManagementService.CreateVariableTableAsync(createDto);
             
-            await _menuDataService.AddMenuItem(_mapper.Map<MenuItem>(resDto.Menu));
+            await _menuDataService.AddMenuToView(_mapper.Map<MenuItem>(resDto.Menu));
             return resDto.VariableTable.Id;
         }
 
