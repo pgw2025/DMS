@@ -33,11 +33,6 @@ namespace DMS.WPF.ViewModels
         [ObservableProperty]
         private TriggerItem _currentTrigger;
 
-        /// <summary>
-        /// 与当前触发器关联的变量数据集合。
-        /// </summary>
-        [ObservableProperty]
-        private ObservableCollection<VariableItem> _associatedVariables;
 
         [ObservableProperty]
         private IList _selectedVariables = new ArrayList();
@@ -166,15 +161,6 @@ namespace DMS.WPF.ViewModels
             {
                 CurrentTrigger = triggerItem;
 
-                // 初始化关联变量列表 - 从VariableIds创建VariableItems列表
-                AssociatedVariables = new ObservableCollection<VariableItem>();
-                foreach (var variableId in CurrentTrigger.VariableIds)
-                {
-                    if (_dataStorageService.Variables.TryGetValue(variableId, out var variableItem))
-                    {
-                        AssociatedVariables.Add(variableItem);
-                    }
-                }
             }
 
             return Task.CompletedTask;

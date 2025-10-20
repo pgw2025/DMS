@@ -1,8 +1,8 @@
 using AutoMapper;
 using DMS.Application.DTOs;
 using DMS.Core.Models;
+using DMS.Core.Models.Triggers;
 using DMS.Infrastructure.Models;
-using DMS.WPF.ItemViewModel;
 using DMS.WPF.ItemViewModel;
 
 namespace DMS.WPF.Profiles
@@ -15,6 +15,7 @@ namespace DMS.WPF.Profiles
                 .ReverseMap();
             CreateMap<Variable, VariableItem>()
                 .ForMember(dest => dest.MqttAliases, opt => opt.Ignore())
+                .ForMember(dest => dest.Triggers, opt => opt.Ignore())
                 .ReverseMap();
             CreateMap<VariableTable, VariableTableItem>()
                 .ReverseMap();
@@ -39,11 +40,12 @@ namespace DMS.WPF.Profiles
                 .ReverseMap();
             CreateMap<NlogDto, NlogItem>().ReverseMap();
             CreateMap<TriggerItem, TriggerItem>().ReverseMap();
-            
+
             // 添加触发器相关映射
-            CreateMap<TriggerItem, Core.Models.Triggers.Trigger>()
-                .ForMember(dest => dest.Variables, opt => opt.Ignore()) // 忽略Variables属性，因为这个通常在业务逻辑中处理
-                .ReverseMap();
+            CreateMap<TriggerItem, Trigger>()
+                .ForMember(dest => dest.Variables, opt => opt.Ignore());
+            CreateMap<Trigger, TriggerItem>()
+                .ForMember(dest => dest.Variables, opt => opt.Ignore());
         }
     }
 }

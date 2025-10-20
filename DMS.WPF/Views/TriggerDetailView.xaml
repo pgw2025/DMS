@@ -9,7 +9,8 @@
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:converters="clr-namespace:DMS.WPF.Converters"
     xmlns:valueConverts="clr-namespace:DMS.WPF.ValueConverts"
-    xmlns:triggers="clr-namespace:DMS.Core.Models.Triggers;assembly=DMS.Core"
+    xmlns:vm="clr-namespace:DMS.WPF.ViewModels"
+    d:DataContext="{d:DesignInstance vm:TriggerDetailViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -377,7 +378,7 @@
                             CanUserAddRows="False"
                             CanUserDeleteRows="False"
                             IsReadOnly="True"
-                            ItemsSource="{Binding AssociatedVariables}"
+                            ItemsSource="{Binding CurrentTrigger.Variables}"
                             SelectionMode="Extended">
 
                             <i:Interaction.Behaviors>

@@ -5,6 +5,7 @@ namespace DMS.Infrastructure.Entities;
 /// <summary>
 /// 数据库实体：表示触发器与变量的多对多关联关系。
 /// </summary>
+[SugarTable("TriggerVariables")]
 public class DbTriggerVariable
 {
     [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]

@@ -73,6 +73,6 @@ namespace DMS.WPF.ItemViewModel
         /// <summary>
         /// 关联的变量 ID 列表
         /// </summary>
-        public ObservableCollection<int> VariableIds { get; } = new ObservableCollection<int>();
+        public ObservableCollection<VariableItem> Variables { get; } = new ObservableCollection<VariableItem>();
     }
 }

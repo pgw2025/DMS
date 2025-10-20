@@ -532,8 +532,7 @@ partial class VariableTableViewModel : ViewModelBase, INavigatable
             }
 
             // 批量更新数据库中的变量数据
-            var variableDtos = _mapper.Map<List<Variable>>(validVariables);
-            var result = await _variableManagementService.UpdateVariablesAsync(variableDtos);
+            var result = await _variableManagementService.UpdateVariablesAsync(_mapper.Map<List<Variable>>(validVariables));
 
             if (result > 0)
             {

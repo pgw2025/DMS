@@ -61,9 +61,19 @@ public class TriggerDataService : ITriggerDataService
     public void LoadAllTriggers()
     {
         _dataStorageService.Triggers.Clear();
-        foreach (var triggerDto in _appStorageService.Triggers.Values)
+        foreach (var trigger in _appStorageService.Triggers.Values)
         {
-            _dataStorageService.Triggers.Add(triggerDto.Id, _mapper.Map<TriggerItem>(triggerDto));
+            TriggerItem triggerItem = _mapper.Map<TriggerItem>(trigger);
+            foreach (var variable in trigger.Variables)
+            {
+                if (_dataStorageService.Variables.TryGetValue(variable.Id,out var variableItem))
+                {
+                    variableItem.Triggers.Add(triggerItem);
+                    triggerItem.Variables.Add(variableItem);
+                }
+            }
+
+            _dataStorageService.Triggers.Add(trigger.Id, triggerItem);
         }
     }
 

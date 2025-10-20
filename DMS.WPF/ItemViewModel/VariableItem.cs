@@ -107,6 +107,12 @@ public partial class VariableItem : ObservableObject
     /// </summary>
     [ObservableProperty]
     private List<MqttAliasItem> _mqttAliases=new List<MqttAliasItem>();
+    /// <summary>
+    /// 获取或设置与此变量关联的触发器列表。
+    /// 一个变量可以有多个触发器。
+    /// </summary>
+    [ObservableProperty]
+    private List<TriggerItem> _triggers=new List<TriggerItem>();
 
     /// <summary>
     /// 获取或设置变量的信号类型 (如：AI, DI, AO, DO)。
